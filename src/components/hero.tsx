@@ -14,7 +14,7 @@ function Hero() {
                         <div className="h-24 w-24 border-4 bg-gray-800 absolute top-8 left-12 rounded-full">
                             <Image
                                 src="/face1.jpg"
-                                className="object-cover h-20 w-20 rounded-full"
+                                className="object-cover h-auto w-auto rounded-full"
                                 fill
                                 alt="A scenic view of mountains"
 
@@ -23,7 +23,7 @@ function Hero() {
                         <div className="h-24 w-24 border-4 bg-gray-800 absolute top-8 left-32 rounded-full z-10">
                             <Image
                                 src="/face2.jpg"
-                                className="object-cover h-20 w-20 rounded-full"
+                                className="object-cover h-auto w-auto rounded-full"
                                 fill
                                 alt="A scenic view of mountains"
 
@@ -32,7 +32,7 @@ function Hero() {
                         <div className="h-24 w-24 border-4 bg-gray-800 absolute top-8 left-52 rounded-full z-20">
                             <Image
                                 src="/face3.jpg"
-                                className="object-cover h-20 w-20 rounded-full"
+                                className="object-cover h-auto w-auto rounded-full"
                                 fill
                                 alt="A scenic view of mountains"
 

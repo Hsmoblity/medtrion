@@ -12,18 +12,10 @@ import Types from "reducers/cart/types";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { Document } from "@contentful/rich-text-types";
 import { normalizeImageUrl } from '../../lib/utils/image'
+import { ProductSchema } from 'lib/interfaces';
 
 interface ProductItemProps {
-  product: {
-    title: string;
-    shortDescription: string;
-    featuredImage: string;
-    affiliate: boolean;
-    productSpeciications: Document;
-    productPictures?: { fields: { file: { url: string } } }[];
-    price: number;
-    slug: string;
-  };
+  product: ProductSchema & { productSpeciications?: Document };
 }
 const options = {
   renderNode: {
@@ -52,6 +44,7 @@ const options = {
 const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
   const [index, setIndex] = useState(0);
   const [hovering, setHovering] = useState(false);
+  const [selectedVariation, setSelectedVariation] = useState<string | null>(null);
   const { toggleCartVisibility } = useContext(CartVisibilityContext);
   const { dispatch } = useContext(CartContext); // Use CartContext to get the dispatch function
   const hasValidSpecs =
@@ -59,19 +52,31 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
     typeof product.productSpeciications === 'object' &&
     Array.isArray((product.productSpeciications as any).content);
 
-  const renderSpecifications = hasValidSpecs
-    ? documentToReactComponents(product.productSpeciications, options)
+  const renderSpecifications = hasValidSpecs && product.productSpeciications
+    ? documentToReactComponents(product.productSpeciications as Document, options)
     : null;
   // Handle adding to the cart
-  const handleAddToCart = () => {
-    const cartProduct = {
+  const handleAddToCart = (selectedOptions?: Array<{ name: string; type?: string; priceModifier?: number; selected?: boolean; quantity?: number; value?: string }>) => {
+    const uuid = () => 'ci_' + Math.random().toString(36).slice(2, 9);
+    const cartProduct: any = {
       slug: product.slug,
       title: product.title,
       price: product.price,
+      cartItemId: uuid(),
       quantity: 1,
       productPictures: product.productPictures,
       affiliate: product.affiliate,
+      productId: product.productId,
+      variations: product.variations,
     };
+
+    if (selectedVariation) {
+      cartProduct.variationId = selectedVariation;
+    }
+
+    if (selectedOptions && Array.isArray(selectedOptions) && selectedOptions.length > 0) {
+      cartProduct.options = selectedOptions;
+    }
 
     dispatch({
       type: Types.addToCart,  // Action type for adding the product to the cart
@@ -80,10 +85,59 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
     toggleCartVisibility();
   };
 
-  const IMAGE_URLS = product.productPictures?.length
-    ? product.productPictures.map((pic) => normalizeImageUrl(pic?.fields?.file?.url))
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
+  const [optionsState, setOptionsState] = useState<Array<{ name: string; type?: string; priceModifier?: number; selected?: boolean; quantity?: number; value?: string }>>([]);
+  const [attributeState, setAttributeState] = useState<{ [key: string]: string }>({});
+  const [attributeGroups, setAttributeGroups] = useState<Array<{ name: string; values: string[] }>>([]);
+
+  const openOptionsModal = () => {
+    // If product has variations or options, show modal; otherwise add directly
+    if ((product.variations && product.variations.length > 0) || (product.options && Array.isArray(product.options) && product.options.length > 0)) {
+      // initialize options state snapshot
+      setOptionsState((product.options && Array.isArray(product.options)) ? product.options.map((o: any) => ({ ...o })) : []);
+      // build attribute groups from variations
+      const groups: { [k: string]: Set<string> } = {};
+      if (product.variations && Array.isArray(product.variations)) {
+        for (const v of product.variations) {
+          if (v.attributes && Array.isArray(v.attributes)) {
+            for (const a of v.attributes) {
+              if (!groups[a.name]) groups[a.name] = new Set();
+              groups[a.name].add(a.value);
+            }
+          }
+        }
+      }
+      setAttributeGroups(Object.keys(groups).map(k => ({ name: k, values: Array.from(groups[k]) })));
+      // prefill attribute selections from selectedVariation when available
+      if (selectedVariation) {
+        const match = product.variations && product.variations.find((v: any) => String(v.databaseId ?? v.id) === String(selectedVariation));
+        if (match && match.attributes && Array.isArray(match.attributes)) {
+          const pre: { [k: string]: string } = {};
+          for (const a of match.attributes) {
+            pre[a.name] = a.value;
+          }
+          setAttributeState(pre);
+        } else {
+          setAttributeState({});
+        }
+      } else {
+        setAttributeState({});
+      }
+      setShowOptionsModal(true);
+      return;
+    }
+    handleAddToCart();
+  };
+
+  const confirmAddFromModal = () => {
+    handleAddToCart(optionsState);
+    setShowOptionsModal(false);
+  };
+
+  const IMAGE_URLS: string[] = product.productPictures && product.productPictures.length > 0
+    ? (product.productPictures as any[]).map((pic: any) => normalizeImageUrl(pic?.fields?.file?.url))
     : product.featuredImage
-      ? [normalizeImageUrl(product.featuredImage)]
+      ? [normalizeImageUrl(product.featuredImage as any)]
       : ['/temp.webp'];
 
 
@@ -168,9 +222,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
               ) : (
                 // Non-affiliate product UI
                 <>
-                  <p className="text-lg font-bold text-blue-500">${product.price.toFixed(2)}</p>
                   <div className="flex items-center space-x-1.5 rounded-lg bg-black px-4 py-1.5 text-white duration-100 hover:bg-slate-800">
-                    <button onClick={handleAddToCart} className="text-sm">Add to cart</button>
+                    <button onClick={openOptionsModal} className="text-sm">Add to cart</button>
                     <FaShoppingCart className="h-4 w-4" />
                   </div>
                 </>
@@ -221,6 +274,92 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
           </div>
         </div>
       </div>
+      {showOptionsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-lg bg-white rounded-lg p-6">
+            <h3 className="text-lg font-semibold mb-4">Confirm selection</h3>
+            <div className="mb-4">
+              <p className="text-sm text-gray-700">Product: <span className="font-medium">{product.title}</span></p>
+              {selectedVariation ? (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-700">Variation:</p>
+                  <div className="mt-1 ml-2">
+                    {(() => {
+                      const v = product.variations?.find((x: any) => (x.databaseId || x.id) == selectedVariation);
+                      if (!v) return <span className="font-medium">{selectedVariation}</span>;
+                      return (
+                        <div>
+                          <p className="font-medium">{v.attributes && v.attributes.length > 0 ? v.attributes.map((a: any) => a.value).join(' / ') : (v.sku || `Variation ${v.databaseId || v.id}`)}</p>
+                          {v.price && <p className="text-sm text-gray-600">Price: <span className="font-medium">${(Number(v.price) / 100).toFixed(2)}</span></p>}
+                          {v.image && v.image.sourceUrl && (
+                            <img src={v.image.sourceUrl} alt="variation" className="w-28 h-28 object-cover mt-2" />
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-700 mt-2">Variation: <span className="font-medium">Default</span></p>
+              )}
+
+              {/* Render attribute groups (built from variations) as radio selectors */}
+              {attributeGroups && attributeGroups.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm text-gray-700">Choose options:</p>
+                  <div className="mt-2 space-y-4">
+                    {attributeGroups.map((g, gi) => (
+                      <div key={gi}>
+                        <p className="text-sm font-medium mb-1">{g.name}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {g.values.map((val) => (
+                            <label key={val} className="inline-flex items-center space-x-2 border rounded px-2 py-1 cursor-pointer">
+                              <input
+                                type="radio"
+                                name={`attr-${g.name}`}
+                                value={val}
+                                checked={attributeState[g.name] === val}
+                                onChange={() => {
+                                  setAttributeState(prev => {
+                                    const next = { ...prev, [g.name]: val };
+                                    // attempt to find matching variation
+                                    if (product.variations && product.variations.length > 0) {
+                                      const match = product.variations.find((v: any) => {
+                                        if (!v.attributes) return false;
+                                        // all attribute names in next must be present and equal on variation
+                                        for (const k of Object.keys(next)) {
+                                          const attr = v.attributes.find((a: any) => a.name === k);
+                                          if (!attr || attr.value !== next[k]) return false;
+                                        }
+                                        return true;
+                                      });
+                                      if (match) {
+                                        setSelectedVariation(String(match.databaseId ?? match.id));
+                                      } else {
+                                        setSelectedVariation(null);
+                                      }
+                                    }
+                                    return next;
+                                  });
+                                }}
+                              />
+                              <span className="text-sm">{val}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end space-x-3">
+              <button onClick={() => setShowOptionsModal(false)} className="px-4 py-2 border rounded">Cancel</button>
+              <button onClick={confirmAddFromModal} className="px-4 py-2 bg-blue-600 text-white rounded">Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

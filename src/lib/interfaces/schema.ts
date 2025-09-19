@@ -10,5 +10,14 @@ export interface ProductSchema {
   price: number;
   affiliate: boolean;
   productId?: string;
+  variations?: Array<{
+    id: string;
+    databaseId?: number;
+    price?: number;
+    sku?: string;
+    image?: { sourceUrl?: string };
+    attributes?: Array<{ id?: string; name: string; value: string }>
+  }>;
+  options?: Array<{ name: string; type?: string; priceModifier?: number; selected?: boolean; quantity?: number; value?: string }>;
 }
 

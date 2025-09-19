@@ -3,7 +3,7 @@ import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
 import Image from "next/image";
 import Link from "next/link";
 import { FaGithub, FaInstagram, FaLinkedinIn } from "react-icons/fa";
-import { client } from "lib/contentful/contentful";
+// import client from "lib/contentful/contentful";
 import TableOfContents from "components/toc";
 import Footer from "components/PageLayout/Footer";
 import { BLOCKS, INLINES, MARKS } from "@contentful/rich-text-types";
@@ -15,23 +15,23 @@ import { Reviews } from "components/reviews";
 export async function getServerSideProps(context: any) {
     const { slug } = context.params;
 
-    const response = await client.getEntries({
-        content_type: "blog",
-        "fields.url[in]": slug,
-        limit: 1,
-    });
+    // const response = await client.getEntries({
+    //     content_type: "blog",
+    //     "fields.url[in]": slug,
+    //     limit: 1,
+    // });
 
-    if (response.items.length === 0) {
-        return {
-            notFound: true,
-        };
-    }
-
+    // if (response.items.length === 0) {
     return {
-        props: {
-            blogDetailData: response.items[0],
-        },
+        notFound: true,
     };
+    // }
+
+    // return {
+    //     props: {
+    //         blogDetailData: response.items[0],
+    //     },
+    // };
 }
 
 const BlogDetailPage = ({ blogDetailData }: any) => {
@@ -209,7 +209,7 @@ const BlogDetailPage = ({ blogDetailData }: any) => {
                             height={blogDetailData.fields.mainImage.fields.file.details.image.height}
                             alt={blogDetailData.fields.mainImage.fields.title || "Blog Image"}
                             title={blogDetailData.fields.mainImage.fields.title || "Blog Image"}
-                            className="h-full w-full rounded-xl flex justify-center"
+                            className="h-auto w-full rounded-xl flex justify-center"
                             loading="lazy"
                         />
                     </div>

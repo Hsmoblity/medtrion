@@ -8,17 +8,22 @@ export interface BulkAddAction {
 
 export interface AddToCartAction {
   type: Types.addToCart;
-  payload: any;
+  payload: any; // payload should include cartItemId (optional) and full product data
+}
+
+export interface UpdateCartItemAction {
+  type: Types.updateCartItem;
+  payload: { cartItemId: string; changes: any };
 }
 
 export interface RemoveSingleItemAction {
   type: Types.removeSingleItem;
-  payload: string;
+  payload: { cartItemId: string };
 }
 
 export interface RemoveWholeProduct {
   type: Types.removeWholeProduct;
-  payload: string;
+  payload: { cartItemId: string };
 }
 
 export interface RemoveAllItems {

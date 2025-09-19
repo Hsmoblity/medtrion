@@ -50,8 +50,13 @@ const Cart = () => {
         return;
       }
 
-      // Navigate to payment page which will request Stripe session for this order
-      router.push(`/payment?wpOrderId=${encodeURIComponent(orderId)}`);
+      // If Stripe was skipped for testing, go directly to success page
+      if (orderData?.skippedStripe) {
+        router.push(`/success?wpOrderId=${encodeURIComponent(orderId)}`);
+      } else {
+        // Navigate to payment page which will request Stripe session for this order
+        router.push(`/payment?wpOrderId=${encodeURIComponent(orderId)}`);
+      }
     } catch (e) {
       console.error('Checkout flow failed', e);
       setRedirecting(false);

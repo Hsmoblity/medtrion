@@ -42,6 +42,15 @@ function mapWooToProductSchema(product: any): ProductSchema {
 	const featured = ensureUrl(product.image?.sourceUrl);
 	const pictures = gallery.length > 0 ? gallery : (featured ? [featured] : ['/temp.webp']);
 
+	const variations = product.variations && product.variations.nodes ? product.variations.nodes.map((v: any) => ({
+		id: v.id,
+		databaseId: v.databaseId,
+		price: v.price ? Number(v.price) : (v.regularPrice ?? v.salePrice ?? null),
+		sku: v.sku,
+		image: v.image && v.image.sourceUrl ? { sourceUrl: v.image.sourceUrl } : undefined,
+		attributes: v.attributes && v.attributes.nodes ? v.attributes.nodes.map((a: any) => ({ id: a.id, name: a.name, value: a.value })) : undefined,
+	})) : undefined;
+
 	return {
 		title: product.name,
 		slug: product.slug,
@@ -52,6 +61,8 @@ function mapWooToProductSchema(product: any): ProductSchema {
 		price,
 		affiliate: false,
 		productId: product.id,
+		// Include variations from WPGraphQL (if present) so pages can render selectors
+		variations,
 	};
 }
 
@@ -71,4 +82,28 @@ export const getProductBySlug = async (slug: string) => {
 	const products = await getProducts(slug);
 	return products.items && products.items.length > 0 ? products.items[0] : null;
 };
+
+// Minimal Contentful client shim for pages that import `client.getEntries`.
+// If the real `contentful` package and environment variables are present
+// the code below will attempt to use it. Otherwise it throws a helpful error.
+const client = {
+	getEntries: async (opts: any) => {
+		const space = process.env.CONTENTFUL_SPACE;
+		const token = process.env.CONTENTFUL_ACCESS_TOKEN;
+		if (space && token) {
+			try {
+				const contentful = await import('contentful');
+				if (contentful && contentful.createClient) {
+					const c = contentful.createClient({ space, accessToken: token });
+					return c.getEntries(opts);
+				}
+			} catch (e) {
+				// fall through to error below
+			}
+		}
+		throw new Error('Contentful client is not configured. Set CONTENTFUL_SPACE and CONTENTFUL_ACCESS_TOKEN and install the `contentful` SDK.');
+	}
+};
+
+export { client };
 

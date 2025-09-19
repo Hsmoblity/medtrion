@@ -23,11 +23,24 @@ export async function fetchGraphQLProducts() {
                         }
                     }
                     ... on ProductWithVariations {
-                        variations(first: 10) {
+                        variations(first: 20) {
                             nodes {
+                                id
+                                databaseId
                                 price
                                 regularPrice
                                 salePrice
+                                sku
+                                image {
+                                    sourceUrl
+                                }
+                                attributes {
+                                    nodes {
+                                        id
+                                        name
+                                        value
+                                    }
+                                }
                             }
                         }
                     }

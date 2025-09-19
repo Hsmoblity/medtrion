@@ -18,10 +18,12 @@ const Card = ({ title, shortDescription, affiliate, slug, price, featuredImage, 
 
   // Handle adding to the cart
   const handleAddToCart = () => {
+    const uuid = () => 'ci_' + Math.random().toString(36).slice(2, 9);
     const safePictures = Array.isArray(productPictures) && productPictures.length ? productPictures : [{ fields: { file: { url: featuredImage || '/temp.webp' } } }];
     const cartProduct = {
       slug: slug,
       title: title,
+      cartItemId: uuid(),
       price: Number(price) || 0,
       quantity: 1,
       productPictures: safePictures,

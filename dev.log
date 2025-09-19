@@ -1,0 +1,298 @@
+
+> nextjs-contentful-ecommerce@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.0.3
+   - Local:        http://localhost:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 2.8s
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 1894ms (732 modules)
+ GET /_next/static/webpack/58b53f4d4c2f163d.webpack.hot-update.json 404 in 3678ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ○ Compiling /product/[slug] ...
+ ✓ Compiled /product/[slug] in 2.1s (834 modules)
+ GET /_next/static/webpack/58b53f4d4c2f163d.webpack.hot-update.json 404 in 1300ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /product/vivalift-ultra-plr4955s-lift-chair 200 in 2960ms
+WP_GRAPHQL_URL: http://hsmobility.local/graphql
+TypeError: Cannot read properties of undefined (reading 'map')
+    at nodeListToReactComponents (node_modules\@contentful\rich-text-react-renderer\src\util\nodeListToReactComponents.tsx:10:15)
+    at nodeToReactComponent (node_modules\@contentful\rich-text-react-renderer\src\util\nodeListToReactComponents.tsx:46:32)
+    at documentToReactComponents (node_modules\@contentful\rich-text-react-renderer\src\index.tsx:115:9)
+    at product (src\components\ProductList\ProductItem.tsx:51:32)
+    at renderWithHooks (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5658:16)
+    at renderIndeterminateComponent (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5732:15)
+    at renderElement (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5957:7)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6115:11)
+    at renderNodeDestructive (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6087:14)
+    at renderNode (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6270:12)
+    at renderChildrenArray (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6222:7)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6152:7)
+    at renderNodeDestructive (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6087:14)
+    at renderElement (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5982:9)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6115:11)
+   8 |
+   9 | export function nodeListToReactComponents(nodes: CommonNode[], options: Options): ReactNode {
+> 10 |   return nodes.map((node: CommonNode, index: number): ReactNode => {
+     |               ^
+  11 |     return appendKeyToValidElement(nodeToReactComponent(node, options), index);
+  12 |   });
+  13 | }
+ ⨯ TypeError: Cannot read properties of undefined (reading 'map')
+    at ProductItem (./src/components/ProductList/ProductItem.tsx:55:160)
+ ⨯ TypeError: Cannot read properties of undefined (reading 'map')
+    at nodeListToReactComponents (node_modules\@contentful\rich-text-react-renderer\src\util\nodeListToReactComponents.tsx:10:15)
+    at nodeToReactComponent (node_modules\@contentful\rich-text-react-renderer\src\util\nodeListToReactComponents.tsx:46:32)
+    at documentToReactComponents (node_modules\@contentful\rich-text-react-renderer\src\index.tsx:115:9)
+    at product (src\components\ProductList\ProductItem.tsx:51:32)
+    at renderWithHooks (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5658:16)
+    at renderIndeterminateComponent (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5732:15)
+    at renderElement (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5957:7)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6115:11)
+    at renderNodeDestructive (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6087:14)
+    at renderNode (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6270:12)
+    at renderChildrenArray (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6222:7)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6152:7)
+    at renderNodeDestructive (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6087:14)
+    at renderElement (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5982:9)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6115:11)
+   8 |
+   9 | export function nodeListToReactComponents(nodes: CommonNode[], options: Options): ReactNode {
+> 10 |   return nodes.map((node: CommonNode, index: number): ReactNode => {
+     |               ^
+  11 |     return appendKeyToValidElement(nodeToReactComponent(node, options), index);
+  12 |   });
+  13 | } {
+  page: '/product/vivalift-ultra-plr4955s-lift-chair'
+}
+TypeError: Cannot read properties of undefined (reading 'map')
+    at nodeListToReactComponents (node_modules\@contentful\rich-text-react-renderer\src\util\nodeListToReactComponents.tsx:10:15)
+    at nodeToReactComponent (node_modules\@contentful\rich-text-react-renderer\src\util\nodeListToReactComponents.tsx:46:32)
+    at documentToReactComponents (node_modules\@contentful\rich-text-react-renderer\src\index.tsx:115:9)
+    at product (src\components\ProductList\ProductItem.tsx:51:32)
+    at renderWithHooks (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5658:16)
+    at renderIndeterminateComponent (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5732:15)
+    at renderElement (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5957:7)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6115:11)
+    at renderNodeDestructive (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6087:14)
+    at renderNode (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6270:12)
+    at renderChildrenArray (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6222:7)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6152:7)
+    at renderNodeDestructive (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6087:14)
+    at renderElement (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5982:9)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6115:11)
+   8 |
+   9 | export function nodeListToReactComponents(nodes: CommonNode[], options: Options): ReactNode {
+> 10 |   return nodes.map((node: CommonNode, index: number): ReactNode => {
+     |               ^
+  11 |     return appendKeyToValidElement(nodeToReactComponent(node, options), index);
+  12 |   });
+  13 | }
+ ⨯ TypeError: Cannot read properties of undefined (reading 'map')
+    at ProductItem (./src/components/ProductList/ProductItem.tsx:55:160)
+ ⨯ TypeError: Cannot read properties of undefined (reading 'map')
+    at nodeListToReactComponents (node_modules\@contentful\rich-text-react-renderer\src\util\nodeListToReactComponents.tsx:10:15)
+    at nodeToReactComponent (node_modules\@contentful\rich-text-react-renderer\src\util\nodeListToReactComponents.tsx:46:32)
+    at documentToReactComponents (node_modules\@contentful\rich-text-react-renderer\src\index.tsx:115:9)
+    at product (src\components\ProductList\ProductItem.tsx:51:32)
+    at renderWithHooks (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5658:16)
+    at renderIndeterminateComponent (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5732:15)
+    at renderElement (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5957:7)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6115:11)
+    at renderNodeDestructive (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6087:14)
+    at renderNode (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6270:12)
+    at renderChildrenArray (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6222:7)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6152:7)
+    at renderNodeDestructive (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6087:14)
+    at renderElement (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5982:9)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6115:11)
+   8 |
+   9 | export function nodeListToReactComponents(nodes: CommonNode[], options: Options): ReactNode {
+> 10 |   return nodes.map((node: CommonNode, index: number): ReactNode => {
+     |               ^
+  11 |     return appendKeyToValidElement(nodeToReactComponent(node, options), index);
+  12 |   });
+  13 | } {
+  page: '/product/vivalift-ultra-plr4955s-lift-chair'
+}
+ GET /product/vivalift-ultra-plr4955s-lift-chair 500 in 2216ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 26ms
+TypeError: Cannot read properties of undefined (reading 'map')
+    at nodeListToReactComponents (node_modules\@contentful\rich-text-react-renderer\src\util\nodeListToReactComponents.tsx:10:15)
+    at nodeToReactComponent (node_modules\@contentful\rich-text-react-renderer\src\util\nodeListToReactComponents.tsx:46:32)
+    at documentToReactComponents (node_modules\@contentful\rich-text-react-renderer\src\index.tsx:115:9)
+    at product (src\components\ProductList\ProductItem.tsx:51:32)
+    at renderWithHooks (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5658:16)
+    at renderIndeterminateComponent (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5732:15)
+    at renderElement (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5957:7)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6115:11)
+    at renderNodeDestructive (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6087:14)
+    at renderNode (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6270:12)
+    at renderChildrenArray (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6222:7)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6152:7)
+    at renderNodeDestructive (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6087:14)
+    at renderElement (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5982:9)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6115:11)
+   8 |
+   9 | export function nodeListToReactComponents(nodes: CommonNode[], options: Options): ReactNode {
+> 10 |   return nodes.map((node: CommonNode, index: number): ReactNode => {
+     |               ^
+  11 |     return appendKeyToValidElement(nodeToReactComponent(node, options), index);
+  12 |   });
+  13 | }
+ ⨯ TypeError: Cannot read properties of undefined (reading 'map')
+    at ProductItem (./src/components/ProductList/ProductItem.tsx:55:160)
+ ⨯ TypeError: Cannot read properties of undefined (reading 'map')
+    at nodeListToReactComponents (node_modules\@contentful\rich-text-react-renderer\src\util\nodeListToReactComponents.tsx:10:15)
+    at nodeToReactComponent (node_modules\@contentful\rich-text-react-renderer\src\util\nodeListToReactComponents.tsx:46:32)
+    at documentToReactComponents (node_modules\@contentful\rich-text-react-renderer\src\index.tsx:115:9)
+    at product (src\components\ProductList\ProductItem.tsx:51:32)
+    at renderWithHooks (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5658:16)
+    at renderIndeterminateComponent (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5732:15)
+    at renderElement (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5957:7)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6115:11)
+    at renderNodeDestructive (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6087:14)
+    at renderNode (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6270:12)
+    at renderChildrenArray (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6222:7)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6152:7)
+    at renderNodeDestructive (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6087:14)
+    at renderElement (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:5982:9)
+    at renderNodeDestructiveImpl (D:\Works\hsmobility.ca\basecode\node_modules\react-dom\cjs\react-dom-server.browser.development.js:6115:11)
+   8 |
+   9 | export function nodeListToReactComponents(nodes: CommonNode[], options: Options): ReactNode {
+> 10 |   return nodes.map((node: CommonNode, index: number): ReactNode => {
+     |               ^
+  11 |     return appendKeyToValidElement(nodeToReactComponent(node, options), index);
+  12 |   });
+  13 | } {
+  page: '/product/vivalift-ultra-plr4955s-lift-chair'
+}
+ GET /product/vivalift-ultra-plr4955s-lift-chair 500 in 931ms
+Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ✓ Compiled in 1869ms (834 modules)
+WP_GRAPHQL_URL: http://hsmobility.local/graphql
+ GET /product/vivalift-ultra-plr4955s-lift-chair 200 in 955ms
+ GET /product/vivalift-ultra-plr4955s-lift-chair 200 in 459ms
+ ✓ Compiled in 870ms (834 modules)
+WP_GRAPHQL_URL: http://hsmobility.local/graphql
+ GET /product/vivalift-ultra-plr4955s-lift-chair 200 in 909ms
+ ⨯ ./src/components/PageLayout/Cart/Item.tsx:6:1
+Module not found: Can't resolve '@/lib/utils/image'
+  4 | import CartItemsContext from "contexts/cartItemsContext";
+  5 | import Types from "reducers/cart/types";
+> 6 | import { normalizeImageUrl } from '@/lib/utils/image'
+    | ^
+  7 | // import urlFor from "lib/sanity/urlFor";
+  8 |
+  9 | interface ItemProps {
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./src/components/PageLayout/Cart/ItemList.tsx
+./src/components/PageLayout/Cart/Cart.tsx
+./src/components/PageLayout/Header.tsx
+./src/components/PageLayout/PageLayout.tsx
+./src/pages/_app.tsx
+ ⨯ ./src/components/PageLayout/Cart/Item.tsx:6:1
+Module not found: Can't resolve '@/lib/utils/image'
+  4 | import CartItemsContext from "contexts/cartItemsContext";
+  5 | import Types from "reducers/cart/types";
+> 6 | import { normalizeImageUrl } from '@/lib/utils/image'
+    | ^
+  7 | // import urlFor from "lib/sanity/urlFor";
+  8 |
+  9 | interface ItemProps {
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./src/components/PageLayout/Cart/ItemList.tsx
+./src/components/PageLayout/Cart/Cart.tsx
+./src/components/PageLayout/Header.tsx
+./src/components/PageLayout/PageLayout.tsx
+./src/pages/_app.tsx
+ ⨯ ./src/components/PageLayout/Cart/Item.tsx:6:1
+Module not found: Can't resolve '@/lib/utils/image'
+  4 | import CartItemsContext from "contexts/cartItemsContext";
+  5 | import Types from "reducers/cart/types";
+> 6 | import { normalizeImageUrl } from '@/lib/utils/image'
+    | ^
+  7 | // import urlFor from "lib/sanity/urlFor";
+  8 |
+  9 | interface ItemProps {
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./src/components/PageLayout/Cart/ItemList.tsx
+./src/components/PageLayout/Cart/Cart.tsx
+./src/components/PageLayout/Header.tsx
+./src/components/PageLayout/PageLayout.tsx
+./src/pages/_app.tsx
+ ⨯ ./src/components/ProductList/ProductItem.tsx:14:1
+Module not found: Can't resolve '@/lib/utils/image'
+  12 | import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
+  13 | import { Document } from "@contentful/rich-text-types";
+> 14 | import { normalizeImageUrl } from '@/lib/utils/image'
+     | ^
+  15 |
+  16 | interface ProductItemProps {
+  17 |   product: {
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./src/pages/product/[slug].tsx
+ ⨯ ./src/components/ProductList/ProductItem.tsx:14:1
+Module not found: Can't resolve '@/lib/utils/image'
+  12 | import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
+  13 | import { Document } from "@contentful/rich-text-types";
+> 14 | import { normalizeImageUrl } from '@/lib/utils/image'
+     | ^
+  15 |
+  16 | interface ProductItemProps {
+  17 |   product: {
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./src/pages/product/[slug].tsx
+ ✓ Compiled in 633ms (834 modules)
+ ✓ Compiled in 181ms (197 modules)
+WP_GRAPHQL_URL: http://hsmobility.local/graphql
+ GET /product/vivalift-ultra-plr4955s-lift-chair 200 in 1720ms
+ ✓ Compiled in 295ms (197 modules)
+WP_GRAPHQL_URL: http://hsmobility.local/graphql
+ GET /product/vivalift-ultra-plr4955s-lift-chair 200 in 1048ms
+ ✓ Compiled in 141ms (197 modules)
+ ✓ Compiled in 161ms (197 modules)
+ ✓ Compiled in 103ms (197 modules)
+WP_GRAPHQL_URL: http://hsmobility.local/graphql
+ GET /product/vivalift-ultra-plr4955s-lift-chair 200 in 1346ms
+ ✓ Compiled in 1402ms (836 modules)
+ ✓ Compiled in 853ms (836 modules)
+WP_GRAPHQL_URL: http://hsmobility.local/graphql
+ GET /product/vivalift-ultra-plr4955s-lift-chair 200 in 1156ms
+ ✓ Compiled in 179ms (198 modules)
+ ✓ Compiled in 99ms (198 modules)
+ ✓ Compiled in 228ms (198 modules)
+WP_GRAPHQL_URL: http://hsmobility.local/graphql
+ GET /product/vivalift-ultra-plr4955s-lift-chair 200 in 2148ms
+ ✓ Compiled in 1864ms (836 modules)
+WP_GRAPHQL_URL: http://hsmobility.local/graphql
+ GET /product/vivalift-ultra-plr4955s-lift-chair 200 in 1937ms
+ ✓ Compiled /_error in 484ms (838 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 831ms
+ ⚠ The "images.domains" configuration is deprecated. Please use "images.remotePatterns" configuration instead.
+ ✓ Compiled in 1318ms (836 modules)
+WP_GRAPHQL_URL: http://hsmobility.local/graphql
+ GET /_next/data/development/product/vivalift-ultra-plr4955s-lift-chair.json?slug=vivalift-ultra-plr4955s-lift-chair 200 in 2092ms
+ ✓ Compiled in 840ms (836 modules)
+WP_GRAPHQL_URL: http://hsmobility.local/graphql
+ GET /_next/data/development/product/vivalift-ultra-plr4955s-lift-chair.json?slug=vivalift-ultra-plr4955s-lift-chair 200 in 2289ms

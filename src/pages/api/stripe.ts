@@ -1,0 +1,169 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+import { CartProduct } from "lib/interfaces";
+import Stripe from "stripe";
+import { GraphQLClient, gql } from 'graphql-request';
+
+if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.trim() === "") {
+  console.warn('STRIPE_SECRET_KEY is not set. /api/stripe will attempt to delegate session creation to WP if supported.');
+}
+
+let stripe: Stripe | null = null;
+if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY.trim() !== "") {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2024-04-10",
+  });
+}
+
+const wpClient = new GraphQLClient(process.env.WP_GRAPHQL_URL || '');
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method === "POST") {
+    try {
+      const items = req.body.items || [];
+      const wpOrderId = req.body.wpOrderId || null;
+
+      // If a WP order id is provided, ask WP to create a session for that order
+      if (!stripe && wpOrderId) {
+        const orderMutation = gql`
+          mutation CreateSessionForOrder($input: CreateSessionForOrderInput!) {
+            createStripeSessionForOrder(input: $input) {
+              sessionId
+              publishableKey
+              errors
+            }
+          }
+        `;
+
+        try {
+          const input = { orderId: parseInt(wpOrderId, 10), successUrl: `${req.headers.origin}/success`, cancelUrl: `${req.headers.origin}` };
+          const data: any = await wpClient.request(orderMutation, { input });
+          const resp = data?.createStripeSessionForOrder;
+          if (!resp) {
+            res.status(500).json({ message: 'WP did not return a session for order.' });
+            return;
+          }
+          if (resp.errors && resp.errors.length) {
+            res.status(500).json({ message: 'WP returned errors', errors: resp.errors });
+            return;
+          }
+          res.status(200).json({ id: resp.sessionId, publishableKey: resp.publishableKey });
+          return;
+        } catch (err: any) {
+          console.error('WP create session for order failed', err);
+          res.status(500).json({ message: 'WP create session for order failed', error: err.message || err });
+          return;
+        }
+      }
+
+      // If server has a Stripe secret key configured, use it directly (existing flow)
+      if (stripe) {
+        const line_items = items.map((item: any) => {
+          const imgUrl = item.productPictures?.[0]?.url || "";
+
+          return {
+            price_data: {
+              currency: "CAD",
+              product_data: {
+                name: item.title,
+                images: imgUrl ? [imgUrl] : [],
+              },
+              unit_amount: Math.round((item.price || 0) * 100),
+            },
+            adjustable_quantity: { enabled: true, minimum: 1 },
+            quantity: item.quantity || 1,
+          };
+        });
+
+        // Fetch shipping rates and create a session
+        const shippingRates = await stripe.shippingRates.list({ limit: 5 });
+        const shippingOptions = shippingRates.data.map(rate => ({ shipping_rate: rate.id }));
+
+        const session = await stripe.checkout.sessions.create({
+          submit_type: "pay",
+          payment_method_types: ["card"],
+          billing_address_collection: "auto",
+          shipping_address_collection: { allowed_countries: ["US", "CA"] },
+          shipping_options: shippingOptions,
+          line_items,
+          mode: "payment",
+          success_url: `${req.headers.origin}/success`,
+          cancel_url: `${req.headers.origin}`,
+        });
+
+        res.status(200).json({
+          id: session.id,
+          publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || null,
+          raw: session,
+        });
+        return;
+      }
+
+      // If no server-side Stripe key, attempt to ask WP to create an order and generate a Stripe session/key.
+      // Expectation: WPGraphQL has a mutation (custom) that accepts line items and returns { sessionId, publishableKey }
+      // We'll attempt a best-effort call to a mutation named `createHeadlessStripeSession`.
+
+      const mutation = gql`
+        mutation CreateHeadlessStripeSession($input: HeadlessStripeInput!) {
+          createHeadlessStripeSession(input: $input) {
+            sessionId
+            publishableKey
+            order {
+              id
+              orderNumber
+            }
+            errors
+          }
+        }
+      `;
+
+      const input = {
+        lineItems: items.map((it: any) => ({
+          productId: it.productId,
+          variationId: it.variationId || null,
+          quantity: it.quantity || 1,
+          unitPrice: Math.round((it.price || 0) * 100),
+        })),
+        metadata: {
+          source: 'headless-nextjs',
+        },
+        successUrl: `${req.headers.origin}/success`,
+        cancelUrl: `${req.headers.origin}`,
+      };
+
+      try {
+        const data: any = await wpClient.request(mutation, { input });
+        const resp = data?.createHeadlessStripeSession;
+
+        if (!resp) {
+          res.status(500).json({ message: 'WP did not return a session. Ensure WP implements createHeadlessStripeSession.' });
+          return;
+        }
+
+        if (resp.errors && resp.errors.length > 0) {
+          res.status(500).json({ message: 'WP returned errors', errors: resp.errors });
+          return;
+        }
+
+        res.status(200).json({ id: resp.sessionId, publishableKey: resp.publishableKey, order: resp.order });
+        return;
+      } catch (wpErr: any) {
+        console.error('WP GraphQL call failed:', wpErr);
+        res.status(500).json({ message: 'WP GraphQL call failed', error: wpErr.message || wpErr });
+        return;
+      }
+    } catch (error: any) {
+      console.error("Stripe session creation failed:", error);
+      res.status(500).json({
+        message: "Failed to create checkout session",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  } else {
+    res.setHeader("Allow", "POST");
+    res.status(405).end("Method Not Allowed");
+  }
+}
+

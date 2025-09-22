@@ -65,10 +65,26 @@ import { GetServerSideProps } from 'next';
 
 export const getServerSideProps: GetServerSideProps = async () => {
   const response = await getProducts("");
-  // Nếu đã map đúng ProductSchema thì response.items là ProductSchema[]
+  // Ensure values are JSON-serializable (replace `undefined` with `null`)
+  const sanitize = (v: any): any => {
+    if (v === undefined) return null;
+    if (v === null) return null;
+    if (Array.isArray(v)) return v.map(sanitize);
+    if (typeof v === 'object') {
+      const out: any = {};
+      for (const k of Object.keys(v)) {
+        out[k] = sanitize(v[k]);
+      }
+      return out;
+    }
+    return v;
+  };
+
+  const items = Array.isArray(response.items) ? response.items.map(sanitize) : [];
+
   return {
     props: {
-      products: response.items,
+      products: items,
     },
   };
 };

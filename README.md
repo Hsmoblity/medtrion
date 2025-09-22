@@ -50,3 +50,21 @@ Build & run (production local)
 npm run build
 npm run start
 ```
+
+Related product add-ons
+----------------------
+
+This project supports product add-ons via a WooCommerce product meta key `_related_options`.
+
+- `_related_options` should be an array of product database IDs (e.g. `[301,302]`).
+- Store it on the base product (visible in WP admin via a meta box or programmatically).
+- Add-on products should be set to hidden from shop/search and can be simple or variable products.
+
+Frontend behaviour
+ - When a product page loads, the app reads `_related_options` and fetches those products from WPGraphQL.
+ - Simple add-ons render as checkboxes, variable add-ons render as radios for variations, group-types render as grouped checkboxes.
+ - Selected add-ons are dispatched to the existing cart reducer along with the base product when added.
+
+Admin workflow
+ - Edit base product and add the `_related_options` meta (multi-select of product IDs). A small admin meta box can be implemented in WP to save IDs.
+ - For add-on products set visibility to hidden and configure price/SKU/variations as needed.

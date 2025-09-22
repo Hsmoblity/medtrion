@@ -144,3 +144,47 @@ export async function fetchGraphQLCart(cartKey: string) {
         return null;
     }
 }
+
+export async function fetchProductsByDatabaseIds(databaseIds: Array<number | string>) {
+    if (!databaseIds || databaseIds.length === 0) return [];
+    const idsList = databaseIds.map(id => Number(id)).filter(n => !isNaN(n));
+    if (idsList.length === 0) return [];
+    const query = gql`
+        query GetProductsByIds($ids: [Int]) {
+            products(where: { include: $ids }, first: 50) {
+                nodes {
+                    id
+                    databaseId
+                    name
+                    slug
+                    description
+                    image { sourceUrl }
+                    galleryImages(first: 10) { nodes { sourceUrl } }
+                    ... on ProductWithVariations {
+                        variations(first: 50) {
+                            nodes {
+                                id
+                                databaseId
+                                price
+                                regularPrice
+                                salePrice
+                                sku
+                                image { sourceUrl }
+                                attributes { nodes { id name value } }
+                            }
+                        }
+                    }
+                    ... on SimpleProduct { price regularPrice salePrice }
+                    ... on GroupProduct { price }
+                }
+            }
+        }
+    `;
+    try {
+        const data = await client.request(query, { ids: idsList }) as { products: { nodes: any[] } };
+        return data.products.nodes || [];
+    } catch (e) {
+        console.error('Error fetching products by ids', e);
+        return [];
+    }
+}

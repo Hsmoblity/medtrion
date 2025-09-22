@@ -5,6 +5,8 @@ import { Reviews } from "components/reviews";
 import Form from "components/step-form";
 import { useEffect, useState } from "react";
 import { getProducts } from "lib/contentful/contentful";
+import ProductOptions from 'components/ProductOptions';
+import { fetchProductsByDatabaseIds } from 'lib/woocommerce';
 import ProductList from "components/ProductList/ProductList";
 import { GetServerSideProps } from 'next';
 import ProductItem from "components/ProductList/ProductItem";
@@ -54,6 +56,24 @@ const ProductPage = ({ params, mappedProducts, hero }: Props) => {
                 featuredImage={pageImage}
             />
             {hero && <ProductItem product={hero} />}
+            {/* Render related options (add-ons) when available */}
+            {hero && hero._related_options && Array.isArray(hero._related_options) && hero._related_options.length > 0 && (
+                <div className="max-w-4xl mx-auto mt-6 px-4">
+                    <ProductOptions relatedIds={hero._related_options} fetchByIds={async (ids) => {
+                        const res = await fetchProductsByDatabaseIds(ids.map((x: any) => Number(x)).filter((n: any) => !isNaN(n)));
+                        // map to shape expected by ProductOptions
+                        return res.map((p: any) => ({
+                            id: p.databaseId ?? p.id,
+                            title: p.name,
+                            price: (p.price ? Number(p.price) : (p.regularPrice ?? p.salePrice) ?? null),
+                            sku: p.sku ?? null,
+                            type: p.__typename && String(p.__typename).toLowerCase().includes('variation') ? 'variable' : (p.__typename && String(p.__typename).toLowerCase().includes('group') ? 'group' : 'simple'),
+                            variations: (p.variations && p.variations.nodes) ? p.variations.nodes : [],
+                            image: p.image && p.image.sourceUrl ? p.image.sourceUrl : null,
+                        }));
+                    }} parentProductId={hero.productId} />
+                </div>
+            )}
             <div className="justify-center mx-auto">
                 <h2 className="text-center md:text-4xl text-2xl uppercase leading-8 text-gray-800 my-6 font-bold font-poppins max-w-4xl mx-auto">
                     Explore a curated selection of top-notch mobility products crafted to elevate your lifestyle.
@@ -80,7 +100,18 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 
     try {
         const response = await getProducts(""); // Fetch already-mapped products
-        const items = response.items || [];
+        const sanitize = (v: any): any => {
+            if (v === undefined) return null;
+            if (v === null) return null;
+            if (Array.isArray(v)) return v.map(sanitize);
+            if (typeof v === 'object') {
+                const out: any = {};
+                for (const k of Object.keys(v)) out[k] = sanitize(v[k]);
+                return out;
+            }
+            return v;
+        };
+        const items = Array.isArray(response.items) ? response.items.map(sanitize) : [];
 
         // Ensure compatibility with ProductItem which expects `productSpeciications` (misspelled)
         const mappedProducts = items.map((item: any) => ({

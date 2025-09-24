@@ -4,6 +4,7 @@ import Image from "next/image";
 import CartItemsContext from "contexts/cartItemsContext";
 import Types from "reducers/cart/types";
 import { normalizeImageUrl } from '../../../lib/utils/image'
+import { fetchRelatedProductsByIds } from 'lib/woocommerce';
 // import urlFor from "lib/sanity/urlFor";
 
 interface ItemProps {
@@ -15,7 +16,8 @@ const Item: React.FC<ItemProps> = ({ product }) => {
   const { slug, productPictures, title, price, quantity } = product;
   const [showEditModal, setShowEditModal] = useState(false);
   const [editAttributes, setEditAttributes] = useState<{ [k: string]: string }>({});
-  const [optionsState, setOptionsState] = useState<Array<{ name: string; type?: string; priceModifier?: number; selected?: boolean; quantity?: number; value?: string }>>([]);
+  type OptionItem = { name: string; type?: string; priceModifier?: number; selected?: boolean; quantity?: number; value?: string; radioGroup?: string; parentId?: number | string };
+  const [optionsState, setOptionsState] = useState<OptionItem[]>([]);
 
   const removeWholeProduct = () => {
     dispatch({
@@ -51,8 +53,63 @@ const Item: React.FC<ItemProps> = ({ product }) => {
       }
     }
     setEditAttributes(pre);
-    // initialize optionsState from product.options snapshot
-    setOptionsState((product.options && Array.isArray(product.options)) ? product.options.map((o: any) => ({ ...o })) : []);
+    // initialize optionsState from product.options snapshot if present
+    const existingOptions = (product.options && Array.isArray(product.options)) ? product.options.map((o: any) => ({ ...o })) : [];
+    if (existingOptions.length > 0) {
+      setOptionsState(existingOptions);
+      setShowEditModal(true);
+      return;
+    }
+
+    // Otherwise, lazy-load related products and build option entries
+    (async () => {
+      try {
+        const relatedIds = product._related_options || [];
+        if (!relatedIds || relatedIds.length === 0) {
+          setOptionsState([]);
+          setShowEditModal(true);
+          return;
+        }
+        const related = await fetchRelatedProductsByIds(relatedIds);
+        const built: OptionItem[] = [];
+        const parsePrice = (p: any) => {
+          if (typeof p === 'number') return p;
+          if (!p) return 0;
+          if (typeof p === 'string') {
+            const n = parseFloat(String(p).replace(/[^0-9.\-]+/g, ''));
+            return isNaN(n) ? 0 : n;
+          }
+          return 0;
+        }
+
+        for (const rp of related) {
+          if (!rp) continue;
+          // Simple product: single checkbox option
+          if (!rp.variations || rp.variations.length === 0) {
+            built.push({ name: rp.name, type: 'checkbox', priceModifier: parsePrice(rp.price), selected: false, quantity: 0, value: String(rp.databaseId), parentId: rp.databaseId });
+          } else {
+            // Variable: create per-variation entries (checkbox or radio depending on soldIndividually)
+            const group = true ? `rg_${rp.databaseId}` : null;
+            for (const v of rp.variations) {
+              const labelParts: string[] = [];
+              if (v.attributes && Array.isArray(v.attributes)) {
+                for (const a of v.attributes) labelParts.push(`${a.name}: ${a.value}`);
+              }
+              const label = labelParts.length > 0 ? `${rp.name} — ${labelParts.join(', ')}` : `${rp.name}`;
+              const entry: OptionItem = { name: label, type: group ? 'radio' : 'checkbox', priceModifier: parsePrice(v.price || rp.price), selected: false, quantity: 0, value: String(v.databaseId), parentId: rp.databaseId };
+              if (group) entry.radioGroup = group;
+              built.push(entry);
+            }
+          }
+        }
+
+        setOptionsState(built);
+      } catch (e) {
+        setOptionsState([]);
+      } finally {
+        setShowEditModal(true);
+      }
+    })();
     setShowEditModal(true);
   };
 
@@ -70,7 +127,36 @@ const Item: React.FC<ItemProps> = ({ product }) => {
       });
       if (match) variationId = String(match.databaseId ?? match.id);
     }
+    // Persist edits to the cart item
     dispatch({ type: Types.updateCartItem, payload: { cartItemId: String(product.cartItemId ?? `ci_fallback_${product.slug}`), changes: { variationId, options: optionsState } } });
+
+    // Also add selected options as separate cart lines
+    try {
+      const uuid = () => 'ci_' + Math.random().toString(36).slice(2, 9);
+      for (const opt of optionsState) {
+        if (!opt || !opt.selected) continue;
+        const qty = typeof opt.quantity === 'number' && opt.quantity > 0 ? opt.quantity : 1;
+        // If opt.value looks like a variation id (we generated variation entries using variation.databaseId), add as variation
+        const idNum = Number(opt.value);
+        if (!isNaN(idNum)) {
+          const payload: any = { cartItemId: uuid(), quantity: qty };
+          // prefer parentId when available
+          if (opt.parentId) payload.productId = String(opt.parentId);
+          else payload.productId = String(idNum);
+          // if this option seems to represent a variation id, set variationId
+          if (opt.type === 'radio' || opt.radioGroup) {
+            payload.variationId = String(idNum);
+          }
+          // if option is a simple product (no parent mapping), and value is product id, set productId
+          if (!payload.productId) payload.productId = String(idNum);
+          dispatch({ type: Types.addToCart, payload });
+        }
+      }
+    } catch (e) {
+      // don't block saving edits if add-ons fail
+      console.warn('Failed to add selected options as separate cart lines', e);
+    }
+
     setShowEditModal(false);
   };
 
@@ -92,7 +178,18 @@ const Item: React.FC<ItemProps> = ({ product }) => {
   const toggleOptionSelected = (idx: number) => {
     setOptionsState(prev => {
       const next = prev.map((p) => ({ ...p }));
-      next[idx].selected = !next[idx].selected;
+      const item = next[idx];
+      if (item && item.radioGroup) {
+        // Deselect others in same group, select this one
+        for (let i = 0; i < next.length; i++) {
+          if (next[i].radioGroup === item.radioGroup) next[i].selected = false;
+        }
+        item.selected = true;
+        if (typeof item.quantity === 'undefined' || item.quantity === 0) item.quantity = 1;
+      } else {
+        item.selected = !item.selected;
+        if (item.selected && (typeof item.quantity === 'undefined' || item.quantity === 0)) item.quantity = 1;
+      }
       return next;
     });
   };
@@ -193,7 +290,10 @@ const Item: React.FC<ItemProps> = ({ product }) => {
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-gray-600">No variations available</p>
+                // If there are add-on options, don't show the parent "No variations available" message
+                (optionsState && optionsState.length > 0) ? null : (
+                  <p className="text-sm text-gray-600">No variations available</p>
+                )
               )}
 
               {/* Product-level options (addons) */}
@@ -205,7 +305,8 @@ const Item: React.FC<ItemProps> = ({ product }) => {
                       <div key={opt.name + idx} className="flex items-center gap-3">
                         <label className="flex items-center gap-2">
                           <input
-                            type="checkbox"
+                            type={opt.type === 'radio' ? 'radio' : 'checkbox'}
+                            name={opt.type === 'radio' ? (opt.radioGroup || `rg_${idx}`) : undefined}
                             checked={!!opt.selected}
                             onChange={() => toggleOptionSelected(idx)}
                           />

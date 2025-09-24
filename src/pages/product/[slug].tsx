@@ -57,23 +57,38 @@ const ProductPage = ({ params, mappedProducts, hero }: Props) => {
             />
             {hero && <ProductItem product={hero} />}
             {/* Render related options (add-ons) when available */}
-            {hero && hero._related_options && Array.isArray(hero._related_options) && hero._related_options.length > 0 && (
+            {/* {hero && hero._related_options && Array.isArray(hero._related_options) && hero._related_options.length > 0 && (
                 <div className="max-w-4xl mx-auto mt-6 px-4">
-                    <ProductOptions relatedIds={hero._related_options} fetchByIds={async (ids) => {
-                        const res = await fetchProductsByDatabaseIds(ids.map((x: any) => Number(x)).filter((n: any) => !isNaN(n)));
+                    <ProductOptions relatedIds={hero._related_options} relatedProducts={Array.isArray((hero as any)._related_options_products) ? (hero as any)._related_options_products : undefined} fetchByIds={async (ids) => {
+                        const idsList = (ids || []).map((x: any) => Number(x)).filter((n: any) => !isNaN(n));
+                        if (idsList.length === 0) return [];
+                        let res = await fetchProductsByDatabaseIds(idsList);
+                        if ((!res || res.length === 0) && typeof window !== 'undefined') {
+                            try {
+                                const url = `/api/debug/related-products?ids=${idsList.join(',')}`;
+                                const r = await fetch(url);
+                                if (r.ok) {
+                                    const json = await r.json();
+                                    res = Array.isArray(json?.products) ? json.products : (Array.isArray(json) ? json : (json?.items || []));
+                                }
+                            } catch (e) {
+                                console.warn('Fallback fetch to /api/debug/related-products failed', e);
+                            }
+                        }
                         // map to shape expected by ProductOptions
-                        return res.map((p: any) => ({
+                        return (res || []).map((p: any) => ({
                             id: p.databaseId ?? p.id,
                             title: p.name,
                             price: (p.price ? Number(p.price) : (p.regularPrice ?? p.salePrice) ?? null),
                             sku: p.sku ?? null,
-                            type: p.__typename && String(p.__typename).toLowerCase().includes('variation') ? 'variable' : (p.__typename && String(p.__typename).toLowerCase().includes('group') ? 'group' : 'simple'),
-                            variations: (p.variations && p.variations.nodes) ? p.variations.nodes : [],
-                            image: p.image && p.image.sourceUrl ? p.image.sourceUrl : null,
+                            type: p.__typename && String(p.__typename).toLowerCase().includes('withvariations') ? 'variable' : 'simple',
+                            variations: (p.variations && p.variations.nodes) ? p.variations.nodes : (p.variations || []),
+                            soldIndividually: p.soldIndividually ?? false,
+                            image: p.image && (p.image.sourceUrl || p.image) ? (p.image.sourceUrl || p.image) : null,
                         }));
                     }} parentProductId={hero.productId} />
                 </div>
-            )}
+            )} */}
             <div className="justify-center mx-auto">
                 <h2 className="text-center md:text-4xl text-2xl uppercase leading-8 text-gray-800 my-6 font-bold font-poppins max-w-4xl mx-auto">
                     Explore a curated selection of top-notch mobility products crafted to elevate your lifestyle.

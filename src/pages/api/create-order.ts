@@ -2,7 +2,21 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { GraphQLClient, gql } from 'graphql-request';
 import fetch from 'node-fetch';
 
-const client = new GraphQLClient(process.env.WP_GRAPHQL_URL || '');
+const WP_GRAPHQL_URL = process.env.WP_GRAPHQL_URL || '';
+let client: GraphQLClient | null = null;
+if (WP_GRAPHQL_URL) {
+  try {
+    // Validate URL
+    // eslint-disable-next-line no-new
+    new URL(WP_GRAPHQL_URL);
+    client = new GraphQLClient(WP_GRAPHQL_URL);
+  } catch (e) {
+    console.warn('Invalid WP_GRAPHQL_URL in create-order API route:', WP_GRAPHQL_URL, e);
+    client = null;
+  }
+} else {
+  console.warn('WP_GRAPHQL_URL not set in create-order API route.');
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -49,6 +63,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     } catch (pingErr: any) {
       return res.status(502).json({ error: 'WP GraphQL endpoint unreachable', details: pingErr?.message || String(pingErr) });
+    }
+
+    if (!client) {
+      return res.status(500).json({ error: 'WP_GRAPHQL_URL is not configured or invalid on the server.' });
     }
 
     const data = await client.request(mutation, { input }) as any;

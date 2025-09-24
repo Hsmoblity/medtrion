@@ -20,5 +20,28 @@ export interface ProductSchema {
   }>;
   options?: Array<{ name: string; type?: string; priceModifier?: number; selected?: boolean; quantity?: number; value?: string }>;
   _related_options?: Array<number | string>;
+  _related_options_products?: Array<{
+    id?: string;
+    databaseId?: number;
+    name?: string;
+    slug?: string;
+    description?: string;
+    type?: string;
+    soldIndividually?: boolean;
+    price?: any;
+    regularPrice?: any;
+    salePrice?: any;
+    image?: string | { sourceUrl?: string } | null;
+    gallery?: string[];
+    variations?: Array<{
+      id?: string;
+      databaseId?: number;
+      name?: string | null;
+      price?: any;
+      sku?: string | null;
+      image?: string | { sourceUrl?: string } | null;
+      attributes?: Array<{ id?: string; name?: string; value?: string }>;
+    }>;
+  }>;
 }
 

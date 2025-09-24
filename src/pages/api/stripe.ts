@@ -14,7 +14,20 @@ if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY.trim() !== ""
   });
 }
 
-const wpClient = new GraphQLClient(process.env.WP_GRAPHQL_URL || '');
+const WP_GRAPHQL_URL = process.env.WP_GRAPHQL_URL || '';
+let wpClient: GraphQLClient | null = null;
+if (WP_GRAPHQL_URL) {
+  try {
+    // eslint-disable-next-line no-new
+    new URL(WP_GRAPHQL_URL);
+    wpClient = new GraphQLClient(WP_GRAPHQL_URL);
+  } catch (e) {
+    console.warn('Invalid WP_GRAPHQL_URL in /api/stripe:', WP_GRAPHQL_URL, e);
+    wpClient = null;
+  }
+} else {
+  console.warn('WP_GRAPHQL_URL not set in /api/stripe.');
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -39,6 +52,10 @@ export default async function handler(
 
         try {
           const input = { orderId: parseInt(wpOrderId, 10), successUrl: `${req.headers.origin}/success`, cancelUrl: `${req.headers.origin}` };
+          if (!wpClient) {
+            res.status(500).json({ message: 'WP_GRAPHQL_URL not configured or invalid; cannot create session via WP.' });
+            return;
+          }
           const data: any = await wpClient.request(orderMutation, { input });
           const resp = data?.createStripeSessionForOrder;
           if (!resp) {
@@ -134,6 +151,10 @@ export default async function handler(
       };
 
       try {
+        if (!wpClient) {
+          res.status(500).json({ message: 'WP_GRAPHQL_URL not configured or invalid; cannot create session via WP.' });
+          return;
+        }
         const data: any = await wpClient.request(mutation, { input });
         const resp = data?.createHeadlessStripeSession;
 

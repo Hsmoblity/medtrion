@@ -42,19 +42,6 @@ function mapWooToProductSchema(product: any): ProductSchema {
 	const featured = ensureUrl(product.image?.sourceUrl);
 	const pictures = gallery.length > 0 ? gallery : (featured ? [featured] : ['/temp.webp']);
 
-	const variations = Array.isArray(product?.variations?.nodes)
-		? product.variations.nodes.map((v: any) => ({
-			id: v.id ?? null,
-			databaseId: v.databaseId ?? null,
-			price: v.price ? Number(v.price) : (v.regularPrice ?? v.salePrice ?? null),
-			sku: v.sku ?? null,
-			image: v.image && v.image.sourceUrl ? { sourceUrl: v.image.sourceUrl } : null,
-			attributes: Array.isArray(v?.attributes?.nodes)
-				? v.attributes.nodes.map((a: any) => ({ id: a.id ?? null, name: a.name ?? null, value: a.value ?? null }))
-				: [],
-		}))
-		: [];
-
 	return {
 		title: product.name,
 		slug: product.slug,
@@ -66,21 +53,21 @@ function mapWooToProductSchema(product: any): ProductSchema {
 		affiliate: false,
 		productId: product.id,
 		// Read related options from common GraphQL meta shapes if present
+		// Prefer normalized `_related_options` if present (set by `fetchGraphQLProducts`),
+		// otherwise fall back to parsing common meta shapes.
 		_related_options: (() => {
+			if (product && Array.isArray(product._related_options) && product._related_options.length > 0) return product._related_options;
 			try {
-				// WPGraphQL may expose meta as `metaData`, `meta`, or `metaFields` depending on setup
 				const candidates = [product.meta, product.metaData, product.metaFields, product._meta];
 				for (const c of candidates) {
 					if (!c) continue;
 					if (Array.isArray(c)) {
-						// array of {key,value} or similar
 						const found = c.find((m: any) => m?.key === '_related_options' || m?.metaKey === '_related_options');
 						if (found) {
 							const v = found?.value ?? found?.metaValue ?? found?.valueRaw;
 							try { const parsed = JSON.parse(String(v)); return Array.isArray(parsed) ? parsed : []; } catch (e) { return String(v).split(',').map(x => x.trim()).filter(Boolean); }
 						}
 					}
-					// object keyed by metaKey
 					if (typeof c === 'object') {
 						const val = c['_related_options'] ?? c['_related_options_raw'] ?? c['_related_options_value'];
 						if (val != null) {
@@ -91,8 +78,8 @@ function mapWooToProductSchema(product: any): ProductSchema {
 				return [];
 			} catch (e) { return []; }
 		})(),
-		// Include variations (always an array) so pages can render selectors
-		variations,
+		// Include variations (always an empty array for simple products)
+		variations: [],
 	};
 }
 

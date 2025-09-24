@@ -1,47 +1,50 @@
 
 import { GraphQLClient, gql } from 'graphql-request';
+require('dotenv').config();
 
-console.log('WP_GRAPHQL_URL:', process.env.WP_GRAPHQL_URL);
-const client = new GraphQLClient(process.env.WP_GRAPHQL_URL || '');
+// Allow client-side code to use `NEXT_PUBLIC_WP_GRAPHQL_URL` while server-side
+// environments may set `WP_GRAPHQL_URL`. Prefer public var when available.
+const WP_GRAPHQL_URL = process.env.WP_GRAPHQL_URL || process.env.NEXT_PUBLIC_WP_GRAPHQL_URL || '';
+let client: GraphQLClient | null = null;
+if (WP_GRAPHQL_URL) {
+    try {
+        // Validate URL to avoid runtime failures when constructing a URL
+        // (graphql-request will attempt to construct one internally).
+        // This protects client.request calls from throwing 'Invalid URL'.
+        // new URL will throw if invalid.
+        // eslint-disable-next-line no-new
+        new URL(WP_GRAPHQL_URL);
+        client = new GraphQLClient(WP_GRAPHQL_URL);
+    } catch (e) {
+        console.warn('Invalid WP_GRAPHQL_URL, GraphQL client not created:', WP_GRAPHQL_URL, e);
+        client = null;
+    }
+} else {
+    console.warn('WP_GRAPHQL_URL / NEXT_PUBLIC_WP_GRAPHQL_URL not set; GraphQL client not created. GraphQL-dependent features will be disabled.', process.env.WP_GRAPHQL_URL);
+}
 
 export async function fetchGraphQLProducts() {
+    if (!client) {
+        console.error('fetchGraphQLProducts: WP_GRAPHQL_URL not configured; skipping GraphQL request.');
+        return [];
+    }
     const query = gql`
         query GetProducts {
-            products(first: 20) {
+            products(where: { typeIn: [SIMPLE] }, first: 20) {
                 nodes {
                     id
                     databaseId
                     name
                     slug
                     description
+                    # New GraphQL field added by WP plugin: relatedOptions
+                    relatedOptions
                     image {
                         sourceUrl
                     }
                     galleryImages(first: 10) {
                         nodes {
                             sourceUrl
-                        }
-                    }
-                    ... on ProductWithVariations {
-                        variations(first: 20) {
-                            nodes {
-                                id
-                                databaseId
-                                price
-                                regularPrice
-                                salePrice
-                                sku
-                                image {
-                                    sourceUrl
-                                }
-                                attributes {
-                                    nodes {
-                                        id
-                                        name
-                                        value
-                                    }
-                                }
-                            }
                         }
                     }
                     ... on SimpleProduct {
@@ -57,12 +60,6 @@ export async function fetchGraphQLProducts() {
                     ... on ExternalProduct {
                         price
                     }
-                    ... on GroupProduct {
-                        price
-                    }
-                    ... on ProductVariation {
-                        price
-                    }
                 }
             }
         }
@@ -70,6 +67,57 @@ export async function fetchGraphQLProducts() {
     try {
         const data = await client.request(query) as { products: { nodes: any[] } };
         const nodes = data.products.nodes;
+        // Normalize relatedOptions (server-provided field) into _related_options, falling back to metaData parsing
+        try {
+            nodes.forEach((p: any) => {
+                try {
+                    if (p.relatedOptions) {
+                        // relatedOptions might be array of strings/numbers
+                        if (Array.isArray(p.relatedOptions)) {
+                            p._related_options = p.relatedOptions.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                        } else if (typeof p.relatedOptions === 'string') {
+                            // sometimes GraphQL returns JSON string
+                            try {
+                                const parsed = JSON.parse(p.relatedOptions);
+                                if (Array.isArray(parsed)) p._related_options = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                            } catch (e) {
+                                const parts = p.relatedOptions.split(',').map((s: string) => Number(s.trim())).filter((n: number) => !isNaN(n));
+                                if (parts.length > 0) p._related_options = parts;
+                            }
+                        }
+                    }
+
+                    // If not set from relatedOptions, try metaData fallback
+                    if ((!p._related_options || p._related_options.length === 0) && p.metaData) {
+                        let metaNodes: any[] = [];
+                        if (Array.isArray(p.metaData)) metaNodes = p.metaData;
+                        else if (p.metaData && Array.isArray(p.metaData.nodes)) metaNodes = p.metaData.nodes;
+                        else metaNodes = [];
+                        const related = (metaNodes || []).find((m: any) => m && (m.key === '_related_options' || m.key === 'related_options' || m.key === '_related_options_raw'));
+                        if (related && related.value) {
+                            const raw = related.value;
+                            try {
+                                const parsed = JSON.parse(raw);
+                                if (Array.isArray(parsed)) p._related_options = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                            } catch (e) {
+                                if (typeof raw === 'string') {
+                                    const parts = raw.split(',').map((s: string) => Number(s.trim())).filter((n: number) => !isNaN(n));
+                                    if (parts.length > 0) p._related_options = parts;
+                                } else if (typeof raw === 'number') {
+                                    p._related_options = [Number(raw)];
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {
+                    // ignore per-item parse errors
+                }
+            });
+        } catch (e) {
+            // ignore
+        }
+
+        console.log('fetchGraphQLProducts: fetched product nodes:', JSON.parse(JSON.stringify(nodes)));
 
         // If GraphQL doesn't return media, try the WP REST API as a fallback.
         // This helps when WPGraphQL media fields are null but attachments exist.
@@ -106,6 +154,45 @@ export async function fetchGraphQLProducts() {
             }
         }));
 
+        // If any product declares related options, fetch those related product
+        // objects now so the client doesn't need to fetch them later.
+        try {
+            const allRelatedIds = Array.from(new Set(nodes.reduce((acc: number[], p: any) => {
+                const ids = Array.isArray(p._related_options) ? p._related_options.map((n: any) => Number(n)).filter((x: any) => !isNaN(x)) : [];
+                return acc.concat(ids);
+            }, [])));
+
+            if (allRelatedIds.length > 0) {
+                // fetchRelatedProductsByIds is defined later in this module
+                try {
+                    const relatedProducts = await fetchRelatedProductsByIds(allRelatedIds);
+                    const relatedMap: Record<number, any> = {};
+                    (relatedProducts || []).forEach((rp: any) => {
+                        if (rp && rp.databaseId) relatedMap[Number(rp.databaseId)] = rp;
+                    });
+
+                    nodes.forEach((p: any) => {
+                        try {
+                            const ids = Array.isArray(p._related_options) ? p._related_options.map((n: any) => Number(n)).filter((x: any) => !isNaN(x)) : [];
+                            p._related_options_products = ids.map((id: number) => relatedMap[id]).filter(Boolean);
+                        } catch (e) {
+                            p._related_options_products = [];
+                        }
+                    });
+                } catch (e) {
+                    console.warn('fetchGraphQLProducts: failed to fetch related products', e);
+                    // ensure property exists
+                    nodes.forEach((p: any) => { p._related_options_products = p._related_options_products || []; });
+                }
+            } else {
+                // ensure property exists even when there are no related ids
+                nodes.forEach((p: any) => { p._related_options_products = p._related_options_products || []; });
+            }
+        } catch (e) {
+            // ignore
+            nodes.forEach((p: any) => { p._related_options_products = p._related_options_products || []; });
+        }
+
         return nodes;
     } catch (error) {
         console.error('Error fetching products from WPGraphQL:', error);
@@ -114,6 +201,10 @@ export async function fetchGraphQLProducts() {
 }
 
 export async function fetchGraphQLCart(cartKey: string) {
+    if (!client) {
+        console.error('fetchGraphQLCart: WP_GRAPHQL_URL not configured; skipping GraphQL request.');
+        return null;
+    }
     const query = gql`
         query GetCart($key: String!) {
             cart(key: $key) {
@@ -151,40 +242,136 @@ export async function fetchProductsByDatabaseIds(databaseIds: Array<number | str
     if (idsList.length === 0) return [];
     const query = gql`
         query GetProductsByIds($ids: [Int]) {
-            products(where: { include: $ids }, first: 50) {
+            products(where: { include: $ids,  typeIn: [VARIABLE] }) {
                 nodes {
                     id
                     databaseId
-                    name
                     slug
                     description
-                    image { sourceUrl }
-                    galleryImages(first: 10) { nodes { sourceUrl } }
+                    type
+                    # Prefer server-provided relatedOptions field from plugin
+                    relatedOptions
+                    variableType
                     ... on ProductWithVariations {
+                        attributes{
+                            nodes{
+                                name
+                            }
+                        }
                         variations(first: 50) {
                             nodes {
                                 id
                                 databaseId
-                                price
-                                regularPrice
-                                salePrice
                                 sku
+                                price
                                 image { sourceUrl }
                                 attributes { nodes { id name value } }
                             }
                         }
                     }
-                    ... on SimpleProduct { price regularPrice salePrice }
-                    ... on GroupProduct { price }
                 }
             }
         }
     `;
+    if (!client) {
+        console.error('fetchProductsByDatabaseIds: GraphQL client not configured. Set WP_GRAPHQL_URL (server) or NEXT_PUBLIC_WP_GRAPHQL_URL (client) to enable fetching products by ids. Skipping GraphQL request.');
+        return [];
+    }
+
     try {
         const data = await client.request(query, { ids: idsList }) as { products: { nodes: any[] } };
-        return data.products.nodes || [];
+        const nodes = data.products.nodes || [];
+        // Normalize relatedOptions (server-provided field) into _related_options, falling back to metaData parsing
+        try {
+            nodes.forEach((p: any) => {
+                try {
+                    if (p.relatedOptions) {
+                        if (Array.isArray(p.relatedOptions)) {
+                            p._related_options = p.relatedOptions.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                        } else if (typeof p.relatedOptions === 'string') {
+                            try {
+                                const parsed = JSON.parse(p.relatedOptions);
+                                if (Array.isArray(parsed)) p._related_options = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                            } catch (e) {
+                                const parts = p.relatedOptions.split(',').map((s: string) => Number(s.trim())).filter((n: number) => !isNaN(n));
+                                if (parts.length > 0) p._related_options = parts;
+                            }
+                        }
+                    }
+
+                    if ((!p._related_options || p._related_options.length === 0) && p.metaData) {
+                        let metaNodes: any[] = [];
+                        if (Array.isArray(p.metaData)) metaNodes = p.metaData;
+                        else if (p.metaData && Array.isArray(p.metaData.nodes)) metaNodes = p.metaData.nodes;
+                        else metaNodes = [];
+                        const related = (metaNodes || []).find((m: any) => m && (m.key === '_related_options' || m.key === 'related_options' || m.key === '_related_options_raw'));
+                        if (related && related.value) {
+                            const raw = related.value;
+                            try {
+                                const parsed = JSON.parse(raw);
+                                if (Array.isArray(parsed)) p._related_options = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                            } catch (e) {
+                                if (typeof raw === 'string') {
+                                    const parts = raw.split(',').map((s: string) => Number(s.trim())).filter((n: number) => !isNaN(n));
+                                    if (parts.length > 0) p._related_options = parts;
+                                } else if (typeof raw === 'number') {
+                                    p._related_options = [Number(raw)];
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {
+                    // ignore
+                }
+            });
+        } catch (e) {
+            // ignore
+        }
+
+        console.log('fetchProductsByDatabaseIds: fetched product nodes for ids', idsList, JSON.parse(JSON.stringify(nodes)));
+        return nodes;
     } catch (e) {
         console.error('Error fetching products by ids', e);
         return [];
     }
+}
+
+// Convenience wrapper to fetch related/optional products and map to a lighter shape
+export async function fetchRelatedProductsByIds(databaseIds: Array<number | string>) {
+    const raw = await fetchProductsByDatabaseIds(databaseIds);
+    if (!raw || raw.length === 0) return [];
+
+    const mapped = raw.map((p: any) => {
+        const variations = (p.variations && Array.isArray(p.variations.nodes)) ? p.variations.nodes.map((v: any) => ({
+            id: v.id,
+            databaseId: v.databaseId,
+            name: v.name,
+            price: v.price,
+            regularPrice: v.regularPrice,
+            salePrice: v.salePrice,
+            sku: v.sku,
+            image: v.image && v.image.sourceUrl,
+            attributes: (v.attributes && Array.isArray(v.attributes.nodes)) ? v.attributes.nodes.map((a: any) => ({ id: a.id, name: a.name, value: a.value })) : [],
+        })) : [];
+
+        return {
+            id: p.id,
+            databaseId: p.databaseId,
+            name: p.name,
+            slug: p.slug,
+            description: p.description,
+            type: (p.type || '').toString().toLowerCase(),
+            soldIndividually: !!p.soldIndividually,
+            price: p.price,
+            regularPrice: p.regularPrice,
+            salePrice: p.salePrice,
+            image: p.image && p.image.sourceUrl,
+            gallery: p.galleryImages && Array.isArray(p.galleryImages.nodes) ? p.galleryImages.nodes.map((g: any) => g.sourceUrl) : [],
+            variations,
+            _related_options: p._related_options || [],
+        };
+    });
+
+    console.log('fetchRelatedProductsByIds: mapped related products for ids', databaseIds, JSON.parse(JSON.stringify(mapped)));
+    return mapped;
 }

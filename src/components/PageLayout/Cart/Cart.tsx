@@ -13,13 +13,22 @@ const Cart = () => {
     CartVisibilityContext
   );
 
-  const subTotal = cart
-    .reduce((total, item: CartProduct) => {
-      return (total +=
-        (item.price) *
-        (item.quantity ?? 1));
-    }, 0)
-    .toFixed(2);
+
+  // include attached options when computing subtotal
+  const subTotal = cart.reduce((total, item: CartProduct) => {
+    const p = typeof item.price === 'number' ? item.price : Number(item.price || 0);
+    const base = isNaN(p) ? 0 : p;
+    let optsSum = 0;
+    if (item.options && Array.isArray(item.options) && item.options.length > 0) {
+      for (const o0 of item.options) {
+        const o: any = o0;
+        const op = typeof o.price === 'number' ? o.price : Number(o.price || o.priceModifier || 0);
+        const oqty = Number(o.quantity || 1) || 1;
+        optsSum += (isNaN(op) ? 0 : op) * oqty;
+      }
+    }
+    return total + ((base + optsSum) * (item.quantity ?? 1));
+  }, 0).toFixed(2);
 
   const router = useRouter();
 
@@ -64,18 +73,14 @@ const Cart = () => {
   };
 
 
-  useEffect(() => {
-    if (cartVisibility) {
-      document.body.classList.add("overflow-hidden");
-    } else {
-      document.body.classList.remove("overflow-hidden");
-    }
-  }, [cartVisibility]);
+  // We no longer control a mini-cart drawer via cartVisibility; users navigate
+  // to the dedicated `/cart` page. Keep cartVisibility for compatibility but
+  // avoid altering document body overflow here.
 
   return (
     <>
       <div
-        onClick={toggleCartVisibility}
+        onClick={() => router.push('/cart')}
         className={classNames(
           "fixed w-screen h-screen opacity-30 bg-[#f5ebdf] z-10",
           { hidden: !cartVisibility }

@@ -6,6 +6,7 @@ import CartVisibilityContext from 'contexts/cartVisibilityContext';
 import Types from 'reducers/cart/types';
 import { normalizeImageUrl } from 'lib/utils/image';
 import { ProductSchema } from 'lib/interfaces';
+import { useRouter } from 'next/navigation';
 
 // Reuse ProductSchema's _related_options_products shape for strong typing
 type RelatedProduct = NonNullable<ProductSchema['_related_options_products']>[number];
@@ -31,13 +32,15 @@ interface Props {
     // present the component will use these directly and skip client fetches.
     relatedProducts?: ProductSchema['_related_options_products'];
     parentProductId?: string | number;
+    parentProduct?: Partial<ProductSchema>;
     onDone?: () => void;
     onConfirm?: (selectedOptions: any[]) => void;
 }
 
-const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProducts, parentProductId, onDone, onConfirm }) => {
+const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProducts, parentProductId, parentProduct, onDone, onConfirm }) => {
     const { dispatch } = useContext(CartContext);
     const { toggleCartVisibility } = useContext(CartVisibilityContext);
+    const router = useRouter();
     const [addOns, setAddOns] = useState<AddOnProduct[]>([]);
     const [selected, setSelected] = useState<Record<string, any>>({});
 
@@ -107,7 +110,22 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
     const addSelectedToCart = () => {
         const uuid = () => 'ci_' + Math.random().toString(36).slice(2, 9);
 
-        // Build a payload array for selected add-ons so the parent can decide how to add them
+        // Build a payload array for selected add-ons so they can be attached
+        // to the parent cart item as an `options` array. Normalize prices to
+        // integer cents to keep storage consistent.
+        const toCents = (val: any) => {
+            if (val == null) return 0;
+            const s = String(val);
+            const n = Number(s.replace(/[^0-9.\-]+/g, ''));
+            if (isNaN(n)) return 0;
+            // If string contained a decimal point, treat as dollars -> cents
+            if (s.indexOf('.') !== -1) return Math.round(n * 100);
+            // If number looks large (>1000) assume it's already cents
+            if (n > 1000) return Math.round(n);
+            // Otherwise treat as dollars
+            return Math.round(n * 100);
+        };
+
         const selectedPayloads: any[] = [];
         for (const p of addOns) {
             if (!p) continue;
@@ -120,7 +138,7 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
                     const sel = selected[`radio_${prodId}`];
                     if (sel) {
                         const v = (p.variations || []).find((x: any) => String(x.databaseId ?? x.id) === String(sel));
-                        if (v) selectedPayloads.push({ cartItemId: uuid(), productId: prodId, variationId: String(v.databaseId ?? v.id), title: `${p.title} - ${v.attributes ? (Array.isArray(v.attributes) ? v.attributes.map((a: any) => a.value).join(' / ') : '') : ''}`.trim(), price: v.price ?? p.price, sku: v.sku });
+                        if (v) selectedPayloads.push({ cartItemId: uuid(), productId: prodId, variationId: String(v.databaseId ?? v.id), name: `${p.title} - ${v.attributes ? (Array.isArray(v.attributes) ? v.attributes.map((a: any) => a.value).join(' / ') : '') : ''}`.trim(), price: (function (val) { const s = String(val || ''); const n = Number(s.replace(/[^0-9.\-]+/g, '')); return isNaN(n) ? 0 : n; })(v.price ?? p.price), sku: v.sku, quantity: 1 });
                     }
                 } else {
                     // checkboxes: multiple variations may be selected
@@ -131,15 +149,47 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
                 }
             } else {
                 // simple product: checkbox per product
-                if (selected[prodId]) selectedPayloads.push({ cartItemId: uuid(), productId: prodId, title: p.title, price: p.price, sku: p.sku });
+                if (selected[prodId]) selectedPayloads.push({ cartItemId: uuid(), productId: prodId, name: p.title, price: (function (val) { const s = String(val || ''); const n = Number(s.replace(/[^0-9.\-]+/g, '')); return isNaN(n) ? 0 : n; })(p.price), sku: p.sku, quantity: 1 });
             }
         }
 
-        // If parent provided and no external handler, dispatch both parent and options
+        // If parent provided and no external handler, dispatch a single parent
+        // cart item that contains the selected options in `options`.
         if (!onConfirm) {
-            if (parentProductId) dispatch({ type: Types.addToCart, payload: { cartItemId: uuid(), productId: parentProductId, quantity: 1 } });
-            for (const p of selectedPayloads) dispatch({ type: Types.addToCart, payload: p });
-            toggleCartVisibility();
+            if (parentProductId) {
+                const payload: any = { cartItemId: uuid(), productId: parentProductId, quantity: 1 };
+                // Attach parent metadata when available so cart UI can render the parent product
+                if (typeof parentProduct === 'object' && parentProduct) {
+                    const pp: any = parentProduct as any;
+                    payload.title = pp.title ?? pp.name ?? pp.productName ?? String(parentProductId);
+                    payload.slug = pp.slug ?? String(parentProductId);
+                    const parsePrice = (x: any) => {
+                        if (x == null) return 0;
+                        const s = String(x);
+                        const n = Number(s.replace(/[^0-9.\-]+/g, ''));
+                        return isNaN(n) ? 0 : n;
+                    };
+                    payload.price = parsePrice(pp.price ?? pp.salePrice ?? pp.regularPrice ?? 0);
+                    payload.productPictures = pp.productPictures ?? undefined;
+                    payload.featuredImage = pp.featuredImage ?? pp.image ?? undefined;
+                    payload.variations = pp.variations ?? undefined;
+                    payload.productId = pp.productId ?? parentProductId;
+                    payload.affiliate = pp.affiliate ?? false;
+                }
+                // Debug: log payload being dispatched so issues can be traced
+                try {
+                    // eslint-disable-next-line no-console
+                    console.log('ProductOptions dispatch parent payload', payload);
+                } catch (e) { }
+                if (selectedPayloads.length > 0) payload.options = selectedPayloads;
+                dispatch({ type: Types.addToCart, payload });
+            }
+            // Navigate to cart page instead of opening mini-cart
+            try {
+                router.push('/cart');
+            } catch (e) {
+                try { toggleCartVisibility(); } catch (e) { }
+            }
             if (typeof onDone === 'function') onDone();
             return;
         }

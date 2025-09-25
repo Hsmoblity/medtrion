@@ -9,6 +9,7 @@ import { fetchProductsByDatabaseIds, fetchRelatedProductsByIds } from 'lib/wooco
 import Link from "next/link";
 import CartVisibilityContext from "contexts/cartVisibilityContext";
 import { useContext, useState } from "react";
+import { useRouter } from 'next/navigation';
 import { FaCartPlus, FaShoppingCart } from "react-icons/fa";
 import Types from "reducers/cart/types";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
@@ -49,6 +50,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
   const [selectedVariation, setSelectedVariation] = useState<string | null>(null);
   const { toggleCartVisibility } = useContext(CartVisibilityContext);
   const { dispatch } = useContext(CartContext); // Use CartContext to get the dispatch function
+  const router = useRouter();
   const hasValidSpecs =
     product.productSpeciications &&
     typeof product.productSpeciications === 'object' &&
@@ -60,10 +62,18 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
   // Handle adding to the cart
   const handleAddToCart = (selectedOptions?: Array<{ name: string; type?: string; priceModifier?: number; selected?: boolean; quantity?: number; value?: string }>) => {
     const uuid = () => 'ci_' + Math.random().toString(36).slice(2, 9);
+    const parsePrice = (val: any) => {
+      if (val == null) return 0;
+      const s = String(val);
+      const n = Number(s.replace(/[^0-9.\-]+/g, ''));
+      if (isNaN(n)) return 0;
+      return n;
+    };
+
     const cartProduct: any = {
       slug: product.slug,
       title: product.title,
-      price: product.price,
+      price: parsePrice(product.price),
       cartItemId: uuid(),
       quantity: 1,
       productPictures: product.productPictures,
@@ -84,7 +94,8 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
       type: Types.addToCart,  // Action type for adding the product to the cart
       payload: cartProduct,
     });
-    toggleCartVisibility();
+    // Previously opened the mini-cart. Now navigate to cart page.
+    router.push('/cart');
   };
 
   const [showOptionsModal, setShowOptionsModal] = useState(false);
@@ -261,7 +272,15 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
                 // Non-affiliate product UI
                 <>
                   <div className="flex items-center space-x-1.5 rounded-lg bg-black px-4 py-1.5 text-white duration-100 hover:bg-slate-800">
-                    <button onClick={() => { console.log('Add to cart button clicked for', product.slug, 'related', product._related_options); openOptionsModal(); }} className="text-sm">Add to cart</button>
+                    <button onClick={() => {
+                      console.log('Add to cart button clicked for', product.slug, 'related', product._related_options);
+                      // If product defines related options, navigate to dedicated options page
+                      if (product._related_options && Array.isArray(product._related_options) && product._related_options.length > 0) {
+                        router.push(`/product/${product.slug}/options`);
+                        return;
+                      }
+                      openOptionsModal();
+                    }} className="text-sm">Add to cart</button>
                     <FaShoppingCart className="h-4 w-4" />
                   </div>
                 </>

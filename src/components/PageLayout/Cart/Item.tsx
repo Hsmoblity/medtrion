@@ -127,35 +127,8 @@ const Item: React.FC<ItemProps> = ({ product }) => {
       });
       if (match) variationId = String(match.databaseId ?? match.id);
     }
-    // Persist edits to the cart item
+    // Persist edits to the cart item (attach options to parent item)
     dispatch({ type: Types.updateCartItem, payload: { cartItemId: String(product.cartItemId ?? `ci_fallback_${product.slug}`), changes: { variationId, options: optionsState } } });
-
-    // Also add selected options as separate cart lines
-    try {
-      const uuid = () => 'ci_' + Math.random().toString(36).slice(2, 9);
-      for (const opt of optionsState) {
-        if (!opt || !opt.selected) continue;
-        const qty = typeof opt.quantity === 'number' && opt.quantity > 0 ? opt.quantity : 1;
-        // If opt.value looks like a variation id (we generated variation entries using variation.databaseId), add as variation
-        const idNum = Number(opt.value);
-        if (!isNaN(idNum)) {
-          const payload: any = { cartItemId: uuid(), quantity: qty };
-          // prefer parentId when available
-          if (opt.parentId) payload.productId = String(opt.parentId);
-          else payload.productId = String(idNum);
-          // if this option seems to represent a variation id, set variationId
-          if (opt.type === 'radio' || opt.radioGroup) {
-            payload.variationId = String(idNum);
-          }
-          // if option is a simple product (no parent mapping), and value is product id, set productId
-          if (!payload.productId) payload.productId = String(idNum);
-          dispatch({ type: Types.addToCart, payload });
-        }
-      }
-    } catch (e) {
-      // don't block saving edits if add-ons fail
-      console.warn('Failed to add selected options as separate cart lines', e);
-    }
 
     setShowEditModal(false);
   };
@@ -216,10 +189,29 @@ const Item: React.FC<ItemProps> = ({ product }) => {
           />
           <span className="text-lg ml-4 text-black">{title}</span>
         </div>
-        <div className="w-1/5">
-          <span className="text-lg text-black">
-            ${price * Number(quantity)}
-          </span>
+        <div className="w-1/5 text-right">
+          <div className="text-sm text-gray-500">
+            {(() => {
+              const base = typeof price === 'number' ? price : Number(price || 0);
+              let opts = 0;
+              if (product.options && Array.isArray(product.options) && product.options.length > 0) {
+                for (const o0 of product.options) {
+                  const o: any = o0;
+                  const op = Number(o.price || o.priceModifier || 0) || 0;
+                  const oq = Number(o.quantity || 1) || 1;
+                  opts += op * oq;
+                }
+              }
+              const configuredPerUnit = Number(base || 0) + opts;
+              const lineTotal = configuredPerUnit * Number(quantity || 1);
+              return (
+                <>
+                  <div className="text-xs">${Number(base).toFixed(2)}</div>
+                  <div className="text-xs text-gray-500">Total: ${Number(lineTotal).toFixed(2)}</div>
+                </>
+              );
+            })()}
+          </div>
         </div>
       </div>
       {/* Show chosen variation / attributes */}
@@ -266,6 +258,24 @@ const Item: React.FC<ItemProps> = ({ product }) => {
         </button>
         <button onClick={openEditModal} className="ml-2 px-3 py-1 border rounded">Edit</button>
       </div>
+
+      {/* Render attached options under the parent product */}
+      {product.options && Array.isArray(product.options) && product.options.length > 0 && (
+        <div className="mt-3 ml-4">
+          <p className="text-sm font-medium">Included Options</p>
+          <ul className="mt-2 space-y-2">
+            {product.options.map((opt: any, idx: number) => (
+              <li key={String(opt.name || idx)} className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm">{opt.name || opt.title || opt.value}</div>
+                  {opt.sku ? <div className="text-xs text-gray-500">SKU: {opt.sku}</div> : null}
+                </div>
+                <div className="text-sm text-gray-700">{typeof opt.price === 'number' ? `$${Number(opt.price).toFixed(2)}` : (opt.price ? `$${Number(opt.price).toFixed(2)}` : '')}</div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">

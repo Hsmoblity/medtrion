@@ -2,6 +2,7 @@ import Cart from "./Cart/Cart";
 import { useCallback, useContext, useEffect, useState } from "react";
 import CartItemsContext from "contexts/cartItemsContext";
 import CartVisibilityContext from "contexts/cartVisibilityContext";
+import { useRouter } from 'next/navigation';
 import { CartProduct } from "lib/interfaces";
 import { MdShoppingCart } from "react-icons/md";
 import { DrawOutlineButton } from "components/btn";
@@ -11,6 +12,7 @@ import Link from "next/link";
 const Header = () => {
   const { cart } = useContext(CartItemsContext);
   const { toggleCartVisibility } = useContext(CartVisibilityContext);
+  const router = useRouter();
   const cartLength = cart.reduce(
     (count: number, item: CartProduct) =>
       (count += item.quantity ? item.quantity : 1),
@@ -68,8 +70,7 @@ const Header = () => {
           />
         </Link>
         <div className="md:hidden absolute top-5 right-5 flex flex-row ">
-          <button onClick={toggleCartVisibility} className="relative z-50 outline-0 text-white items-start mt-2 mr-3 rounded-md border-1  flex flex-row" >
-
+          <button onClick={() => router.push('/cart')} className="relative z-50 outline-0 text-white items-start mt-2 mr-3 rounded-md border-1  flex flex-row" >
             <MdShoppingCart
               color="black"
               className="ml-2"
@@ -113,7 +114,7 @@ const Header = () => {
             <FaUser className="cursor-pointer hover:text-gray-700" title="Account" /> */}
 
 
-            <button onClick={toggleCartVisibility} className="relative z-50 outline-0 text-white flex flex-row" >
+            <button onClick={() => router.push('/cart')} className="relative z-50 outline-0 text-white flex flex-row" >
 
               <MdShoppingCart
                 color="black"

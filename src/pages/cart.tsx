@@ -8,7 +8,18 @@ const CartPage = () => {
     const router = useRouter();
     const [isRedirecting, setRedirecting] = useState(false);
 
-    const subTotal = cart.reduce((total: number, item: any) => total + (Number(item.price) * (Number(item.quantity) || 1)), 0).toFixed(2);
+    const subTotal = cart.reduce((total: number, item: any) => {
+        const base = Number(item.price || 0) || 0;
+        let opts = 0;
+        if (item.options && Array.isArray(item.options) && item.options.length > 0) {
+            for (const o of item.options) {
+                const op = Number(o.price || o.priceModifier || 0) || 0;
+                const oq = Number(o.quantity || 1) || 1;
+                opts += op * oq;
+            }
+        }
+        return total + ((base + opts) * (Number(item.quantity) || 1));
+    }, 0).toFixed(2);
 
     const handleCheckout = async () => {
         setRedirecting(true);

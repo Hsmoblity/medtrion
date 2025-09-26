@@ -3,9 +3,10 @@ import { Document } from '@contentful/rich-text-types';
 export interface ProductSchema {
   title: string;
   slug: string;
+  description: string;
   shortDescription: string;
   featuredImage: any,
-  productSpecifications: Document;
+  productSpecifications: string | Document;
   productPictures: any;
   price: number;
   affiliate: boolean;
@@ -18,24 +19,23 @@ export interface ProductSchema {
     image?: { sourceUrl?: string };
     attributes?: Array<{ id?: string; name: string; value: string }>
   }>;
-  options?: Array<{ name: string; type?: string; priceModifier?: number; selected?: boolean; quantity?: number; value?: string }>;
+  options?: Array<{ name: string; type?: string; selected?: boolean; quantity?: number; value?: string }>;
   _related_options?: Array<number | string>;
   _related_options_products?: Array<{
     id?: string;
     databaseId?: number;
     name?: string;
     slug?: string;
-    description?: string;
-    type?: string;
-    soldIndividually?: boolean;
-    price?: any;
-    regularPrice?: any;
-    salePrice?: any;
-    image?: string | { sourceUrl?: string } | null;
-    gallery?: string[];
+    description?: string | null;
+    type?: string | null;
+    relatedOptions?: any | null;
+    variableType?: string | null;
+    // attributes are provided as an array of nodes
+    attributes?: Array<{ id?: string; name?: string; value?: string }>;
+    // variations are returned as a flat array
     variations?: Array<{
-      id?: string;
-      databaseId?: number;
+      id?: string | null;
+      databaseId?: number | null;
       name?: string | null;
       price?: any;
       sku?: string | null;

@@ -5,6 +5,7 @@ import CartContext from 'contexts/cartItemsContext';
 import CartVisibilityContext from 'contexts/cartVisibilityContext';
 import Types from 'reducers/cart/types';
 import { normalizeImageUrl } from 'lib/utils/image';
+import Image from 'next/image';
 import { ProductSchema } from 'lib/interfaces';
 import { useRouter } from 'next/navigation';
 
@@ -44,6 +45,43 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
     const [addOns, setAddOns] = useState<AddOnProduct[]>([]);
     const [selected, setSelected] = useState<Record<string, any>>({});
 
+    // When editing an existing cart item, parentProduct may include an `options`
+    // array that represents previously selected add-ons. When addOns are
+    // resolved, initialize the selected state from parentProduct.options so
+    // the UI pre-fills the controls for editing.
+    useEffect(() => {
+        if (!parentProduct || !Array.isArray((parentProduct as any).options) || addOns.length === 0) return;
+        try {
+            const opts: any[] = (parentProduct as any).options || [];
+            const initSelected: Record<string, any> = {};
+            for (const o of opts) {
+                // o.productId references the addon product id
+                const prodId = o.productId ?? o.productId;
+                // try to find matching addon by id or databaseId
+                const a = addOns.find(x => String(x.id) === String(prodId) || String(x.databaseId) === String(prodId));
+                if (!a) continue;
+                // If a variationId is present, this was a variable selection
+                if (o.variationId) {
+                    const vid = String(o.variationId);
+                    const isRadio = !!(a.variableType && String(a.variableType).toLowerCase() === 'radio');
+                    if (isRadio) {
+                        initSelected[`radio_${a.id}`] = vid;
+                    } else {
+                        initSelected[`${a.id}:${vid}`] = true;
+                    }
+                } else {
+                    // simple product option
+                    initSelected[String(a.id)] = true;
+                }
+            }
+            // Merge into existing selected state so external interactions still work
+            setSelected(prev => ({ ...prev, ...initSelected }));
+        } catch (e) {
+            // ignore faults during prefill
+            /* noop */
+        }
+    }, [addOns, parentProduct]);
+
     useEffect(() => {
         if ((!relatedIds || relatedIds.length === 0) && (!relatedProducts || relatedProducts.length === 0)) return;
         console.log('ProductOptions resolving related products for ids:', relatedIds);
@@ -52,11 +90,11 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
         // If server provided full related product objects, use them directly.
         if (relatedProducts && Array.isArray(relatedProducts) && relatedProducts.length > 0) {
             // Map server-provided RelatedProduct -> internal AddOnProduct shape
+            console.log('ProductOptions using server-provided related products:', relatedProducts);
             const mapped = relatedProducts.map((p: RelatedProduct) => ({
                 id: p.databaseId ?? p.id ?? Math.random().toString(36).slice(2, 9),
                 databaseId: p.databaseId,
                 title: p.name ?? (p.slug || String(p.databaseId ?? p.id)),
-                price: p.price ?? null,
                 sku: (p as any).sku ?? null,
                 type: (String(p.type || '').toLowerCase() === 'variable') ? 'variable' : 'simple',
                 variations: Array.isArray(p.variations) ? p.variations.map((v: any) => ({
@@ -73,12 +111,6 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
                     const vt = (p as any).variableType || (p as any).optionType || (p as any).variable_type || null;
                     return vt ? String(vt).toLowerCase() : null;
                 })(),
-                soldIndividually: (function () {
-                    const vt = (p as any).variableType || (p as any).optionType || (p as any).variable_type || null;
-                    return vt && typeof vt === 'string' ? String(vt).toLowerCase() === 'radio' : !!p.soldIndividually;
-                })(),
-                // prefer product image; if missing, try first variation image
-                image: (p.image && (typeof p.image === 'string' ? p.image : (p.image as any).sourceUrl)) || (Array.isArray(p.variations) && p.variations[0] && p.variations[0].image ? (typeof p.variations[0].image === 'string' ? p.variations[0].image : p.variations[0].image.sourceUrl) : null),
             } as AddOnProduct));
 
             setAddOns(mapped);
@@ -232,12 +264,14 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
                                                             else toggleCheckbox(`${a.id}:${vid}`);
                                                         }}
                                                     />
-                                                    <img src={v.image ? normalizeImageUrl(v.image) : (a.image ? normalizeImageUrl(a.image) : '/temp.webp')} className="w-8 h-8 object-cover rounded" />
+                                                    <Image src={String(v.image ? normalizeImageUrl(v.image) : (a.image ? normalizeImageUrl(a.image) : '/temp.webp'))} width={32} height={32} alt={v.name || `variation-${vid}`} className="w-8 h-8 object-cover rounded" />
                                                     <div className="flex-1 text-sm">
                                                         <div className="font-medium">{v.name || (v.attributes && Array.isArray(v.attributes) ? v.attributes.map((at: any) => at.value).join(' / ') : `Variation ${vid}`)}</div>
                                                         {v.sku ? <div className="text-xs text-gray-500">SKU: {v.sku}</div> : null}
                                                     </div>
-                                                    {v.price != null && !Number.isNaN(Number(v.price)) ? <div className="text-sm text-gray-600">{`$${(Number(v.price) / 100).toFixed(2)}`}</div> : null}
+                                                    {v.price != null ? (
+                                                        <div className="text-sm text-green-600 font-medium price">{`+${v.price}`}</div>
+                                                    ) : null}
                                                 </label>
                                             );
                                         });
@@ -247,10 +281,10 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
                         ) : (
                             <label className="inline-flex items-center space-x-2">
                                 <input type="checkbox" checked={!!selected[a.id]} onChange={() => toggleCheckbox(a.id)} />
-                                <img src={a.image ? normalizeImageUrl(a.image) : '/temp.webp'} className="w-10 h-10 object-cover rounded" />
+                                <Image src={String(a.image ? normalizeImageUrl(a.image) : '/temp.webp')} width={40} height={40} alt={a.title || `addon-${a.id}`} className="w-10 h-10 object-cover rounded" />
                                 <div>
                                     <div className="font-medium">{a.title}</div>
-                                    <div className="text-sm text-gray-600">{a.sku ? `SKU: ${a.sku}` : ''} {a.price != null && !Number.isNaN(Number(a.price)) ? ` • $${(Number(a.price) / 100).toFixed(2)}` : ''}</div>
+                                    <div className="text-sm text-gray-600">{a.sku ? `SKU: ${a.sku}` : ''} {a.price != null && !Number.isNaN(Number(a.price)) ? <span className="text-green-600 font-medium">{` • +$${(Number(a.price) / 100).toFixed(2)}`}</span> : ''}</div>
                                 </div>
                             </label>
                         )}

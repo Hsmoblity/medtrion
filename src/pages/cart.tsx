@@ -22,32 +22,13 @@ const CartPage = () => {
     }, 0).toFixed(2);
 
     const handleCheckout = async () => {
+        // Do not create the order here. Navigate to the payment page and
+        // allow the payment page to create the order when user submits
+        // the payment form. Keep the UX of redirecting to /payment.
         setRedirecting(true);
         try {
-            const res = await fetch('/api/create-order', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ lineItems: cart }),
-            });
-            if (!res.ok) {
-                setRedirecting(false);
-                alert('Failed to create order');
-                return;
-            }
-            const data = await res.json();
-            const orderId = data?.order?.id || data?.orderId || null;
-            if (!orderId) {
-                setRedirecting(false);
-                alert('Failed to create order');
-                return;
-            }
-            if (data?.skippedStripe) {
-                router.push(`/success?wpOrderId=${encodeURIComponent(orderId)}`);
-            } else {
-                router.push(`/payment?wpOrderId=${encodeURIComponent(orderId)}`);
-            }
-        } catch (e) {
-            console.error(e);
+            router.push('/payment');
+        } finally {
             setRedirecting(false);
         }
     };

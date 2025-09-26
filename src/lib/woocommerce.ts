@@ -23,6 +23,28 @@ if (WP_GRAPHQL_URL) {
     console.warn('WP_GRAPHQL_URL / NEXT_PUBLIC_WP_GRAPHQL_URL not set; GraphQL client not created. GraphQL-dependent features will be disabled.', process.env.WP_GRAPHQL_URL);
 }
 
+// Helper wrapper around client.request to add retry logic and better logging
+async function runClientRequest(query: any, variables?: Record<string, any>) {
+    if (!client) throw new Error('GraphQL client not configured');
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            return await client.request(query, variables);
+        } catch (err: any) {
+            // Provide detailed log to help diagnose fetch failures (DNS, TLS, CORS, network)
+            console.error(`GraphQL request failed (attempt ${attempt}/${maxAttempts})`, {
+                url: WP_GRAPHQL_URL,
+                attempt,
+                message: err && err.message ? err.message : String(err),
+                stack: err && err.stack ? err.stack : undefined,
+            });
+            if (attempt === maxAttempts) throw err;
+            // backoff before retrying
+            await new Promise(res => setTimeout(res, attempt * 300));
+        }
+    }
+}
+
 export async function fetchGraphQLProducts() {
     if (!client) {
         console.error('fetchGraphQLProducts: WP_GRAPHQL_URL not configured; skipping GraphQL request.');
@@ -37,6 +59,10 @@ export async function fetchGraphQLProducts() {
                     name
                     slug
                     description
+                    shortDescription
+                    # Include productSpecifications as requested
+                    productSpecifications
+                    
                     # New GraphQL field added by WP plugin: relatedOptions
                     relatedOptions
                     image {
@@ -65,7 +91,7 @@ export async function fetchGraphQLProducts() {
         }
     `;
     try {
-        const data = await client.request(query) as { products: { nodes: any[] } };
+        const data = await runClientRequest(query) as { products: { nodes: any[] } };
         const nodes = data.products.nodes;
         // Normalize relatedOptions (server-provided field) into _related_options, falling back to metaData parsing
         try {
@@ -228,7 +254,7 @@ export async function fetchGraphQLCart(cartKey: string) {
         }
     `;
     try {
-        const data = await client.request(query, { key: cartKey }) as { cart: any };
+        const data = await runClientRequest(query, { key: cartKey }) as { cart: any };
         return data.cart;
     } catch (error) {
         console.error('Error fetching cart from WPGraphQL:', error);
@@ -248,6 +274,7 @@ export async function fetchProductsByDatabaseIds(databaseIds: Array<number | str
                     databaseId
                     slug
                     description
+                    productSpecifications
                     type
                     # Prefer server-provided relatedOptions field from plugin
                     relatedOptions
@@ -279,7 +306,7 @@ export async function fetchProductsByDatabaseIds(databaseIds: Array<number | str
     }
 
     try {
-        const data = await client.request(query, { ids: idsList }) as { products: { nodes: any[] } };
+        const data = await runClientRequest(query, { ids: idsList }) as { products: { nodes: any[] } };
         const nodes = data.products.nodes || [];
         // Normalize relatedOptions (server-provided field) into _related_options, falling back to metaData parsing
         try {
@@ -341,34 +368,38 @@ export async function fetchRelatedProductsByIds(databaseIds: Array<number | stri
     const raw = await fetchProductsByDatabaseIds(databaseIds);
     if (!raw || raw.length === 0) return [];
 
+    console.log('fetchRelatedProductsByIds: fetched raw products', raw);
+
     const mapped = raw.map((p: any) => {
-        const variations = (p.variations && Array.isArray(p.variations.nodes)) ? p.variations.nodes.map((v: any) => ({
-            id: v.id,
-            databaseId: v.databaseId,
-            name: v.name,
-            price: v.price,
-            regularPrice: v.regularPrice,
-            salePrice: v.salePrice,
-            sku: v.sku,
-            image: v.image && v.image.sourceUrl,
-            attributes: (v.attributes && Array.isArray(v.attributes.nodes)) ? v.attributes.nodes.map((a: any) => ({ id: a.id, name: a.name, value: a.value })) : [],
-        })) : [];
+        // Map to a minimal, but compatible, shape. Include `name` and
+        // normalize `attributes` and `variations` to arrays because several
+        // callers expect these properties to be present and iterable.
+        const attrArray = (p.attributes && Array.isArray(p.attributes.nodes)) ? p.attributes.nodes : (Array.isArray(p.attributes) ? p.attributes : []);
+        const variationArray = (p.variations && Array.isArray(p.variations.nodes)) ? p.variations.nodes : (Array.isArray(p.variations) ? p.variations : []);
+
+        const variations = variationArray.map((v: any) => ({
+            id: v.id ?? null,
+            databaseId: v.databaseId ?? v.database_id ?? null,
+            name: v.name ?? null,
+            price: v.price ?? null,
+            sku: v.sku ?? null,
+            image: v.image && (v.image.sourceUrl || v.image) ? (v.image.sourceUrl || v.image) : null,
+            attributes: (v.attributes && Array.isArray(v.attributes.nodes)) ? v.attributes.nodes : (Array.isArray(v.attributes) ? v.attributes : []),
+        }));
 
         return {
-            id: p.id,
-            databaseId: p.databaseId,
-            name: p.name,
-            slug: p.slug,
-            description: p.description,
-            type: (p.type || '').toString().toLowerCase(),
-            soldIndividually: !!p.soldIndividually,
-            price: p.price,
-            regularPrice: p.regularPrice,
-            salePrice: p.salePrice,
-            image: p.image && p.image.sourceUrl,
-            gallery: p.galleryImages && Array.isArray(p.galleryImages.nodes) ? p.galleryImages.nodes.map((g: any) => g.sourceUrl) : [],
+            id: p.id ?? null,
+            databaseId: p.databaseId ?? null,
+            slug: p.slug ?? null,
+            name: attrArray[0]?.name ?? p.name ?? p.title ?? p.slug ?? null,
+            // Pass through productSpecifications when present
+            productSpecifications: p.productSpecifications ?? null,
+            description: p.description ?? null,
+            type: p.type ?? null,
+            relatedOptions: p.relatedOptions ?? null,
+            variableType: p.variableType ?? null,
+            attributes: attrArray,
             variations,
-            _related_options: p._related_options || [],
         };
     });
 

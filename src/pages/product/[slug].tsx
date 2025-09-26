@@ -19,6 +19,7 @@ interface ContentfulProduct {
         title: string;
         slug: string;
         shortDescription: any;
+        description: any;
         featuredImage?: {
             fields: {
                 file: {
@@ -42,7 +43,7 @@ type Props = {
 const ProductPage = ({ params, mappedProducts, hero }: Props) => {
     const { slug } = params; // Now this will definitely work
     const pageTitle = hero ? hero.title : "Product Not Found";
-    const pageDescription = hero ? stripHtml(hero.shortDescription) : "Explore our mobility products.";
+    const pageDescription = hero ? stripHtml(hero.description) : "Explore our mobility products.";
     const pageImage = hero && hero.productPictures && hero.productPictures[0] && hero.productPictures[0].fields?.file?.url
         ? normalizeImageUrl(hero.productPictures[0].fields.file.url)
         : normalizeImageUrl(hero && hero.featuredImage ? hero.featuredImage : '/temp.webp'); // Fallback to a default image

@@ -45,9 +45,10 @@ function mapWooToProductSchema(product: any): ProductSchema {
 	return {
 		title: product.name,
 		slug: product.slug,
-		shortDescription: product.description || '',
+		shortDescription: product.shortDescription || '',
+		description: product.description || '',
 		featuredImage: featured,
-		productSpecifications: {} as any,
+		productSpecifications: product.productSpecifications || {} as any,
 		productPictures: pictures.map((url: string) => ({ fields: { file: { url } } })),
 		price,
 		affiliate: false,

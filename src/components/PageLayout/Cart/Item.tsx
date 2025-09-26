@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+import { useRouter } from 'next/navigation';
 import { CartProduct } from "lib/interfaces";
 import Image from "next/image";
 import CartItemsContext from "contexts/cartItemsContext";
@@ -13,6 +14,7 @@ interface ItemProps {
 
 const Item: React.FC<ItemProps> = ({ product }) => {
   const { dispatch } = useContext(CartItemsContext);
+  const router = useRouter();
   const { slug, productPictures, title, price, quantity } = product;
   const [showEditModal, setShowEditModal] = useState(false);
   const [editAttributes, setEditAttributes] = useState<{ [k: string]: string }>({});
@@ -86,7 +88,7 @@ const Item: React.FC<ItemProps> = ({ product }) => {
           if (!rp) continue;
           // Simple product: single checkbox option
           if (!rp.variations || rp.variations.length === 0) {
-            built.push({ name: rp.name, type: 'checkbox', priceModifier: parsePrice(rp.price), selected: false, quantity: 0, value: String(rp.databaseId), parentId: rp.databaseId });
+            built.push({ name: rp.name, type: 'checkbox', selected: false, quantity: 0, value: String(rp.databaseId), parentId: rp.databaseId });
           } else {
             // Variable: create per-variation entries (checkbox or radio depending on soldIndividually)
             const group = true ? `rg_${rp.databaseId}` : null;
@@ -96,7 +98,7 @@ const Item: React.FC<ItemProps> = ({ product }) => {
                 for (const a of v.attributes) labelParts.push(`${a.name}: ${a.value}`);
               }
               const label = labelParts.length > 0 ? `${rp.name} — ${labelParts.join(', ')}` : `${rp.name}`;
-              const entry: OptionItem = { name: label, type: group ? 'radio' : 'checkbox', priceModifier: parsePrice(v.price || rp.price), selected: false, quantity: 0, value: String(v.databaseId), parentId: rp.databaseId };
+              const entry: OptionItem = { name: label, type: group ? 'radio' : 'checkbox', selected: false, quantity: 0, value: String(v.databaseId), parentId: rp.databaseId };
               if (group) entry.radioGroup = group;
               built.push(entry);
             }
@@ -256,7 +258,15 @@ const Item: React.FC<ItemProps> = ({ product }) => {
         >
           +
         </button>
-        <button onClick={openEditModal} className="ml-2 px-3 py-1 border rounded">Edit</button>
+        <button onClick={() => {
+          try {
+            const id = String(product.cartItemId ?? `ci_fallback_${product.slug}`);
+            router.push(`/product/${product.slug}/options?cartItemId=${encodeURIComponent(id)}`);
+          } catch (e) {
+            // Fallback to modal if router not available
+            openEditModal();
+          }
+        }} className="ml-2 px-3 py-1 border rounded">Edit</button>
       </div>
 
       {/* Render attached options under the parent product */}

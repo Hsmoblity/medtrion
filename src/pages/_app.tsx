@@ -63,6 +63,33 @@ function MyApp({ Component, pageProps }: AppProps) {
   //   fetchCartProducts();
   // }, []);
 
+  // Rehydrate cart from cookie on client mount. We do this in an effect so
+  // server-side rendering is not affected and the client can restore the
+  // session cart without requiring a full product fetch.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const cookie = Cookies.get("_cart");
+      if (!cookie) return;
+      const raw = JSON.parse(cookie);
+      if (!Array.isArray(raw) || raw.length === 0) return;
+      const mapped = raw.map((it: any) => ({
+        cartItemId: it.cartItemId || `ci_${Math.random().toString(36).slice(2, 9)}`,
+        slug: it.slug,
+        quantity: Number(it.quantity ?? 1),
+        variationId: it.variationId ?? null,
+        options: it.options ?? [],
+        name: it.name ?? undefined,
+        price: it.price ?? undefined
+      }));
+      // We intentionally restore a compact cart-product shape from cookie.
+      // Cast to any to avoid forcing a full ProductSchema at this point.
+      dispatch({ type: Types.bulkAdd, payload: mapped as any });
+    } catch (e) {
+      // ignore malformed cookie
+    }
+  }, []);
+
   return (
     <CartItemsContext.Provider
       value={{

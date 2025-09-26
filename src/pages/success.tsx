@@ -1,4 +1,5 @@
 import { useEffect, useContext } from "react";
+import { useRouter } from 'next/router';
 import CartItemsContext from "contexts/cartItemsContext";
 import Types from "reducers/cart/types";
 import MetaHead from "components/MetaHead";
@@ -6,6 +7,8 @@ import Link from "next/link";
 
 const Success = () => {
   const { dispatch } = useContext(CartItemsContext);
+  const router = useRouter();
+  const { wpOrderId } = router.query as { wpOrderId?: string };
 
   useEffect(() => {
     const removeAllCartItems = () => {
@@ -36,6 +39,9 @@ const Success = () => {
             <h3 className="md:text-2xl text-base text-gray-900 font-semibold text-center">Payment Done!</h3>
             <p className="text-gray-600 my-2">Thank you for completing your secure online payment.</p>
             <p > Your recipt will shortly arrive to your email!</p>
+            {wpOrderId && (
+              <p className="text-sm text-gray-500 mt-2">Order reference: <span className="font-mono">{wpOrderId}</span></p>
+            )}
 
             <div className="py-10 text-center">
               <Link href="/" className="px-12 bg-black rounded-md hover:bg-indigo-500 text-white font-semibold py-3">

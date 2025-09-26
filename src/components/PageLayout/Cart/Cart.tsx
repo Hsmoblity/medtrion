@@ -33,41 +33,13 @@ const Cart = () => {
   const router = useRouter();
 
   const handleCheckout = async () => {
-    // Create an order page first, then redirect to an intermediate checkout flow
+    // Navigate to the payment page and let the payment page create the
+    // order when the user confirms (Place Order). This avoids creating
+    // orphan orders prematurely.
     setRedirecting(true);
     try {
-      // Save cart to server-side order endpoint
-      const res = await fetch('/api/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lineItems: cart }),
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        console.error('Create order failed', err);
-        alert('Failed to create order. Please try again.');
-        setRedirecting(false);
-        return;
-      }
-
-      const orderData = await res.json();
-      const orderId = orderData?.order?.id || orderData?.orderId || null;
-      if (!orderId) {
-        console.error('Order creation returned no id', orderData);
-        alert('Failed to create order. Please try again.');
-        setRedirecting(false);
-        return;
-      }
-
-      // If Stripe was skipped for testing, go directly to success page
-      if (orderData?.skippedStripe) {
-        router.push(`/success?wpOrderId=${encodeURIComponent(orderId)}`);
-      } else {
-        // Navigate to payment page which will request Stripe session for this order
-        router.push(`/payment?wpOrderId=${encodeURIComponent(orderId)}`);
-      }
-    } catch (e) {
-      console.error('Checkout flow failed', e);
+      router.push('/payment');
+    } finally {
       setRedirecting(false);
     }
   };

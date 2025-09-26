@@ -6,7 +6,7 @@
     "dev": "next dev",
     "dev:env": "node ./scripts/load-env-and-run-dev.js",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3002",
     "lint": "next lint"
   },
   "dependencies": {

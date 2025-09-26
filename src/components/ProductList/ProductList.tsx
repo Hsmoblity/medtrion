@@ -9,6 +9,9 @@ import { useContext } from "react";
 import { FaShoppingCart } from "react-icons/fa";
 import Types from "reducers/cart/types";
 import { normalizeImageUrl } from '../../lib/utils/image'
+import dynamic from 'next/dynamic';
+import { Document } from "@contentful/rich-text-types";
+const RichContent = dynamic(() => import('components/RichContent'), { ssr: false });
 
 
 
@@ -64,9 +67,10 @@ const Card = ({ product }: { product: ProductSchema }) => {
         </div>
         <div className="mt-1 p-2">
           <h2 className="text-slate-700 font-poppins font-black">{product.title}</h2>
-          <p className="mt-1 text-sm text-slate-400 font-semibold line-clamp-3">
-            {product.shortDescription || "No description available"}
-          </p>
+          {/* Render shortDescription client-side to avoid hydration mismatch */}
+          <div className="mt-1 text-sm text-slate-400 font-semibold line-clamp-3">
+            <RichContent content={(product as any).shortDescription || ''} />
+          </div>
           <div className="mt-3 flex items-end justify-between">
             {product.affiliate ? (
               // Affiliate-specific UI

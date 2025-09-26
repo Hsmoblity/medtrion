@@ -12,10 +12,15 @@ import { useContext, useState } from "react";
 import { useRouter } from 'next/navigation';
 import { FaCartPlus, FaShoppingCart } from "react-icons/fa";
 import Types from "reducers/cart/types";
-import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
+import dynamic from 'next/dynamic';
 import { Document } from "@contentful/rich-text-types";
+const RichContent = dynamic(() => import('components/RichContent'), { ssr: false });
 import { normalizeImageUrl } from '../../lib/utils/image'
+import { Reviews } from "components/reviews";
 import { ProductSchema } from 'lib/interfaces';
+import React from 'react';
+import Image from "next/image";
+
 
 interface ProductItemProps {
   product: ProductSchema & { productSpeciications?: Document };
@@ -34,10 +39,13 @@ const options = {
       const src = imageUrl.startsWith('http') ? imageUrl : `https:${imageUrl}`;
 
       return (
-        <img
+        <Image
           src={src}
           alt={imageAlt}
           className="my-4 max-w-full"
+          width={600}
+          height={400}
+          style={{ height: 'auto', width: '100%' }}
         />
       );
     },
@@ -51,14 +59,9 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
   const { toggleCartVisibility } = useContext(CartVisibilityContext);
   const { dispatch } = useContext(CartContext); // Use CartContext to get the dispatch function
   const router = useRouter();
-  const hasValidSpecs =
-    product.productSpeciications &&
-    typeof product.productSpeciications === 'object' &&
-    Array.isArray((product.productSpeciications as any).content);
-
-  const renderSpecifications = hasValidSpecs && product.productSpeciications
-    ? documentToReactComponents(product.productSpeciications as Document, options)
-    : null;
+  // Render product specifications depending on type: Contentful Document vs HTML string
+  // renderSpecifications will be rendered client-side by RichContent to avoid SSR/CSR mismatch
+  const spec = (product as any).productSpeciications ?? (product as any).productSpecifications;
   // Handle adding to the cart
   const handleAddToCart = (selectedOptions?: Array<{ name: string; type?: string; priceModifier?: number; selected?: boolean; quantity?: number; value?: string }>) => {
     const uuid = () => 'ci_' + Math.random().toString(36).slice(2, 9);
@@ -182,370 +185,107 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
     : product.featuredImage
       ? [normalizeImageUrl(product.featuredImage as any)]
       : ['/temp.webp'];
-
+  const [selectedTab, setSelectedTab] = useState<'Overview' | 'Documentation' | 'Reviews' | 'Specifications'>('Overview');
 
   return (
-    <div className="flex flex-col items-center py-8 mt-16 bg-[url('/nnnoise.svg')] bg-cover bg-repeat">
+    <div className="flex flex-col items-center py-4 mt-4 bg-[url('/nnnoise.svg')] bg-cover bg-repeat">
       {process.env.NODE_ENV === 'development' && (
         <div className="fixed top-4 right-4 bg-white border p-2 text-xs z-50">
           <div className="font-medium">Debug: related option IDs</div>
           <div>{JSON.stringify(product._related_options || [])}</div>
         </div>
       )}
-      <div className="flex flex-col md:max-w-screen-2xl md:flex-row w-full justify-center items-start gap-10 z-10">
-        {/* Image Section */}
-        <div className="relative w-full max-w-md py-8">
+
+      <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row items-start gap-6 px-4">
+        <div className="w-full md:w-2/3">
           <Carousel disableDrag index={index} onIndexChange={setIndex}>
             <CarouselContent className="relative">
               {IMAGE_URLS.map((url, idx) => (
-                <CarouselItem key={idx} className="py-4">
-                  <div className="flex aspect-square items-center justify-center  ">
+                <CarouselItem key={idx} className="py-2">
+                  <div className="flex items-center justify-center">
                     <Lens hovering={hovering} setHovering={setHovering}>
-                      <img
-                        src={url || '/temp.webp'}
-                        alt={`Product Image ${idx + 1}`}
-                        className=" object-cover object-center"
-                      />
+                      <img src={url || '/temp.webp'} alt={`Product Image ${idx + 1}`} className="w-full h-auto object-contain max-h-[520px]" />
                     </Lens>
                   </div>
                 </CarouselItem>
               ))}
             </CarouselContent>
           </Carousel>
-          <div className="flex w-full justify-center space-x-3 px-4">
+
+          <div className="flex gap-3 mt-3 overflow-x-auto">
             {IMAGE_URLS.map((url, idx) => (
-              <button
-                key={idx}
-                type="button"
-                aria-label={`Go to slide ${idx + 1}`}
-                onClick={() => setIndex(idx)}
-                className={`h-20 w-20 border ${idx === index
-                  ? 'border-blue-500'
-                  : 'border-zinc-200 dark:border-zinc-800'
-                  }`}
-              >
-                <img
-                  src={url}
-                  alt={`Thumbnail ${idx + 1}`}
-                  className="w-full h-full object-cover"
-                />
+              <button key={idx} type="button" aria-label={`Go to slide ${idx + 1}`} onClick={() => setIndex(idx)} className={`h-16 w-16 flex-shrink-0 border ${idx === index ? 'border-blue-500' : 'border-zinc-200 dark:border-zinc-800'}`}>
+                <img src={url} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
               </button>
             ))}
           </div>
         </div>
-        <div className="flex flex-col">
-          {/* Details Section */}
-          <div className="flex flex-col gap-4 md:max-w-[600px] border-2 p-4 bg-white drop-shadow-lg m-4 rounded-lg">
-            {/* Product Title */}
+        <aside className="w-full md:w-1/3 sticky top-20 self-start">
+          <div className="border-2 p-4 bg-white drop-shadow-lg rounded-lg">
+            <p className="text-sm text-gray-600"><span className="font-bold">Shop • </span><span className="font-mono">{product.title}</span></p>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mt-2 mb-4">{product.title}</h1>
 
-            <p className="md:text-sm text-md text-gray-600 mx-8">
-              <span className="font-bold">Shop • </span>
-              <span className="font-mono hover:text-blue-300 hover:underline"> {product.title}</span>
-
-            </p>
-            <h1 className="md:text-4xl text-xl font-bold text-gray-800 mx-8 font-poppins">
-              {product.title}
-            </h1>
-            {/* Product Description */}
-            <p className="md:text-lg text-md text-gray-600 mx-8">
-              {product.shortDescription}
-            </p>
-            <div className="md:text-lg text-md text-gray-600 mx-8">
-              {renderSpecifications}
+            <div className="mb-3">
+              <p className="text-3xl font-extrabold text-blue-600">${(Number((product as any).price) || 0).toFixed(2)}</p>
+              {(product as any).regularPrice && <p className="text-sm text-gray-500 line-through">${Number((product as any).regularPrice || 0).toFixed(2)}</p>}
             </div>
-
-            <div className="border-b-[0.2px]"></div>
-
-            {/* Price and Add to Cart */}
-            <div className="flex justify-between items-center mx-6">
-              {product.affiliate ? (
-                // Affiliate-specific UI
-                <>
-                  <button className="text-md font-bold text-black underline">
-                    Learn More
-                  </button>
-                  <div className="flex items-center space-x-1.5 rounded-lg bg-black px-4 py-1.5 text-white duration-100 hover:bg-slate-800">
-                    <button className="text-sm">Get a Quote</button>
-                  </div>
-                </>
+            <div className="mb-3">
+              {(product as any).affiliate ? (
+                <a href="#" className="block w-full text-center bg-green-600 text-white py-3 rounded">Learn More</a>
               ) : (
-                // Non-affiliate product UI
-                <>
-                  <div className="flex items-center space-x-1.5 rounded-lg bg-black px-4 py-1.5 text-white duration-100 hover:bg-slate-800">
-                    <button onClick={() => {
-                      console.log('Add to cart button clicked for', product.slug, 'related', product._related_options);
-                      // If product defines related options, navigate to dedicated options page
-                      if (product._related_options && Array.isArray(product._related_options) && product._related_options.length > 0) {
-                        router.push(`/product/${product.slug}/options`);
-                        return;
-                      }
-                      openOptionsModal();
-                    }} className="text-sm">Add to cart</button>
-                    <FaShoppingCart className="h-4 w-4" />
-                  </div>
-                </>
+                <button onClick={() => {
+                  if (product._related_options && Array.isArray(product._related_options) && product._related_options.length > 0) {
+                    router.push(`/product/${product.slug}/options`);
+                    return;
+                  }
+                  openOptionsModal();
+                }} className="w-full bg-green-600 text-white py-3 rounded">Add to Cart</button>
               )}
+            </div>
 
+            <div className="text-sm text-gray-600">
+              <p>SKU: {(product as any).sku || '-'}</p>
+              <p className="mt-2">{(product as any).affiliate ? 'Affiliate product' : 'Ships from our warehouse'}</p>
             </div>
           </div>
-          <div className="flex flex-col gap-4 md:max-w-[600px] border-2 p-4 bg-white drop-shadow-lg m-4 rounded-lg">
-            <div className="md:mt-10">
-              <h2 className="text-2xl font-semibold text-gray-800 font-poppins ml-4">Our Bestsellers</h2>
-              <div className="flex md:flex-row flex-col gap-8 mt-6">
-                <div className="flex flex-col items-center  pb-2">
-                  <img
-                    loading="lazy"
-                    src="/180-stairlift-moving.png"
-                    alt="30 Pod Mix"
-                    className="object-cover max-w-56 aspect-[1.61]"
-                  />
-                  <p className="text-xl uppercase text-gray-800 font-bold m-3">For curved staircases</p>
-                  <p className="text-lg text-slate-600 md:m-2 mx-8 md:text-left text-center">The Acorn 180 stairlift for curved staircases</p>
-                  <button className="relative inline-flex text-nowrap h-12 mt-4 overflow-hidden rounded-lg">
-                    <span className="group inline-flex items-center bg-black text-white px-4 py-2">
-                      <Link href="/product/acorn-stairlifts-acorn-130-straight-stairlift">Shop Now{" "}</Link>
-                      <FaCartPlus className="ml-1 size-4 transition-transform duration-300 group-hover:translate-x-3" />
-                    </span>
-                  </button>
-
-
-                </div>
-                <div className="flex flex-col items-center pb-2">
-                  <img
-                    loading="lazy"
-                    src="/acorn-outdoor-stair-lift-uk.jpg"
-                    alt="100 Pod Box"
-                    className="object-cover max-w-56 aspect-[1.61]"
-                  />
-                  <p className="text-xl uppercase text-gray-800 font-bold m-3">For outdoor spaces</p>
-                  <p className="text-lg text-slate-600 md:m-2 mx-8 text-center">The Acorn 160 stairlift for  outdoor spaces</p>
-                  <button className="relative inline-flex text-nowrap h-12 mt-4 overflow-hidden rounded-lg">
-                    <span className="group inline-flex items-center bg-black text-white px-4 py-2">
-                      <Link href="/product/acorn-stairlifts-acorn-130-straight-stairlift">Shop Now{" "}</Link>
-                      <FaCartPlus className="ml-1 size-4 transition-transform duration-300 group-hover:translate-x-3" />
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        </aside>
       </div>
-      {showOptionsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-lg bg-white rounded-lg p-6">
-            <h3 className="text-lg font-semibold mb-4">Confirm selection</h3>
-            <div className="mb-4">
-              <p className="text-sm text-gray-700">Product: <span className="font-medium">{product.title}</span></p>
-              {selectedVariation ? (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-700">Variation:</p>
-                  <div className="mt-1 ml-2">
-                    {(() => {
-                      const v = product.variations?.find((x: any) => (x.databaseId || x.id) == selectedVariation);
-                      if (!v) return <span className="font-medium">{selectedVariation}</span>;
-                      return (
-                        <div>
-                          <p className="font-medium">{v.attributes && v.attributes.length > 0 ? v.attributes.map((a: any) => a.value).join(' / ') : (v.sku || `Variation ${v.databaseId || v.id}`)}</p>
-                          {v.price && <p className="text-sm text-gray-600">Price: <span className="font-medium">${(Number(v.price) / 100).toFixed(2)}</span></p>}
-                          {(() => {
-                            const extract = (img: any) => {
-                              if (!img) return null;
-                              if (typeof img === 'string') return img;
-                              return img.sourceUrl || img.source_url || null;
-                            };
-                            const url = extract(v.image);
-                            if (url) return <img src={url} alt="variation" className="w-28 h-28 object-cover mt-2" />;
-                            return null;
-                          })()}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-gray-700 mt-2">Variation: <span className="font-medium">Default</span></p>
-              )}
 
-              {/* Render attribute groups (built from variations) as radio selectors */}
-              {attributeGroups && attributeGroups.length > 0 && (
-                <div className="mt-4">
-                  <p className="text-sm text-gray-700">Choose options:</p>
-                  <div className="mt-2 space-y-4">
-                    {attributeGroups.map((g, gi) => (
-                      <div key={gi}>
-                        <p className="text-sm font-medium mb-1">{g.name}</p>
-                        <div className="flex flex-wrap gap-2">
-                          {g.values.map((val) => (
-                            <label key={val} className="inline-flex items-center space-x-2 border rounded px-2 py-1 cursor-pointer">
-                              <input
-                                type="radio"
-                                name={`attr-${g.name}`}
-                                value={val}
-                                checked={attributeState[g.name] === val}
-                                onChange={() => {
-                                  setAttributeState(prev => {
-                                    const next = { ...prev, [g.name]: val };
-                                    // attempt to find matching variation
-                                    console.log('Attribute change', g.name, val, '=>', next);
-                                    console.log('Finding match in variations:', product.variations);
-                                    if (product.variations && product.variations.length > 0) {
-                                      const match = product.variations.find((v: any) => {
-                                        if (!v.attributes) return false;
-                                        // all attribute names in next must be present and equal on variation
-                                        for (const k of Object.keys(next)) {
-                                          const attr = v.attributes.find((a: any) => a.name === k);
-                                          if (!attr || attr.value !== next[k]) return false;
-                                        }
-                                        return true;
-                                      });
-                                      if (match) {
-                                        setSelectedVariation(String(match.databaseId ?? match.id));
-                                      } else {
-                                        setSelectedVariation(null);
-                                      }
-                                    }
-                                    return next;
-                                  });
-                                }}
-                              />
-                              <span className="text-sm">{val}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            {/* If product has related options, render ProductOptions component */}
-            {(product._related_options && Array.isArray(product._related_options) && product._related_options.length > 0) || (modalRelatedIds && modalRelatedIds.length > 0) ? (
-              <div className="mt-4">
-                <ProductOptions
-                  relatedIds={(product._related_options && product._related_options.length > 0) ? product._related_options : modalRelatedIds}
-                  // Server-provided related product objects (mapped shape) to use directly.
-                  // Prefer freshly fetched `modalRelatedProducts` when present (client-side fetch).
-                  relatedProducts={Array.isArray(modalRelatedProducts) && modalRelatedProducts.length > 0 ? modalRelatedProducts : (Array.isArray(product._related_options_products) ? product._related_options_products : undefined)}
-                  parentProductId={product.productId}
-                  onConfirm={async (selectedPayloads: any[]) => {
-                    if (!selectedPayloads || selectedPayloads.length === 0) {
-                      handleAddToCart([]);
-                      setShowOptionsModal(false);
-                      return;
-                    }
-
-                    // Fetch full product objects for the selected add-ons' parents
-                    try {
-                      const parentIds = Array.from(new Set(selectedPayloads.map((s: any) => Number(s.productId)).filter((n: any) => !isNaN(n))));
-                      let products = parentIds.length > 0 ? await fetchProductsByDatabaseIds(parentIds) : [];
-                      // If GraphQL client didn't work on client, fall back to debug API
-                      if ((!products || products.length === 0) && typeof window !== 'undefined' && parentIds.length > 0) {
-                        try {
-                          const url = `/api/debug/related-products?ids=${parentIds.join(',')}`;
-                          const r = await fetch(url);
-                          if (r.ok) {
-                            const json = await r.json();
-                            products = Array.isArray(json.products) ? json.products : (Array.isArray(json) ? json : (json?.items || []));
-                          }
-                        } catch (e) {
-                          console.warn('Fallback fetch to /api/debug/related-products failed', e);
-                        }
-                      }
-
-                      const prodMap: Record<string | number, any> = {};
-                      for (const p of (products || [])) {
-                        if (!p) continue;
-                        // Normalize variations shape: accept { nodes: [...] } or array
-                        let vars: any[] = [];
-                        if (p.variations) {
-                          if (Array.isArray(p.variations)) vars = p.variations;
-                          else if (p.variations && Array.isArray(p.variations.nodes)) vars = p.variations.nodes;
-                        }
-                        const cloned = { ...p, variations: vars };
-                        if (p.databaseId) prodMap[String(p.databaseId)] = cloned;
-                        if (p.id) prodMap[String(p.id)] = cloned;
-                      }
-
-                      const mapped = selectedPayloads.map((s: any) => {
-                        const pid = String(s.productId);
-                        const prod = prodMap[pid] || null;
-                        const variationId = s.variationId ? String(s.variationId) : null;
-                        let variation = null;
-                        const prodVars = prod && Array.isArray(prod.variations) ? prod.variations : (prod && prod.variations && Array.isArray(prod.variations.nodes) ? prod.variations.nodes : []);
-                        if (variationId && prodVars && Array.isArray(prodVars)) {
-                          variation = prodVars.find((v: any) => String(v.databaseId ?? v.id) === variationId) || null;
-                        }
-
-                        return {
-                          name: s.title || `${s.productId}${variationId ? ' (variation)' : ''}`,
-                          type: variationId ? 'radio' : 'checkbox',
-                          priceModifier: s.price ? Number(s.price) : 0,
-                          selected: true,
-                          quantity: s.quantity || 1,
-                          value: variationId ? String(variationId) : String(s.productId),
-                          parentId: s.productId,
-                          product: prod ? (function () {
-                            const extractImage = (img: any) => {
-                              if (!img) return null;
-                              if (typeof img === 'string') return img;
-                              return img.sourceUrl || img.source_url || null;
-                            };
-                            return {
-                              id: prod.id,
-                              databaseId: prod.databaseId,
-                              name: prod.name,
-                              slug: prod.slug,
-                              price: prod.price,
-                              regularPrice: prod.regularPrice,
-                              salePrice: prod.salePrice,
-                              image: extractImage(prod.image),
-                              variations: Array.isArray(prod.variations) ? prod.variations : (prod.variations && Array.isArray(prod.variations.nodes) ? prod.variations.nodes : []),
-                            };
-                          })() : null,
-                          variation: variation ? {
-                            id: variation.id,
-                            databaseId: variation.databaseId,
-                            price: variation.price,
-                            sku: variation.sku,
-                            attributes: (variation.attributes && Array.isArray(variation.attributes.nodes)) ? variation.attributes.nodes : (variation.attributes || [])
-                          } : null,
-                        } as any;
-                      });
-
-                      // Immediately add parent + enriched options to cart
-                      handleAddToCart(mapped);
-                    } catch (e) {
-                      console.warn('Failed to enrich selected add-ons with product objects', e);
-                      // fallback: add simple mapped entries
-                      const fallback = selectedPayloads.map((s: any) => ({
-                        name: s.title || `${s.productId}${s.variationId ? ' (variation)' : ''}`,
-                        type: s.variationId ? 'radio' : 'checkbox',
-                        priceModifier: s.price ? Number(s.price) : 0,
-                        selected: true,
-                        quantity: s.quantity || 1,
-                        value: s.variationId ? String(s.variationId) : String(s.productId),
-                        parentId: s.productId
-                      }));
-                      handleAddToCart(fallback);
-                    }
-
-                    setShowOptionsModal(false);
-                  }}
-                  onDone={() => setShowOptionsModal(false)}
-                />
+      <div className="w-full max-w-6xl mx-auto mt-8 px-4">
+        <div className="bg-white border rounded-lg">
+          <div className="flex flex-wrap border-b">
+            {['Overview', 'Documentation', 'Reviews', 'Specifications'].map((t) => (
+              <button key={t} onClick={() => setSelectedTab(t as any)} className={`px-4 py-3 -mb-px ${selectedTab === t ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'}`}>
+                {t}
+              </button>
+            ))}
+          </div>
+          <div className="p-6">
+            {selectedTab === 'Overview' && (
+              <div className="prose max-w-none text-gray-700">
+                {/* Render shortDescription client-side to avoid hydration mismatch */}
+                <RichContent content={(product as any).shortDescription || product.description} options={options} className="prose max-w-none text-gray-700" />
               </div>
-            ) : (
-              <div className="flex justify-end space-x-3">
-                <button onClick={() => setShowOptionsModal(false)} className="px-4 py-2 border rounded">Cancel</button>
-                <button onClick={confirmAddFromModal} className="px-4 py-2 bg-blue-600 text-white rounded">Confirm</button>
+            )}
+
+            {selectedTab === 'Documentation' && (
+              <div className="text-gray-700">Documentation content (if any) goes here.</div>
+            )}
+
+            {selectedTab === 'Reviews' && (
+              <div className="text-gray-700"><Reviews /></div>
+            )}
+
+            {selectedTab === 'Specifications' && (
+              <div className="text-gray-700">
+                {spec ? <RichContent content={spec} options={options} /> : <div>No specifications available.</div>}
               </div>
             )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
-}
+};
 
 export default ProductItem;

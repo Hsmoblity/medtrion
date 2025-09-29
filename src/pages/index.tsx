@@ -9,6 +9,10 @@ import { ProductSchema } from "lib/interfaces";
 import ProductList from "components/ProductList/ProductList";
 import { Document } from "@contentful/rich-text-types";
 
+import TopProductsStrip from "components/Home/TopProductsStrip";
+import BestSellerSection from "components/Home/BestSellerSection";
+import { getFeatureFlag } from "lib/featureFlags";
+
 interface ContentfulProduct {
   fields: {
     title: string;
@@ -30,29 +34,40 @@ interface ContentfulProduct {
 
 interface HomeProps {
   products: ProductSchema[];
+  error?: string | null;
 }
 
-const Home = ({ products }: HomeProps) => {
+const Home = ({ products, error }: HomeProps) => {
   const safeProducts = Array.isArray(products) ? products : [];
+  const showcaseEnabled = getFeatureFlag('homepage_showcase_layout');
+  
+  
   return (
     <>
       <MetaHead title=" Health Services & Mobility Products for a Better Life" description="Explore hsMobility for a wide range of health services and mobility products designed to improve your quality of life. As affiliate partners of Acron stairlifts, we offer trusted solutions to help you regain independence and enhance your mobility." />
       <Hero />
-      <div className=" justify-center mx-auto">
-        <h2 className=" text-center md:text-4xl text-2xl uppercase leading-8 text-gray-800 my-6 font-bold font-poppins max-w-4xl mx-auto ">Explore a curated selection of top-notch mobility products crafted to elevate your lifestyle.</h2>
-        <ProductList products={safeProducts} />
-      </div>
+      
+      {/* Top Products Showcase - Featured Products Strip */}
+      <TopProductsStrip enableShowcase={showcaseEnabled} />
+      
+      {/* Best Seller Section with Real Products - HIDDEN */}
+      {/* <BestSellerSection initialProducts={safeProducts} /> */}
+      
+      {/* FAQ Section */}
       <div>
         <FAQ />
       </div>
+      
+      {/* Banner Section */}
       <Banner />
+      
+      {/* Contact Form Section */}
       <div className="py-8">
-
         <Form />
       </div>
 
-      {/* <Specs /> */}
-      <div >
+      {/* Reviews Section */}
+      <div>
         <Reviews />
       </div>
     </>
@@ -64,29 +79,46 @@ const Home = ({ products }: HomeProps) => {
 import { GetServerSideProps } from 'next';
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const response = await getProducts("");
-  // Ensure values are JSON-serializable (replace `undefined` with `null`)
-  const sanitize = (v: any): any => {
-    if (v === undefined) return null;
-    if (v === null) return null;
-    if (Array.isArray(v)) return v.map(sanitize);
-    if (typeof v === 'object') {
-      const out: any = {};
-      for (const k of Object.keys(v)) {
-        out[k] = sanitize(v[k]);
-      }
-      return out;
+  try {
+    const response = await getProducts("");
+    
+    // Check for error in response
+    if (response.error) {
+      console.error('Homepage: Product fetch error:', response.error);
     }
-    return v;
-  };
+    
+    // Ensure values are JSON-serializable (replace `undefined` with `null`)
+    const sanitize = (v: any): any => {
+      if (v === undefined) return null;
+      if (v === null) return null;
+      if (Array.isArray(v)) return v.map(sanitize);
+      if (typeof v === 'object') {
+        const out: any = {};
+        for (const k of Object.keys(v)) {
+          out[k] = sanitize(v[k]);
+        }
+        return out;
+      }
+      return v;
+    };
 
-  const items = Array.isArray(response.items) ? response.items.map(sanitize) : [];
+    const items = Array.isArray(response.items) ? response.items.map(sanitize) : [];
 
-  return {
-    props: {
-      products: items,
-    },
-  };
+    return {
+      props: {
+        products: items,
+        error: response.error || null,
+      },
+    };
+  } catch (error) {
+    console.error('Homepage: Failed to fetch products:', error);
+    return {
+      props: {
+        products: [],
+        error: error instanceof Error ? error.message : 'Failed to load products',
+      },
+    };
+  }
 };
 
 export default Home;

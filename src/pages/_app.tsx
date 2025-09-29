@@ -1,108 +1,15 @@
 import "/globals.css";
 import type { AppProps } from "next/app";
-import { useEffect, useReducer, useState } from "react";
 import PageLayout from "components/PageLayout/PageLayout";
-import CartItemsContext from "contexts/cartItemsContext";
-import CartVisibilityContext from "contexts/cartVisibilityContext";
-import { cartReducer } from "reducers/cart/reducer";
-import Types from "reducers/cart/types";
-// import productsBySlugsQuery from "lib/sanity/queries/products_by_slugs";
-import { CookieCart, CartProduct } from "lib/interfaces";
-import Cookies from "js-cookie";
-// import client from "lib/sanity/client";
-import { useRouter } from "next/router";
-import { getProducts } from "lib/contentful/contentful";
 import NextTopLoader from "nextjs-toploader";
 import { Cursor } from "components/custom-cursor";
-
-
-const cartItems = Cookies.get("_cart");
-
-const parsedCartItems = cartItems && JSON.parse(cartItems);
-const slugs =
-  parsedCartItems &&
-  parsedCartItems.reduce((slugs: string[], item: CookieCart) => {
-    return [...slugs, item.slug];
-  }, []);
+import { SessionProvider } from "contexts/SessionContext";
+import { CartVisibilityProvider } from "contexts/cartVisibilityContext";
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const [cart, dispatch] = useReducer(cartReducer, []);
-  const [cartVisibility, setCartVisibilty] = useState(false);
-  // const appendTotalItemsField = (products: CartProduct[]) => {
-  //   return products.map((product: CartProduct, i) => {
-  //     return {
-  //       ...product,
-  //       quantity: parsedCartItems[i].quantity ? parsedCartItems[i].quantity : 1
-  //     };
-  //   });
-  // };
-
-  const toggleCartVisibility = () => {
-    setCartVisibilty(!cartVisibility);
-  };
-
-  // useEffect(() => {
-  //   const fetchCartProducts = async () => {
-  //     const cartProducts = await getProducts('');
-  //     return console.log(cartProducts);
-  //     if (parsedCartItems) {
-
-
-  //       if (!cartProducts) {
-  //         throw Error("Sorry, something went wrong.");
-  //       }
-
-  //       dispatch({
-  //         type: Types.bulkAdd,
-  //         payload: cartProducts && appendTotalItemsField(cartProducts)
-  //       });
-  //     }
-  //   };
-
-  //   // if (router.asPath !== "/success") 
-  //   fetchCartProducts();
-  // }, []);
-
-  // Rehydrate cart from cookie on client mount. We do this in an effect so
-  // server-side rendering is not affected and the client can restore the
-  // session cart without requiring a full product fetch.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const cookie = Cookies.get("_cart");
-      if (!cookie) return;
-      const raw = JSON.parse(cookie);
-      if (!Array.isArray(raw) || raw.length === 0) return;
-      const mapped = raw.map((it: any) => ({
-        cartItemId: it.cartItemId || `ci_${Math.random().toString(36).slice(2, 9)}`,
-        slug: it.slug,
-        quantity: Number(it.quantity ?? 1),
-        variationId: it.variationId ?? null,
-        options: it.options ?? [],
-        name: it.name ?? undefined,
-        price: it.price ?? undefined
-      }));
-      // We intentionally restore a compact cart-product shape from cookie.
-      // Cast to any to avoid forcing a full ProductSchema at this point.
-      dispatch({ type: Types.bulkAdd, payload: mapped as any });
-    } catch (e) {
-      // ignore malformed cookie
-    }
-  }, []);
-
   return (
-    <CartItemsContext.Provider
-      value={{
-        cart,
-        dispatch
-      }}
-    >
-      <CartVisibilityContext.Provider
-        value={{
-          cartVisibility,
-          toggleCartVisibility
-        }}
-      >
+    <SessionProvider>
+      <CartVisibilityProvider>
         <NextTopLoader
           color="#debe75"
           initialPosition={0.3}
@@ -112,7 +19,6 @@ function MyApp({ Component, pageProps }: AppProps) {
           showSpinner={true}
           easing="ease"
           speed={400}
-
           zIndex={1600}
           showAtBottom={false}
         />
@@ -120,8 +26,10 @@ function MyApp({ Component, pageProps }: AppProps) {
         <PageLayout>
           <Component {...pageProps} />
         </PageLayout>
-      </CartVisibilityContext.Provider>
-    </CartItemsContext.Provider>
+
+        <Cursor />
+      </CartVisibilityProvider>
+    </SessionProvider>
   );
 }
 

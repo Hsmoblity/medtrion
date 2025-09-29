@@ -1,11 +1,12 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import CartItemsContext from 'contexts/cartItemsContext';
+import { useCartItems } from 'stores/cartStore';
+import { PrimaryButton } from 'components/ui';
 
 export default function PaymentPage() {
     const router = useRouter();
     const { wpOrderId } = router.query as { wpOrderId?: string };
-    const { cart } = useContext(CartItemsContext);
+    const cart = useCartItems();
     const [message, setMessage] = useState('Preparing payment (simulated)...');
     const [submitting, setSubmitting] = useState(false);
 
@@ -143,7 +144,13 @@ export default function PaymentPage() {
                         </div>
 
                         <div className="flex justify-end">
-                            <button disabled={!isValid || submitting} type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">{submitting ? 'Please wait...' : 'Place Order (simulate)'}</button>
+                            <PrimaryButton 
+                                disabled={!isValid || submitting} 
+                                type="submit"
+                                loading={submitting}
+                            >
+                                {submitting ? 'Please wait...' : 'Place Order (simulate)'}
+                            </PrimaryButton>
                         </div>
                     </form>
                 </div>

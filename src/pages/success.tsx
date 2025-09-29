@@ -1,24 +1,18 @@
-import { useEffect, useContext } from "react";
+import { useEffect } from "react";
 import { useRouter } from 'next/router';
-import CartItemsContext from "contexts/cartItemsContext";
-import Types from "reducers/cart/types";
+import { useCartStore } from "stores/cartStore";
 import MetaHead from "components/MetaHead";
 import Link from "next/link";
 
 const Success = () => {
-  const { dispatch } = useContext(CartItemsContext);
+  const clearCart = useCartStore(state => state.clearCart);
   const router = useRouter();
   const { wpOrderId } = router.query as { wpOrderId?: string };
 
   useEffect(() => {
-    const removeAllCartItems = () => {
-      dispatch({
-        type: Types.removeAllItems
-      });
-    };
-
-    removeAllCartItems();
-  }, []);
+    // Clear all cart items on success page
+    clearCart();
+  }, [clearCart]);
 
   return (
     <>

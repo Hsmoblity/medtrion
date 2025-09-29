@@ -1,0 +1,167 @@
+/* Configurator Layout Styles */
+
+/* Option Cards Grid - Responsive and Flexible */
+.option-cards-grid {
+  display: grid;
+  gap: 1rem;
+  grid-auto-rows: max-content;
+  width: 100%;
+}
+
+/* Responsive grid columns */
+.option-cards-grid {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .option-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .option-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .option-cards-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1536px) {
+  .option-cards-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Option Card Responsive Sizing */
+.option-card {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure cards don't overflow their container */
+.option-cards-container {
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Prevent text overflow in cards */
+.option-card h3 {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.option-card p {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Ensure images are responsive */
+.option-card img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* Button responsiveness */
+.option-card button {
+  width: 100%;
+  min-height: 44px; /* Touch target size */
+}
+
+/* Loading state */
+.option-cards-loading {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Empty state */
+.option-cards-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  text-align: center;
+}
+
+/* Error state */
+.option-cards-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  text-align: center;
+}
+
+/* Mobile optimizations */
+@media (max-width: 639px) {
+  .option-cards-grid {
+    gap: 0.75rem;
+  }
+  
+  .option-card {
+    min-height: 180px;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .option-cards-grid {
+    gap: 1rem;
+  }
+  
+  .option-card {
+    min-height: 200px;
+  }
+}
+
+/* Desktop optimizations */
+@media (min-width: 1024px) {
+  .option-cards-grid {
+    gap: 1.25rem;
+  }
+  
+  .option-card {
+    min-height: 220px;
+  }
+}
+
+/* Large desktop optimizations */
+@media (min-width: 1280px) {
+  .option-cards-grid {
+    gap: 1.5rem;
+  }
+  
+  .option-card {
+    min-height: 240px;
+  }
+}
+
+/* Ensure proper spacing in configurator layout */
+.configurator-layout {
+  min-height: 600px;
+}
+
+.configurator-content {
+  min-height: 500px;
+}
+
+/* Prevent horizontal scroll on mobile */
+@media (max-width: 1023px) {
+  .configurator-layout {
+    overflow-x: hidden;
+  }
+}

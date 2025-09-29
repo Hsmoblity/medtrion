@@ -409,9 +409,9 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
       )}
 
       {/* Main Configurator Layout */}
-      <div className="configurator-layout grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="configurator-layout grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Section: Configuration Options Sidebar */}
-        <aside className="configurator-sidebar configurator-section-left lg:col-span-1">
+        <aside className="configurator-sidebar configurator-section-left lg:col-span-3">
           <ConfiguratorSidebar
             categories={categories.map(c => ({
               ...c,
@@ -426,7 +426,7 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
         </aside>
 
         {/* Center Section: Option Cards Display */}
-        <main className="configurator-content configurator-section-center lg:col-span-2">
+        <main className="configurator-content configurator-section-center lg:col-span-6">
           {showSummary ? (
             isHydrated ? (
               <ConfigurationSummary
@@ -477,7 +477,7 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
         </main>
 
         {/* Right Section: Configuration Summary Panel */}
-        <aside className="configurator-summary configurator-section-right lg:col-span-1">
+        <aside className="configurator-summary configurator-section-right lg:col-span-3">
           <ClientOnly fallback={
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="animate-pulse">

@@ -3,6 +3,7 @@ import { ConfiguratorCategory, ConfigurableProductSchema, CompatibilityIssue } f
 import { PrimaryButton } from 'components/ui';
 import OptionCard from './OptionCard';
 import OptionCardSkeleton from './OptionCardSkeleton';
+import styles from './ConfiguratorLayout.module.css';
 
 interface CategoryGroupProps {
   category: ConfiguratorCategory;
@@ -241,13 +242,13 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
       >
         <div className="p-6">
           {loading || category.loadingState === 'loading' ? (
-            <div className="option-cards-loading grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className={`option-cards-loading ${styles['option-cards-loading']}`}>
               {[...Array(6)].map((_, index) => (
                 <OptionCardSkeleton key={index} variant="default" />
               ))}
             </div>
           ) : error ? (
-            <div className="option-cards-error text-center py-8">
+            <div className={`option-cards-error ${styles['option-cards-error']}`}>
               <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -263,7 +264,7 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
               </div>
             </div>
           ) : !category.options || category.options.length === 0 ? (
-            <div className="option-cards-empty text-center py-8">
+            <div className={`option-cards-empty ${styles['option-cards-empty']}`}>
               <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
               </svg>
@@ -273,7 +274,7 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
               </p>
             </div>
           ) : (
-            <div className="option-cards-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className={`option-cards-grid ${styles['option-cards-grid']}`}>
               {category.options.map((option) => {
                 const isSelected = isOptionSelected(option);
                 const optionIssues = getOptionCompatibilityIssues(option);

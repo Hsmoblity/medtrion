@@ -16,6 +16,7 @@ interface OptionCardProps {
   isSelected?: boolean;
   disabled?: boolean;
   loading?: boolean;
+  className?: string;
   
   // Edit Session Props (ALIGNED WITH STANDARDIZED CART EDIT FLOW)
   editSessionId?: string;
@@ -73,6 +74,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
   isSelected: propIsSelected = false,
   disabled = false,
   loading = false,
+  className = '',
   variant = 'default',
   size = 'medium',
   showDetails = true,
@@ -167,6 +169,8 @@ const OptionCard: React.FC<OptionCardProps> = ({
       styles.optionCard,
       'bg-white rounded-lg shadow-md border-2 border-gray-200 p-6',
       'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+      'w-full h-auto min-w-0 max-w-full', // Ensure responsive sizing
+      className, // Include passed className
       {
         [styles.selected]: isSelected,
         [styles.compatibilityWarning]: compatibilityStatus === 'warning',
@@ -183,13 +187,13 @@ const OptionCard: React.FC<OptionCardProps> = ({
         'option-card-loading': loading,
       },
       {
-        'min-h-[160px] min-w-[240px] p-4': variant === 'compact' || size === 'small',
-        'min-h-[260px] min-w-[320px] p-8': variant === 'featured' || size === 'large',
-        'min-h-[300px] min-w-[360px] p-10': size === 'extra-large',
-        'min-h-[200px] min-w-[280px] p-6': size === 'medium',
+        'min-h-[160px] p-4': variant === 'compact' || size === 'small',
+        'min-h-[260px] p-8': variant === 'featured' || size === 'large',
+        'min-h-[300px] p-10': size === 'extra-large',
+        'min-h-[200px] p-6': size === 'medium',
       }
     );
-  }, [isSelected, disabled, loading, compatibilityStatus, highContrast, reducedMotion, variant, size, internalState.priceUpdated]);
+  }, [isSelected, disabled, loading, compatibilityStatus, highContrast, reducedMotion, variant, size, internalState.priceUpdated, className]);
 
   // Event handlers
   const handleClick = useCallback(async (event: React.MouseEvent) => {

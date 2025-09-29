@@ -1,11 +1,36 @@
 
 import { GraphQLClient, gql } from 'graphql-request';
-require('dotenv').config();
 
-// Allow client-side code to use `NEXT_PUBLIC_WP_GRAPHQL_URL` while server-side
-// environments may set `WP_GRAPHQL_URL`. Prefer public var when available.
-const WP_GRAPHQL_URL = process.env.WP_GRAPHQL_URL || process.env.NEXT_PUBLIC_WP_GRAPHQL_URL || '';
+// Load environment variables in Node.js environment
+if (typeof window === 'undefined') {
+  try {
+    // Try to load dotenv if available
+    if (typeof require !== 'undefined') {
+      require('dotenv').config();
+    }
+  } catch (error) {
+    // Ignore dotenv errors - Next.js should handle env vars
+    console.warn('dotenv not available, relying on Next.js environment variables');
+  }
+}
+
+// Environment variable priority: WP_GRAPHQL_URL (primary), NEXT_PUBLIC_WP_GRAPHQL_URL (secondary)
+// Only use NEXT_PUBLIC_WP_GRAPHQL_URL when server-side var is absent
+const WP_GRAPHQL_URL = (typeof process !== 'undefined' && process.env) 
+  ? (process.env.WP_GRAPHQL_URL || process.env.NEXT_PUBLIC_WP_GRAPHQL_URL || '')
+  : '';
+
+// Debug logging
+if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development') {
+  console.log('WooCommerce GraphQL URL:', WP_GRAPHQL_URL);
+  console.log('Environment variables available:', {
+    WP_GRAPHQL_URL: process.env.WP_GRAPHQL_URL,
+    NEXT_PUBLIC_WP_GRAPHQL_URL: process.env.NEXT_PUBLIC_WP_GRAPHQL_URL
+  });
+}
+
 let client: GraphQLClient | null = null;
+
 if (WP_GRAPHQL_URL) {
     try {
         // Validate URL to avoid runtime failures when constructing a URL
@@ -14,22 +39,75 @@ if (WP_GRAPHQL_URL) {
         // new URL will throw if invalid.
         // eslint-disable-next-line no-new
         new URL(WP_GRAPHQL_URL);
-        client = new GraphQLClient(WP_GRAPHQL_URL);
+        
+        // Configure GraphQL client with SSL handling
+        const clientOptions: any = {};
+        if (typeof window === 'undefined' && process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') {
+            // Use node-fetch with SSL certificate verification disabled
+            console.log('SSL certificate verification disabled for GraphQL requests');
+            const fetch = require('node-fetch');
+            const { Agent } = require('https');
+            
+            const agent = new Agent({
+                rejectUnauthorized: false
+            });
+            
+            clientOptions.fetch = (url: string, options: any) => {
+                return fetch(url, {
+                    ...options,
+                    agent
+                });
+            };
+        }
+        
+        client = new GraphQLClient(WP_GRAPHQL_URL, clientOptions);
     } catch (e) {
         console.warn('Invalid WP_GRAPHQL_URL, GraphQL client not created:', WP_GRAPHQL_URL, e);
         client = null;
     }
 } else {
-    console.warn('WP_GRAPHQL_URL / NEXT_PUBLIC_WP_GRAPHQL_URL not set; GraphQL client not created. GraphQL-dependent features will be disabled.', process.env.WP_GRAPHQL_URL);
+    // Only show warning in development, not in Storybook
+    if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development') {
+        console.warn('WP_GRAPHQL_URL / NEXT_PUBLIC_WP_GRAPHQL_URL not set; GraphQL client not created. GraphQL-dependent features will be disabled.');
+    }
 }
 
 // Helper wrapper around client.request to add retry logic and better logging
-async function runClientRequest(query: any, variables?: Record<string, any>) {
+export async function runClientRequest(query: any, variables?: Record<string, any>) {
     if (!client) throw new Error('GraphQL client not configured');
+
+    // console.log('GraphQL query:', query);
+
     const maxAttempts = 3;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-            return await client.request(query, variables);
+            const body = JSON.stringify({ query, variables });
+            const fetchOptions: RequestInit = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body,
+            };
+
+            // In Node.js environment, handle SSL certificate issues if NODE_TLS_REJECT_UNAUTHORIZED is set
+            if (typeof window === 'undefined' && process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') {
+                // For server-side requests with SSL issues, we need to use a custom agent
+                // This is already handled by the environment variable
+            }
+
+            const response = await fetch(WP_GRAPHQL_URL, fetchOptions);
+
+            if (!response.ok) {
+                const errorBody = await response.text();
+                throw new Error(`GraphQL request failed with status ${response.status}: ${errorBody}`);
+            }
+
+            const json = await response.json();
+
+            if (json.errors) {
+                throw new Error(`GraphQL errors: ${JSON.stringify(json.errors, null, 2)}`);
+            }
+
+            return json.data;
         } catch (err: any) {
             // Provide detailed log to help diagnose fetch failures (DNS, TLS, CORS, network)
             console.error(`GraphQL request failed (attempt ${attempt}/${maxAttempts})`, {
@@ -47,12 +125,22 @@ async function runClientRequest(query: any, variables?: Record<string, any>) {
 
 export async function fetchGraphQLProducts() {
     if (!client) {
-        console.error('fetchGraphQLProducts: WP_GRAPHQL_URL not configured; skipping GraphQL request.');
-        return [];
+        const errorMsg = 'GraphQL client not configured - products temporarily unavailable';
+        if (process.env.NODE_ENV === 'development') {
+            console.error('fetchGraphQLProducts: WP_GRAPHQL_URL not configured; skipping GraphQL request.');
+            console.error('Available environment variables:', {
+                WP_GRAPHQL_URL: process.env.WP_GRAPHQL_URL,
+                NEXT_PUBLIC_WP_GRAPHQL_URL: process.env.NEXT_PUBLIC_WP_GRAPHQL_URL,
+                NODE_ENV: process.env.NODE_ENV
+            });
+        } else {
+            console.warn('fetchGraphQLProducts: GraphQL client not configured');
+        }
+        throw new Error(errorMsg);
     }
     const query = gql`
         query GetProducts {
-            products(where: { typeIn: [SIMPLE] }, first: 20) {
+            products(where: { typeIn: [SIMPLE, VARIABLE] }, first: 50) {
                 nodes {
                     id
                     databaseId
@@ -60,7 +148,6 @@ export async function fetchGraphQLProducts() {
                     slug
                     description
                     shortDescription
-                    # Include productSpecifications as requested
                     productSpecifications
                     
                     # New GraphQL field added by WP plugin: relatedOptions
@@ -85,6 +172,33 @@ export async function fetchGraphQLProducts() {
                     }
                     ... on ExternalProduct {
                         price
+                    }
+                    ... on VariableProduct {
+                        price
+                        regularPrice
+                        salePrice
+                        variations(first: 20) {
+                            nodes {
+                                id
+                                databaseId
+                                name
+                                slug
+                                price
+                                regularPrice
+                                salePrice
+                                sku
+                                image {
+                                    sourceUrl
+                                }
+                                attributes {
+                                    nodes {
+                                        id
+                                        name
+                                        value
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -301,8 +415,13 @@ export async function fetchProductsByDatabaseIds(databaseIds: Array<number | str
         }
     `;
     if (!client) {
-        console.error('fetchProductsByDatabaseIds: GraphQL client not configured. Set WP_GRAPHQL_URL (server) or NEXT_PUBLIC_WP_GRAPHQL_URL (client) to enable fetching products by ids. Skipping GraphQL request.');
-        return [];
+        const errorMsg = 'GraphQL client not configured - products temporarily unavailable';
+        if (process.env.NODE_ENV === 'development') {
+            console.error('fetchProductsByDatabaseIds: WP_GRAPHQL_URL not configured; skipping GraphQL request.');
+        } else {
+            console.warn('fetchProductsByDatabaseIds: GraphQL client not configured');
+        }
+        throw new Error(errorMsg);
     }
 
     try {
@@ -363,8 +482,158 @@ export async function fetchProductsByDatabaseIds(databaseIds: Array<number | str
     }
 }
 
+// Single-purpose query for fetching one option product by database ID
+export async function fetchOptionProductById(databaseId: number | string) {
+    if (!databaseId) return null;
+    
+    const id = Number(databaseId);
+    if (isNaN(id)) return null;
+
+    if (!client) {
+        const errorMsg = 'GraphQL client not configured - option product temporarily unavailable';
+        if (process.env.NODE_ENV === 'development') {
+            console.error('fetchOptionProductById: WP_GRAPHQL_URL not configured; skipping GraphQL request.');
+        } else {
+            console.warn('fetchOptionProductById: GraphQL client not configured');
+        }
+        throw new Error(errorMsg);
+    }
+
+    const query = gql`
+        query GetOptionProductById($id: ID!) {
+            product(id: $id, idType: DATABASE_ID) {
+                id
+                databaseId
+                name
+                slug
+                description
+                shortDescription
+                productSpecifications
+                type
+                relatedOptions
+                image {
+                    sourceUrl
+                    altText
+                }
+                galleryImages(first: 10) {
+                    nodes {
+                        sourceUrl
+                        altText
+                    }
+                }
+                ... on SimpleProduct {
+                    price
+                    regularPrice
+                    salePrice
+                    sku
+                }
+                ... on VariableProduct {
+                    price
+                    regularPrice
+                    salePrice
+                    sku
+                    variableType
+                    attributes {
+                        nodes {
+                            id
+                            name
+                        }
+                    }
+                    variations(first: 50) {
+                        nodes {
+                            id
+                            databaseId
+                            name
+                            price
+                            regularPrice
+                            salePrice
+                            sku
+                            image {
+                                sourceUrl
+                                altText
+                            }
+                            attributes {
+                                nodes {
+                                    id
+                                    name
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    `;
+
+    try {
+        const data = await runClientRequest(query, { id }) as { product: any };
+        
+        if (!data.product) {
+            console.warn('fetchOptionProductById: No product found for ID', id);
+            return null;
+        }
+
+        const product = data.product;
+        
+        // Normalize relatedOptions (server-provided field) into _related_options, falling back to metaData parsing
+        try {
+            if (product.relatedOptions) {
+                if (Array.isArray(product.relatedOptions)) {
+                    product._related_options = product.relatedOptions.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                } else if (typeof product.relatedOptions === 'string') {
+                    try {
+                        const parsed = JSON.parse(product.relatedOptions);
+                        if (Array.isArray(parsed)) product._related_options = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                    } catch (e) {
+                        const parts = product.relatedOptions.split(',').map((s: string) => Number(s.trim())).filter((n: number) => !isNaN(n));
+                        if (parts.length > 0) product._related_options = parts;
+                    }
+                }
+            }
+
+            // If not set from relatedOptions, try metaData fallback
+            if ((!product._related_options || product._related_options.length === 0) && product.metaData) {
+                let metaNodes: any[] = [];
+                if (Array.isArray(product.metaData)) metaNodes = product.metaData;
+                else if (product.metaData && Array.isArray(product.metaData.nodes)) metaNodes = product.metaData.nodes;
+                else metaNodes = [];
+                const related = (metaNodes || []).find((m: any) => m && (m.key === '_related_options' || m.key === 'related_options' || m.key === '_related_options_raw'));
+                if (related && related.value) {
+                    const raw = related.value;
+                    try {
+                        const parsed = JSON.parse(raw);
+                        if (Array.isArray(parsed)) product._related_options = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                    } catch (e) {
+                        if (typeof raw === 'string') {
+                            const parts = raw.split(',').map((s: string) => Number(s.trim())).filter((n: number) => !isNaN(n));
+                            if (parts.length > 0) product._related_options = parts;
+                        } else if (typeof raw === 'number') {
+                            product._related_options = [Number(raw)];
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            // ignore normalization errors
+        }
+
+        console.log('fetchOptionProductById: fetched product for ID', id, JSON.parse(JSON.stringify(product)));
+        return product;
+    } catch (error) {
+        console.error('Error fetching option product by ID:', error);
+        return null;
+    }
+}
+
 // Convenience wrapper to fetch related/optional products and map to a lighter shape
 export async function fetchRelatedProductsByIds(databaseIds: Array<number | string>) {
+    // Use single-purpose query for single ID case
+    if (databaseIds.length === 1) {
+        const singleProduct = await fetchOptionProductById(databaseIds[0]);
+        return singleProduct ? [singleProduct] : [];
+    }
+    
+    // Use multi-purpose query for multiple IDs
     const raw = await fetchProductsByDatabaseIds(databaseIds);
     if (!raw || raw.length === 0) return [];
 

@@ -6,8 +6,9 @@ import { fetchGraphQLProducts } from '../woocommerce';
 import { ProductSchema } from '../interfaces';
 
 function mapWooToProductSchema(product: any): ProductSchema {
-	// Lấy giá cho mọi loại sản phẩm (Simple, Variation, Group, External...)
+	// Enhanced price parsing with fallback from description
 	let price = 0;
+	
 	// WPGraphQL may provide price in different places depending on type
 	const parsePrice = (p: any) => {
 		if (p == null) return null;
@@ -34,13 +35,21 @@ function mapWooToProductSchema(product: any): ProductSchema {
 			}
 		}
 	}
-	const ensureUrl = (u: any) => (u && typeof u === 'string' && u.trim().length > 0) ? u : '/temp.webp';
+	
+	// Enhanced image handling with better fallbacks
+	const ensureUrl = (u: any) => {
+		if (u && typeof u === 'string' && u.trim().length > 0) {
+			return u;
+		}
+		return '/placeholder.svg'; // Consistent fallback image
+	};
+	
 	const gallery = (product.galleryImages && Array.isArray(product.galleryImages.nodes))
 		? product.galleryImages.nodes.map((n: any) => ensureUrl(n?.sourceUrl))
 			.filter(Boolean)
 		: [];
 	const featured = ensureUrl(product.image?.sourceUrl);
-	const pictures = gallery.length > 0 ? gallery : (featured ? [featured] : ['/temp.webp']);
+	const pictures = gallery.length > 0 ? gallery : (featured ? [featured] : ['/placeholder.svg']);
 
 	return {
 		title: product.name,
@@ -85,14 +94,23 @@ function mapWooToProductSchema(product: any): ProductSchema {
 }
 
 export const getProducts = async (slug: string) => {
-	const wooProducts = await fetchGraphQLProducts();
-	let filtered = wooProducts;
-	if (slug) {
-		filtered = wooProducts.filter((p: any) => p.slug === slug);
+	try {
+		const wooProducts = await fetchGraphQLProducts();
+		let filtered = wooProducts;
+		if (slug) {
+			filtered = wooProducts.filter((p: any) => p.slug === slug);
+		}
+		return {
+			items: filtered.map(mapWooToProductSchema)
+		};
+	} catch (error) {
+		console.error('getProducts: Failed to fetch products from GraphQL:', error);
+		// Return empty array with error info for debugging
+		return {
+			items: [],
+			error: error instanceof Error ? error.message : 'Unknown error fetching products'
+		};
 	}
-	return {
-		items: filtered.map(mapWooToProductSchema)
-	};
 };
 
 
@@ -101,27 +119,15 @@ export const getProductBySlug = async (slug: string) => {
 	return products.items && products.items.length > 0 ? products.items[0] : null;
 };
 
-// Minimal Contentful client shim for pages that import `client.getEntries`.
-// If the real `contentful` package and environment variables are present
-// the code below will attempt to use it. Otherwise it throws a helpful error.
+// Legacy Contentful client shim - DEPRECATED
+// This is kept for backward compatibility but should not be used for new features.
+// All new data access should go through WooCommerce GraphQL via lib/woocommerce.ts
 const client = {
 	getEntries: async (opts: any) => {
-		const space = process.env.CONTENTFUL_SPACE;
-		const token = process.env.CONTENTFUL_ACCESS_TOKEN;
-		if (space && token) {
-			try {
-				const contentful = await import('contentful');
-				if (contentful && contentful.createClient) {
-					const c = contentful.createClient({ space, accessToken: token });
-					return c.getEntries(opts);
-				}
-			} catch (e) {
-				// fall through to error below
-			}
-		}
-		throw new Error('Contentful client is not configured. Set CONTENTFUL_SPACE and CONTENTFUL_ACCESS_TOKEN and install the `contentful` SDK.');
+		console.warn('DEPRECATED: Contentful client.getEntries() is deprecated. Use WooCommerce GraphQL instead.');
+		throw new Error('Contentful client is deprecated. Use WooCommerce GraphQL via lib/woocommerce.ts instead.');
 	}
 };
 
-export { client };
+export { client, mapWooToProductSchema };
 

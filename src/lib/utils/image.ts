@@ -1,8 +1,8 @@
 export function normalizeImageUrl(url: unknown): string {
     try {
-        if (!url) return '/temp.webp'
+        if (!url) return '/placeholder.svg'
         const s = String(url).trim()
-        if (!s) return '/temp.webp'
+        if (!s) return '/placeholder.svg'
         // If it's already an absolute URL with protocol, return it
         if (/^https?:\/\//i.test(s)) return s
         // If it starts with //, prepend https:
@@ -14,10 +14,10 @@ export function normalizeImageUrl(url: unknown): string {
             const u = new URL(s)
             return u.toString()
         } catch (e) {
-            return '/temp.webp'
+            return '/placeholder.svg'
         }
     } catch (e) {
-        return '/temp.webp'
+        return '/placeholder.svg'
     }
 }
 

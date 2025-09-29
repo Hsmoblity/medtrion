@@ -181,7 +181,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
         [styles.priceUpdated]: internalState.priceUpdated,
         'border-4 border-black': highContrast,
         'transition-none': reducedMotion,
-        'border-green-500 bg-green-50': isSelected && !disabled,
+        'border-green-500 bg-green-50 shadow-lg ring-2 ring-green-200': isSelected && !disabled,
         'option-card-selected': isSelected,
         'option-card-disabled': disabled,
         'option-card-loading': loading,
@@ -407,7 +407,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
             <div className={`
               w-8 h-8 bg-gray-200 rounded-full 
               flex items-center justify-center text-gray-500 transform 
-              transition-transform duration-200
+              transition-all duration-200 hover:bg-gray-300
               ${reducedMotion ? 'transition-none' : 'scale-100 opacity-100'}
             `}>
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -463,12 +463,15 @@ const OptionCard: React.FC<OptionCardProps> = ({
           </h3>
 
           {/* Description */}
-          <p className={`
-            text-gray-700 mb-3 leading-relaxed
-            ${largeText ? 'text-xl' : 'text-base'}
-          `}>
-            {option.shortDescription || option.description}
-          </p>
+          <div 
+            className={`
+              text-gray-700 mb-3 leading-relaxed prose prose-sm max-w-none
+              ${largeText ? 'text-xl' : 'text-base'}
+            `}
+            dangerouslySetInnerHTML={{ 
+              __html: option.shortDescription || option.description || '' 
+            }}
+          />
 
           {/* Price */}
           {showPrice && (
@@ -542,7 +545,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
               w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200
               flex items-center justify-center gap-2
               ${isSelected 
-                ? 'bg-red-600 hover:bg-red-700 text-white border-2 border-red-600' 
+                ? 'bg-green-600 hover:bg-green-700 text-white border-2 border-green-600 shadow-md' 
                 : 'bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-600'
               }
               ${disabled || loading 
@@ -556,16 +559,16 @@ const OptionCard: React.FC<OptionCardProps> = ({
             {isSelected ? (
               <>
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
-                Remove from Configuration
+                Selected
               </>
             ) : (
               <>
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
                 </svg>
-                Add to Configuration
+                Select
               </>
             )}
           </button>

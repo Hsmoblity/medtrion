@@ -149,28 +149,30 @@ export async function fetchGraphQLProducts() {
     try {
         const data = await runClientRequest(query) as { products: { nodes: any[] } };
         const nodes = data.products.nodes;
-        // Normalize relatedOptions (server-provided field) into _related_options, falling back to metaData parsing
+        // Normalize relatedOptions (server-provided field) into both _related_options and relatedOptions
         try {
             nodes.forEach((p: any) => {
                 try {
+                    let normalizedOptions: number[] = [];
+                    
                     if (p.relatedOptions) {
                         // relatedOptions might be array of strings/numbers
                         if (Array.isArray(p.relatedOptions)) {
-                            p._related_options = p.relatedOptions.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                            normalizedOptions = p.relatedOptions.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
                         } else if (typeof p.relatedOptions === 'string') {
                             // sometimes GraphQL returns JSON string
                             try {
                                 const parsed = JSON.parse(p.relatedOptions);
-                                if (Array.isArray(parsed)) p._related_options = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                                if (Array.isArray(parsed)) normalizedOptions = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
                             } catch (e) {
                                 const parts = p.relatedOptions.split(',').map((s: string) => Number(s.trim())).filter((n: number) => !isNaN(n));
-                                if (parts.length > 0) p._related_options = parts;
+                                if (parts.length > 0) normalizedOptions = parts;
                             }
                         }
                     }
 
                     // If not set from relatedOptions, try metaData fallback
-                    if ((!p._related_options || p._related_options.length === 0) && p.metaData) {
+                    if (normalizedOptions.length === 0 && p.metaData) {
                         let metaNodes: any[] = [];
                         if (Array.isArray(p.metaData)) metaNodes = p.metaData;
                         else if (p.metaData && Array.isArray(p.metaData.nodes)) metaNodes = p.metaData.nodes;
@@ -180,19 +182,25 @@ export async function fetchGraphQLProducts() {
                             const raw = related.value;
                             try {
                                 const parsed = JSON.parse(raw);
-                                if (Array.isArray(parsed)) p._related_options = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                                if (Array.isArray(parsed)) normalizedOptions = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
                             } catch (e) {
                                 if (typeof raw === 'string') {
                                     const parts = raw.split(',').map((s: string) => Number(s.trim())).filter((n: number) => !isNaN(n));
-                                    if (parts.length > 0) p._related_options = parts;
+                                    if (parts.length > 0) normalizedOptions = parts;
                                 } else if (typeof raw === 'number') {
-                                    p._related_options = [Number(raw)];
+                                    normalizedOptions = [Number(raw)];
                                 }
                             }
                         }
                     }
+                    
+                    // Set both field names for backward compatibility and consistency
+                    p._related_options = normalizedOptions;
+                    p.relatedOptions = normalizedOptions;
                 } catch (e) {
                     // ignore per-item parse errors
+                    p._related_options = [];
+                    p.relatedOptions = [];
                 }
             });
         } catch (e) {
@@ -315,25 +323,27 @@ export async function fetchProductsByDatabaseIds(databaseIds: Array<number | str
     try {
         const data = await runClientRequest(query, { ids: idsList }) as { products: { nodes: any[] } };
         const nodes = data.products.nodes || [];
-        // Normalize relatedOptions (server-provided field) into _related_options, falling back to metaData parsing
+        // Normalize relatedOptions (server-provided field) into both _related_options and relatedOptions
         try {
             nodes.forEach((p: any) => {
                 try {
+                    let normalizedOptions: number[] = [];
+                    
                     if (p.relatedOptions) {
                         if (Array.isArray(p.relatedOptions)) {
-                            p._related_options = p.relatedOptions.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                            normalizedOptions = p.relatedOptions.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
                         } else if (typeof p.relatedOptions === 'string') {
                             try {
                                 const parsed = JSON.parse(p.relatedOptions);
-                                if (Array.isArray(parsed)) p._related_options = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                                if (Array.isArray(parsed)) normalizedOptions = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
                             } catch (e) {
                                 const parts = p.relatedOptions.split(',').map((s: string) => Number(s.trim())).filter((n: number) => !isNaN(n));
-                                if (parts.length > 0) p._related_options = parts;
+                                if (parts.length > 0) normalizedOptions = parts;
                             }
                         }
                     }
 
-                    if ((!p._related_options || p._related_options.length === 0) && p.metaData) {
+                    if (normalizedOptions.length === 0 && p.metaData) {
                         let metaNodes: any[] = [];
                         if (Array.isArray(p.metaData)) metaNodes = p.metaData;
                         else if (p.metaData && Array.isArray(p.metaData.nodes)) metaNodes = p.metaData.nodes;
@@ -343,19 +353,25 @@ export async function fetchProductsByDatabaseIds(databaseIds: Array<number | str
                             const raw = related.value;
                             try {
                                 const parsed = JSON.parse(raw);
-                                if (Array.isArray(parsed)) p._related_options = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                                if (Array.isArray(parsed)) normalizedOptions = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
                             } catch (e) {
                                 if (typeof raw === 'string') {
                                     const parts = raw.split(',').map((s: string) => Number(s.trim())).filter((n: number) => !isNaN(n));
-                                    if (parts.length > 0) p._related_options = parts;
+                                    if (parts.length > 0) normalizedOptions = parts;
                                 } else if (typeof raw === 'number') {
-                                    p._related_options = [Number(raw)];
+                                    normalizedOptions = [Number(raw)];
                                 }
                             }
                         }
                     }
+                    
+                    // Set both field names for backward compatibility and consistency
+                    p._related_options = normalizedOptions;
+                    p.relatedOptions = normalizedOptions;
                 } catch (e) {
                     // ignore
+                    p._related_options = [];
+                    p.relatedOptions = [];
                 }
             });
         } catch (e) {
@@ -399,24 +415,26 @@ export async function fetchOptionProductById(databaseId: number | string) {
 
         const product = data.product;
         
-        // Normalize relatedOptions (server-provided field) into _related_options, falling back to metaData parsing
+        // Normalize relatedOptions (server-provided field) into both _related_options and relatedOptions
         try {
+            let normalizedOptions: number[] = [];
+            
             if (product.relatedOptions) {
                 if (Array.isArray(product.relatedOptions)) {
-                    product._related_options = product.relatedOptions.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                    normalizedOptions = product.relatedOptions.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
                 } else if (typeof product.relatedOptions === 'string') {
                     try {
                         const parsed = JSON.parse(product.relatedOptions);
-                        if (Array.isArray(parsed)) product._related_options = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                        if (Array.isArray(parsed)) normalizedOptions = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
                     } catch (e) {
                         const parts = product.relatedOptions.split(',').map((s: string) => Number(s.trim())).filter((n: number) => !isNaN(n));
-                        if (parts.length > 0) product._related_options = parts;
+                        if (parts.length > 0) normalizedOptions = parts;
                     }
                 }
             }
 
             // If not set from relatedOptions, try metaData fallback
-            if ((!product._related_options || product._related_options.length === 0) && product.metaData) {
+            if (normalizedOptions.length === 0 && product.metaData) {
                 let metaNodes: any[] = [];
                 if (Array.isArray(product.metaData)) metaNodes = product.metaData;
                 else if (product.metaData && Array.isArray(product.metaData.nodes)) metaNodes = product.metaData.nodes;
@@ -426,19 +444,25 @@ export async function fetchOptionProductById(databaseId: number | string) {
                     const raw = related.value;
                     try {
                         const parsed = JSON.parse(raw);
-                        if (Array.isArray(parsed)) product._related_options = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+                        if (Array.isArray(parsed)) normalizedOptions = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
                     } catch (e) {
                         if (typeof raw === 'string') {
                             const parts = raw.split(',').map((s: string) => Number(s.trim())).filter((n: number) => !isNaN(n));
-                            if (parts.length > 0) product._related_options = parts;
+                            if (parts.length > 0) normalizedOptions = parts;
                         } else if (typeof raw === 'number') {
-                            product._related_options = [Number(raw)];
+                            normalizedOptions = [Number(raw)];
                         }
                     }
                 }
             }
+            
+            // Set both field names for backward compatibility and consistency
+            product._related_options = normalizedOptions;
+            product.relatedOptions = normalizedOptions;
         } catch (e) {
             // ignore normalization errors
+            product._related_options = [];
+            product.relatedOptions = [];
         }
 
         console.log('fetchOptionProductById: fetched product for ID', id, JSON.parse(JSON.stringify(product)));

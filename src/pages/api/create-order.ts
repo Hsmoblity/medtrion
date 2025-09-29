@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { GraphQLClient, gql } from 'graphql-request';
+import { GraphQLClient } from 'graphql-request';
 import fetch from 'node-fetch';
+import { CREATE_HEADLESS_ORDER } from '../../lib/graphql/queries';
 
 const WP_GRAPHQL_URL = process.env.WP_GRAPHQL_URL || '';
 let client: GraphQLClient | null = null;
@@ -25,14 +26,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { lineItems, customer } = req.body;
 
-  const mutation = gql`
-    mutation CreateHeadlessOrder($input: CreateHeadlessOrderInput!) {
-      createHeadlessOrder(input: $input) {
-        order { id orderNumber }
-        errors
-      }
-    }
-  `;
 
   const origin = (req.headers.origin as string) || (process.env.NEXT_PUBLIC_BASE_URL || '');
   // If front-end only provided minimal cart items (cookies store only slug+quantity),
@@ -247,7 +240,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'WP_GRAPHQL_URL is not configured or invalid on the server.' });
     }
 
-    const data = await client.request(mutation, { input }) as any;
+    const data = await client.request(CREATE_HEADLESS_ORDER, { input }) as any;
     const resp = data.createHeadlessOrder;
     console.debug('create-order: WP response', resp);
 

@@ -242,7 +242,7 @@ export function logValidationResults(component: string, results: ValidationResul
 }
 
 /**
- * Filter products to only include configurable products (products with non-empty relatedOptions)
+ * Filter products to only include configurable main products (products with non-empty relatedOptions and slug not containing 'option')
  */
 export function filterConfigurableProducts(products: ProductSchema[]): ProductSchema[] {
   return products.filter(product => {
@@ -251,10 +251,18 @@ export function filterConfigurableProducts(products: ProductSchema[]): ProductSc
       return false;
     }
     
+    // Exclude products with 'option' in slug (these are option products, not main products)
+    if (product.slug.toLowerCase().includes('option')) {
+      return false;
+    }
+    
     // Check if product has configurable options
-    const hasRelatedOptions = product.relatedOptions && 
+    const hasRelatedOptions = (product.relatedOptions && 
       Array.isArray(product.relatedOptions) && 
-      product.relatedOptions.length > 0;
+      product.relatedOptions.length > 0) ||
+      (product._related_options && 
+      Array.isArray(product._related_options) && 
+      product._related_options.length > 0);
     
     return hasRelatedOptions;
   });

@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { ProductSchema } from '../lib/interfaces/schema';
 import { ProductCardView, mapToProductCardView, validateProductCardViews } from '../lib/interfaces/homepage';
-import { gql } from 'graphql-request';
 import { runClientRequest } from '../lib/woocommerce';
 import { validateProductSchema, sanitizeForSSR, filterConfigurableProducts, handleInsufficientConfigurableProducts } from '../lib/utils/data-validation';
 import { mapWooToProductSchema } from '../lib/contentful/contentful';
+import { GET_FEATURED_PRODUCTS } from '../lib/graphql/queries';
 
 interface HomepageState {
   featuredProducts: ProductCardView[];
@@ -13,43 +13,6 @@ interface HomepageState {
   fetchFeaturedProducts: () => Promise<void>;
 }
 
-const GET_FEATURED_PRODUCTS_QUERY = gql`
-  query GetFeaturedProducts {
-    products(where: { typeIn: [SIMPLE] }, first: 4) {
-      nodes {
-        id
-        databaseId
-        name
-        slug
-        description
-        shortDescription
-        productSpecifications
-        relatedOptions
-        image {
-          sourceUrl
-        }
-        galleryImages(first: 10) {
-          nodes {
-            sourceUrl
-          }
-        }
-        ... on SimpleProduct {
-          price
-          regularPrice
-          salePrice
-        }
-        ... on ProductWithPricing {
-          price
-          regularPrice
-          salePrice
-        }
-        ... on ExternalProduct {
-          price
-        }
-      }
-    }
-  }
-`;
 
 export const useHomepageStore = create<HomepageState>((set) => ({
   featuredProducts: [],
@@ -58,7 +21,7 @@ export const useHomepageStore = create<HomepageState>((set) => ({
   fetchFeaturedProducts: async () => {
     set({ loading: true, error: null });
     try {
-      const data = await runClientRequest(GET_FEATURED_PRODUCTS_QUERY) as { products: { nodes: ProductSchema[] } };
+      const data = await runClientRequest(GET_FEATURED_PRODUCTS) as { products: { nodes: ProductSchema[] } };
       
       // Map raw GraphQL data to ProductSchema first
       const productSchemas = data.products.nodes

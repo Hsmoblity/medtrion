@@ -20,6 +20,7 @@ export interface ProductSchema {
     attributes?: Array<{ id?: string; name: string; value: string }>
   }>;
   options?: Array<{ name: string; type?: string; selected?: boolean; quantity?: number; value?: string }>;
+  relatedOptions?: Array<number | string>;
   _related_options?: Array<number | string>;
   _related_options_products?: Array<{
     id?: string;

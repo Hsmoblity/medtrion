@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { CartProduct } from "lib/interfaces";
 import Stripe from "stripe";
-import { GraphQLClient, gql } from 'graphql-request';
+import { GraphQLClient } from 'graphql-request';
+import { CREATE_HEADLESS_STRIPE_SESSION } from '../../lib/graphql/queries';
 
 if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.trim() === "") {
   console.warn('STRIPE_SECRET_KEY is not set. /api/stripe will attempt to delegate session creation to WP if supported.');
@@ -122,19 +123,6 @@ export default async function handler(
       // Expectation: WPGraphQL has a mutation (custom) that accepts line items and returns { sessionId, publishableKey }
       // We'll attempt a best-effort call to a mutation named `createHeadlessStripeSession`.
 
-      const mutation = gql`
-        mutation CreateHeadlessStripeSession($input: HeadlessStripeInput!) {
-          createHeadlessStripeSession(input: $input) {
-            sessionId
-            publishableKey
-            order {
-              id
-              orderNumber
-            }
-            errors
-          }
-        }
-      `;
 
       const input = {
         lineItems: items.map((it: any) => ({
@@ -155,7 +143,7 @@ export default async function handler(
           res.status(500).json({ message: 'WP_GRAPHQL_URL not configured or invalid; cannot create session via WP.' });
           return;
         }
-        const data: any = await wpClient.request(mutation, { input });
+        const data: any = await wpClient.request(CREATE_HEADLESS_STRIPE_SESSION, { input });
         const resp = data?.createHeadlessStripeSession;
 
         if (!resp) {

@@ -254,6 +254,7 @@ export function normalizeSlugQueryResponse(wooProduct: any): any {
     productPictures: galleryImages,
     variations,
     options: [],
+    relatedOptions: relatedOptions,
     _related_options: relatedOptions,
     _related_options_products: [] as any[],
     

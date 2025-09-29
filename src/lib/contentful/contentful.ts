@@ -88,6 +88,38 @@ function mapWooToProductSchema(product: any): ProductSchema {
 				return [];
 			} catch (e) { return []; }
 		})(),
+		// Map to camelCase relatedOptions for consistency with TypeScript conventions
+		relatedOptions: (() => {
+			// First try to get from GraphQL relatedOptions field
+			if (product && Array.isArray(product.relatedOptions) && product.relatedOptions.length > 0) {
+				return product.relatedOptions.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+			}
+			// Fall back to _related_options if available
+			if (product && Array.isArray(product._related_options) && product._related_options.length > 0) {
+				return product._related_options;
+			}
+			// Parse from meta data as last resort
+			try {
+				const candidates = [product.meta, product.metaData, product.metaFields, product._meta];
+				for (const c of candidates) {
+					if (!c) continue;
+					if (Array.isArray(c)) {
+						const found = c.find((m: any) => m?.key === '_related_options' || m?.metaKey === '_related_options');
+						if (found) {
+							const v = found?.value ?? found?.metaValue ?? found?.valueRaw;
+							try { const parsed = JSON.parse(String(v)); return Array.isArray(parsed) ? parsed : []; } catch (e) { return String(v).split(',').map(x => x.trim()).filter(Boolean); }
+						}
+					}
+					if (typeof c === 'object') {
+						const val = c['_related_options'] ?? c['_related_options_raw'] ?? c['_related_options_value'];
+						if (val != null) {
+							try { const parsed = JSON.parse(String(val)); return Array.isArray(parsed) ? parsed : []; } catch (e) { return String(val).split(',').map(x => x.trim()).filter(Boolean); }
+						}
+					}
+				}
+				return [];
+			} catch (e) { return []; }
+		})(),
 		// Include variations (always an empty array for simple products)
 		variations: [],
 	};

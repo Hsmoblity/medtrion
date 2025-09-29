@@ -84,6 +84,24 @@ describe('Configurable Products Filter', () => {
     {
       id: '5',
       databaseId: 5,
+      slug: 'option-product-1',
+      title: 'Option Product 1',
+      description: 'An option product (should be excluded)',
+      shortDescription: 'Option product',
+      price: 200,
+      regularPrice: 200,
+      salePrice: null,
+      featuredImage: 'image5.jpg',
+      galleryImages: [],
+      productSpecifications: '',
+      relatedOptions: [6, 7], // Has configurable options but slug contains 'option'
+      _related_options: [6, 7],
+      affiliate: false,
+      type: 'simple'
+    },
+    {
+      id: '6',
+      databaseId: 6,
       slug: 'invalid-product',
       title: '', // Invalid - no title
       description: 'Invalid product',
@@ -122,6 +140,12 @@ describe('Configurable Products Filter', () => {
       const result = filterConfigurableProducts(mockProducts);
       
       expect(result.find(p => p.slug === 'null-options-product')).toBeUndefined();
+    });
+
+    it('should exclude products with "option" in slug (option products)', () => {
+      const result = filterConfigurableProducts(mockProducts);
+      
+      expect(result.find(p => p.slug === 'option-product-1')).toBeUndefined();
     });
 
     it('should exclude invalid products (missing title or slug)', () => {

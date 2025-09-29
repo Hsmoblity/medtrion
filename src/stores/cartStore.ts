@@ -14,6 +14,7 @@ interface CartStore {
   cart: CartProduct[]
   cartVisibility: boolean
   editStatuses: Record<string, EditStatus>
+  isHydrated: boolean
   
   // Cart Actions
   addToCart: (product: Omit<CartProduct, 'cartItemId'>) => void
@@ -27,6 +28,7 @@ interface CartStore {
   // UI Actions
   toggleCartVisibility: () => void
   setCartVisibility: (visible: boolean) => void
+  setHydrated: () => void
   
   // Edit-specific Actions
   findCartItemById: (cartItemId: string) => CartProduct | undefined
@@ -48,6 +50,7 @@ export const useCartStore = create<CartStore>()(
       cart: [],
       cartVisibility: false,
       editStatuses: {},
+      isHydrated: false,
       
       // Cart Actions
       addToCart: (product) => set((state) => {
@@ -121,6 +124,10 @@ export const useCartStore = create<CartStore>()(
       
       setCartVisibility: (visible) => set({
         cartVisibility: visible
+      }),
+      
+      setHydrated: () => set({
+        isHydrated: true
       }),
       
       // Edit-specific Actions
@@ -227,17 +234,59 @@ export const useCartStore = create<CartStore>()(
         cart: state.cart // Only persist cart data, not UI state
       }),
       version: 1, // For future migrations
+      skipHydration: true, // Prevent automatic hydration to avoid SSR mismatches
+      onRehydrateStorage: () => (state) => {
+        // Mark as hydrated after rehydration completes
+        if (state) {
+          state.isHydrated = true
+        }
+      }
     }
   )
 )
 
-// Selectors for better performance
-// Selectors for better performance
-export const useCartCount = () => useCartStore(state => state.getCartCount())
-export const useCartTotal = () => useCartStore(state => state.getCartTotal())
+// Selectors for better performance with hydration safety
+export const useCartCount = () => {
+  const count = useCartStore(state => state.getCartCount())
+  const isHydrated = useCartStore(state => state.isHydrated)
+  return isHydrated ? count : 0
+}
+
+export const useCartTotal = () => {
+  const total = useCartStore(state => state.getCartTotal())
+  const isHydrated = useCartStore(state => state.isHydrated)
+  return isHydrated ? total : 0
+}
+
 export const useCartVisibility = () => useCartStore(state => state.cartVisibility)
-export const useCartItems = () => useCartStore(state => state.cart)
+
+export const useCartItems = () => {
+  const items = useCartStore(state => state.cart)
+  const isHydrated = useCartStore(state => state.isHydrated)
+  return isHydrated ? items : []
+}
+
 export const useEditStatus = (cartItemId: string) => useCartStore(state => state.getEditStatus(cartItemId))
+
+export const useIsHydrated = () => useCartStore(state => state.isHydrated)
+
+// Hydration effect - ensure store is hydrated on client
+if (typeof window !== 'undefined') {
+  // Trigger hydration after component mount
+  const hydrateStore = () => {
+    const store = useCartStore.getState()
+    if (!store.isHydrated) {
+      store.setHydrated()
+    }
+  }
+  
+  // Hydrate immediately if DOM is ready
+  if (document.readyState === 'complete') {
+    hydrateStore()
+  } else {
+    window.addEventListener('load', hydrateStore)
+  }
+}
 
 // Cross-tab synchronization
 if (typeof window !== 'undefined') {

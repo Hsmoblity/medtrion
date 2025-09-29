@@ -5,13 +5,14 @@ import { MdShoppingCart } from "react-icons/md";
 import { DrawOutlineButton } from "components/btn";
 import Drawer from "components/drawer";
 import Link from "next/link";
-import { useCartStore, useCartCount } from "stores/cartStore";
+import { useCartStore, useCartCount, useIsHydrated } from "stores/cartStore";
 import { handleAnchorNavigation } from "lib/utils/navigation";
 import ClientOnly from 'components/ClientOnly';
 
 const Header = () => {
   const toggleCartVisibility = useCartStore(state => state.toggleCartVisibility);
   const cartLength = useCartCount();
+  const isHydrated = useIsHydrated();
   const router = useRouter();
   const menuItems = [
     { name: "Shop All", href: "/products" },
@@ -77,7 +78,7 @@ const Header = () => {
                 0
               </span>
             }>
-              {cartLength > 0 && (
+              {isHydrated && cartLength > 0 && (
                 <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 -left-1 -bottom-1 bg-white">
                   {cartLength}
                 </span>
@@ -133,7 +134,7 @@ const Header = () => {
                   0
                 </span>
               }>
-                {cartLength > 0 && (
+                {isHydrated && cartLength > 0 && (
                   <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 -left-1 -bottom-1 bg-white">
                     {cartLength}
                   </span>

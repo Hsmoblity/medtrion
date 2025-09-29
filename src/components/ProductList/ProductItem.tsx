@@ -3,7 +3,8 @@
 import { AnimatedSubscribeButton } from "components/btn";
 import { Lens } from "components/PageLayout/lens";
 import { Carousel, CarouselContent, CarouselItem } from "components/pictureCarousal";
-import CartContext from "contexts/cartItemsContext";
+import { useCartStore } from "stores/cartStore";
+import { PrimaryButton } from 'components/ui';
 import ProductOptions from 'components/ProductOptions';
 import { fetchProductsByDatabaseIds, fetchRelatedProductsByIds } from 'lib/woocommerce';
 import Link from "next/link";
@@ -11,7 +12,6 @@ import CartVisibilityContext from "contexts/cartVisibilityContext";
 import { useContext, useState } from "react";
 import { useRouter } from 'next/navigation';
 import { FaCartPlus, FaShoppingCart } from "react-icons/fa";
-import Types from "reducers/cart/types";
 import dynamic from 'next/dynamic';
 import { Document } from "@contentful/rich-text-types";
 const RichContent = dynamic(() => import('components/RichContent'), { ssr: false });
@@ -57,7 +57,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
   const [hovering, setHovering] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<string | null>(null);
   const { toggleCartVisibility } = useContext(CartVisibilityContext);
-  const { dispatch } = useContext(CartContext); // Use CartContext to get the dispatch function
+  const addToCart = useCartStore(state => state.addToCart);
   const router = useRouter();
   // Render product specifications depending on type: Contentful Document vs HTML string
   // renderSpecifications will be rendered client-side by RichContent to avoid SSR/CSR mismatch
@@ -73,30 +73,25 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
       return n;
     };
 
-    const cartProduct: any = {
+    const cartProduct = {
       slug: product.slug,
       title: product.title,
       price: parsePrice(product.price),
-      cartItemId: uuid(),
       quantity: 1,
-      productPictures: product.productPictures,
-      affiliate: product.affiliate,
-      productId: product.productId,
-      variations: product.variations,
+      productPictures: product.productPictures || [],
+      affiliate: product.affiliate || false,
+      productId: product.productId || undefined,
+      variationId: selectedVariation || undefined,
+      options: (selectedOptions && Array.isArray(selectedOptions) && selectedOptions.length > 0) ? selectedOptions : [],
+      // Required CartProduct fields
+      description: product.description || '',
+      shortDescription: product.shortDescription || '',
+      featuredImage: product.featuredImage || '',
+      productSpecifications: product.productSpecifications || ''
     };
 
-    if (selectedVariation) {
-      cartProduct.variationId = selectedVariation;
-    }
-
-    if (selectedOptions && Array.isArray(selectedOptions) && selectedOptions.length > 0) {
-      cartProduct.options = selectedOptions;
-    }
-
-    dispatch({
-      type: Types.addToCart,  // Action type for adding the product to the cart
-      payload: cartProduct,
-    });
+    // Add to cart using Zustand store (cartItemId will be generated automatically)
+    addToCart(cartProduct);
     // Previously opened the mini-cart. Now navigate to cart page.
     router.push('/cart');
   };
@@ -229,17 +224,36 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
               <p className="text-3xl font-extrabold text-blue-600">${(Number((product as any).price) || 0).toFixed(2)}</p>
               {(product as any).regularPrice && <p className="text-sm text-gray-500 line-through">${Number((product as any).regularPrice || 0).toFixed(2)}</p>}
             </div>
-            <div className="mb-3">
+            <div className="mb-3 space-y-3">
               {(product as any).affiliate ? (
                 <a href="#" className="block w-full text-center bg-green-600 text-white py-3 rounded">Learn More</a>
               ) : (
-                <button onClick={() => {
-                  if (product._related_options && Array.isArray(product._related_options) && product._related_options.length > 0) {
-                    router.push(`/product/${product.slug}/options`);
-                    return;
-                  }
-                  openOptionsModal();
-                }} className="w-full bg-green-600 text-white py-3 rounded">Add to Cart</button>
+                <>
+                  {/* Configure Button - Primary Action */}
+                  <PrimaryButton
+                    fullWidth
+                    onClick={() => {
+                      // Route to the new configurator page
+                      router.push(`/product/${product.slug}/configure`);
+                    }}
+                  >
+                    Configure This Model
+                  </PrimaryButton>
+                  
+                  {/* Add to Cart Button - Secondary Action */}
+                  <button 
+                    onClick={() => {
+                      if (product._related_options && Array.isArray(product._related_options) && product._related_options.length > 0) {
+                        router.push(`/product/${product.slug}/options`);
+                        return;
+                      }
+                      openOptionsModal();
+                    }} 
+                    className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  >
+                    Quick Add to Cart
+                  </button>
+                </>
               )}
             </div>
 

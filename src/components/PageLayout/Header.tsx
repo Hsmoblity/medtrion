@@ -1,29 +1,25 @@
 import Cart from "./Cart/Cart";
-import { useCallback, useContext, useEffect, useState } from "react";
-import CartItemsContext from "contexts/cartItemsContext";
-import CartVisibilityContext from "contexts/cartVisibilityContext";
-import { useRouter } from 'next/navigation';
-import { CartProduct } from "lib/interfaces";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from 'next/router';
 import { MdShoppingCart } from "react-icons/md";
 import { DrawOutlineButton } from "components/btn";
 import Drawer from "components/drawer";
 import Link from "next/link";
+import { useCartStore, useCartCount } from "stores/cartStore";
+import { handleAnchorNavigation } from "lib/utils/navigation";
+import ClientOnly from 'components/ClientOnly';
 
 const Header = () => {
-  const { cart } = useContext(CartItemsContext);
-  const { toggleCartVisibility } = useContext(CartVisibilityContext);
+  const toggleCartVisibility = useCartStore(state => state.toggleCartVisibility);
+  const cartLength = useCartCount();
   const router = useRouter();
-  const cartLength = cart.reduce(
-    (count: number, item: CartProduct) =>
-      (count += item.quantity ? item.quantity : 1),
-    0
-  );
   const menuItems = [
-    { name: "Shop All", href: "#shop" },
+    { name: "Shop All", href: "/products" },
+    { name: "Products", href: "/products" },
     { name: "Acorn Stairlifts", href: "/product/acorn-stairlifts-acorn-180-curved-stairlift" },
-    { name: "Contact Us", href: "#contact-us" },
-    { name: "Reviews", href: "#reviews" },
-    { name: "FAQs", href: "#faq" },
+    { name: "Contact Us", href: "/#contact-us" },
+    { name: "Reviews", href: "/#reviews" },
+    { name: "FAQs", href: "/#faq" },
     { name: "Blogs", href: "/blogs" },
   ];
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -76,11 +72,17 @@ const Header = () => {
               className="ml-2"
               size={32}
             />
-            {cartLength > 0 && (
-              <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 -left-1 -bottom-1 bg-white">
-                {cartLength}
+            <ClientOnly fallback={
+              <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 -left-1 -bottom-1 bg-white opacity-0">
+                0
               </span>
-            )}
+            }>
+              {cartLength > 0 && (
+                <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 -left-1 -bottom-1 bg-white">
+                  {cartLength}
+                </span>
+              )}
+            </ClientOnly>
           </button>
           <Drawer />
         </div>
@@ -100,9 +102,16 @@ const Header = () => {
           {/* Navigation Menu */}
           <nav className="flex space-x-6 text-lg mt-2">
             {menuItems.map((item, index) => (
-              <Link key={index} href={item.href} className="uppercase font-bold font-poppins tracking-widest">
-                <DrawOutlineButton>{item.name}</DrawOutlineButton>
-              </Link>
+              <DrawOutlineButton
+                key={index} 
+                onClick={(e: React.MouseEvent) => {
+                  e.preventDefault();
+                  handleAnchorNavigation(item.href, router, item.name);
+                }}
+                className="uppercase font-bold font-poppins tracking-widest"
+              >
+                {item.name}
+              </DrawOutlineButton>
             ))}
           </nav>
 
@@ -115,16 +124,21 @@ const Header = () => {
 
 
             <button onClick={() => router.push('/cart')} className="relative z-50 outline-0 text-white flex flex-row" >
-
               <MdShoppingCart
                 color="black"
                 size={40}
               />
-              {cartLength > 0 && (
-                <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 -left-1 -bottom-1 bg-white">
-                  {cartLength}
+              <ClientOnly fallback={
+                <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 -left-1 -bottom-1 bg-white opacity-0">
+                  0
                 </span>
-              )}
+              }>
+                {cartLength > 0 && (
+                  <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 -left-1 -bottom-1 bg-white">
+                    {cartLength}
+                  </span>
+                )}
+              </ClientOnly>
             </button>
           </div>
         </div>

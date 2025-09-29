@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useAnimate, stagger } from "framer-motion";
 import { RiMenu4Line } from "react-icons/ri";
 import Link from "next/link";
+import { useRouter } from 'next/router';
+import { handleAnchorNavigation } from "lib/utils/navigation";
 
 
 interface PathProps {
@@ -66,12 +68,13 @@ function useMenuAnimation(isOpen: boolean) {
             ],
             ...menuAnimations
         ]);
-    }, [isOpen]);
+    }, [isOpen, animate]);
 
     return scope;
 }
 
 const Drawer: React.FC = () => {
+    const router = useRouter();
     const toggleDrawer = () => {
         setIsOpen(!isOpen);
     };
@@ -82,13 +85,13 @@ const Drawer: React.FC = () => {
             ref={scope}
             className="relative bg-transparent z-50 overflow-hidden pb-24"
         >
-            <nav className="fixed top-0 -left-10 h-full w-11/12 bg-[#f1ebe0] transform -translate-x-full will-change-transform">
-                <div className="flex flex-col relative z-40 pt-4 pl-10 font-poppins text-center  text-stone-400 ">
+            <nav className="fixed top-0 -left-10 h-full w-11/12 bg-[#f1ebe0] transform -translate-x-full will-change-transform shadow-2xl">
+                <div className="flex flex-col relative z-40 pt-4 pl-10 font-poppins text-center text-stone-400">
                     <div className="flex flex-col md:gap-3 gap-2 relative">
                         <div className="flex md:hidden items-center ml-6 mt-4">
                             <img
                                 src="/Logo.png"
-                                alt="Logo"
+                                alt="HS Mobility Logo"
                                 className="md:h-10 h-8 object-cover"
                             />
                         </div>
@@ -101,31 +104,108 @@ const Drawer: React.FC = () => {
                         /> */}
                     </div>
                 </div>
-                <ul className="flex flex-col gap-5 pt-8 pl-8 text-black font-bold text-xl border-l-[0.5px] m-5 ">
-
-
-                    <li className="p-2.5 transform-origin-left-5 will-change-transform-opacity-filter">
-                        <Link aria-label="link to how it works section" href="#shop" onClick={toggleDrawer}>Shop All</Link>
+                <ul className="flex flex-col gap-5 pt-8 pl-8 text-black font-bold text-xl border-l border-gray-300 m-5">
+                    <li className="p-2.5 transform-origin-left-5 will-change-transform-opacity-filter hover:bg-gray-100 rounded-md transition-colors duration-200">
+                        <button 
+                            aria-label="view all products" 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                toggleDrawer();
+                                handleAnchorNavigation("/products", router, "Shop All");
+                            }}
+                            className="block text-left w-full"
+                        >
+                            Shop All
+                        </button>
+                    </li>
+                    <li className="p-2.5 transform-origin-left-5 will-change-transform-opacity-filter hover:bg-gray-100 rounded-md transition-colors duration-200">
+                        <button 
+                            aria-label="view all products" 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                toggleDrawer();
+                                handleAnchorNavigation("/products", router, "Products");
+                            }}
+                            className="block text-left w-full"
+                        >
+                            Products
+                        </button>
+                    </li>
+                    <li className="p-2.5 transform-origin-left-5 will-change-transform-opacity-filter hover:bg-gray-100 rounded-md transition-colors duration-200">
+                        <button 
+                            aria-label="check Acorn Stairlift designs" 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                toggleDrawer();
+                                handleAnchorNavigation("/product/acorn-stairlifts-acorn-180-curved-stairlift", router, "Acorn Stairlift");
+                            }}
+                            className="block text-left w-full"
+                        >
+                            Acorn Stairlift
+                        </button>
+                    </li>
+                    <li className="p-2.5 transform-origin-left-5 will-change-transform-opacity-filter hover:bg-gray-100 rounded-md transition-colors duration-200">
+                        <button 
+                            aria-label="Check out our reviews" 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                toggleDrawer();
+                                handleAnchorNavigation("/#reviews", router, "Reviews");
+                            }}
+                            className="block text-left w-full"
+                        >
+                            Reviews
+                        </button>
+                    </li>
+                    <li className="p-2.5 transform-origin-left-5 will-change-transform-opacity-filter hover:bg-gray-100 rounded-md transition-colors duration-200">
+                        <button 
+                            aria-label="Frequently asked Questions" 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                toggleDrawer();
+                                handleAnchorNavigation("/#faq", router, "FAQs");
+                            }}
+                            className="block text-left w-full"
+                        >
+                            FAQs
+                        </button>
+                    </li>
+                    <li className="p-2.5 transform-origin-left-5 will-change-transform-opacity-filter hover:bg-gray-100 rounded-md transition-colors duration-200">
+                        <button 
+                            aria-label="Read our blogs" 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                toggleDrawer();
+                                handleAnchorNavigation("/blogs", router, "Blogs");
+                            }}
+                            className="block text-left w-full"
+                        >
+                            Blogs
+                        </button>
+                    </li>
+                    <li className="p-2.5 transform-origin-left-5 will-change-transform-opacity-filter hover:bg-gray-100 rounded-md transition-colors duration-200">
+                        <button 
+                            aria-label="Contact us" 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                toggleDrawer();
+                                handleAnchorNavigation("/#contact-us", router, "Contact Us");
+                            }}
+                            className="block text-left w-full"
+                        >
+                            Contact Us
+                        </button>
                     </li>
                     <li className="p-2.5 transform-origin-left-5 will-change-transform-opacity-filter">
-                        <Link aria-label="check designs" href="/product/acorn-stairlifts-acorn-180-curved-stairlift" onClick={toggleDrawer}>Acorn Stairlift</Link>
-                    </li>
-                    <li className="p-2.5 transform-origin-left-5 will-change-transform-opacity-filter">
-                        <Link aria-label="Check out our blogs" href="#reviews" onClick={toggleDrawer}>Reviews</Link>
-                    </li>
-                    <li className="p-2.5 transform-origin-left-5 will-change-transform-opacity-filter">
-                        <Link aria-label="Frequently asked Questions" href="#faq" onClick={toggleDrawer}>FAQs</Link>
-                    </li>
-                    <li className="p-2.5 transform-origin-left-5 will-change-transform-opacity-filter">
-                        <div className="text-left">
-                            <h2 className="text-xl font-bold mb-4">Contact Us:</h2>
-                            <p className="text-lg ">
+                        <div className="text-left bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <h2 className="text-xl font-bold mb-4 text-gray-800">Contact Us:</h2>
+                            <p className="text-lg text-gray-700 leading-relaxed">
                                 3495 Rebecca St<br /> #207 Oakville, ON<br />L6L 6X9<br />
                                 <br />
-                                <Link href="tel:+19053301774" className="text-xl text-sky-400">
+                                <Link href="tel:+19053301774" className="text-xl text-blue-600 hover:text-blue-800 transition-colors duration-200">
                                     +1 (905) 330-1774
                                 </Link><br />
-                                <Link href="mailto:Info@hsmobility.ca" className="text-xl text-sky-400">Info@hsmobility.ca</Link><br />
+                                <Link href="mailto:Info@hsmobility.ca" className="text-xl text-blue-600 hover:text-blue-800 transition-colors duration-200">Info@hsmobility.ca</Link><br />
                             </p>
                         </div>
                     </li>
@@ -133,9 +213,10 @@ const Drawer: React.FC = () => {
             </nav>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className=" w-12 h-12 rounded-full bg-transparent p-2.5"
+                className="w-12 h-12 rounded-full bg-transparent p-2.5 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
+                aria-label="Toggle navigation menu"
             >
-                <RiMenu4Line size={32} />
+                <RiMenu4Line size={32} className="text-gray-700" />
             </button>
         </div>
     );

@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { FaFacebook } from "react-icons/fa";
+import { useRouter } from 'next/router';
+import { handleAnchorNavigation } from "lib/utils/navigation";
 
 const Footer = () => {
   const d = new Date();
+  const router = useRouter();
 
   return (
     <div className="w-full bg-inherit">
@@ -17,9 +20,15 @@ const Footer = () => {
                 </Link>
               </li>
               <li className="my-2">
-                <Link href="#shop" className="text-base leading-6 text-gray-500 hover:text-gray-900">
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleAnchorNavigation("/#shop", router);
+                  }}
+                  className="text-base leading-6 text-gray-500 hover:text-gray-900 text-left"
+                >
                   Shop All
-                </Link>
+                </button>
               </li>
               <li className="my-2">
                 <Link href="/product/acorn-stairlifts-acorn-180-curved-stairlift" className="text-base leading-6 text-gray-500 hover:text-gray-900">
@@ -27,15 +36,27 @@ const Footer = () => {
                 </Link>
               </li>
               <li className="my-2">
-                <Link href="#reviews" className="text-base leading-6 text-gray-500 hover:text-gray-900">
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleAnchorNavigation("/#reviews", router);
+                  }}
+                  className="text-base leading-6 text-gray-500 hover:text-gray-900 text-left"
+                >
                   Reviews
-                </Link>
+                </button>
               </li>
 
               <li className="my-2">
-                <Link href="#faq" className="text-base leading-6 text-gray-500 hover:text-gray-900">
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleAnchorNavigation("/#faq", router);
+                  }}
+                  className="text-base leading-6 text-gray-500 hover:text-gray-900 text-left"
+                >
                   Faq
-                </Link>
+                </button>
               </li>
             </ul>
           </div>

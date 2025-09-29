@@ -9,8 +9,8 @@ const BlogsList = ({ blogs }: BlogsPreProps) => {
 
 
     return (
-        <div >
-            <div className="max-w-7xl mt-20 text-4xl text-red-500 font-poppins font-medium pt-20 md:ml-10 mx-4 w-full">
+        <div>
+            <div className="max-w-7xl mt-20 text-4xl text-gray-800 font-poppins font-semibold pt-20 md:ml-10 mx-4 w-full">
                 Latest Blogs
             </div>
             <BlogsPre blogs={blogs} />

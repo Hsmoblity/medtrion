@@ -61,29 +61,29 @@ function FAQ() {
                             />
                         </div>
                         <div className="flex flex-col items-center text-center md:text-left">
-                            <div className="bg-gray-300 p-4 rounded-lg">
-                                <h3 className="text-xl font-semibold font-poppins text-gray-800">Straight Stairlift Installation</h3>
-                                <p className="text-base text-gray-600 mt-2">
+                            <div className="bg-gray-100 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+                                <h3 className="text-xl font-semibold font-poppins text-gray-800 mb-3">Straight Stairlift Installation</h3>
+                                <p className="text-base text-gray-600 leading-relaxed">
                                     All stairlifts fit directly to the staircase, not the wall, so installation is quick and mess-free.
                                 </p>
                             </div>
                         </div>
                         <div className="flex flex-col items-center text-center md:text-left">
-                            <div className="bg-gray-300 p-4 rounded-lg">
-                                <h3 className="text-xl font-semibold font-poppins text-gray-800">Safety and Convenience</h3>
-                                <p className="text-base text-gray-600 mt-2">
+                            <div className="bg-gray-100 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+                                <h3 className="text-xl font-semibold font-poppins text-gray-800 mb-3">Safety and Convenience</h3>
+                                <p className="text-base text-gray-600 leading-relaxed">
                                     Enjoy peace of mind with a Folding foot rest,
                                     Seat belt,
                                     Diagnostic display,
                                     Backup battery,
-                                    Remote control, ensuring Safty and Convenience.
+                                    Remote control, ensuring Safety and Convenience.
                                 </p>
                             </div>
                         </div>
                         <div className="flex flex-col items-center text-center md:text-left">
-                            <div className="bg-gray-300 p-4 rounded-lg">
-                                <h3 className="text-xl font-semibold font-poppins text-gray-800"> One Year Warrenty </h3>
-                                <p className="text-base text-gray-600 mt-2">
+                            <div className="bg-gray-100 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+                                <h3 className="text-xl font-semibold font-poppins text-gray-800 mb-3">One Year Warranty</h3>
+                                <p className="text-base text-gray-600 leading-relaxed">
                                     Acorn stairlifts comes with Fully comprehensive 12-month warranty. If any component should fail due to faulty manufacture during the first year of ownership, Acorn will send round one of our fully trained service technicians to get your stairlift back to full working order free of charge.
                                 </p>
                             </div>
@@ -96,21 +96,21 @@ function FAQ() {
                             {faqs.map((faq, index) => (
                                 <div
                                     key={index}
-                                    className="flex flex-col gap-2 justify-center px-5 py-6 mt-5 w-full rounded-xl bg-white border-b-[0.2px]  border-gray-600 transition-colors duration-300 ease-in-out shadow-lg max-md:flex-wrap max-md:px-5"
+                                    className="flex flex-col gap-2 justify-center px-5 py-6 mt-5 w-full rounded-xl bg-white border-b border-gray-300 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl cursor-pointer group"
                                     onClick={() => toggleOpenIndex(index)}
                                 >
-                                    <div className="flex justify-between items-center text-gray-800 w-full cursor-pointer">
-                                        <div className="flex-auto">{faq.question}</div>
-                                        <div className="flex items-center justify-center text-black w-10">
+                                    <div className="flex justify-between items-center text-gray-800 w-full">
+                                        <div className="flex-auto font-semibold group-hover:text-gray-900 transition-colors duration-200">{faq.question}</div>
+                                        <div className="flex items-center justify-center text-gray-600 w-10 group-hover:text-gray-800 transition-colors duration-200">
                                             {openIndex === index ? (
-                                                <FaMinusCircle size={30} />
+                                                <FaMinusCircle size={30} className="text-blue-600" />
                                             ) : (
                                                 <FaPlusCircle size={30} />
                                             )}
                                         </div>
                                     </div>
                                     {openIndex === index && (
-                                        <div className="mt-4 text-base text-gray-800">{faq.answer}</div>
+                                        <div className="mt-4 text-base text-gray-700 leading-relaxed animate-in slide-in-from-top-2 duration-300">{faq.answer}</div>
                                     )}
                                 </div>
                             ))}

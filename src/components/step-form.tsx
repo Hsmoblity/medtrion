@@ -139,13 +139,13 @@ export default function Form() {
                     ))}
                 </ol>
             </nav>
-            <div className='bg-gray-800  shadow-2xl mt-10 700 rounded-lg'>
-                <div className={` p-6  -translate-x-2 shadow-md shadow-gray-400 -translate-y-2 rounded-lg bg-[#f1ebe0]`}>
+            <div className='bg-gray-800 shadow-2xl mt-10 rounded-lg'>
+                <div className="p-6 -translate-x-2 shadow-md shadow-gray-400 -translate-y-2 rounded-lg bg-[#f1ebe0]">
                     {/* steps */}
 
 
                     {/* Form */}
-                    <form className={`mt-12 `} onSubmit={handleSubmit(processForm)}>
+                    <form className="mt-12" onSubmit={handleSubmit(processForm)}>
                         {currentStep === 0 && (
                             <motion.div
                                 initial={{ x: delta >= 0 ? '50%' : '-50%', opacity: 0 }}
@@ -167,7 +167,7 @@ export default function Form() {
                                                 id='firstName'
                                                 {...register('firstName')}
                                                 autoComplete='given-name'
-                                                className='block w-full rounded-md border-0 py-1.5 pl-1 text-gray-900  shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-xl sm:leading-6'
+                                                className='block w-full rounded-md border-0 py-2.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 sm:text-lg sm:leading-6'
                                             />
                                             {errors.firstName?.message && (
                                                 <p className='mt-2 text-xl text-red-400'>
@@ -190,7 +190,7 @@ export default function Form() {
                                                 id='lastName'
                                                 {...register('lastName')}
                                                 autoComplete='family-name'
-                                                className='block w-full rounded-md border-0 py-1.5 pl-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-xl sm:leading-6'
+                                                className='block w-full rounded-md border-0 py-2.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 sm:text-lg sm:leading-6'
                                             />
                                             {errors.lastName?.message && (
                                                 <p className='mt-2 text-xl text-red-400'>
@@ -391,17 +391,17 @@ export default function Form() {
                                 type='button'
                                 onClick={prev}
                                 disabled={currentStep === 0}
-                                className='rounded bg-black flex flex-row px-2 py-1 text-xl font-semibold text-white   shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 hover:text-black disabled:cursor-not-allowed disabled:opacity-50'
+                                className='rounded-md bg-gray-800 flex flex-row px-4 py-2 text-lg font-semibold text-white shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200'
                             >
-                                <BiLeftArrowAlt size={50} className='hover:-translate-x-1' />
+                                <BiLeftArrowAlt size={24} className='hover:-translate-x-1 transition-transform duration-200' />
                             </button>
                             <button
                                 type='button'
                                 onClick={next}
                                 disabled={currentStep === steps.length - 1}
-                                className='rounded bg-black  px-2 py-1 text-xl font-semibold text-white shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 hover:text-black disabled:cursor-not-allowed disabled:opacity-50'
+                                className='rounded-md bg-gray-800 px-4 py-2 text-lg font-semibold text-white shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200'
                             >
-                                <BiRightArrowAlt size={50} className='hover:translate-x-1' />
+                                <BiRightArrowAlt size={24} className='hover:translate-x-1 transition-transform duration-200' />
                             </button>
                         </div>
                     </div>

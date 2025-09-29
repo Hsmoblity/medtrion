@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useEffect, useState, useContext } from 'react';
-import CartContext from 'contexts/cartItemsContext';
-import CartVisibilityContext from 'contexts/cartVisibilityContext';
-import Types from 'reducers/cart/types';
-import { normalizeImageUrl } from 'lib/utils/image';
+import { useCartStore } from 'stores/cartStore';
+import CartVisibilityContext from '../contexts/cartVisibilityContext';
+import { normalizeImageUrl } from '../lib/utils/image';
 import Image from 'next/image';
-import { ProductSchema } from 'lib/interfaces';
+import { ProductSchema } from '../lib/interfaces';
 import { useRouter } from 'next/navigation';
 
 // Reuse ProductSchema's _related_options_products shape for strong typing
@@ -36,14 +35,36 @@ interface Props {
     parentProduct?: Partial<ProductSchema>;
     onDone?: () => void;
     onConfirm?: (selectedOptions: any[]) => void;
+    
+    // Edit mode props
+    initialSelectedOptionIds?: string[];
+    onConfigurationChange?: (optionIds: string[]) => void;
+    onSelectionChange?: (selectedOptions: any[]) => void;
+    editMode?: boolean;
+    originalPrice?: number;
 }
 
-const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProducts, parentProductId, parentProduct, onDone, onConfirm }) => {
-    const { dispatch } = useContext(CartContext);
+const ProductOptions: React.FC<Props> = ({ 
+    relatedIds, 
+    fetchByIds, 
+    relatedProducts, 
+    parentProductId, 
+    parentProduct, 
+    onDone, 
+    onConfirm,
+    initialSelectedOptionIds,
+    onConfigurationChange,
+    onSelectionChange,
+    editMode = false,
+    originalPrice
+}) => {
+    const addToCart = useCartStore(state => state.addToCart);
     const { toggleCartVisibility } = useContext(CartVisibilityContext);
     const router = useRouter();
     const [addOns, setAddOns] = useState<AddOnProduct[]>([]);
     const [selected, setSelected] = useState<Record<string, any>>({});
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
 
     // When editing an existing cart item, parentProduct may include an `options`
     // array that represents previously selected add-ons. When addOns are
@@ -81,6 +102,153 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
             /* noop */
         }
     }, [addOns, parentProduct]);
+
+    // Initialize selected options from edit session data
+    useEffect(() => {
+        if (!editMode || !initialSelectedOptionIds || !addOns.length) return;
+        
+        try {
+            const initSelected: Record<string, any> = {};
+            
+            for (const optionId of initialSelectedOptionIds) {
+                // Find the addon that matches this option ID
+                const addon = addOns.find(a => 
+                    String(a.id) === String(optionId) || 
+                    String(a.databaseId) === String(optionId) ||
+                    (a.variations && a.variations.some(v => 
+                        String(v.id) === String(optionId) || 
+                        String(v.databaseId) === String(optionId)
+                    ))
+                );
+                
+                if (addon) {
+                    // Check if it's a variation
+                    const variation = addon.variations?.find(v => 
+                        String(v.id) === String(optionId) || 
+                        String(v.databaseId) === String(optionId)
+                    );
+                    
+                    if (variation) {
+                        // Handle variable product selection
+                        const isRadio = !!(addon.variableType && String(addon.variableType).toLowerCase() === 'radio');
+                        if (isRadio) {
+                            initSelected[`radio_${addon.id}`] = String(variation.id || variation.databaseId);
+                        } else {
+                            initSelected[`${addon.id}:${variation.id || variation.databaseId}`] = true;
+                        }
+                    } else {
+                        // Handle simple product selection
+                        initSelected[String(addon.id)] = true;
+                    }
+                }
+            }
+            
+            setSelected(prev => ({ ...prev, ...initSelected }));
+        } catch (error) {
+            console.error('Failed to initialize selected options from edit session:', error);
+        }
+    }, [editMode, initialSelectedOptionIds, addOns]);
+
+    // Notify about configuration changes in edit mode
+    useEffect(() => {
+        if (!editMode || !onConfigurationChange) return;
+        
+        // Extract currently selected option IDs
+        const selectedOptionIds: string[] = [];
+        
+        Object.entries(selected).forEach(([key, value]) => {
+            if (!value) return;
+            
+            if (key.startsWith('radio_')) {
+                // Radio selection: value is the variation ID
+                selectedOptionIds.push(String(value));
+            } else if (key.includes(':')) {
+                // Checkbox with variation: key is "productId:variationId"
+                const variationId = key.split(':')[1];
+                selectedOptionIds.push(variationId);
+            } else {
+                // Simple product: key is the product ID
+                selectedOptionIds.push(key);
+            }
+        });
+        
+        onConfigurationChange(selectedOptionIds);
+    }, [selected, editMode, onConfigurationChange]);
+
+    // Notify parent component when selections change
+    useEffect(() => {
+        if (onSelectionChange && addOns.length > 0) {
+            const selectedPayloads = createSelectedPayloads();
+            onSelectionChange(selectedPayloads);
+        }
+    }, [selected, addOns, onSelectionChange, createSelectedPayloads]);
+
+    // Helper function to generate unique cart item IDs
+    const uuid = React.useCallback(() => 'ci_' + Math.random().toString(36).slice(2, 9), []);
+
+    // Helper function to create selected payloads from current state
+    const createSelectedPayloads = React.useCallback(() => {
+        const selectedPayloads: any[] = [];
+        for (const p of addOns) {
+            if (!p) continue;
+            const prodId = p.id ?? p.databaseId;
+            if (String(p.type).toLowerCase() === 'variable') {
+                // For variable products, use variableType enum to decide radio (single) vs checkbox (multiple)
+                const isRadio = !!(p.variableType && String(p.variableType).toLowerCase() === 'radio');
+                if (isRadio) {
+                    // radio: single selected variation per product
+                    const sel = selected[`radio_${prodId}`];
+                    if (sel) {
+                        const v = (p.variations || []).find((x: any) => String(x.databaseId ?? x.id) === String(sel));
+                        if (v) selectedPayloads.push({ 
+                            cartItemId: uuid(), 
+                            productId: prodId, 
+                            variationId: String(v.databaseId ?? v.id), 
+                            name: `${p.title} - ${v.attributes ? (Array.isArray(v.attributes) ? v.attributes.map((a: any) => a.value).join(' / ') : '') : ''}`.trim(), 
+                            price: (function (val) { const s = String(val || ''); const n = Number(s.replace(/[^0-9.\-]+/g, '')); return isNaN(n) ? 0 : n; })(v.price ?? p.price), 
+                            sku: v.sku, 
+                            quantity: 1 
+                        });
+                    }
+                } else {
+                    // checkboxes: multiple variations may be selected
+                    for (const v of (p.variations || [])) {
+                        const key = `${prodId}:${v.databaseId ?? v.id}`;
+                        if (selected[key]) selectedPayloads.push({ 
+                            cartItemId: uuid(), 
+                            productId: prodId, 
+                            variationId: String(v.databaseId ?? v.id), 
+                            title: `${p.title} - ${v.attributes ? (Array.isArray(v.attributes) ? v.attributes.map((a: any) => a.value).join(' / ') : '') : ''}`.trim(), 
+                            price: v.price ?? p.price, 
+                            sku: v.sku 
+                        });
+                    }
+                }
+            } else {
+                // simple product: checkbox per product
+                if (selected[prodId]) selectedPayloads.push({ 
+                    cartItemId: uuid(), 
+                    productId: prodId, 
+                    name: p.title, 
+                    price: (function (val) { const s = String(val || ''); const n = Number(s.replace(/[^0-9.\-]+/g, '')); return isNaN(n) ? 0 : n; })(p.price), 
+                    sku: p.sku, 
+                    quantity: 1 
+                });
+            }
+        }
+        return selectedPayloads;
+    }, [addOns, selected, uuid]);
+
+    // Calculate current total price for edit mode
+    const calculateCurrentTotal = React.useCallback(() => {
+        const selectedPayloads = createSelectedPayloads();
+        const basePrice = originalPrice || 0;
+        const optionsTotal = selectedPayloads.reduce((sum, option) => {
+            const price = typeof option.price === 'number' ? option.price : parseFloat(option.price || '0');
+            return sum + (price * (option.quantity || 1));
+        }, 0);
+        return basePrice + optionsTotal;
+    }, [createSelectedPayloads, originalPrice]);
 
     useEffect(() => {
         if ((!relatedIds || relatedIds.length === 0) && (!relatedProducts || relatedProducts.length === 0)) return;
@@ -122,14 +290,22 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
         if (idsToFetch.length === 0) return;
 
         if (typeof fetchByIds === 'function') {
+            setLoading(true);
+            setError(null);
             fetchByIds(idsToFetch).then((res) => {
                 if (!mounted) return;
-                // Expect `res` to be an array of product objects. Keep as-is.
                 setAddOns(res || []);
-            }).catch(() => { });
+            }).catch((err) => {
+                if (!mounted) return;
+                setError(err.message || 'Failed to load options.');
+            }).finally(() => {
+                if (mounted) {
+                    setLoading(false);
+                }
+            });
         }
         return () => { mounted = false; };
-    }, [JSON.stringify(relatedIds), JSON.stringify(relatedProducts || [])]);
+    }, [relatedIds, relatedProducts, fetchByIds]);
 
     const toggleCheckbox = (id: string | number) => {
         setSelected(prev => ({ ...prev, [id]: !prev[id] }));
@@ -140,51 +316,26 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
     };
 
     const addSelectedToCart = () => {
-        const uuid = () => 'ci_' + Math.random().toString(36).slice(2, 9);
-
-        // Build a payload array for selected add-ons so they can be attached
-        // to the parent cart item as an `options` array. Normalize prices to
-        // integer cents to keep storage consistent.
-        const toCents = (val: any) => {
-            if (val == null) return 0;
-            const s = String(val);
-            const n = Number(s.replace(/[^0-9.\-]+/g, ''));
-            if (isNaN(n)) return 0;
-            // If string contained a decimal point, treat as dollars -> cents
-            if (s.indexOf('.') !== -1) return Math.round(n * 100);
-            // If number looks large (>1000) assume it's already cents
-            if (n > 1000) return Math.round(n);
-            // Otherwise treat as dollars
-            return Math.round(n * 100);
-        };
-
-        const selectedPayloads: any[] = [];
-        for (const p of addOns) {
-            if (!p) continue;
-            const prodId = p.id ?? p.databaseId;
-            if (String(p.type).toLowerCase() === 'variable') {
-                // For variable products, use variableType enum to decide radio (single) vs checkbox (multiple)
-                const isRadio = !!(p.variableType && String(p.variableType).toLowerCase() === 'radio');
-                if (isRadio) {
-                    // radio: single selected variation per product
-                    const sel = selected[`radio_${prodId}`];
-                    if (sel) {
-                        const v = (p.variations || []).find((x: any) => String(x.databaseId ?? x.id) === String(sel));
-                        if (v) selectedPayloads.push({ cartItemId: uuid(), productId: prodId, variationId: String(v.databaseId ?? v.id), name: `${p.title} - ${v.attributes ? (Array.isArray(v.attributes) ? v.attributes.map((a: any) => a.value).join(' / ') : '') : ''}`.trim(), price: (function (val) { const s = String(val || ''); const n = Number(s.replace(/[^0-9.\-]+/g, '')); return isNaN(n) ? 0 : n; })(v.price ?? p.price), sku: v.sku, quantity: 1 });
-                    }
-                } else {
-                    // checkboxes: multiple variations may be selected
-                    for (const v of (p.variations || [])) {
-                        const key = `${prodId}:${v.databaseId ?? v.id}`;
-                        if (selected[key]) selectedPayloads.push({ cartItemId: uuid(), productId: prodId, variationId: String(v.databaseId ?? v.id), title: `${p.title} - ${v.attributes ? (Array.isArray(v.attributes) ? v.attributes.map((a: any) => a.value).join(' / ') : '') : ''}`.trim(), price: v.price ?? p.price, sku: v.sku });
-                    }
-                }
-            } else {
-                // simple product: checkbox per product
-                if (selected[prodId]) selectedPayloads.push({ cartItemId: uuid(), productId: prodId, name: p.title, price: (function (val) { const s = String(val || ''); const n = Number(s.replace(/[^0-9.\-]+/g, '')); return isNaN(n) ? 0 : n; })(p.price), sku: p.sku, quantity: 1 });
+        // Use the new createSelectedPayloads function for consistency
+        const selectedPayloads = createSelectedPayloads();
+        
+        // In edit mode, call onConfirm with updated selections including price info
+        if (editMode && onConfirm) {
+            const currentTotal = calculateCurrentTotal();
+            // Enhance selectedPayloads with total price information for edit mode
+            const enhancedPayloads = selectedPayloads.map(payload => ({
+                ...payload,
+                totalPrice: currentTotal,
+                isEditMode: true
+            }));
+            try {
+                onConfirm(enhancedPayloads);
+            } catch (e) {
+                console.warn('ProductOptions onConfirm handler failed', e);
             }
+            if (typeof onDone === 'function') onDone();
+            return;
         }
-
         // If parent provided and no external handler, dispatch a single parent
         // cart item that contains the selected options in `options`.
         if (!onConfirm) {
@@ -201,7 +352,12 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
                         const n = Number(s.replace(/[^0-9.\-]+/g, ''));
                         return isNaN(n) ? 0 : n;
                     };
-                    payload.price = parsePrice(pp.price ?? pp.salePrice ?? pp.regularPrice ?? 0);
+                    const basePrice = parsePrice(pp.price ?? pp.salePrice ?? pp.regularPrice ?? 0);
+                    const optionsTotal = selectedPayloads.reduce((sum, option) => {
+                        const price = typeof option.price === 'number' ? option.price : parseFloat(option.price || '0');
+                        return sum + (price * (option.quantity || 1));
+                    }, 0);
+                    payload.price = basePrice + optionsTotal; // Include options in total price
                     payload.productPictures = pp.productPictures ?? undefined;
                     payload.featuredImage = pp.featuredImage ?? pp.image ?? undefined;
                     payload.variations = pp.variations ?? undefined;
@@ -214,7 +370,23 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
                     console.log('ProductOptions dispatch parent payload', payload);
                 } catch (e) { }
                 if (selectedPayloads.length > 0) payload.options = selectedPayloads;
-                dispatch({ type: Types.addToCart, payload });
+                
+                // Add to cart using Zustand store
+                addToCart({
+                    slug: payload.slug,
+                    title: payload.title,
+                    price: payload.price,
+                    quantity: payload.quantity || 1,
+                    productPictures: payload.productPictures || [],
+                    featuredImage: payload.featuredImage || '',
+                    affiliate: payload.affiliate || false,
+                    productId: payload.productId || null,
+                    options: payload.options || [],
+                    // Required ProductSchema fields
+                    description: payload.description || '',
+                    shortDescription: payload.shortDescription || '',
+                    productSpecifications: payload.productSpecifications || ''
+                });
             }
             // Navigate to cart page instead of opening mini-cart
             try {
@@ -234,6 +406,22 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
         }
         if (typeof onDone === 'function') onDone();
     };
+
+    if (loading) {
+        return (
+            <div className="p-4 border rounded-lg bg-white text-center">
+                <p>Loading options...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="p-4 border rounded-lg bg-red-50 text-red-700 text-center">
+                <p>Error loading options: {error}</p>
+            </div>
+        );
+    }
 
     if ((!relatedIds || relatedIds.length === 0) && (!relatedProducts || relatedProducts.length === 0)) return null;
 
@@ -264,7 +452,13 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
                                                             else toggleCheckbox(`${a.id}:${vid}`);
                                                         }}
                                                     />
-                                                    <Image src={String(v.image ? normalizeImageUrl(v.image) : (a.image ? normalizeImageUrl(a.image) : '/temp.webp'))} width={32} height={32} alt={v.name || `variation-${vid}`} className="w-8 h-8 object-cover rounded" />
+                                                    <Image 
+                                                        src={String(v.image ? normalizeImageUrl(v.image) : (a.image ? normalizeImageUrl(a.image) : '/placeholder.svg'))} 
+                                                        width={32} 
+                                                        height={32} 
+                                                        alt={v.name || `variation-${vid}`} 
+                                                        className="w-8 h-8 object-cover rounded"
+                                                    />
                                                     <div className="flex-1 text-sm">
                                                         <div className="font-medium">{v.name || (v.attributes && Array.isArray(v.attributes) ? v.attributes.map((at: any) => at.value).join(' / ') : `Variation ${vid}`)}</div>
                                                         {v.sku ? <div className="text-xs text-gray-500">SKU: {v.sku}</div> : null}
@@ -281,7 +475,13 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
                         ) : (
                             <label className="inline-flex items-center space-x-2">
                                 <input type="checkbox" checked={!!selected[a.id]} onChange={() => toggleCheckbox(a.id)} />
-                                <Image src={String(a.image ? normalizeImageUrl(a.image) : '/temp.webp')} width={40} height={40} alt={a.title || `addon-${a.id}`} className="w-10 h-10 object-cover rounded" />
+                                <Image 
+                                    src={String(a.image ? normalizeImageUrl(a.image) : '/placeholder.svg')} 
+                                    width={40} 
+                                    height={40} 
+                                    alt={a.title || `addon-${a.id}`} 
+                                    className="w-10 h-10 object-cover rounded"
+                                />
                                 <div>
                                     <div className="font-medium">{a.title}</div>
                                     <div className="text-sm text-gray-600">{a.sku ? `SKU: ${a.sku}` : ''} {a.price != null && !Number.isNaN(Number(a.price)) ? <span className="text-green-600 font-medium">{` • +$${(Number(a.price) / 100).toFixed(2)}`}</span> : ''}</div>
@@ -291,8 +491,35 @@ const ProductOptions: React.FC<Props> = ({ relatedIds, fetchByIds, relatedProduc
                     </div>
                 ))}
             </div>
+            
+            {/* Price Summary for Edit Mode */}
+            {editMode && originalPrice && (
+                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="flex justify-between items-center text-sm">
+                        <span>Base Price:</span>
+                        <span>${originalPrice.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                        <span>Options Total:</span>
+                        <span>${((calculateCurrentTotal() - originalPrice) || 0).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center font-semibold text-lg border-t pt-2 mt-2">
+                        <span>New Total:</span>
+                        <span>${calculateCurrentTotal().toFixed(2)}</span>
+                    </div>
+                </div>
+            )}
+            
             <div className="mt-4 text-right">
-                <button onClick={() => { console.log('ProductOptions Add Selected Options clicked, selected map:', selected); addSelectedToCart(); }} className="px-4 py-2 bg-black text-white rounded">Add Selected Options</button>
+                <button 
+                    onClick={() => { 
+                        console.log('ProductOptions button clicked, selected map:', selected); 
+                        addSelectedToCart(); 
+                    }} 
+                    className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors"
+                >
+                    {editMode ? 'Save Changes' : 'Add Selected Options'}
+                </button>
             </div>
         </div>
     );

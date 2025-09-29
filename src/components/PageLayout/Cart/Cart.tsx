@@ -1,34 +1,16 @@
-import React, { useContext, useEffect, useState } from "react";
-import CartItemsContext from "contexts/cartItemsContext";
-import CartVisibilityContext from "contexts/cartVisibilityContext";
+import React, { useEffect, useState } from "react";
 import ItemList from "./ItemList";
 import classNames from "classnames";
-import { CartProduct } from "lib/interfaces";
 import { useRouter } from 'next/router';
+import { useCartStore, useCartTotal, useCartVisibility, useCartItems } from "stores/cartStore";
+import ProductGroup from "../../Cart/ProductGroup";
 
 const Cart = () => {
   const [isRedirecting, setRedirecting] = useState(false);
-  const { cart } = useContext(CartItemsContext);
-  const { cartVisibility, toggleCartVisibility } = useContext(
-    CartVisibilityContext
-  );
-
-
-  // include attached options when computing subtotal
-  const subTotal = cart.reduce((total, item: CartProduct) => {
-    const p = typeof item.price === 'number' ? item.price : Number(item.price || 0);
-    const base = isNaN(p) ? 0 : p;
-    let optsSum = 0;
-    if (item.options && Array.isArray(item.options) && item.options.length > 0) {
-      for (const o0 of item.options) {
-        const o: any = o0;
-        const op = typeof o.price === 'number' ? o.price : Number(o.price || o.priceModifier || 0);
-        const oqty = Number(o.quantity || 1) || 1;
-        optsSum += (isNaN(op) ? 0 : op) * oqty;
-      }
-    }
-    return total + ((base + optsSum) * (item.quantity ?? 1));
-  }, 0).toFixed(2);
+  const cart = useCartItems();
+  const cartVisibility = useCartVisibility();
+  const toggleCartVisibility = useCartStore(state => state.toggleCartVisibility);
+  const subTotal = useCartTotal().toFixed(2);
 
   const router = useRouter();
 

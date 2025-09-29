@@ -22,7 +22,7 @@ export function BlogsPre({ blogs }: BlogsPreProps) {
     const [loading, setLoading] = useState(false);
 
     // Load more blogs
-    const loadMoreBlogs = () => {
+    const loadMoreBlogs = React.useCallback(() => {
         if (loading || visibleBlogs.length >= blogs.length) return;
         setLoading(true);
 
@@ -33,7 +33,7 @@ export function BlogsPre({ blogs }: BlogsPreProps) {
             ]);
             setLoading(false);
         }, 1000); // Simulate network delay
-    };
+    }, [loading, visibleBlogs, blogs]);
 
     // Scroll event listener
     useEffect(() => {
@@ -50,7 +50,7 @@ export function BlogsPre({ blogs }: BlogsPreProps) {
         return () => {
             window.removeEventListener('scroll', onScroll);
         };
-    }, [loading, visibleBlogs]);
+    }, [loadMoreBlogs]);
 
     return (
         <>
@@ -100,14 +100,13 @@ export function BlogsPre({ blogs }: BlogsPreProps) {
                                     height={300}
                                 />
                             </div>
-                            <div className=" inset-y-0 left-0 w-full bg-[#f0eade]  rounded-b-md  flex flex-col justify-center">
-
-                                <h2 className="text-lg font-bold text-black m-4 line-clamp-3">
+                            <div className="inset-y-0 left-0 w-full bg-[#f0eade] rounded-b-md flex flex-col justify-center p-4">
+                                <h2 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2">
                                     {blog.title}
                                 </h2>
-                                <h2 className="text-lg font-bold text-white m-4 line-clamp-3">
+                                <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
                                     {blog.description}
-                                </h2>
+                                </p>
                             </div>
                             {/* Clickable Area */}
                             <span className="absolute inset-0 z-10" />
@@ -119,7 +118,7 @@ export function BlogsPre({ blogs }: BlogsPreProps) {
             {/* Loading Spinner */}
             {loading && (
                 <div className="flex justify-center py-4">
-                    <div className="w-12 h-12 border-4 border-t-transparent border-amber-500 rounded-full animate-spin"></div>
+                    <div className="w-12 h-12 border-4 border-t-transparent border-blue-500 rounded-full animate-spin"></div>
                 </div>
             )}
         </>

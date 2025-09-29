@@ -1,11 +1,12 @@
-import { useContext, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import { CartProduct } from "lib/interfaces";
 import Image from "next/image";
-import CartItemsContext from "contexts/cartItemsContext";
-import Types from "reducers/cart/types";
 import { normalizeImageUrl } from '../../../lib/utils/image'
 import { fetchRelatedProductsByIds } from 'lib/woocommerce';
+import { useCartStore, useEditStatus } from "stores/cartStore";
+import { useSession } from '../../../contexts/SessionContext';
+import { PrimaryButton } from 'components/ui';
 // import urlFor from "lib/sanity/urlFor";
 
 interface ItemProps {
@@ -13,34 +14,41 @@ interface ItemProps {
 }
 
 const Item: React.FC<ItemProps> = ({ product }) => {
-  const { dispatch } = useContext(CartItemsContext);
+  const removeFromCart = useCartStore(state => state.removeFromCart);
+  const updateQuantity = useCartStore(state => state.updateQuantity);
+  const setEditStatus = useCartStore(state => state.setEditStatus);
   const router = useRouter();
+  const { startEditSession, addNotification } = useSession();
+  const cartItemId = String(product.cartItemId ?? `ci_fallback_${product.slug}`);
+  const editStatus = useEditStatus(cartItemId);
+  
   const { slug, productPictures, title, price, quantity } = product;
   const [showEditModal, setShowEditModal] = useState(false);
   const [editAttributes, setEditAttributes] = useState<{ [k: string]: string }>({});
+  const [isStartingEdit, setIsStartingEdit] = useState(false);
+  
   type OptionItem = { name: string; type?: string; priceModifier?: number; selected?: boolean; quantity?: number; value?: string; radioGroup?: string; parentId?: number | string };
   const [optionsState, setOptionsState] = useState<OptionItem[]>([]);
 
   const removeWholeProduct = () => {
-    dispatch({
-      type: Types.removeWholeProduct,
-      payload: { cartItemId: String(product.cartItemId ?? `ci_fallback_${product.slug}`) }
-    });
+    if (product.cartItemId) {
+      removeFromCart(product.cartItemId);
+    }
   };
 
   const removeSingleItem = () => {
-    dispatch({
-      type: Types.removeSingleItem,
-      payload: { cartItemId: String(product.cartItemId ?? `ci_fallback_${product.slug}`) }
-    });
+    if (product.cartItemId) {
+      const currentQuantity = product.quantity || 1;
+      updateQuantity(product.cartItemId, currentQuantity - 1);
+    }
   };
 
   const addSingleItem = () => {
     // increment quantity of this specific cart item
-    dispatch({
-      type: Types.addToCart,
-      payload: { ...product, cartItemId: String(product.cartItemId ?? `ci_fallback_${product.slug}`) }
-    });
+    if (product.cartItemId) {
+      const currentQuantity = product.quantity || 1;
+      updateQuantity(product.cartItemId, currentQuantity + 1);
+    }
   };
 
   const openEditModal = () => {
@@ -130,7 +138,10 @@ const Item: React.FC<ItemProps> = ({ product }) => {
       if (match) variationId = String(match.databaseId ?? match.id);
     }
     // Persist edits to the cart item (attach options to parent item)
-    dispatch({ type: Types.updateCartItem, payload: { cartItemId: String(product.cartItemId ?? `ci_fallback_${product.slug}`), changes: { variationId, options: optionsState } } });
+    if (product.cartItemId) {
+      const updateCartItem = useCartStore.getState().updateCartItem;
+      updateCartItem(String(product.cartItemId), { variationId, options: optionsState });
+    }
 
     setShowEditModal(false);
   };
@@ -178,114 +189,237 @@ const Item: React.FC<ItemProps> = ({ product }) => {
   };
 
   return (
-    <div>
-      <div className="flex flex-row mb-3 justify-between">
-        <div className="w-4/5 flex flex-row">
-          <Image
-            src={getSafeImage()}
-            width={64}
-            height={64}
-            className="clickable-img h-auto"
-            quality={100}
-            alt={title}
-          />
-          <span className="text-lg ml-4 text-black">{title}</span>
-        </div>
-        <div className="w-1/5 text-right">
-          <div className="text-sm text-gray-500">
-            {(() => {
-              const base = typeof price === 'number' ? price : Number(price || 0);
-              let opts = 0;
-              if (product.options && Array.isArray(product.options) && product.options.length > 0) {
-                for (const o0 of product.options) {
-                  const o: any = o0;
-                  const op = Number(o.price || o.priceModifier || 0) || 0;
-                  const oq = Number(o.quantity || 1) || 1;
-                  opts += op * oq;
-                }
-              }
-              const configuredPerUnit = Number(base || 0) + opts;
-              const lineTotal = configuredPerUnit * Number(quantity || 1);
-              return (
-                <>
-                  <div className="text-xs">${Number(base).toFixed(2)}</div>
-                  <div className="text-xs text-gray-500">Total: ${Number(lineTotal).toFixed(2)}</div>
-                </>
-              );
-            })()}
+    <div className="border-b border-gray-200 pb-6 mb-6 last:border-b-0 last:pb-0 last:mb-0">
+      {/* Product Header with Edit Button */}
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex-1">
+          {/* Product Title with View More Link */}
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            {slug ? (
+              <a
+                href={`/product/${slug}`}
+                className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors duration-200"
+                onClick={(e) => {
+                  e.preventDefault();
+                  router.push(`/product/${slug}`);
+                }}
+              >
+                View More →
+              </a>
+            ) : (
+              <span className="text-sm text-gray-400 font-medium">
+                Product details unavailable
+              </span>
+            )}
           </div>
+          <p className="text-sm text-gray-600">SKU: {slug}</p>
         </div>
-      </div>
-      {/* Show chosen variation / attributes */}
-      {product.variationId && (
-        <div className="mb-2 text-sm text-gray-700">Selected: {product.variationId}</div>
-      )}
-      <div className="flex flex-row">
         <button
-          onClick={removeWholeProduct}
-          className="border border-gray-500 p-1 border-solid w-9 h-9 flex flex-row justify-center items-center"
+          onClick={async () => {
+            if (isStartingEdit || editStatus === 'editing') return;
+
+            try {
+              setIsStartingEdit(true);
+              setEditStatus(cartItemId, 'editing');
+
+              // Extract current selected option IDs from the cart item
+              const originalSelectedOptionIds = (product.options || [])
+                .filter(opt => opt.selected)
+                .map(opt => opt.value || '')
+                .filter(Boolean);
+
+              // Start edit session
+              const session = await startEditSession(
+                cartItemId,
+                product.slug,
+                originalSelectedOptionIds
+              );
+
+              if (session) {
+                // Navigate to configurator with edit session
+                router.push(`/product/${product.slug}/configure?edit=true&cartItemId=${encodeURIComponent(cartItemId)}&sessionId=${encodeURIComponent(session.id)}`);
+              } else {
+                // Failed to create session - show error and reset
+                setEditStatus(cartItemId, 'idle');
+                addNotification({
+                  type: 'error',
+                  message: 'Unable to start edit session. Please try again.'
+                });
+              }
+            } catch (error) {
+              console.error('Failed to start edit session:', error);
+              setEditStatus(cartItemId, 'idle');
+              addNotification({
+                type: 'error',
+                message: 'An error occurred while starting the edit session.'
+              });
+            } finally {
+              setIsStartingEdit(false);
+            }
+          }}
+          disabled={isStartingEdit || editStatus === 'editing'}
+          className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md ${
+            isStartingEdit || editStatus === 'editing'
+              ? 'text-gray-400 bg-gray-100 border-gray-200 cursor-not-allowed'
+              : 'text-blue-600 hover:text-blue-800 hover:bg-blue-50 border border-blue-200 cursor-pointer'
+          }`}
+          aria-label={`Edit configuration for ${title}`}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-4 w-4"
             fill="none"
             viewBox="0 0 24 24"
-            stroke="black"
+            stroke="currentColor"
+            aria-hidden="true"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={5}
-              d="M6 18L18 6M6 6l12 12"
-            />
+            {isStartingEdit ? (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            ) : (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            )}
           </svg>
+          {isStartingEdit ? 'Starting...' : editStatus === 'editing' ? 'Currently editing' : 'Edit'}
         </button>
-        <input
-          type="text"
-          className="border border-gray-500 p-1 border-solid bg-transparent ml-2 outline-none text-black flex-1 h-9 pl-3"
-          value={quantity}
-          disabled
-        />
-        <button
-          className="border border-gray-500 p-1 border-solid w-9 h-9 flex flex-row justify-center items-center text-black font-black text-2xl"
-          onClick={removeSingleItem}
-        >
-          -
-        </button>
-        <button
-          className="border border-gray-500 p-1 border-solid w-9 h-9 flex flex-row justify-center items-center text-black font-black text-2xl"
-          onClick={addSingleItem}
-        >
-          +
-        </button>
-        <button onClick={() => {
-          try {
-            const id = String(product.cartItemId ?? `ci_fallback_${product.slug}`);
-            router.push(`/product/${product.slug}/options?cartItemId=${encodeURIComponent(id)}`);
-          } catch (e) {
-            // Fallback to modal if router not available
-            openEditModal();
-          }
-        }} className="ml-2 px-3 py-1 border rounded">Edit</button>
       </div>
 
-      {/* Render attached options under the parent product */}
-      {product.options && Array.isArray(product.options) && product.options.length > 0 && (
-        <div className="mt-3 ml-4">
-          <p className="text-sm font-medium">Included Options</p>
-          <ul className="mt-2 space-y-2">
-            {product.options.map((opt: any, idx: number) => (
-              <li key={String(opt.name || idx)} className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm">{opt.name || opt.title || opt.value}</div>
-                  {opt.sku ? <div className="text-xs text-gray-500">SKU: {opt.sku}</div> : null}
-                </div>
-                <div className="text-sm text-gray-700">{typeof opt.price === 'number' ? `$${Number(opt.price).toFixed(2)}` : (opt.price ? `$${Number(opt.price).toFixed(2)}` : '')}</div>
-              </li>
-            ))}
-          </ul>
+      {/* Product Content */}
+      <div className="flex gap-6">
+        {/* Product Image */}
+        <div className="flex-shrink-0">
+          <Image
+            src={getSafeImage()}
+            width={120}
+            height={120}
+            className="rounded-lg object-cover border border-gray-200"
+            quality={100}
+            alt={title}
+          />
         </div>
-      )}
+
+        {/* Product Details */}
+        <div className="flex-1 min-w-0">
+          {/* Selected Variation */}
+          {product.variationId && (
+            <div className="mb-3">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Configuration: {product.variationId}
+              </span>
+            </div>
+          )}
+
+          {/* Options */}
+          {product.options && Array.isArray(product.options) && product.options.length > 0 && (
+            <div className="mb-4">
+              <h4 className="text-sm font-medium text-gray-900 mb-2">Included Options</h4>
+              <div className="space-y-2">
+                {product.options.map((opt: any, idx: number) => (
+                  <div key={String(opt.name || idx)} className="flex items-center justify-between bg-gray-50 rounded-md px-3 py-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {opt.name || opt.title || opt.value}
+                      </p>
+                      {opt.sku && (
+                        <p className="text-xs text-gray-500">SKU: {opt.sku}</p>
+                      )}
+                    </div>
+                    <div className="text-sm font-medium text-gray-900 ml-4">
+                      {typeof opt.price === 'number' ? `$${Number(opt.price).toFixed(2)}` : (opt.price ? `$${Number(opt.price).toFixed(2)}` : 'Included')}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Quantity and Price Controls */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-gray-700">Quantity:</span>
+              <div className="flex items-center border border-gray-300 rounded-md">
+                <button
+                  onClick={removeSingleItem}
+                  className="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset rounded-l-md"
+                  aria-label="Decrease quantity"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                  </svg>
+                </button>
+                <span className="px-4 py-2 text-center min-w-[3rem] font-medium border-x border-gray-300">{quantity}</span>
+                <button
+                  onClick={addSingleItem}
+                  className="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset rounded-r-md"
+                  aria-label="Increase quantity"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="text-right">
+              <div className="text-sm text-gray-600">Price per item</div>
+              <div className="text-lg font-semibold text-gray-900">
+                ${(() => {
+                  const base = typeof price === 'number' ? price : Number(price || 0);
+                  let opts = 0;
+                  if (product.options && Array.isArray(product.options) && product.options.length > 0) {
+                    for (const o0 of product.options) {
+                      const o: any = o0;
+                      const op = Number(o.price || o.priceModifier || 0) || 0;
+                      const oq = Number(o.quantity || 1) || 1;
+                      opts += op * oq;
+                    }
+                  }
+                  return (Number(base || 0) + opts).toFixed(2);
+                })()}
+              </div>
+              <div className="text-sm text-gray-600">
+                Total: ${(() => {
+                  const base = typeof price === 'number' ? price : Number(price || 0);
+                  let opts = 0;
+                  if (product.options && Array.isArray(product.options) && product.options.length > 0) {
+                    for (const o0 of product.options) {
+                      const o: any = o0;
+                      const op = Number(o.price || o.priceModifier || 0) || 0;
+                      const oq = Number(o.quantity || 1) || 1;
+                      opts += op * oq;
+                    }
+                  }
+                  const configuredPerUnit = Number(base || 0) + opts;
+                  return (configuredPerUnit * Number(quantity || 1)).toFixed(2);
+                })()}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Remove Button */}
+        <div className="flex-shrink-0">
+          <button
+            onClick={removeWholeProduct}
+            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            aria-label={`Remove ${title} from cart`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
 
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -355,9 +489,13 @@ const Item: React.FC<ItemProps> = ({ product }) => {
                   const selectedCount = Object.keys(editAttributes).filter(k => !!editAttributes[k]).length;
                   const allSelected = requiredCount === selectedCount;
                   return (
-                    <button onClick={saveEdits} disabled={!allSelected} className={`px-4 py-2 text-white rounded ${allSelected ? 'bg-blue-600' : 'bg-gray-300 cursor-not-allowed'}`}>
+                    <PrimaryButton 
+                      size="sm"
+                      onClick={saveEdits} 
+                      disabled={!allSelected}
+                    >
                       Save
-                    </button>
+                    </PrimaryButton>
                   );
                 })()
               }

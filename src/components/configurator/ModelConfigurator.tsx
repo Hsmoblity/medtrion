@@ -409,9 +409,9 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
       )}
 
       {/* Main Configurator Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Sidebar Navigation */}
-        <div className="lg:col-span-1">
+      <div className="configurator-layout grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Left Section: Configuration Options Sidebar */}
+        <aside className="configurator-sidebar configurator-section-left lg:col-span-1">
           <ConfiguratorSidebar
             categories={categories.map(c => ({
               ...c,
@@ -423,10 +423,10 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
             currentCategoryId={currentCategoryId}
             onCategorySelect={handleCategorySelect}
           />
-        </div>
+        </aside>
 
-        {/* Main Content Area */}
-        <div className="lg:col-span-2">
+        {/* Center Section: Option Cards Display */}
+        <main className="configurator-content configurator-section-center lg:col-span-2">
           {showSummary ? (
             isHydrated ? (
               <ConfigurationSummary
@@ -469,15 +469,15 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
               }}
             />
           ) : (
-            <div className="bg-white rounded-lg shadow-md p-8 text-center">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Select a Category</h2>
-              <p className="text-gray-600">Choose a category from the sidebar to start configuring your mobility solution.</p>
+            <div className="option-cards-empty bg-white rounded-lg shadow-md p-8 text-center">
+              <h2 className="option-cards-title text-xl font-semibold text-gray-900 mb-2">Select a Category</h2>
+              <p className="option-cards-subtitle text-gray-600">Choose a category from the sidebar to start configuring your mobility solution.</p>
             </div>
           )}
-        </div>
+        </main>
 
-        {/* Summary Panel */}
-        <div className="lg:col-span-1">
+        {/* Right Section: Configuration Summary Panel */}
+        <aside className="configurator-summary configurator-section-right lg:col-span-1">
           <ClientOnly fallback={
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="animate-pulse">
@@ -509,7 +509,7 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
               {showSummary ? 'Continue Configuring' : 'Review Configuration'}
             </button>
           </div>
-        </div>
+        </aside>
       </div>
 
       {/* Save Configuration Modal */}

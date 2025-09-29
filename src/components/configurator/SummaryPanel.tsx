@@ -137,11 +137,11 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
     return (
       <div 
-        className={`bg-white rounded-lg shadow-md p-6 sticky top-4 ${className || ''}`}
+        className={`configuration-summary-container bg-white rounded-lg shadow-md p-6 sticky top-4 ${className || ''}`}
         role="complementary"
         aria-label="Configuration pricing summary"
       >
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Configuration Summary</h2>
+        <h2 className="configuration-summary-title text-xl font-bold text-gray-900 mb-6">Configuration Summary</h2>
         
         {/* Live region for screen readers */}
         <div 
@@ -152,7 +152,7 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
           Total price updated to ${configuration.grandTotal?.toFixed(2) || '0.00'}
         </div>
         
-        <div className="space-y-4">
+        <div className="configuration-summary-details space-y-4">
           {/* Base Price */}
           <div className="flex justify-between items-center py-2 border-b">
             <span className="text-gray-600">Base Price</span>
@@ -217,13 +217,13 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
           )}
           
           {/* Grand Total */}
-          <div className="flex justify-between items-center py-4 border-t-2 border-gray-200">
-            <span className="text-lg font-bold text-gray-900">Total</span>
+          <div className="configuration-total-price flex justify-between items-center py-4 border-t-2 border-gray-200">
+            <span className="total-price-label text-lg font-bold text-gray-900">Total</span>
             <AnimatedNumber
               from={0}
               to={configuration.grandTotal || 0}
               prefix="$"
-              className="text-xl font-bold text-blue-600"
+              className="total-price-amount text-xl font-bold text-blue-600"
             />
           </div>
           
@@ -276,24 +276,26 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
           {/* Add to Cart Button */}
           {onAddToCart && (
-            <PrimaryButton
-              onClick={handleAddToCart}
-              disabled={loading || disabled}
-              loading={loading}
-              fullWidth
-              className="mt-6"
-            >
-              {loading ? (
-                'Adding to Cart...'
-              ) : (
-                <>
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-                  </svg>
-                  Add to Cart
-                </>
-              )}
-            </PrimaryButton>
+            <div className="configuration-summary-actions mt-6">
+              <PrimaryButton
+                onClick={handleAddToCart}
+                disabled={loading || disabled}
+                loading={loading}
+                fullWidth
+                className="btn-add-to-cart"
+              >
+                {loading ? (
+                  'Adding to Cart...'
+                ) : (
+                  <>
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+                    </svg>
+                    Add to Cart
+                  </>
+                )}
+              </PrimaryButton>
+            </div>
           )}
         </div>
       </div>

@@ -125,7 +125,7 @@ const ConfiguratorSidebar: React.FC<ConfiguratorSidebarProps> = ({
 
   if (loading) {
     return (
-      <div className={`bg-white rounded-lg shadow-md p-4 ${className}`}>
+      <div className={`configuration-options-container bg-white rounded-lg shadow-md p-4 ${className}`}>
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 rounded mb-4"></div>
           {[...Array(5)].map((_, i) => (
@@ -140,15 +140,15 @@ const ConfiguratorSidebar: React.FC<ConfiguratorSidebarProps> = ({
   }
 
   return (
-    <div className={`bg-white rounded-lg shadow-md ${className}`}>
+    <div className={`configuration-options-container bg-white rounded-lg shadow-md ${className}`}>
       <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Configuration Options</h2>
-        <p className="text-sm text-gray-600 mt-1">
+        <h2 className="configuration-options-title text-lg font-semibold text-gray-900">Configuration Options</h2>
+        <p className="configuration-options-subtitle text-sm text-gray-600 mt-1">
           Customize your mobility solution
         </p>
       </div>
 
-      <nav className="p-2" role="navigation" aria-label="Configuration categories">
+      <nav className="configuration-categories-nav p-2" role="navigation" aria-label="Configuration categories">
         {categories.length === 0 ? (
           <div className="p-4 text-center">
             <svg className="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,7 +161,7 @@ const ConfiguratorSidebar: React.FC<ConfiguratorSidebarProps> = ({
             </p>
           </div>
         ) : (
-          <ul className="space-y-1">
+          <ul className="configuration-category-list space-y-1">
             {categories.map((category) => {
             const isCollapsed = collapsedCategories.has(category.id);
             const isActive = currentCategoryId === category.id;
@@ -169,17 +169,17 @@ const ConfiguratorSidebar: React.FC<ConfiguratorSidebarProps> = ({
             const isLoading = category.loadingState === 'loading';
 
             return (
-              <li key={category.id}>
+              <li key={category.id} className="configuration-category-group">
                 <div className="flex items-center">
                   <button
                     onClick={() => onCategorySelect?.(category.id)}
-                    className={`flex-1 flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 ${
+                    className={`configuration-category-item flex-1 flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 ${
                       isActive
-                        ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-500'
+                        ? 'configuration-category-active bg-blue-100 text-blue-700 border-l-4 border-blue-500'
                         : hasError
-                        ? 'text-red-700 hover:bg-red-50'
+                        ? 'configuration-category-error text-red-700 hover:bg-red-50'
                         : 'text-gray-700 hover:bg-gray-50'
-                    }`}
+                    } ${isLoading ? 'configuration-category-loading' : ''}`}
                     aria-current={isActive ? 'page' : undefined}
                     disabled={isLoading}
                   >
@@ -268,11 +268,11 @@ const ConfiguratorSidebar: React.FC<ConfiguratorSidebarProps> = ({
       </nav>
 
       {/* Progress Summary */}
-      <div className="p-4 border-t border-gray-200 bg-gray-50">
+      <div className="configuration-progress-bar p-4 border-t border-gray-200 bg-gray-50">
         <div className="text-sm text-gray-600">
           <div className="flex justify-between items-center">
-            <span>Configuration Progress</span>
-            <span className="font-medium">
+            <span className="configuration-progress-label">Configuration Progress</span>
+            <span className="configuration-progress-text font-medium">
               {categories.length > 0 ? (
                 `${categories.filter(c => c.progressCount && c.progressCount.selected > 0).length}/${categories.length}`
               ) : (
@@ -282,7 +282,7 @@ const ConfiguratorSidebar: React.FC<ConfiguratorSidebarProps> = ({
           </div>
           <div className="mt-2 bg-gray-200 rounded-full h-2">
             <div 
-              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+              className="configuration-progress-fill bg-blue-500 h-2 rounded-full transition-all duration-300"
               style={{
                 width: categories.length > 0 
                   ? `${(categories.filter(c => c.progressCount && c.progressCount.selected > 0).length / categories.length) * 100}%`

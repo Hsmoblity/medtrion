@@ -163,9 +163,10 @@ const OptionCard: React.FC<OptionCardProps> = ({
 
   const cardClasses = useMemo(() => {
     return cn(
+      'option-card', // Base semantic class
       styles.optionCard,
       'bg-white rounded-lg shadow-md border-2 border-gray-200 p-6',
-      'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer',
+      'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
       {
         [styles.selected]: isSelected,
         [styles.compatibilityWarning]: compatibilityStatus === 'warning',
@@ -176,6 +177,10 @@ const OptionCard: React.FC<OptionCardProps> = ({
         [styles.priceUpdated]: internalState.priceUpdated,
         'border-4 border-black': highContrast,
         'transition-none': reducedMotion,
+        'border-green-500 bg-green-50': isSelected && !disabled,
+        'option-card-selected': isSelected,
+        'option-card-disabled': disabled,
+        'option-card-loading': loading,
       },
       {
         'min-h-[160px] min-w-[240px] p-4': variant === 'compact' || size === 'small',
@@ -351,14 +356,10 @@ const OptionCard: React.FC<OptionCardProps> = ({
     return option.image?.altText || `${option.name || option.title} option`;
   };
 
-  // ARIA props
-  const ariaProps = useMemo(() => ({
-    role: 'button' as const,
-    tabIndex: disabled ? -1 : 0,
-    'aria-pressed': isSelected,
-    'aria-disabled': disabled,
+  // ARIA props for the card container
+  const cardAriaProps = useMemo(() => ({
     'aria-describedby': `${option.databaseId}-description ${option.databaseId}-price`,
-    'aria-label': `${option.name || option.title}, ${formatPrice(option.price)}${
+    'aria-label': `${option.name || option.title} option card, ${formatPrice(option.price)}${
       option.installationRequired ? ', installation required' : ''
     }${
       option.adaCompliant ? ', ADA compliant' : ''
@@ -366,12 +367,9 @@ const OptionCard: React.FC<OptionCardProps> = ({
       hasCompatibilityIssues ? ', has compatibility warnings' : ''
     }${
       isSelected ? ', currently selected' : ', not selected'
-    }`,
-    'aria-expanded': internalState.detailsVisible,
-    'aria-haspopup': showDetails ? 'dialog' as const : undefined
+    }`
   }), [
-    disabled, isSelected, option, hasCompatibilityIssues, 
-    internalState.detailsVisible, showDetails
+    option, hasCompatibilityIssues, isSelected
   ]);
 
   return (
@@ -379,29 +377,41 @@ const OptionCard: React.FC<OptionCardProps> = ({
       <div
         ref={cardRef}
         className={cardClasses}
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        {...ariaProps}
+        role="article"
+        {...cardAriaProps}
       >
-        {/* Selection Indicator */}
-        {isSelected && (
-          <div className={`
-            absolute top-4 right-4 w-8 h-8 bg-blue-600 rounded-full 
-            flex items-center justify-center text-white transform 
-            transition-transform duration-200
-            ${reducedMotion ? 'transition-none' : 'scale-100 opacity-100'}
-          `}>
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-          </div>
-        )}
+        {/* Selection Status Indicator */}
+        <div className="absolute top-4 right-4">
+          {isSelected ? (
+            <div className={`
+              w-8 h-8 bg-green-600 rounded-full 
+              flex items-center justify-center text-white transform 
+              transition-transform duration-200 shadow-lg
+              ${reducedMotion ? 'transition-none' : 'scale-100 opacity-100'}
+            `}>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            </div>
+          ) : (
+            <div className={`
+              w-8 h-8 bg-gray-200 rounded-full 
+              flex items-center justify-center text-gray-500 transform 
+              transition-transform duration-200
+              ${reducedMotion ? 'transition-none' : 'scale-100 opacity-100'}
+            `}>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+          )}
+        </div>
 
         {/* Compatibility Warning */}
         {hasCompatibilityIssues && showCompatibility && (
@@ -516,21 +526,60 @@ const OptionCard: React.FC<OptionCardProps> = ({
         </div>
 
         {/* Actions Section */}
-        {showDetails && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <PrimaryButton
-              fullWidth
-              size={size === 'large' || largeText ? 'lg' : 'md'}
+        <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
+          {/* Selection Control Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClick(e);
+            }}
+            disabled={disabled || loading}
+            className={`
+              w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200
+              flex items-center justify-center gap-2
+              ${isSelected 
+                ? 'bg-red-600 hover:bg-red-700 text-white border-2 border-red-600' 
+                : 'bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-600'
+              }
+              ${disabled || loading 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'hover:shadow-lg transform hover:scale-[1.02]'
+              }
+              ${reducedMotion ? 'transition-none' : ''}
+            `}
+            aria-label={isSelected ? `Remove ${option.name || option.title} from configuration` : `Add ${option.name || option.title} to configuration`}
+          >
+            {isSelected ? (
+              <>
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+                Remove from Configuration
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+                Add to Configuration
+              </>
+            )}
+          </button>
+
+          {/* View Details Button */}
+          {showDetails && (
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 handleViewDetails();
               }}
-              style={{ minHeight: '44px' }}
+              className="w-full py-2 px-4 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+              aria-label={`View details for ${option.name || option.title}`}
             >
               View Details
-            </PrimaryButton>
-          </div>
-        )}
+            </button>
+          )}
+        </div>
 
         {/* Loading Overlay */}
         {loading && (

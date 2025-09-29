@@ -169,7 +169,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
       styles.optionCard,
       'bg-white rounded-lg shadow-md border-2 border-gray-200 p-6',
       'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-      'w-full h-auto min-w-0 max-w-full', // Ensure responsive sizing
+      'w-full h-auto min-w-0 max-w-full flex-shrink-0', // Ensure responsive sizing and prevent shrinking
       className, // Include passed className
       {
         [styles.selected]: isSelected,

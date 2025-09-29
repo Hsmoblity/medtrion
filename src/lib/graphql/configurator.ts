@@ -53,6 +53,89 @@ export class ConfiguratorGraphQLClient {
 
 // GraphQL Queries
 export const CONFIGURATOR_QUERIES = {
+  // Get product by slug
+  GET_PRODUCT_BY_SLUG: `
+    query GetProductBySlug($slug: String!) {
+      products(where: { slugIn: [$slug] }, first: 1) {
+        nodes {
+          id
+          databaseId
+          name
+          slug
+          __typename
+          shortDescription
+          description
+          localAttributes { 
+            nodes { 
+              label 
+              options 
+            } 
+          }
+          globalAttributes { 
+            nodes { 
+              label 
+              terms { 
+                nodes { 
+                  name 
+                } 
+              } 
+            } 
+          }
+          relatedOptions
+          image { 
+            sourceUrl 
+            altText
+          }
+          galleryImages(first: 10) { 
+            nodes { 
+              sourceUrl 
+              altText
+            } 
+          }
+          ... on SimpleProduct { 
+            price 
+            regularPrice 
+            salePrice 
+            sku
+          }
+          ... on VariableProduct {
+            price
+            regularPrice
+            salePrice
+            sku
+            variableType
+            attributes {
+              nodes {
+                id
+                name
+              }
+            }
+            variations(first: 50) {
+              nodes {
+                id
+                databaseId
+                name
+                price
+                regularPrice
+                salePrice
+                sku
+                image {
+                  sourceUrl
+                  altText
+                }
+                attributes {
+                  nodes {
+                    id
+                    name
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `,
   // Get single option product by database ID
   GET_OPTION_PRODUCT_BY_ID: `
     query GetOptionProductById($id: ID!) {
@@ -584,8 +667,127 @@ const handleConfiguratorError = (error: any, operation: string) => {
   };
 };
 
+// Normalize slug query response to ConfigurableProductSchema
+export function normalizeSlugQueryResponse(wooProduct: any): any {
+  if (!wooProduct) return null;
+
+  // Normalize relatedOptions (server-provided field) into _related_options
+  let relatedOptions: number[] = [];
+  try {
+    if (wooProduct.relatedOptions) {
+      if (Array.isArray(wooProduct.relatedOptions)) {
+        relatedOptions = wooProduct.relatedOptions.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+      } else if (typeof wooProduct.relatedOptions === 'string') {
+        try {
+          const parsed = JSON.parse(wooProduct.relatedOptions);
+          if (Array.isArray(parsed)) relatedOptions = parsed.map((v: any) => Number(v)).filter((n: any) => !isNaN(n));
+        } catch (e) {
+          const parts = wooProduct.relatedOptions.split(',').map((s: string) => Number(s.trim())).filter((n: number) => !isNaN(n));
+          if (parts.length > 0) relatedOptions = parts;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to normalize relatedOptions:', e);
+  }
+
+  // Normalize images
+  const featuredImage = wooProduct.image?.sourceUrl || '';
+  const galleryImages = wooProduct.galleryImages?.nodes?.map((img: any) => img.sourceUrl) || [];
+
+  // Normalize local and global attributes
+  const localAttributes = wooProduct.localAttributes?.nodes || [];
+  const globalAttributes = wooProduct.globalAttributes?.nodes || [];
+
+  // Normalize variations
+  const variations = wooProduct.variations?.nodes?.map((variation: any) => ({
+    id: variation.id || variation.databaseId?.toString() || '',
+    databaseId: variation.databaseId || undefined,
+    name: variation.name || '',
+    price: variation.price || 0,
+    regularPrice: variation.regularPrice || undefined,
+    salePrice: variation.salePrice || undefined,
+    sku: variation.sku || undefined,
+    image: variation.image?.sourceUrl || '',
+    attributes: variation.attributes?.nodes || []
+  })) || [];
+
+  return {
+    id: wooProduct.id || wooProduct.databaseId?.toString() || '',
+    databaseId: wooProduct.databaseId || undefined,
+    name: wooProduct.name || '',
+    slug: wooProduct.slug || '',
+    title: wooProduct.name || '',
+    description: wooProduct.description || '',
+    shortDescription: wooProduct.shortDescription || '',
+    featuredImage,
+    image: featuredImage ? {
+      sourceUrl: featuredImage,
+      altText: `${wooProduct.name} image`
+    } : undefined,
+    price: wooProduct.price || 0,
+    regularPrice: wooProduct.regularPrice || undefined,
+    salePrice: wooProduct.salePrice || undefined,
+    sku: wooProduct.sku || undefined,
+    type: wooProduct.__typename?.replace('Product', '').toLowerCase() || 'simple',
+    affiliate: false,
+    productId: wooProduct.databaseId?.toString(),
+    
+    // Configurator-specific fields
+    baseModel: true,
+    configuratorCategories: [],
+    compatibilityRules: [],
+    installationRequired: false,
+    financingAvailable: false,
+    insuranceCoverage: [],
+    safetyRating: undefined,
+    adaCompliant: false,
+    weightCapacity: undefined,
+    
+    // Additional fields
+    productPictures: galleryImages,
+    variations,
+    options: [],
+    _related_options: relatedOptions,
+    _related_options_products: [] as any[],
+    
+    // Raw WooCommerce data for reference
+    localAttributes,
+    globalAttributes,
+    rawData: wooProduct
+  };
+}
+
 // Helper functions for common operations
 export const configuratorAPI = {
+  // Get product by slug
+  async getProductBySlug(slug: string) {
+    try {
+      const result = await configuratorGraphQL.query(CONFIGURATOR_QUERIES.GET_PRODUCT_BY_SLUG, { slug });
+      
+      // Validate response structure
+      if (!result || !result.products || !result.products.nodes) {
+        throw new Error('Invalid response structure from GraphQL endpoint');
+      }
+      
+      const products = result.products.nodes;
+      if (products.length === 0) {
+        return {
+          error: false,
+          data: null,
+          fallback: false
+        };
+      }
+      
+      return {
+        error: false,
+        data: products[0], // Return first (and only) product
+        fallback: false
+      };
+    } catch (error) {
+      return handleConfiguratorError(error, 'getProductBySlug');
+    }
+  },
   // Get single option product by database ID
   async getOptionProductById(id: string | number) {
     try {

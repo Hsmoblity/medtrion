@@ -3,7 +3,7 @@ import { GetServerSideProps } from 'next';
 import { ProductSchema } from '../../lib/interfaces/schema';
 import { ProductCardView, mapToProductCardView } from '../../lib/interfaces/homepage';
 import { getProducts } from '../../lib/contentful/contentful';
-import { sanitizeForSSR } from '../../lib/utils/data-validation';
+import { sanitizeForSSR, filterConfigurableProducts, handleInsufficientConfigurableProducts } from '../../lib/utils/data-validation';
 import { ProductHeroCard } from '../../components/Home';
 import MetaHead from '../../components/MetaHead';
 import { PrimaryButton } from '../../components/ui';
@@ -16,9 +16,13 @@ interface ProductsPageProps {
 /**
  * Curated product selection logic
  * Returns exactly ten spotlight products for the shop page
+ * Only includes configurable products (products with non-empty relatedOptions)
  */
 const getCuratedProducts = (allProducts: ProductSchema[]): ProductSchema[] => {
-  // Define curated product slugs for spotlight
+  // First filter for configurable products only
+  const configurableProducts = filterConfigurableProducts(allProducts);
+
+  // Define curated product slugs for spotlight (only configurable products)
   const curatedSlugs = [
     'vivalift-tranquil-2-plr-935s-lift-chair',
     'acorn-stairlifts-acorn-180-curved-stairlift',
@@ -32,14 +36,14 @@ const getCuratedProducts = (allProducts: ProductSchema[]): ProductSchema[] => {
     'acorn-stairlifts-acorn-210-straight-stairlift'
   ];
 
-  // Filter products by curated slugs
-  const curated = allProducts.filter(product => 
+  // Filter configurable products by curated slugs
+  const curated = configurableProducts.filter(product => 
     curatedSlugs.includes(product.slug)
   );
 
-  // If we don't have enough curated products, fill with top products
+  // If we don't have enough curated configurable products, fill with other configurable products
   if (curated.length < 10) {
-    const remaining = allProducts
+    const remaining = configurableProducts
       .filter(product => !curatedSlugs.includes(product.slug))
       .slice(0, 10 - curated.length);
     
@@ -436,8 +440,14 @@ export const getServerSideProps: GetServerSideProps<ProductsPageProps> = async (
       };
     }
 
-    // Get curated selection of five products
+    // Get curated selection of configurable products
     const curatedProducts = getCuratedProducts(productsData.items);
+    
+    // Handle insufficient configurable products
+    const fallbackCheck = handleInsufficientConfigurableProducts(curatedProducts.length, 10, 'Shop page');
+    if (fallbackCheck.shouldShowFallback) {
+      console.warn(fallbackCheck.message);
+    }
     
     // Map to ProductCardView format
     const productCardViews: ProductCardView[] = curatedProducts.map(product => 

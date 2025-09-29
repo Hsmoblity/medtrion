@@ -386,13 +386,37 @@ export async function fetchProductsByDatabaseIds(databaseIds: Array<number | str
                 nodes {
                     id
                     databaseId
+                    name
                     slug
+                    __typename
                     description
+                    shortDescription
                     productSpecifications
+                    globalAttributes { 
+                        nodes { 
+                            label 
+                            terms { 
+                                nodes { 
+                                    name 
+                                } 
+                            } 
+                        } 
+                    }
                     type
                     # Prefer server-provided relatedOptions field from plugin
                     relatedOptions
                     variableType
+                    image { sourceUrl }
+                    galleryImages(first: 10) { 
+                        nodes { 
+                            sourceUrl 
+                        } 
+                    }
+                    ... on SimpleProduct { 
+                        price 
+                        regularPrice 
+                        salePrice 
+                    }
                     ... on ProductWithVariations {
                         attributes{
                             nodes{
@@ -405,6 +429,8 @@ export async function fetchProductsByDatabaseIds(databaseIds: Array<number | str
                                 databaseId
                                 sku
                                 price
+                                regularPrice
+                                salePrice
                                 image { sourceUrl }
                                 attributes { nodes { id name value } }
                             }
@@ -674,4 +700,219 @@ export async function fetchRelatedProductsByIds(databaseIds: Array<number | stri
 
     console.log('fetchRelatedProductsByIds: mapped related products for ids', databaseIds, JSON.parse(JSON.stringify(mapped)));
     return mapped;
+}
+
+/**
+ * Specialized function to fetch option products using the GetProductsByIds query
+ * This implements the feat-option-query-followup.yaml requirements
+ * 
+ * @param relatedOptionIds - Array of numeric database IDs from relatedOptions field
+ * @returns Promise<ConfigurableProductSchema[]> - Array of option products ready for configurator
+ */
+export async function fetchOptionProductsByIds(relatedOptionIds: Array<number | string>) {
+    if (!relatedOptionIds || relatedOptionIds.length === 0) {
+        console.log('fetchOptionProductsByIds: No related option IDs provided, skipping query');
+        return [];
+    }
+
+    const numericIds = relatedOptionIds.map(id => Number(id)).filter(n => !isNaN(n));
+    if (numericIds.length === 0) {
+        console.warn('fetchOptionProductsByIds: No valid numeric IDs found in:', relatedOptionIds);
+        return [];
+    }
+
+    console.log('fetchOptionProductsByIds: Fetching option products for IDs:', numericIds);
+
+    if (!client) {
+        const errorMsg = 'GraphQL client not configured - option products temporarily unavailable';
+        console.error('fetchOptionProductsByIds: WP_GRAPHQL_URL not configured');
+        throw new Error(errorMsg);
+    }
+
+    // Use the complete GetProductsByIds query template with all required fields for options
+    const query = gql`
+        query GetProductsByIds($ids: [Int]) {
+            products(where: { include: $ids, typeIn: [VARIABLE] }) {
+                nodes {
+                    id
+                    databaseId
+                    name
+                    slug
+                    __typename
+                    description
+                    shortDescription
+                    productSpecifications
+                    globalAttributes { 
+                        nodes { 
+                            label 
+                            terms { 
+                                nodes { 
+                                    name 
+                                } 
+                            } 
+                        } 
+                    }
+                    type
+                    relatedOptions
+                    variableType
+                    image { sourceUrl }
+                    galleryImages(first: 10) { 
+                        nodes { 
+                            sourceUrl 
+                        } 
+                    }
+                    ... on SimpleProduct { 
+                        price 
+                        regularPrice 
+                        salePrice 
+                        sku
+                    }
+                    ... on ProductWithVariations {
+                        attributes {
+                            nodes {
+                                name
+                                label
+                                options
+                            }
+                        }
+                        variations(first: 50) {
+                            nodes {
+                                id
+                                databaseId
+                                name
+                                sku
+                                price
+                                regularPrice
+                                salePrice
+                                image { sourceUrl }
+                                attributes { 
+                                    nodes { 
+                                        id 
+                                        name 
+                                        value 
+                                    } 
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    `;
+
+    try {
+        const data = await runClientRequest(query, { ids: numericIds }) as { products: { nodes: any[] } };
+        const nodes = data.products.nodes || [];
+
+        if (nodes.length === 0) {
+            console.warn('fetchOptionProductsByIds: No option products found for IDs:', numericIds);
+            return [];
+        }
+
+        // Map to ConfigurableProductSchema format for configurator use
+        const optionProducts = nodes.map((node: any) => {
+            // Normalize attributes from globalAttributes and local attributes
+            const globalAttrs = node.globalAttributes?.nodes || [];
+            const localAttrs = node.attributes?.nodes || [];
+            
+            // Extract price information
+            const price = node.price ? parseFloat(node.price.replace(/[^0-9.-]/g, '')) : 0;
+            const regularPrice = node.regularPrice ? parseFloat(node.regularPrice.replace(/[^0-9.-]/g, '')) : price;
+            const salePrice = node.salePrice ? parseFloat(node.salePrice.replace(/[^0-9.-]/g, '')) : null;
+
+            // Normalize related options for nested option products
+            let normalizedRelatedOptions: number[] = [];
+            if (node.relatedOptions) {
+                if (Array.isArray(node.relatedOptions)) {
+                    normalizedRelatedOptions = node.relatedOptions.map((v: any) => Number(v)).filter((n: number) => !isNaN(n));
+                } else if (typeof node.relatedOptions === 'string') {
+                    try {
+                        const parsed = JSON.parse(node.relatedOptions);
+                        if (Array.isArray(parsed)) {
+                            normalizedRelatedOptions = parsed.map((v: any) => Number(v)).filter((n: number) => !isNaN(n));
+                        }
+                    } catch (e) {
+                        const parts = node.relatedOptions.split(',').map((s: string) => Number(s.trim())).filter((n: number) => !isNaN(n));
+                        normalizedRelatedOptions = parts;
+                    }
+                }
+            }
+
+            const configurableProduct: any = {
+                id: node.id || node.databaseId?.toString() || '',
+                databaseId: node.databaseId || undefined,
+                name: node.name || '',
+                slug: node.slug || '',
+                title: node.name || '',
+                description: node.description || '',
+                shortDescription: node.shortDescription || node.description || '',
+                featuredImage: node.image?.sourceUrl || '',
+                image: node.image ? {
+                    sourceUrl: node.image.sourceUrl,
+                    altText: `${node.name} option image`
+                } : undefined,
+                price: price,
+                regularPrice: regularPrice?.toString() || undefined,
+                salePrice: salePrice?.toString() || null,
+                sku: node.sku || undefined,
+                type: node.type || 'simple',
+                affiliate: false,
+                productId: node.databaseId?.toString() || '',
+                
+                // Configurator-specific fields
+                baseModel: false, // Option products are not base models
+                configuratorCategories: [],
+                compatibilityRules: [],
+                installationRequired: false,
+                financingAvailable: false,
+                insuranceCoverage: [],
+                safetyRating: undefined,
+                adaCompliant: false,
+                weightCapacity: undefined,
+                
+                // Product data arrays
+                productPictures: (node.galleryImages?.nodes || []).map((img: any) => img.sourceUrl).filter(Boolean),
+                variations: (node.variations?.nodes || []).map((variation: any) => ({
+                    id: variation.id,
+                    databaseId: variation.databaseId,
+                    name: variation.name || '',
+                    sku: variation.sku || '',
+                    price: variation.price ? parseFloat(variation.price.replace(/[^0-9.-]/g, '')) : 0,
+                    regularPrice: variation.regularPrice || variation.price || '',
+                    salePrice: variation.salePrice || null,
+                    image: variation.image?.sourceUrl || '',
+                    attributes: variation.attributes?.nodes || []
+                })),
+                options: [], // Will be populated by parent component if needed
+                _related_options: normalizedRelatedOptions,
+                _related_options_products: [] as any[], // Will be populated if nested options exist
+                
+                // Additional fields for configurator
+                productSpecifications: node.productSpecifications || '',
+                globalAttributes: globalAttrs,
+                localAttributes: localAttrs,
+                __typename: node.__typename || 'SimpleProduct'
+            };
+
+            return configurableProduct;
+        });
+
+        console.log('fetchOptionProductsByIds: Successfully mapped', optionProducts.length, 'option products with specifications and attributes');
+        console.log('fetchOptionProductsByIds: Option products preview:', optionProducts.map(p => ({ 
+            id: p.id, 
+            name: p.name, 
+            price: p.price,
+            type: p.type,
+            hasSpecs: !!p.productSpecifications,
+            hasGlobalAttrs: p.globalAttributes?.length > 0,
+            hasVariations: p.variations?.length > 0
+        })));
+
+        return optionProducts;
+
+    } catch (error) {
+        console.error('fetchOptionProductsByIds: Error fetching option products:', error);
+        // Don't throw - return empty array to allow graceful degradation
+        return [];
+    }
 }

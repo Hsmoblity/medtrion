@@ -16,6 +16,9 @@ import { Reviews } from 'components/reviews';
 import FAQ from 'components/faq';
 import { PrimaryButton, LoadingOverlay } from 'components/ui';
 import { useOptionProductsWithMetrics } from 'hooks/useOptionProducts';
+import { LazyOptionProducts } from 'components/lazy-loading/LazyOptionProducts';
+import { OptionProductsLoadingOverlay } from 'components/loading/OptionProductsLoadingOverlay';
+import { PERFORMANCE_THRESHOLDS } from 'lib/utils/performance-tracking-lazy-load';
 
 interface ProductDetailPageProps {
   product: ConfigurableProductSchema | null;
@@ -42,7 +45,9 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   const [configuratorCategories, setConfiguratorCategories] = useState<ConfiguratorCategory[]>([]);
 
   // Lazy load option products with performance tracking
-  const relatedOptionIds = product?._related_options || [];
+  const relatedOptionIds = (product?._related_options || []).map(id => 
+    typeof id === 'string' ? parseInt(id, 10) : id
+  ).filter(id => !isNaN(id));
   const {
     products: optionProducts,
     loading: optionsLoading,
@@ -469,6 +474,69 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           <div className="mt-16">
             <FAQ />
           </div>
+
+          {/* Lazy Loaded Option Products Section */}
+          {relatedOptionIds && relatedOptionIds.length > 0 && (
+            <div className="mt-16">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  Available Options & Accessories
+                </h2>
+                <p className="text-lg text-gray-600">
+                  Customize your {product.title || product.name} with these compatible options
+                </p>
+              </div>
+              
+              <LazyOptionProducts
+                relatedOptionIds={relatedOptionIds}
+                performanceLabel={`product-detail-lazy-options-${product.slug}`}
+                groupByCategory={true}
+                maxProductsPerCategory={8}
+                enableNoJSFallback={true}
+                className="max-w-7xl mx-auto"
+                onLoadComplete={(loadedProducts) => {
+                  console.log(`Successfully lazy loaded ${loadedProducts.length} option products`);
+                  // Generate categories from loaded products if not already done
+                  if (configuratorCategories.length === 0) {
+                    generateConfigurationCategories(loadedProducts);
+                  }
+                }}
+                onLoadError={(error) => {
+                  console.error('Failed to lazy load option products:', error);
+                }}
+                onLoadTimeout={() => {
+                  console.warn('Option products loading timed out');
+                }}
+                errorComponent={
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                    <div className="text-yellow-800">
+                      <h3 className="font-semibold mb-2">Options Temporarily Unavailable</h3>
+                      <p className="text-sm mb-4">
+                        We're having trouble loading product options right now. 
+                        Please refresh the page or contact us for assistance.
+                      </p>
+                      <button
+                        onClick={() => window.location.reload()}
+                        className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 transition-colors"
+                      >
+                        Refresh Page
+                      </button>
+                    </div>
+                  </div>
+                }
+                emptyComponent={
+                  <div className="text-center py-12">
+                    <div className="text-gray-500">
+                      <h3 className="font-semibold mb-2">No Additional Options</h3>
+                      <p className="text-sm">
+                        This product doesn't have additional customization options available at this time.
+                      </p>
+                    </div>
+                  </div>
+                }
+              />
+            </div>
+          )}
         </div>
       </div>
     </>
@@ -507,19 +575,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   try {
-    // Single source of truth: WooCommerce GraphQL only
+    // Single source of truth: WooCommerce GraphQL slug query
     let product;
     let categories: ConfiguratorCategory[] = [];
 
-    // Fetch product data from WooCommerce GraphQL
-    const { fetchGraphQLProducts } = await import('../../../lib/woocommerce');
-    const allProducts = await fetchGraphQLProducts();
+    // Fetch product data using new slug-based query
+    const { configuratorAPI, normalizeSlugQueryResponse } = await import('../../../lib/graphql/configurator');
+    const slugResult = await configuratorAPI.getProductBySlug(slug);
     
-    // Find product by slug from WooCommerce data
-    const wooProduct = allProducts.find((p: any) => p.slug === slug);
-    
-    if (!wooProduct) {
-      console.error(`Product with slug "${slug}" not found in WooCommerce data`);
+    if (slugResult.error || !slugResult.data) {
+      console.error(`Product with slug "${slug}" not found via slug query`);
       return {
         props: {
           product: null,
@@ -529,56 +594,25 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    // Convert WooCommerce product to ProductSchema format first
-    const { mapWooToProductSchema } = await import('../../../lib/contentful/contentful');
-    const mappedProduct = mapWooToProductSchema(wooProduct);
+    // Normalize the slug query response to ConfigurableProductSchema
+    product = normalizeSlugQueryResponse(slugResult.data);
     
-    console.log(`Found product for detail page:`, mappedProduct.title, `ID: ${mappedProduct.productId}`);
-
-    // Convert WooCommerce product to ConfigurableProductSchema
-    product = {
-      id: mappedProduct.productId || mappedProduct.slug,
-      databaseId: mappedProduct.productId ? parseInt(mappedProduct.productId) : undefined,
-      name: mappedProduct.title,
-      slug: mappedProduct.slug,
-      title: mappedProduct.title,
-      description: mappedProduct.description || '',
-      shortDescription: mappedProduct.shortDescription || '',
-      featuredImage: mappedProduct.featuredImage,
-      image: mappedProduct.featuredImage ? {
-        sourceUrl: mappedProduct.featuredImage,
-        altText: `${mappedProduct.title} image`
-      } : undefined,
-      price: typeof mappedProduct.price === 'number' ? mappedProduct.price : parseFloat(mappedProduct.price || '0'),
-      regularPrice: mappedProduct.price?.toString() || undefined,
-      salePrice: undefined,
-      sku: undefined,
-      type: 'configurable',
-      affiliate: mappedProduct.affiliate || false,
-      productId: mappedProduct.productId,
-      
-      // Configurator-specific fields
-      baseModel: true,
-      configuratorCategories: [],
-      compatibilityRules: [],
-      installationRequired: false,
-      financingAvailable: false,
-      insuranceCoverage: [],
-      safetyRating: undefined,
-      adaCompliant: false,
-      weightCapacity: undefined,
-      
-      // Additional fields
-      productPictures: mappedProduct.productPictures || [],
-      variations: mappedProduct.variations || [],
-      options: mappedProduct.options || [],
-      _related_options: mappedProduct._related_options || [],
-      _related_options_products: [] as ConfigurableProductSchema[]
-    };
+    if (!product) {
+      console.error(`Failed to normalize product data for slug "${slug}"`);
+      return {
+        props: {
+          product: null,
+          categories: [],
+          error: 'Product data normalization failed'
+        }
+      };
+    }
+    
+    console.log(`Found product via slug query:`, product.title, `ID: ${product.databaseId}`, `Related options: ${product._related_options?.length || 0}`);
 
     // Note: Related option products are now loaded lazily on the client side
     // This improves initial page load performance by deferring option data fetching
-    console.log(`Product "${mappedProduct.title}" has ${mappedProduct._related_options?.length || 0} related options (will be loaded client-side)`);
+    console.log(`Product "${product.title}" has ${product._related_options?.length || 0} related options (will be loaded client-side)`);
 
     // Note: Configuration categories are now generated client-side after option products are loaded
     // This improves initial page load performance

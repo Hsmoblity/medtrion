@@ -3,7 +3,7 @@ import { ProductSchema } from '../lib/interfaces/schema';
 import { ProductCardView, mapToProductCardView, validateProductCardViews } from '../lib/interfaces/homepage';
 import { gql } from 'graphql-request';
 import { runClientRequest } from '../lib/woocommerce';
-import { validateProductSchema, sanitizeForSSR } from '../lib/utils/data-validation';
+import { validateProductSchema, sanitizeForSSR, filterConfigurableProducts, handleInsufficientConfigurableProducts } from '../lib/utils/data-validation';
 import { mapWooToProductSchema } from '../lib/contentful/contentful';
 
 interface HomepageState {
@@ -69,14 +69,22 @@ export const useHomepageStore = create<HomepageState>((set) => ({
             console.warn('Invalid product data:', validation.errors);
           }
           return sanitizeForSSR(mappedProduct);
-        })
-        .filter(product => product && product.slug && product.title); // Basic filtering
+        });
+      
+      // Filter for configurable products only
+      const configurableProducts = filterConfigurableProducts(productSchemas);
       
       // Map ProductSchema to ProductCardView with validation
-      const mappedProducts = productSchemas.map(mapToProductCardView);
+      const mappedProducts = configurableProducts.map(mapToProductCardView);
       
       // Final validation of ProductCardView objects
       const finalProducts = validateProductCardViews(mappedProducts, 'TopProductsStrip');
+      
+      // Handle insufficient configurable products
+      const fallbackCheck = handleInsufficientConfigurableProducts(finalProducts.length, 4, 'Homepage Store');
+      if (fallbackCheck.shouldShowFallback) {
+        console.warn(fallbackCheck.message);
+      }
       
       set({ featuredProducts: finalProducts, loading: false });
     } catch (error) {
@@ -88,10 +96,12 @@ export const useHomepageStore = create<HomepageState>((set) => ({
         if (response.items && response.items.length > 0) {
           // Apply same validation to fallback data
           const validatedFallback = response.items
-            .map(product => sanitizeForSSR(product))
-            .filter(product => product && product.slug && product.title);
+            .map(product => sanitizeForSSR(product));
           
-          const fallbackProducts = validatedFallback.slice(0, 4).map(mapToProductCardView);
+          // Filter for configurable products only
+          const configurableFallback = filterConfigurableProducts(validatedFallback);
+          
+          const fallbackProducts = configurableFallback.slice(0, 4).map(mapToProductCardView);
           const validatedFallbackProducts = validateProductCardViews(fallbackProducts, 'TopProductsStrip-Fallback');
           
           set({ featuredProducts: validatedFallbackProducts, loading: false });

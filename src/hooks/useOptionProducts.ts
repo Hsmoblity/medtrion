@@ -1,11 +1,19 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ConfigurableProductSchema } from '../lib/interfaces/configurator';
+import { 
+  usePerformanceTracking, 
+  PERFORMANCE_THRESHOLDS,
+  getLoadingStateForDuration
+} from '../lib/utils/performance-tracking-lazy-load';
 
 interface UseOptionProductsState {
   products: ConfigurableProductSchema[];
   loading: boolean;
   error: string | null;
   hasLoaded: boolean;
+  loadingDuration: number;
+  loadingState: 'none' | 'skeleton' | 'overlay';
+  performanceMetrics?: any;
 }
 
 interface UseOptionProductsOptions {
@@ -19,6 +27,10 @@ interface UseOptionProductsOptions {
   retry?: boolean;
   /** Maximum retry attempts */
   maxRetries?: number;
+  /** Enable performance tracking */
+  enablePerformanceTracking?: boolean;
+  /** Performance tracking label */
+  trackingLabel?: string;
 }
 
 // Simple in-memory cache for option products
@@ -47,6 +59,8 @@ export function useOptionProducts(
     timeout = 10000,
     retry = true,
     maxRetries = 2,
+    enablePerformanceTracking = true,
+    trackingLabel,
   } = options;
 
   const [state, setState] = useState<UseOptionProductsState>({
@@ -54,13 +68,24 @@ export function useOptionProducts(
     loading: false,
     error: null,
     hasLoaded: false,
+    loadingDuration: 0,
+    loadingState: 'none',
   });
 
   const retryCountRef = useRef(0);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const loadingStartTimeRef = useRef<number>(0);
 
   // Generate cache key from related option IDs
   const effectiveCacheKey = cacheKey || `options_${relatedOptionIds.sort().join(',')}`;
+
+  // Performance tracking setup
+  const performanceLabel = trackingLabel || `option-products-${effectiveCacheKey}`;
+  const { startTracking, endTracking, getMetrics } = usePerformanceTracking(performanceLabel, {
+    trackLCP: enablePerformanceTracking,
+    trackTTI: enablePerformanceTracking,
+    enableConsoleLogging: enablePerformanceTracking,
+  });
 
   // Check cache first
   const getCachedData = useCallback(() => {
@@ -95,8 +120,8 @@ export function useOptionProducts(
     console.log('useOptionProducts: Fetching option products for IDs:', relatedOptionIds);
 
     try {
-      // Import dynamically to avoid SSR issues
-      const { fetchRelatedProductsByIds } = await import('../lib/woocommerce');
+      // Import the new specialized function for option products
+      const { fetchOptionProductsByIds } = await import('../lib/woocommerce');
       
       // Create abort controller for timeout
       const abortController = new AbortController();
@@ -107,38 +132,19 @@ export function useOptionProducts(
         abortController.abort();
       }, timeout);
 
-      const relatedProducts = await fetchRelatedProductsByIds(relatedOptionIds);
+      // Use the specialized option products fetcher that implements the GetProductsByIds query
+      const optionProducts = await fetchOptionProductsByIds(relatedOptionIds);
       
       // Clear timeout
       clearTimeout(timeoutId);
       
-      if (!relatedProducts || relatedProducts.length === 0) {
-        console.warn('useOptionProducts: No related products returned for IDs:', relatedOptionIds);
+      if (!optionProducts || optionProducts.length === 0) {
+        console.warn('useOptionProducts: No option products returned for IDs:', relatedOptionIds);
         return [];
       }
 
-      // Convert raw WooCommerce products to ConfigurableProductSchema format
-      const mappedProducts: ConfigurableProductSchema[] = relatedProducts.map((rawProduct: any) => ({
-        id: rawProduct.id || rawProduct.databaseId?.toString() || '',
-        databaseId: rawProduct.databaseId || undefined,
-        name: rawProduct.name || '',
-        slug: rawProduct.slug || '',
-        title: rawProduct.name || '',
-        description: rawProduct.description || '',
-        shortDescription: rawProduct.description || '',
-        featuredImage: rawProduct.image || '',
-        image: rawProduct.image ? {
-          sourceUrl: rawProduct.image,
-          altText: `${rawProduct.name} image`
-        } : undefined,
-        price: 0, // Options might not have individual prices
-        productPictures: [],
-        variations: rawProduct.variations || [],
-        options: [],
-        _related_options: [],
-        _related_options_products: [],
-        productSpecifications: rawProduct.productSpecifications || ''
-      }));
+      // Products are already in ConfigurableProductSchema format from fetchOptionProductsByIds
+      const mappedProducts: ConfigurableProductSchema[] = optionProducts;
 
       // Cache the results
       if (effectiveCacheKey) {
@@ -149,7 +155,7 @@ export function useOptionProducts(
         });
       }
 
-      console.log('useOptionProducts: Successfully fetched and mapped', mappedProducts.length, 'option products');
+      console.log('useOptionProducts: Successfully fetched and cached', mappedProducts.length, 'option products with full specifications');
       return mappedProducts;
 
     } catch (error) {
@@ -167,17 +173,35 @@ export function useOptionProducts(
       return;
     }
 
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    // Start performance tracking and loading duration
+    loadingStartTimeRef.current = Date.now();
+    if (enablePerformanceTracking) {
+      startTracking();
+    }
+
+    setState(prev => ({ ...prev, loading: true, error: null, loadingDuration: 0 }));
 
     try {
       const products = await fetchOptionProducts();
+      const finalDuration = Date.now() - loadingStartTimeRef.current;
       
-      setState({
+      // End performance tracking
+      const performanceMetrics = enablePerformanceTracking ? endTracking({
+        cacheHit: false, // Will be set by fetchOptionProducts if cache hit
+        optionCount: products.length,
+        errorCount: 0,
+      }) : undefined;
+      
+      setState(prev => ({
+        ...prev,
         products,
         loading: false,
         error: null,
         hasLoaded: true,
-      });
+        loadingDuration: finalDuration,
+        loadingState: 'none',
+        performanceMetrics,
+      }));
       
       retryCountRef.current = 0; // Reset retry count on success
 
@@ -199,12 +223,26 @@ export function useOptionProducts(
       }
 
       console.error('useOptionProducts: Failed to fetch option products:', error);
-      setState({
+      
+      const finalDuration = Date.now() - loadingStartTimeRef.current;
+      
+      // End performance tracking with error
+      const performanceMetrics = enablePerformanceTracking ? endTracking({
+        cacheHit: false,
+        optionCount: 0,
+        errorCount: 1,
+      }) : undefined;
+
+      setState(prev => ({
+        ...prev,
         products: [],
         loading: false,
         error: errorMessage,
         hasLoaded: true,
-      });
+        loadingDuration: finalDuration,
+        loadingState: 'none',
+        performanceMetrics,
+      }));
     }
   }, [relatedOptionIds, fetchOptionProducts, retry, maxRetries]);
 
@@ -214,6 +252,24 @@ export function useOptionProducts(
       optionProductsCache.delete(effectiveCacheKey);
     }
   }, [effectiveCacheKey]);
+
+  // Effect for real-time loading duration and state updates
+  useEffect(() => {
+    if (!state.loading) return;
+
+    const interval = setInterval(() => {
+      const currentDuration = Date.now() - loadingStartTimeRef.current;
+      const currentLoadingState = getLoadingStateForDuration(currentDuration);
+
+      setState(prev => ({
+        ...prev,
+        loadingDuration: currentDuration,
+        loadingState: currentLoadingState,
+      }));
+    }, 50); // Update every 50ms for smooth progress
+
+    return () => clearInterval(interval);
+  }, [state.loading]);
 
   // Effect for immediate fetching
   useEffect(() => {
@@ -239,7 +295,8 @@ export function useOptionProducts(
 }
 
 /**
- * Hook for lazy loading option products with performance tracking
+ * Hook for lazy loading option products with enhanced performance tracking
+ * Now uses the base hook's built-in performance tracking capabilities
  */
 export function useOptionProductsWithMetrics(
   relatedOptionIds: number[],
@@ -250,36 +307,12 @@ export function useOptionProductsWithMetrics(
 ) {
   const { performanceLabel, ...hookOptions } = options;
   
-  const result = useOptionProducts(relatedOptionIds, hookOptions);
-
-  // Track performance metrics
-  useEffect(() => {
-    if (performanceLabel && result.hasLoaded && !result.loading) {
-      const startTime = performance.now();
-      
-      // Track largest contentful paint for option loading
-      if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
-        try {
-          const observer = new PerformanceObserver((list) => {
-            const entries = list.getEntries();
-            const lcpEntry = entries.find(entry => entry.entryType === 'largest-contentful-paint');
-            
-            if (lcpEntry) {
-              console.log(`${performanceLabel} - LCP:`, lcpEntry.startTime);
-            }
-          });
-          
-          observer.observe({ entryTypes: ['largest-contentful-paint'] });
-          
-          return () => observer.disconnect();
-        } catch (error) {
-          console.warn('Performance tracking not supported:', error);
-        }
-      }
-    }
-  }, [performanceLabel, result.hasLoaded, result.loading]);
-
-  return result;
+  // Use the enhanced base hook with performance tracking enabled
+  return useOptionProducts(relatedOptionIds, {
+    ...hookOptions,
+    enablePerformanceTracking: true,
+    trackingLabel: performanceLabel,
+  });
 }
 
 /**

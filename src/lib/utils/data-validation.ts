@@ -242,6 +242,67 @@ export function logValidationResults(component: string, results: ValidationResul
 }
 
 /**
+ * Filter products to only include configurable products (products with non-empty relatedOptions)
+ */
+export function filterConfigurableProducts(products: ProductSchema[]): ProductSchema[] {
+  return products.filter(product => {
+    // Basic validation
+    if (!product || !product.slug || !product.title) {
+      return false;
+    }
+    
+    // Check if product has configurable options
+    const hasRelatedOptions = product.relatedOptions && 
+      Array.isArray(product.relatedOptions) && 
+      product.relatedOptions.length > 0;
+    
+    return hasRelatedOptions;
+  });
+}
+
+/**
+ * Get curated fallback products when configurable products are insufficient
+ * Returns a predefined list of high-quality products that should have configurable options
+ */
+export function getCuratedFallbackProducts(): string[] {
+  return [
+    'vivalift-tranquil-2-plr-935s-lift-chair',
+    'acorn-stairlifts-acorn-180-curved-stairlift',
+    'vivalift-ultra-plr4955s-lift-chair',
+    'acorn-stairlifts-acorn-130-straight-stairlift',
+    'vivalift-classic-plr-835s-lift-chair',
+    'acorn-stairlifts-acorn-200-straight-stairlift',
+    'vivalift-premium-plr-945s-lift-chair',
+    'acorn-stairlifts-acorn-190-curved-stairlift',
+    'vivalift-deluxe-plr-755s-lift-chair',
+    'acorn-stairlifts-acorn-210-straight-stairlift'
+  ];
+}
+
+/**
+ * Handle insufficient configurable products by providing fallback messaging
+ */
+export function handleInsufficientConfigurableProducts(
+  configurableCount: number, 
+  requiredCount: number, 
+  context: string
+): { shouldShowFallback: boolean; message?: string } {
+  if (configurableCount < requiredCount) {
+    const message = `${context}: Only ${configurableCount} configurable products found (need ${requiredCount}). Consider adding more products with relatedOptions.`;
+    console.warn(message);
+    
+    return {
+      shouldShowFallback: true,
+      message: configurableCount === 0 
+        ? 'No configurable products available. Please contact support or try again later.'
+        : `Limited selection: ${configurableCount} configurable products available.`
+    };
+  }
+  
+  return { shouldShowFallback: false };
+}
+
+/**
  * Enhanced data sanitization for SSR
  */
 export function sanitizeForSSR(data: any): any {

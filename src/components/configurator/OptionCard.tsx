@@ -3,6 +3,7 @@ import { ConfigurableProductSchema, CompatibilityIssue, FinancingOption, Insuran
 import { useConfiguratorStore } from 'stores/configuratorStore';
 import { PrimaryButton } from 'components/ui';
 import OptionCardDetailsModal from './OptionCardDetailsModal';
+import OptionVariationPopup from './OptionVariationPopup';
 import styles from './OptionCard.module.css';
 import { cn } from '../../lib/utils';
 
@@ -114,6 +115,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
     imageLoaded: false,
     imageError: false,
     detailsVisible: false,
+    variationPopupVisible: false,
     compatibilityChecking: false,
     financingCalculating: false,
     insuranceChecking: false,
@@ -257,6 +259,14 @@ const OptionCard: React.FC<OptionCardProps> = ({
     onViewDetails?.(option);
   }, [option, onViewDetails]);
 
+  const handleViewVariations = useCallback(() => {
+    setInternalState(prev => ({ ...prev, variationPopupVisible: true }));
+  }, []);
+
+  const handleCloseVariationPopup = useCallback(() => {
+    setInternalState(prev => ({ ...prev, variationPopupVisible: false }));
+  }, []);
+
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
     switch (event.key) {
       case 'Enter':
@@ -387,6 +397,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
         onMouseUp={handleMouseUp}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        onClick={handleViewVariations}
         role="article"
         {...cardAriaProps}
       >
@@ -603,6 +614,20 @@ const OptionCard: React.FC<OptionCardProps> = ({
         onClose={() => setInternalState(prev => ({ ...prev, detailsVisible: false }))}
         financingOptions={financingOptions}
         insuranceEstimate={insuranceEstimate}
+      />
+
+      {/* Variation Popup */}
+      <OptionVariationPopup
+        option={option}
+        isOpen={internalState.variationPopupVisible}
+        onClose={handleCloseVariationPopup}
+        onAddToConfiguration={(option, variations) => {
+          // Handle adding to configuration
+          if (onToggle) {
+            onToggle();
+          }
+        }}
+        isAlreadySelected={isSelected}
       />
     </>
   );

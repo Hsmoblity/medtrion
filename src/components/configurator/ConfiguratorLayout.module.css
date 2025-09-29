@@ -1,17 +1,17 @@
 /* Configurator Layout Styles */
 
-/* Option Cards Grid - Max 3 Columns with Row Stacking */
+/* Option Cards Grid - Max 2 Columns with Row Stacking */
 .option-cards-grid {
   display: grid;
   gap: 1rem;
   grid-auto-rows: max-content;
   width: 100%;
   /* Use auto-fit with minmax to ensure cards wrap to new rows */
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   max-width: 100%;
 }
 
-/* Responsive grid columns - Max 3 columns approach */
+/* Responsive grid columns - Max 2 columns approach */
 @media (max-width: 639px) {
   .option-cards-grid {
     grid-template-columns: 1fr;
@@ -21,31 +21,31 @@
 
 @media (min-width: 640px) and (max-width: 1023px) {
   .option-cards-grid {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 1rem;
   }
 }
 
 @media (min-width: 1024px) {
   .option-cards-grid {
-    /* Maximum 3 columns - cards will stack in rows beyond 3 */
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    /* Maximum 2 columns - cards will stack in rows beyond 2 */
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 1.25rem;
   }
 }
 
-/* Ensure maximum of 3 columns on all larger screens */
+/* Ensure maximum of 2 columns on all larger screens */
 @media (min-width: 1280px) {
   .option-cards-grid {
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
     gap: 1.5rem;
   }
 }
 
-/* Force maximum 3 columns on very large screens */
+/* Force maximum 2 columns on very large screens */
 @media (min-width: 1536px) {
   .option-cards-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
   }
 }
@@ -95,23 +95,23 @@
   min-height: 44px; /* Touch target size */
 }
 
-/* Loading state - Max 3 columns */
+/* Loading state - Max 2 columns */
 .option-cards-loading {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   max-width: 100%;
 }
 
 @media (min-width: 1024px) {
   .option-cards-loading {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   }
 }
 
 @media (min-width: 1536px) {
   .option-cards-loading {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

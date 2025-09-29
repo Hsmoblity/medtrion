@@ -1,5 +1,12 @@
 
-import { GraphQLClient, gql } from 'graphql-request';
+import { GraphQLClient } from 'graphql-request';
+import { 
+  GET_ALL_PRODUCTS,
+  GET_PRODUCTS_BY_IDS, 
+  GET_OPTION_PRODUCT_BY_ID,
+  GET_OPTION_PRODUCTS_BY_IDS,
+  GET_CART
+} from './graphql/queries';
 
 // Load environment variables in Node.js environment
 if (typeof window === 'undefined') {
@@ -138,72 +145,7 @@ export async function fetchGraphQLProducts() {
         }
         throw new Error(errorMsg);
     }
-    const query = gql`
-        query GetProducts {
-            products(where: { typeIn: [SIMPLE, VARIABLE] }, first: 50) {
-                nodes {
-                    id
-                    databaseId
-                    name
-                    slug
-                    description
-                    shortDescription
-                    productSpecifications
-                    
-                    # New GraphQL field added by WP plugin: relatedOptions
-                    relatedOptions
-                    image {
-                        sourceUrl
-                    }
-                    galleryImages(first: 10) {
-                        nodes {
-                            sourceUrl
-                        }
-                    }
-                    ... on SimpleProduct {
-                        price
-                        regularPrice
-                        salePrice
-                    }
-                    ... on ProductWithPricing {
-                        price
-                        regularPrice
-                        salePrice
-                    }
-                    ... on ExternalProduct {
-                        price
-                    }
-                    ... on VariableProduct {
-                        price
-                        regularPrice
-                        salePrice
-                        variations(first: 20) {
-                            nodes {
-                                id
-                                databaseId
-                                name
-                                slug
-                                price
-                                regularPrice
-                                salePrice
-                                sku
-                                image {
-                                    sourceUrl
-                                }
-                                attributes {
-                                    nodes {
-                                        id
-                                        name
-                                        value
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    `;
+    const query = GET_ALL_PRODUCTS;
     try {
         const data = await runClientRequest(query) as { products: { nodes: any[] } };
         const nodes = data.products.nodes;
@@ -345,28 +287,7 @@ export async function fetchGraphQLCart(cartKey: string) {
         console.error('fetchGraphQLCart: WP_GRAPHQL_URL not configured; skipping GraphQL request.');
         return null;
     }
-    const query = gql`
-        query GetCart($key: String!) {
-            cart(key: $key) {
-                contents {
-                    nodes {
-                        product {
-                            node {
-                                id
-                                name
-                                image {
-                                    sourceUrl
-                                }
-                            }
-                        }
-                        quantity
-                        total
-                    }
-                }
-                total
-            }
-        }
-    `;
+    const query = GET_CART;
     try {
         const data = await runClientRequest(query, { key: cartKey }) as { cart: any };
         return data.cart;
@@ -380,66 +301,7 @@ export async function fetchProductsByDatabaseIds(databaseIds: Array<number | str
     if (!databaseIds || databaseIds.length === 0) return [];
     const idsList = databaseIds.map(id => Number(id)).filter(n => !isNaN(n));
     if (idsList.length === 0) return [];
-    const query = gql`
-        query GetProductsByIds($ids: [Int]) {
-            products(where: { include: $ids,  typeIn: [VARIABLE] }) {
-                nodes {
-                    id
-                    databaseId
-                    name
-                    slug
-                    __typename
-                    description
-                    shortDescription
-                    productSpecifications
-                    globalAttributes { 
-                        nodes { 
-                            label 
-                            terms { 
-                                nodes { 
-                                    name 
-                                } 
-                            } 
-                        } 
-                    }
-                    type
-                    # Prefer server-provided relatedOptions field from plugin
-                    relatedOptions
-                    variableType
-                    image { sourceUrl }
-                    galleryImages(first: 10) { 
-                        nodes { 
-                            sourceUrl 
-                        } 
-                    }
-                    ... on SimpleProduct { 
-                        price 
-                        regularPrice 
-                        salePrice 
-                    }
-                    ... on ProductWithVariations {
-                        attributes{
-                            nodes{
-                                name
-                            }
-                        }
-                        variations(first: 50) {
-                            nodes {
-                                id
-                                databaseId
-                                sku
-                                price
-                                regularPrice
-                                salePrice
-                                image { sourceUrl }
-                                attributes { nodes { id name value } }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    `;
+    const query = GET_PRODUCTS_BY_IDS;
     if (!client) {
         const errorMsg = 'GraphQL client not configured - products temporarily unavailable';
         if (process.env.NODE_ENV === 'development') {
@@ -525,71 +387,7 @@ export async function fetchOptionProductById(databaseId: number | string) {
         throw new Error(errorMsg);
     }
 
-    const query = gql`
-        query GetOptionProductById($id: ID!) {
-            product(id: $id, idType: DATABASE_ID) {
-                id
-                databaseId
-                name
-                slug
-                description
-                shortDescription
-                productSpecifications
-                type
-                relatedOptions
-                image {
-                    sourceUrl
-                    altText
-                }
-                galleryImages(first: 10) {
-                    nodes {
-                        sourceUrl
-                        altText
-                    }
-                }
-                ... on SimpleProduct {
-                    price
-                    regularPrice
-                    salePrice
-                    sku
-                }
-                ... on VariableProduct {
-                    price
-                    regularPrice
-                    salePrice
-                    sku
-                    variableType
-                    attributes {
-                        nodes {
-                            id
-                            name
-                        }
-                    }
-                    variations(first: 50) {
-                        nodes {
-                            id
-                            databaseId
-                            name
-                            price
-                            regularPrice
-                            salePrice
-                            sku
-                            image {
-                                sourceUrl
-                                altText
-                            }
-                            attributes {
-                                nodes {
-                                    id
-                                    name
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    `;
+    const query = GET_OPTION_PRODUCT_BY_ID;
 
     try {
         const data = await runClientRequest(query, { id }) as { product: any };
@@ -729,76 +527,8 @@ export async function fetchOptionProductsByIds(relatedOptionIds: Array<number | 
         throw new Error(errorMsg);
     }
 
-    // Use the complete GetProductsByIds query template with all required fields for options
-    const query = gql`
-        query GetProductsByIds($ids: [Int]) {
-            products(where: { include: $ids, typeIn: [VARIABLE] }) {
-                nodes {
-                    id
-                    databaseId
-                    name
-                    slug
-                    __typename
-                    description
-                    shortDescription
-                    productSpecifications
-                    globalAttributes { 
-                        nodes { 
-                            label 
-                            terms { 
-                                nodes { 
-                                    name 
-                                } 
-                            } 
-                        } 
-                    }
-                    type
-                    relatedOptions
-                    variableType
-                    image { sourceUrl }
-                    galleryImages(first: 10) { 
-                        nodes { 
-                            sourceUrl 
-                        } 
-                    }
-                    ... on SimpleProduct { 
-                        price 
-                        regularPrice 
-                        salePrice 
-                        sku
-                    }
-                    ... on ProductWithVariations {
-                        attributes {
-                            nodes {
-                                name
-                                label
-                                options
-                            }
-                        }
-                        variations(first: 50) {
-                            nodes {
-                                id
-                                databaseId
-                                name
-                                sku
-                                price
-                                regularPrice
-                                salePrice
-                                image { sourceUrl }
-                                attributes { 
-                                    nodes { 
-                                        id 
-                                        name 
-                                        value 
-                                    } 
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    `;
+    // Use the complete GetOptionProductsByIds query template with all required fields for options
+    const query = GET_OPTION_PRODUCTS_BY_IDS;
 
     try {
         const data = await runClientRequest(query, { ids: numericIds }) as { products: { nodes: any[] } };

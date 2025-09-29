@@ -1,5 +1,20 @@
 // GraphQL integration for ModelConfigurator
-// This file contains GraphQL queries and mutations for the configurator functionality
+// This file contains GraphQL client and API functions for the configurator functionality
+// All GraphQL queries are now centralized in ./queries.ts
+
+import { 
+  GET_PRODUCT_BY_SLUG,
+  GET_OPTION_PRODUCT_BY_ID,
+  GET_MODEL_WITH_CATEGORIES,
+  GET_CONFIGURATION_CATEGORIES,
+  CHECK_COMPATIBILITY,
+  CALCULATE_FINANCING,
+  ESTIMATE_INSURANCE,
+  LOAD_CONFIGURATION,
+  ADD_CONFIGURATION_TO_CART,
+  UPDATE_CART_ITEM_CONFIGURATION,
+  SAVE_CONFIGURATION
+} from './queries';
 
 export interface GraphQLConfiguratorOptions {
   endpoint: string;
@@ -51,535 +66,26 @@ export class ConfiguratorGraphQLClient {
   }
 }
 
-// GraphQL Queries
+// Legacy CONFIGURATOR_QUERIES object for backward compatibility
+// @deprecated - Import individual queries from './queries' instead
 export const CONFIGURATOR_QUERIES = {
-  // Get product by slug
-  GET_PRODUCT_BY_SLUG: `
-    query GetProductBySlug($slug: String!) {
-      products(where: { slugIn: [$slug] }, first: 1) {
-        nodes {
-          id
-          databaseId
-          name
-          slug
-          __typename
-          shortDescription
-          description
-          localAttributes { 
-            nodes { 
-              label 
-              options 
-            } 
-          }
-          globalAttributes { 
-            nodes { 
-              label 
-              terms { 
-                nodes { 
-                  name 
-                } 
-              } 
-            } 
-          }
-          relatedOptions
-          image { 
-            sourceUrl 
-            altText
-          }
-          galleryImages(first: 10) { 
-            nodes { 
-              sourceUrl 
-              altText
-            } 
-          }
-          ... on SimpleProduct { 
-            price 
-            regularPrice 
-            salePrice 
-            sku
-          }
-          ... on VariableProduct {
-            price
-            regularPrice
-            salePrice
-            sku
-            variableType
-            attributes {
-              nodes {
-                id
-                name
-              }
-            }
-            variations(first: 50) {
-              nodes {
-                id
-                databaseId
-                name
-                price
-                regularPrice
-                salePrice
-                sku
-                image {
-                  sourceUrl
-                  altText
-                }
-                attributes {
-                  nodes {
-                    id
-                    name
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  `,
-  // Get single option product by database ID
-  GET_OPTION_PRODUCT_BY_ID: `
-    query GetOptionProductById($id: ID!) {
-      product(id: $id, idType: DATABASE_ID) {
-        id
-        databaseId
-        name
-        slug
-        title: name
-        description
-        shortDescription
-        price
-        regularPrice
-        salePrice
-        sku
-        type
-        image {
-          sourceUrl
-          altText
-        }
-        galleryImages(first: 10) {
-          nodes {
-            sourceUrl
-            altText
-          }
-        }
-        productSpecifications
-        relatedOptions
-        ... on SimpleProduct {
-          price
-          regularPrice
-          salePrice
-        }
-        ... on VariableProduct {
-          price
-          regularPrice
-          salePrice
-          variableType
-          attributes {
-            nodes {
-              id
-              name
-            }
-          }
-          variations(first: 50) {
-            nodes {
-              id
-              databaseId
-              name
-              price
-              regularPrice
-              salePrice
-              sku
-              image {
-                sourceUrl
-                altText
-              }
-              attributes {
-                nodes {
-                  id
-                  name
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  `,
-
-  // Get base model with configuration categories
-  GET_MODEL_WITH_CATEGORIES: `
-    query GetModelWithCategories($slug: String!) {
-      products(where: { slug: $slug }, first: 1) {
-        nodes {
-        id
-        databaseId
-        name
-        slug
-        title: name
-        description
-        shortDescription
-        price
-        regularPrice
-        salePrice
-        sku
-        image {
-          sourceUrl
-          altText
-        }
-        galleryImages(first: 10) {
-          nodes {
-            sourceUrl
-            altText
-          }
-        }
-        productSpecifications
-        relatedOptions
-        ... on SimpleProduct {
-          price
-          regularPrice
-          salePrice
-        }
-        ... on VariableProduct {
-          price
-          regularPrice
-          salePrice
-          variations(first: 50) {
-            nodes {
-              id
-              databaseId
-              name
-              price
-              regularPrice
-              salePrice
-              sku
-              image {
-                sourceUrl
-                altText
-              }
-              attributes {
-                nodes {
-                  id
-                  name
-                }
-              }
-            }
-          }
-        }
-        configuratorCategories {
-          id
-          name
-          slug
-          description
-          icon
-          required
-          multiSelect
-          minSelections
-          maxSelections
-          options {
-            id
-            databaseId
-            name
-            title: name
-            description
-            shortDescription
-            price
-            regularPrice
-            salePrice
-            sku
-            image {
-              sourceUrl
-              altText
-            }
-            optionType
-            compatibilityRules
-            installationRequired
-            financingAvailable
-            safetyRating
-            adaCompliant
-            weightCapacity
-          }
-          compatibilityRules
-          helpText
-        }
-        compatibilityRules
-        installationRequired
-        financingAvailable
-        insuranceCoverage
-        safetyRating
-        adaCompliant
-        weightCapacity
-        }
-      }
-    }
-  `,
-
-  // Get configuration categories for a model
-  GET_CONFIGURATION_CATEGORIES: `
-    query GetConfigurationCategories($modelId: ID!) {
-      configuratorCategories(modelId: $modelId) {
-        id
-        name
-        slug
-        description
-        icon
-        required
-        multiSelect
-        minSelections
-        maxSelections
-        options {
-          id
-          databaseId
-          name
-          title
-          description
-          shortDescription
-          price
-          regularPrice
-          salePrice
-          sku
-          image {
-            sourceUrl
-            altText
-          }
-          optionType
-          compatibilityRules {
-            id
-            name
-            description
-            affectedOptions
-            autoResolvable
-          }
-          installationRequired
-          financingAvailable
-          safetyRating
-          adaCompliant
-          weightCapacity
-        }
-        compatibilityRules {
-          id
-          name
-          description
-          affectedOptions
-          autoResolvable
-        }
-        helpText
-      }
-    }
-  `,
-
-  // Check compatibility between selected options
-  CHECK_COMPATIBILITY: `
-    query CheckCompatibility($selectedOptions: [ID!]!) {
-      checkCompatibility(selectedOptions: $selectedOptions) {
-        issues {
-          id
-          rule {
-            id
-            name
-            description
-            affectedOptions
-            autoResolvable
-          }
-          affectedOptions
-          severity
-          message
-          autoResolvable
-          suggestedResolutions {
-            id
-            description
-            action
-          }
-        }
-      }
-    }
-  `,
-
-  // Calculate financing options
-  CALCULATE_FINANCING: `
-    query CalculateFinancing($configuration: ConfigurationInput!) {
-      calculateFinancing(configuration: $configuration) {
-        options {
-          id
-          name
-          description
-          monthlyPayment
-          termMonths
-          interestRate
-          totalCost
-          downPayment
-          requiresPreApproval
-          eligibility {
-            minCreditScore
-            maxDebtToIncomeRatio
-            employmentRequirements
-          }
-        }
-      }
-    }
-  `,
-
-  // Estimate insurance coverage
-  ESTIMATE_INSURANCE: `
-    query EstimateInsurance($configuration: ConfigurationInput!) {
-      estimateInsurance(configuration: $configuration) {
-        estimatedCoverage
-        coveragePercentage
-        requirements {
-          documentation
-          preApproval
-          medicalNecessity
-        }
-        providers {
-          name
-          coverageType
-          estimatedCoverage
-          contactInfo
-        }
-      }
-    }
-  `,
+  GET_PRODUCT_BY_SLUG,
+  GET_OPTION_PRODUCT_BY_ID,
+  GET_MODEL_WITH_CATEGORIES,
+  GET_CONFIGURATION_CATEGORIES,
+  CHECK_COMPATIBILITY,
+  CALCULATE_FINANCING,
+  ESTIMATE_INSURANCE,
+  LOAD_CONFIGURATION,
 };
 
-// GraphQL Mutations
+// Legacy CONFIGURATOR_MUTATIONS object for backward compatibility
+// @deprecated - Import individual mutations from './queries' instead
 export const CONFIGURATOR_MUTATIONS = {
-  // Add configuration to cart
-  ADD_CONFIGURATION_TO_CART: `
-    mutation AddConfigurationToCart($input: AddConfigurationInput!) {
-      addConfigurationToCart(input: $input) {
-        cart {
-          contents {
-            nodes {
-              key
-              product {
-                node {
-                  id
-                  databaseId
-                  name
-                  price
-                  image {
-                    sourceUrl
-                  }
-                }
-              }
-              quantity
-              total
-              extraData {
-                key
-                value
-              }
-            }
-          }
-          total
-          subtotal
-          totalTax
-        }
-        errors {
-          field
-          message
-        }
-      }
-    }
-  `,
-
-  // Update cart item configuration
-  UPDATE_CART_ITEM_CONFIGURATION: `
-    mutation UpdateCartItemConfiguration($input: UpdateCartItemConfigurationInput!) {
-      updateCartItemConfiguration(input: $input) {
-        cart {
-          contents {
-            nodes {
-              key
-              product {
-                node {
-                  id
-                  databaseId
-                  name
-                  price
-                  image {
-                    sourceUrl
-                  }
-                }
-              }
-              quantity
-              total
-              extraData {
-                key
-                value
-              }
-            }
-          }
-          total
-          subtotal
-          totalTax
-        }
-        errors {
-          field
-          message
-        }
-      }
-    }
-  `,
-
-  // Save configuration
-  SAVE_CONFIGURATION: `
-    mutation SaveConfiguration($input: SaveConfigurationInput!) {
-      saveConfiguration(input: $input) {
-        configuration {
-          id
-          name
-          baseModelId
-          optionIds
-          totalPrice
-          createdAt
-          notes
-        }
-        errors {
-          field
-          message
-        }
-      }
-    }
-  `,
-
-  // Load saved configuration
-  LOAD_CONFIGURATION: `
-    query LoadConfiguration($id: ID!) {
-      configuration(id: $id) {
-        id
-        name
-        baseModelId
-        optionIds
-        totalPrice
-        createdAt
-        notes
-        baseModel {
-          id
-          databaseId
-          name
-          slug
-          title
-          description
-          price
-          image {
-            sourceUrl
-            altText
-          }
-        }
-        selectedOptions {
-          id
-          databaseId
-          name
-          title
-          description
-          price
-          image {
-            sourceUrl
-            altText
-          }
-        }
-      }
-    }
-  `,
+  ADD_CONFIGURATION_TO_CART,
+  UPDATE_CART_ITEM_CONFIGURATION,
+  SAVE_CONFIGURATION,
+  LOAD_CONFIGURATION,
 };
 
 // Input Types for GraphQL
@@ -763,7 +269,7 @@ export const configuratorAPI = {
   // Get product by slug
   async getProductBySlug(slug: string) {
     try {
-      const result = await configuratorGraphQL.query(CONFIGURATOR_QUERIES.GET_PRODUCT_BY_SLUG, { slug });
+      const result = await configuratorGraphQL.query(GET_PRODUCT_BY_SLUG, { slug });
       
       // Validate response structure
       if (!result || !result.products || !result.products.nodes) {
@@ -791,7 +297,7 @@ export const configuratorAPI = {
   // Get single option product by database ID
   async getOptionProductById(id: string | number) {
     try {
-      const result = await configuratorGraphQL.query(CONFIGURATOR_QUERIES.GET_OPTION_PRODUCT_BY_ID, { id });
+      const result = await configuratorGraphQL.query(GET_OPTION_PRODUCT_BY_ID, { id });
       
       // Validate response structure
       if (!result || !result.product) {
@@ -811,7 +317,7 @@ export const configuratorAPI = {
   // Get model with categories
   async getModelWithCategories(slug: string) {
     try {
-      const result = await configuratorGraphQL.query(CONFIGURATOR_QUERIES.GET_MODEL_WITH_CATEGORIES, { slug });
+      const result = await configuratorGraphQL.query(GET_MODEL_WITH_CATEGORIES, { slug });
       
       // Validate response structure - now using products.nodes[0] instead of product
       if (!result || !result.products || !result.products.nodes || result.products.nodes.length === 0) {
@@ -831,7 +337,7 @@ export const configuratorAPI = {
   // Get configuration categories
   async getConfigurationCategories(modelId: string) {
     try {
-      const result = await configuratorGraphQL.query(CONFIGURATOR_QUERIES.GET_CONFIGURATION_CATEGORIES, { modelId });
+      const result = await configuratorGraphQL.query(GET_CONFIGURATION_CATEGORIES, { modelId });
       return {
         error: false,
         data: result,
@@ -845,7 +351,7 @@ export const configuratorAPI = {
   // Check compatibility
   async checkCompatibility(selectedOptions: string[]) {
     try {
-      const result = await configuratorGraphQL.query(CONFIGURATOR_QUERIES.CHECK_COMPATIBILITY, { selectedOptions });
+      const result = await configuratorGraphQL.query(CHECK_COMPATIBILITY, { selectedOptions });
       return {
         error: false,
         data: result,
@@ -859,7 +365,7 @@ export const configuratorAPI = {
   // Calculate financing
   async calculateFinancing(configuration: ConfigurationInput) {
     try {
-      const result = await configuratorGraphQL.query(CONFIGURATOR_QUERIES.CALCULATE_FINANCING, { configuration });
+      const result = await configuratorGraphQL.query(CALCULATE_FINANCING, { configuration });
       return {
         error: false,
         data: result,
@@ -873,7 +379,7 @@ export const configuratorAPI = {
   // Estimate insurance
   async estimateInsurance(configuration: ConfigurationInput) {
     try {
-      const result = await configuratorGraphQL.query(CONFIGURATOR_QUERIES.ESTIMATE_INSURANCE, { configuration });
+      const result = await configuratorGraphQL.query(ESTIMATE_INSURANCE, { configuration });
       return {
         error: false,
         data: result,
@@ -886,21 +392,21 @@ export const configuratorAPI = {
 
   // Add configuration to cart
   async addConfigurationToCart(input: AddConfigurationInput) {
-    return configuratorGraphQL.mutation(CONFIGURATOR_MUTATIONS.ADD_CONFIGURATION_TO_CART, { input });
+    return configuratorGraphQL.mutation(ADD_CONFIGURATION_TO_CART, { input });
   },
 
   // Update cart item configuration
   async updateCartItemConfiguration(input: UpdateCartItemConfigurationInput) {
-    return configuratorGraphQL.mutation(CONFIGURATOR_MUTATIONS.UPDATE_CART_ITEM_CONFIGURATION, { input });
+    return configuratorGraphQL.mutation(UPDATE_CART_ITEM_CONFIGURATION, { input });
   },
 
   // Save configuration
   async saveConfiguration(input: SaveConfigurationInput) {
-    return configuratorGraphQL.mutation(CONFIGURATOR_MUTATIONS.SAVE_CONFIGURATION, { input });
+    return configuratorGraphQL.mutation(SAVE_CONFIGURATION, { input });
   },
 
   // Load configuration
   async loadConfiguration(id: string) {
-    return configuratorGraphQL.query(CONFIGURATOR_MUTATIONS.LOAD_CONFIGURATION, { id });
+    return configuratorGraphQL.query(LOAD_CONFIGURATION, { id });
   },
 };

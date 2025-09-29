@@ -1,0 +1,138 @@
+/* Option Card Animation States and Transitions */
+
+/* Base card styles */
+.optionCard {
+  transition: all 0.2s ease-in-out;
+}
+
+.optionCard:hover {
+  transform: scale(1.02);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-color: #93c5fd; /* blue-300 */
+}
+
+/* Selected state with pulse animation */
+.selected {
+  border-color: #2563eb; /* blue-600 */
+  background-color: #eff6ff; /* blue-50 */
+  transform: scale(1.02);
+  animation: selectPulse 0.3s ease-out;
+}
+
+@keyframes selectPulse {
+  0% { 
+    transform: scale(1); 
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  50% { 
+    transform: scale(1.05); 
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.2);
+  }
+  100% { 
+    transform: scale(1.02); 
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Compatibility states */
+.compatibilityWarning {
+  border-color: #f59e0b; /* amber-500 */
+  background-color: #fffbeb; /* amber-50 */
+}
+
+.compatibilityError {
+  border-color: #ef4444; /* red-500 */
+  background-color: #fef2f2; /* red-50 */
+}
+
+.compatibilityInfo {
+  border-color: #3b82f6; /* blue-500 */
+  background-color: #eff6ff; /* blue-50 */
+}
+
+/* Disabled state */
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.disabled:hover {
+  border-color: #d1d5db; /* gray-300 */
+  box-shadow: none;
+  transform: none !important;
+}
+
+/* Loading state */
+.loading {
+  opacity: 0.5;
+  pointer-events: none;
+  position: relative;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+}
+
+/* Price update flash animation */
+.priceUpdated {
+  animation: priceFlash 0.5s ease-out;
+}
+
+@keyframes priceFlash {
+  0% { background-color: transparent; }
+  50% { background-color: #fef3c7; } /* yellow-100 */
+  100% { background-color: transparent; }
+}
+
+/* Selection indicator */
+.selectionIndicator {
+  transition: all 0.2s ease-in-out;
+}
+
+.selectionIndicator.selected {
+  background-color: #2563eb; /* blue-600 */
+  color: white;
+}
+
+.selectionIndicator.unselected {
+  background-color: #e5e7eb; /* gray-200 */
+  color: #9ca3af; /* gray-400 */
+}
+
+/* Edit mode styles */
+.editMode.originallySelected {
+  box-shadow: 0 0 0 2px #10b981; /* green-500 */
+}
+
+.editMode.hasChanged {
+  box-shadow: 0 0 0 2px #f59e0b; /* amber-500 */
+}
+
+/* Accessibility - Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .optionCard,
+  .optionCard:hover,
+  .selected {
+    transform: none !important;
+    animation: none !important;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+}
+
+/* Focus states for keyboard navigation */
+.optionCard:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #2563eb, 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+.optionCard:focus-visible {
+  box-shadow: 0 0 0 2px #2563eb, 0 0 0 4px rgba(59, 130, 246, 0.2);
+}

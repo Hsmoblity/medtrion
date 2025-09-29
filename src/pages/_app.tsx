@@ -27,7 +27,8 @@ function MyApp({ Component, pageProps }: AppProps) {
           <Component {...pageProps} />
         </PageLayout>
 
-        <Cursor />
+        {/* Custom cursor - can be disabled by setting environment variable */}
+        {process.env.NEXT_PUBLIC_ENABLE_CUSTOM_CURSOR !== 'false' && <Cursor />}
       </CartVisibilityProvider>
     </SessionProvider>
   );

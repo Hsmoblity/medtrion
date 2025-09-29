@@ -30,7 +30,7 @@ export function Cursor({
     children,
     className,
     springConfig,
-    attachToParent,
+    attachToParent = false,
     variants,
     transition,
     onPositionChange,
@@ -42,7 +42,7 @@ export function Cursor({
         typeof window !== 'undefined' ? window.innerHeight / 2 : 0
     );
     const cursorRef = useRef<HTMLDivElement>(null);
-    const [isVisible, setIsVisible] = useState(!attachToParent);
+    const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
         if (!attachToParent) {
@@ -61,6 +61,8 @@ export function Cursor({
 
         return () => {
             document.removeEventListener('mousemove', updatePosition);
+            // Restore default cursor when component unmounts
+            document.body.style.cursor = 'auto';
         };
     }, [cursorX, cursorY, onPositionChange, attachToParent]);
 
@@ -106,13 +108,20 @@ export function Cursor({
             <AnimatePresence>
                 {isVisible && (
                     <motion.div
-                        initial='initial'
-                        animate='animate'
-                        exit='exit'
-                        variants={variants}
-                        transition={transition}
+                        initial={variants?.initial || { opacity: 0, scale: 0.8 }}
+                        animate={variants?.animate || { opacity: 1, scale: 1 }}
+                        exit={variants?.exit || { opacity: 0, scale: 0.8 }}
+                        transition={transition || { duration: 0.2 }}
+                        className="w-6 h-6"
                     >
-                        {children}
+                        {children || (
+                            <img 
+                                src="/cursor-click.svg" 
+                                alt="Custom cursor" 
+                                className="w-full h-full"
+                                style={{ filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.3))' }}
+                            />
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>

@@ -4,6 +4,8 @@
 
 body {
   @apply bg-white;
+  /* Ensure cursor is visible by default */
+  cursor: auto !important;
 }
 
 html {
@@ -43,4 +45,18 @@ html {
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Ensure proper cursor behavior for interactive elements */
+button, a, [role="button"], [onclick], input[type="button"], input[type="submit"] {
+  cursor: pointer !important;
+}
+
+input[type="text"], input[type="email"], input[type="password"], textarea {
+  cursor: text !important;
+}
+
+/* Fallback for custom cursor issues */
+.custom-cursor-fallback {
+  cursor: auto !important;
 }

@@ -20,6 +20,15 @@ module.exports = {
       width: {
         "custom-31": "31.871429%",
         "custom-66": "66%"
+      },
+      animation: {
+        'shimmer': 'shimmer 2s infinite linear',
+      },
+      keyframes: {
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        }
       }
     }
   },

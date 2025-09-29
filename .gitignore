@@ -35,3 +35,68 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# storybook
+*storybook.log
+storybook-static
+.storybook-out
+
+# documentation and task management (development only)
+.docs
+.vscode
+.tasks
+.tracking
+docs/
+
+# IDE and editor files
+*.swp
+*.swo
+*~
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+.cache/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+
+# Development logs and artifacts
+dev.log
+debug.log
+error.log
+
+# Package manager lock files (choose one)
+# yarn.lock
+# pnpm-lock.yaml
+
+# Test artifacts
+test-results/
+coverage/
+.nyc_output/
+
+# Backup files
+*.backup
+*.bak
+*.old
+
+# Large media files (if not needed in repo)
+# *.mp4
+# *.mov
+# *.avi
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3

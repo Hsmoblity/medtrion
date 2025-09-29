@@ -35,3 +35,12 @@ html {
   background-color: #000000;
   -webkit-border-radius: 2px;
 }
+
+/* Hide scrollbar utility for mobile hero carousel */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}

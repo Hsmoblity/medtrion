@@ -1,0 +1,13 @@
+<script>
+  // Set the data-scroll-behavior attribute on the HTML element in the preview iframe
+  document.addEventListener('DOMContentLoaded', function() {
+    if (document && document.documentElement) {
+      document.documentElement.setAttribute('data-scroll-behavior', 'smooth');
+    }
+  });
+  
+  // Also set it immediately if DOM is already loaded
+  if (document && document.documentElement) {
+    document.documentElement.setAttribute('data-scroll-behavior', 'smooth');
+  }
+</script>

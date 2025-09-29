@@ -1,0 +1,21 @@
+project: front-store
+repo: https://gitlab.com/luanha200027/hsmobility.git
+language: typescript
+frameworks:
+  - Next.js
+  - React  
+agents:
+  - role: frontend-dev
+    scope: src/components,src/pages,src/contexts,public
+  - role: backend-dev
+    scope: src/pages/api,src/lib,scripts
+  - role: qa
+    scope: src/pages,src/components
+task_folder: ./.tasks
+tracking_folder: ./.tracking
+dictionary:
+	•	You type yml bug ... → I expand and return a Bug Fix YAML.
+	•	You type yml feat ... → I expand and return a Feature YAML.
+	•	You type yml r7d ... → I expand and return a Research & Design YAML.
+	•	You type yml prd ... → I expand and return a PRD YAML.
+

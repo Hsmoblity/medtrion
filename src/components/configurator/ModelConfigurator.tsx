@@ -170,9 +170,10 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
   // Calculate configuration summary
   const getConfigurationSummary = useCallback((): ConfigurationSummaryData => {
     const allSelectedOptions = isHydrated ? Object.values(selectedOptions).flat() : [];
-    const basePrice = parseFloat(baseModel.regularPrice || '0');
+    // Use regularPrice first, then fallback to price field
+    const basePrice = parseFloat(baseModel.regularPrice || baseModel.price?.toString() || '0');
     const optionsPrice = allSelectedOptions.reduce((sum, option) => {
-      return sum + parseFloat(option.regularPrice || '0');
+      return sum + parseFloat(option.regularPrice || option.price?.toString() || '0');
     }, 0);
     
     // Calculate installation cost (simplified)
@@ -439,8 +440,8 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
         <ModelHero
           model={baseModel}
           selectedOptionsCount={isHydrated ? Object.values(selectedOptions).flat().length : 0}
-          totalPrice={isHydrated ? getConfigurationSummary().totalPrice : parseFloat(baseModel.regularPrice || '0')}
-          basePrice={isHydrated ? getConfigurationSummary().basePrice : parseFloat(baseModel.regularPrice || '0')}
+          totalPrice={isHydrated ? getConfigurationSummary().totalPrice : parseFloat(baseModel.regularPrice || baseModel.price?.toString() || '0')}
+          basePrice={isHydrated ? getConfigurationSummary().basePrice : parseFloat(baseModel.regularPrice || baseModel.price?.toString() || '0')}
           showFinancingBadge={isHydrated && financingOptions.length > 0}
           financingOption={isHydrated ? selectedFinancing : undefined}
         />

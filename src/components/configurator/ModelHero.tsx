@@ -248,9 +248,13 @@ const ModelHero: React.FC<ModelHeroProps> = ({
                     )}
                   </div>
                   
-                  {selectedOptionsCount > 0 && (
+                  {selectedOptionsCount > 0 ? (
                     <p className="text-sm text-gray-600 mt-1">
                       Includes {selectedOptionsCount} selected option{selectedOptionsCount !== 1 ? 's' : ''}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-600 mt-1">
+                      Base product price
                     </p>
                   )}
                 </div>
@@ -265,9 +269,38 @@ const ModelHero: React.FC<ModelHeroProps> = ({
                 )}
               </div>
 
+              {/* Price Breakdown */}
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-4">
+                <h4 className="text-sm font-medium text-gray-900 mb-3">Price Breakdown</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Base Product</span>
+                    <span className="text-sm font-semibold text-gray-900">
+                      {formatPrice(displayBasePrice)}
+                    </span>
+                  </div>
+                  {selectedOptionsCount > 0 && totalPrice && totalPrice > displayBasePrice && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Selected Options</span>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {formatPrice(totalPrice - displayBasePrice)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="border-t border-gray-200 pt-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-base font-medium text-gray-900">Total</span>
+                      <span className="text-lg font-bold text-blue-600">
+                        {formatPrice(currentPrice)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Financing Information */}
               {financingOption && (
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mt-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-purple-900">Financing Available</p>

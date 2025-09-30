@@ -31,6 +31,7 @@ interface ConfiguratorStore {
   clearCategory: (categoryId: string) => void;
   checkCompatibility: () => void;
   calculateSummary: () => void;
+  updateProgressCount: () => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearConfiguration: () => void;
@@ -217,6 +218,7 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
         
         get().checkCompatibility();
         get().calculateSummary();
+        get().updateProgressCount();
       },
 
       removeOption: (optionId, categoryId) => {
@@ -239,6 +241,7 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
         
         get().checkCompatibility();
         get().calculateSummary();
+        get().updateProgressCount();
       },
 
       clearCategory: (categoryId) => {
@@ -250,6 +253,7 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
         
         get().checkCompatibility();
         get().calculateSummary();
+        get().updateProgressCount();
       },
 
       checkCompatibility: () => {
@@ -355,6 +359,46 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
         });
       },
 
+      updateProgressCount: () => {
+        set((state) => {
+          const { categories, selectedOptions } = state;
+          
+          // Debug logging
+          console.log('Updating progress count:', {
+            categoriesCount: categories.length,
+            selectedOptionsCount: Object.values(selectedOptions).flat().length,
+            selectedOptionsByCategory: Object.keys(selectedOptions).map(categoryId => ({
+              categoryId,
+              count: selectedOptions[categoryId]?.length || 0
+            }))
+          });
+          
+          const updatedCategories = categories.map(category => {
+            const categorySelectedOptions = selectedOptions[category.id] || [];
+            const selectedCount = categorySelectedOptions.length;
+            const totalCount = category.options?.length || 0;
+            
+            console.log('Category progress update:', {
+              categoryId: category.id,
+              categoryName: category.name,
+              selectedCount,
+              totalCount,
+              previousProgressCount: category.progressCount
+            });
+            
+            return {
+              ...category,
+              progressCount: {
+                selected: selectedCount,
+                total: totalCount
+              }
+            };
+          });
+          
+          return { categories: updatedCategories };
+        });
+      },
+
       setLoading: (loading) => set({ loading }),
       setError: (error) => set({ error }),
 
@@ -364,6 +408,8 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
           compatibilityIssues: [],
           summary: defaultSummary
         });
+        
+        get().updateProgressCount();
       },
 
       saveConfiguration: (name, notes) => {

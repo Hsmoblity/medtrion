@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { CartProduct } from 'lib/interfaces'
+import { parsePrice, calculateOrderTotal, debugPriceParsing } from 'lib/utils/priceUtils'
 
 // Generate unique cart item ID
 const generateCartItemId = (): string => 
@@ -192,21 +193,25 @@ export const useCartStore = create<CartStore>()(
       // Computed Values
       getCartTotal: () => {
         const { cart } = get()
-        return cart.reduce((total, item) => {
-          const basePrice = typeof item.price === 'number' ? item.price : Number(item.price || 0)
-          const quantity = item.quantity || 1
-          
-          // Add option prices if any
-          let optionPrice = 0
-          if (item.options && Array.isArray(item.options)) {
-            optionPrice = item.options.reduce((sum, option: any) => {
-              const optPrice = typeof option.price === 'number' ? option.price : Number(option.price || 0)
-              return sum + optPrice
-            }, 0)
-          }
-          
-          return total + ((basePrice + optionPrice) * quantity)
-        }, 0)
+        
+        // Debug logging for price parsing issues
+        if (cart.length > 0) {
+          console.log('Calculating cart total for items:', cart.length);
+          cart.forEach((item, index) => {
+            debugPriceParsing(item.price, `Cart item ${index} (${item.title})`);
+          });
+        }
+        
+        const orderTotal = calculateOrderTotal(cart);
+        
+        console.log('Cart total calculation result:', {
+          subtotal: orderTotal.subtotal,
+          tax: orderTotal.tax,
+          total: orderTotal.total,
+          itemCount: orderTotal.itemCount
+        });
+        
+        return orderTotal.total;
       },
       
       getCartCount: () => {
@@ -216,11 +221,23 @@ export const useCartStore = create<CartStore>()(
       
       getCartSubtotal: () => {
         const { cart } = get()
-        return cart.reduce((subtotal, item) => {
-          const basePrice = typeof item.price === 'number' ? item.price : Number(item.price || 0)
-          const quantity = item.quantity || 1
-          return subtotal + (basePrice * quantity)
-        }, 0)
+        
+        // Debug logging for price parsing issues
+        if (cart.length > 0) {
+          console.log('Calculating cart subtotal for items:', cart.length);
+          cart.forEach((item, index) => {
+            debugPriceParsing(item.price, `Cart subtotal item ${index} (${item.title})`);
+          });
+        }
+        
+        const orderTotal = calculateOrderTotal(cart);
+        
+        console.log('Cart subtotal calculation result:', {
+          subtotal: orderTotal.subtotal,
+          itemCount: orderTotal.itemCount
+        });
+        
+        return orderTotal.subtotal;
       },
       
       findCartItem: (cartItemId) => {

@@ -3,6 +3,7 @@ import { useCartStore, useCartItems, useCartTotal } from 'stores/cartStore';
 import ItemList from 'components/PageLayout/Cart/ItemList';
 import { useRouter } from 'next/router';
 import { PrimaryButton } from '../components/ui';
+import { formatPrice, calculateOrderTotal } from 'lib/utils/priceUtils';
 
 const CartPage = () => {
     const cart = useCartItems();
@@ -10,8 +11,22 @@ const CartPage = () => {
     const router = useRouter();
     const [isRedirecting, setRedirecting] = useState(false);
 
-    // Use the optimized cart total calculation from the store
-    const subTotal = cartTotal.toFixed(2);
+    // Use the robust cart total calculation with proper price handling
+    const orderTotal = calculateOrderTotal(cart);
+    const subTotal = formatPrice(orderTotal.subtotal);
+    const tax = formatPrice(orderTotal.tax);
+    const total = formatPrice(orderTotal.total);
+    
+    // Debug logging for price issues
+    console.log('Cart page order summary:', {
+      cartItems: cart.length,
+      subtotal: orderTotal.subtotal,
+      tax: orderTotal.tax,
+      total: orderTotal.total,
+      formattedSubtotal: subTotal,
+      formattedTax: tax,
+      formattedTotal: total
+    });
 
     const handleCheckout = async () => {
         // Do not create the order here. Navigate to the payment page and
@@ -64,7 +79,7 @@ const CartPage = () => {
                                     {/* Subtotal */}
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-600">Subtotal</span>
-                                        <span className="text-gray-900 font-medium">${subTotal}</span>
+                                        <span className="text-gray-900 font-medium">{subTotal}</span>
                                     </div>
 
                                     {/* Shipping */}
@@ -75,9 +90,9 @@ const CartPage = () => {
 
                                     {/* Tax */}
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">Tax (13%)</span>
+                                        <span className="text-gray-600">Tax (8%)</span>
                                         <span className="text-gray-900 font-medium">
-                                            ${(Number(subTotal) * 0.13).toFixed(2)}
+                                            {tax}
                                         </span>
                                     </div>
 
@@ -88,7 +103,7 @@ const CartPage = () => {
                                     <div className="flex justify-between items-center text-lg font-semibold">
                                         <span className="text-gray-900">Total</span>
                                         <span className="text-gray-900">
-                                            ${(Number(subTotal) * 1.13).toFixed(2)}
+                                            {total}
                                         </span>
                                     </div>
 

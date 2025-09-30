@@ -4,6 +4,7 @@ import { useConfiguratorStore } from '../../stores/configuratorStore';
 import OptionVariationCard, { Variation } from './OptionVariationCard';
 import RichContent from '../RichContent';
 import { parsePrice } from '../../lib/utils/priceUtils';
+import { calculatePricePreview } from '../../lib/utils/price-calculations';
 
 // Variation interface is now imported from OptionVariationCard
 
@@ -282,30 +283,47 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
   return (
     <div 
       ref={modalRef}
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className={`
+        fixed inset-0 bg-black flex items-center justify-center z-50 p-4
+        transition-all duration-300 ease-out
+        ${isOpen ? 'bg-opacity-50 backdrop-blur-sm' : 'bg-opacity-0 backdrop-blur-none'}
+      `}
       onClick={(e) => {
         if (e.target === modalRef.current) {
           onClose();
         }
       }}
     >
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold text-gray-900">
+      {/* Phase 2: Enhanced Modal with sophisticated animations */}
+      <div className={`
+        bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto
+        transition-all duration-500 ease-out transform
+        ${isOpen 
+          ? 'scale-100 opacity-100 translate-y-0 rotate-0' 
+          : 'scale-95 opacity-0 translate-y-4 rotate-1'
+        }
+        animate-[slideInUp_0.5s_ease-out]
+      `}>
+        {/* Phase 2: Enhanced Header with gradient and better animations */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+          <div className="flex items-center gap-3 animate-[fadeIn_0.6s_ease-out]">
+            <h2 className="text-2xl font-bold text-gray-900 transition-colors duration-300 hover:text-blue-700">
               {option.name || option.title}
             </h2>
             {isEditMode && (
-              <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full animate-pulse border border-blue-200">
                 Edit Mode
               </span>
             )}
+            {/* Phase 2: Variable type indicator */}
+            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+              {selectionType === 'radio' ? 'Single Choice' : 'Multiple Choice'}
+            </span>
           </div>
           <button
             ref={closeButtonRef}
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-all duration-300 hover:scale-110 hover:rotate-90 p-2 rounded-full hover:bg-gray-100"
             aria-label="Close popup"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -314,8 +332,8 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6">
+        {/* Phase 2: Enhanced Content with staggered animations */}
+        <div className="p-6 animate-[fadeIn_0.7s_ease-out]">
           {/* Option Information */}
           <div className="mb-6 p-4 bg-gray-50 rounded-lg">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

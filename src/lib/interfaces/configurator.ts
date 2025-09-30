@@ -60,6 +60,14 @@ export interface ConfigurableProductSchema extends Omit<ProductSchema, 'shortDes
     stockStatus?: 'instock' | 'outofstock' | 'onbackorder';
   }>;
   totalPrice?: number; // Total price including selected variations
+  
+  // Enhanced user flow support
+  variations?: Variation[];
+  priceBreakdown?: {
+    basePrice: number;
+    variationsTotal: number;
+    combinedTotal: number;
+  };
 }
 
 export interface ConfiguratorCategory {
@@ -342,4 +350,58 @@ export interface HSMOptionCardEvents {
     context: string;
     timestamp: Date;
   };
+}
+
+// Enhanced User Flow Interfaces
+
+export interface Variation {
+  id: string;
+  databaseId: number;
+  name: string;
+  price: number; // Price modifier (can be 0, positive, or negative)
+  sku: string;
+  image?: {
+    sourceUrl: string;
+    altText: string;
+  };
+  attributes: Array<{
+    id: string;
+    name: string;
+    value: string;
+  }>;
+  stockStatus?: 'instock' | 'outofstock' | 'onbackorder';
+}
+
+export interface SelectedOption {
+  id: string;
+  option: ConfigurableProductSchema;
+  selectedVariations: Variation[];
+  totalPrice: number;
+  quantity: number;
+  addedAt: Date;
+  category: string;
+}
+
+export interface OptionPopupState {
+  isOpen: boolean;
+  selectedOption: ConfigurableProductSchema | null;
+  selectedVariations: Variation[];
+  tempSelections: Variation[];
+  pricePreview: number;
+  isAlreadyInConfiguration: boolean;
+  selectionType: 'radio' | 'checkbox';
+}
+
+export interface ConfigurationSummaryData {
+  baseModel: ConfigurableProductSchema;
+  selectedOptions: ConfigurableProductSchema[];
+  totalPrice: number;
+  basePrice: number;
+  optionsPrice: number;
+  installationPrice: number;
+  shippingPrice: number;
+  taxAmount: number;
+  deliveryEstimate: string;
+  financingOption?: FinancingOption;
+  insuranceEstimate?: InsuranceEstimate;
 }

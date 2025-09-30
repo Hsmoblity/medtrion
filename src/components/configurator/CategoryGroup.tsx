@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ConfiguratorCategory, ConfigurableProductSchema, CompatibilityIssue } from '../../lib/interfaces/configurator';
+import { ConfiguratorCategory, ConfigurableProductSchema, CompatibilityIssue, SelectedOption } from '../../lib/interfaces/configurator';
 import { PrimaryButton } from 'components/ui';
 import OptionCard from './OptionCard';
 import OptionCardSkeleton from './OptionCardSkeleton';
 import styles from './ConfiguratorLayout.module.css';
+import { useConfiguratorStore } from '../../stores/configuratorStore';
 
 interface CategoryGroupProps {
   category: ConfiguratorCategory;
@@ -17,6 +18,12 @@ interface CategoryGroupProps {
   onViewDetails?: (option: ConfigurableProductSchema) => void;
   onToggleCollapse?: (collapsed: boolean) => void;
   onValidationError?: (error: string | null) => void;
+  
+  // Enhanced User Flow Props
+  showVariationCount?: boolean;
+  showRealTimePrice?: boolean;
+  onOptionSelect?: (option: ConfigurableProductSchema) => void;
+  selectedOptionsWithVariations?: SelectedOption[];
 }
 
 const CategoryGroup: React.FC<CategoryGroupProps> = ({
@@ -30,10 +37,44 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
   onToggleOption,
   onViewDetails,
   onToggleCollapse,
-  onValidationError
+  onValidationError,
+  // Enhanced User Flow Props
+  showVariationCount = true,
+  showRealTimePrice = true,
+  onOptionSelect,
+  selectedOptionsWithVariations = []
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(collapsed);
   const [validationError, setValidationError] = useState<string | null>(null);
+  
+  // Enhanced User Flow Integration
+  const { openOptionPopup, optionProducts } = useConfiguratorStore();
+
+  // Enhanced helper functions
+  const handleOptionClick = (option: ConfigurableProductSchema) => {
+    if (option.type === 'VARIABLE' && option.variations && option.variations.length > 0) {
+      // Open variation popup for variable options
+      openOptionPopup(option);
+    } else {
+      // Direct selection for simple options
+      onOptionSelect?.(option);
+      onToggleOption?.(option);
+    }
+  };
+
+  const isOptionSelected = (optionId: string): boolean => {
+    return selectedOptionsWithVariations.some(selected => selected.option.id === optionId);
+  };
+
+  const getOptionPrice = (option: ConfigurableProductSchema): number => {
+    const selectedOption = selectedOptionsWithVariations.find(selected => selected.option.id === option.id);
+    return selectedOption ? selectedOption.totalPrice : parseFloat(option.price?.toString() || option.regularPrice?.toString() || '0');
+  };
+
+  const getVariationCount = (option: ConfigurableProductSchema): number => {
+    const selectedOption = selectedOptionsWithVariations.find(selected => selected.option.id === option.id);
+    return selectedOption ? selectedOption.selectedVariations.length : 0;
+  };
 
   // Validate category requirements
   useEffect(() => {
@@ -62,7 +103,7 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
     onToggleCollapse?.(newCollapsed);
   };
 
-  const isOptionSelected = (option: ConfigurableProductSchema) => {
+  const isOptionSelectedInCategory = (option: ConfigurableProductSchema) => {
     return selectedOptions.some(selected => selected.databaseId === option.databaseId);
   };
 
@@ -119,53 +160,67 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
   };
 
   const getProgressText = () => {
-    const selectedCount = selectedOptions.length;
+    const selectedCount = selectedOptionsWithVariations.length;
     const totalOptions = category.options?.length || 0;
     
+    let progressText = '';
     if (category.multiSelect) {
-      return `${selectedCount}/${totalOptions} selected`;
+      progressText = `${selectedCount}/${totalOptions} selected`;
     } else {
-      return selectedCount > 0 ? '1 selected' : `${totalOptions} options`;
+      progressText = selectedCount > 0 ? '1 selected' : `${totalOptions} options`;
     }
+    
+    // Add real-time pricing if enabled
+    if (showRealTimePrice && selectedOptionsWithVariations.length > 0) {
+      const totalPrice = selectedOptionsWithVariations.reduce((sum, option) => sum + option.totalPrice, 0);
+      progressText += ` • $${totalPrice.toFixed(2)}`;
+    }
+    
+    return progressText;
   };
 
   return (
-    <div className={`option-cards-container bg-white rounded-lg shadow-md overflow-hidden ${className}`}>
-      {/* Category Header */}
+    <div className={`option-cards-container bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-out hover:shadow-lg ${className}`}>
+      {/* Phase 2: Enhanced Category Header with better animations */}
       <div className="border-b border-gray-200">
         <button
           onClick={toggleCollapse}
-          className="w-full px-6 py-4 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-150"
+          className="w-full px-6 py-4 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-all duration-300 ease-out group"
           aria-expanded={!isCollapsed}
           aria-controls={`category-${category.id}-content`}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="flex-shrink-0 mr-3">
+              <div className="flex-shrink-0 mr-3 transition-transform duration-300 ease-out group-hover:scale-110">
                 {getHeaderIcon()}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-3">
-                  <h3 className="option-cards-title text-lg font-medium text-gray-900">
+                  <h3 className="option-cards-title text-lg font-medium text-gray-900 transition-colors duration-300 group-hover:text-blue-700">
                     {category.name}
                   </h3>
                   {category.required && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 transition-all duration-300 hover:bg-red-200 animate-pulse">
                       Required
                     </span>
                   )}
-                  {selectedOptions.length > 0 && (
-                    <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-blue-600 rounded-full">
-                      {selectedOptions.length}
+                  {selectedOptionsWithVariations.length > 0 && (
+                    <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-blue-600 rounded-full transition-all duration-300 hover:bg-blue-700 hover:scale-110 animate-[fadeIn_0.5s_ease-out]">
+                      {selectedOptionsWithVariations.length}
+                    </span>
+                  )}
+                  {showVariationCount && selectedOptionsWithVariations.length > 0 && (
+                    <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-medium leading-none text-blue-600 bg-blue-100 rounded-full transition-all duration-300 hover:bg-blue-200 hover:scale-105 animate-[slideInUp_0.4s_ease-out]">
+                      {selectedOptionsWithVariations.reduce((sum, option) => sum + option.selectedVariations.length, 0)} variations
                     </span>
                   )}
                   {category.required && (
-                    <span className="ml-2 text-red-500 text-sm" aria-label="Required">
+                    <span className="ml-2 text-red-500 text-sm animate-pulse" aria-label="Required">
                       *
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-gray-600 mt-1 transition-colors duration-300 group-hover:text-gray-800">
                   {getProgressText()}
                 </p>
               </div>
@@ -173,7 +228,7 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
             
             <div className="flex items-center ml-4">
               <svg
-                className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${
+                className={`h-5 w-5 text-gray-400 transition-all duration-300 ease-out group-hover:text-blue-500 ${
                   isCollapsed ? 'transform rotate-180' : ''
                 }`}
                 fill="none"
@@ -186,9 +241,9 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
           </div>
         </button>
 
-        {/* Category Description */}
+        {/* Phase 2: Enhanced Category Description with fade transition */}
         {category.description && !isCollapsed && (
-          <div className="px-6 pb-4">
+          <div className="px-6 pb-4 animate-[fadeIn_0.3s_ease-out]">
             <p className="text-sm text-gray-600">{category.description}</p>
           </div>
         )}
@@ -235,67 +290,88 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
         )}
       </div>
 
-      {/* Category Content */}
+      {/* Phase 2: Enhanced Category Content with smooth transitions */}
       <div
         id={`category-${category.id}-content`}
-        className={`transition-all duration-300 ${isCollapsed ? 'h-0 overflow-hidden' : 'h-auto'}`}
+        className={`transition-all duration-500 ease-out ${isCollapsed ? 'h-0 overflow-hidden opacity-0' : 'h-auto opacity-100'}`}
       >
         <div className="p-6">
           {loading || category.loadingState === 'loading' ? (
-            <div className={`option-cards-loading ${styles['option-cards-loading']}`}>
+            <div className={`option-cards-loading ${styles['option-cards-loading']} animate-[fadeIn_0.5s_ease-out]`}>
               {[...Array(6)].map((_, index) => (
-                <OptionCardSkeleton key={index} variant="default" />
+                <OptionCardSkeleton key={index} variant="default" enhanced={true} />
               ))}
             </div>
           ) : error ? (
-            <div className={`option-cards-error ${styles['option-cards-error']}`}>
-              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">Failed to load options</h3>
-              <p className="mt-1 text-sm text-gray-500">{error}</p>
-              <div className="mt-6">
-                <PrimaryButton
-                  size="sm"
-                  onClick={() => window.location.reload()}
-                >
-                  Try Again
-                </PrimaryButton>
+            <div className={`option-cards-error ${styles['option-cards-error']} animate-[fadeIn_0.3s_ease-out]`}>
+              <div className="text-center p-8 bg-red-50 rounded-lg border border-red-200">
+                <svg className="mx-auto h-12 w-12 text-red-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 className="mt-2 text-sm font-medium text-red-900">Failed to load options</h3>
+                <p className="mt-1 text-sm text-red-600">{error}</p>
+                <div className="mt-6">
+                  <PrimaryButton
+                    size="sm"
+                    onClick={() => window.location.reload()}
+                    className="transition-all duration-300 hover:scale-105"
+                  >
+                    Try Again
+                  </PrimaryButton>
+                </div>
               </div>
             </div>
           ) : !category.options || category.options.length === 0 ? (
-            <div className={`option-cards-empty ${styles['option-cards-empty']}`}>
-              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-              </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No options available</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                There are currently no options available in this category.
-              </p>
+            <div className={`option-cards-empty ${styles['option-cards-empty']} animate-[fadeIn_0.5s_ease-out]`}>
+              <div className="text-center p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                <svg className="mx-auto h-12 w-12 text-gray-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No options available</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  There are currently no options available in this category.
+                </p>
+              </div>
             </div>
           ) : (
-            <div className={`option-cards-grid ${styles['option-cards-grid']}`}>
-              {category.options.map((option) => {
-                const isSelected = isOptionSelected(option);
+            <div className={`option-cards-grid ${styles['option-cards-grid']} animate-[fadeIn_0.6s_ease-out]`}>
+              {category.options.map((option, index) => {
+                const isSelected = isOptionSelected(option.id || option.databaseId?.toString() || '');
                 const optionIssues = getOptionCompatibilityIssues(option);
                 const isDisabled = !canSelectMoreOptions() && !isSelected;
+                const currentPrice = showRealTimePrice ? getOptionPrice(option) : parseFloat(option.price?.toString() || option.regularPrice?.toString() || '0');
+                const variationCount = showVariationCount ? getVariationCount(option) : 0;
 
                 return (
-                  <OptionCard
+                  <div
                     key={option.databaseId}
-                    option={option}
-                    categoryId={category.id}
-                    isSelected={isSelected}
-                    disabled={isDisabled}
-                    variant="default"
-                    size="medium"
-                    showPrice={true}
-                    showCompatibility={optionIssues.length > 0}
-                    compatibilityIssues={optionIssues}
-                    onToggle={() => onToggleOption?.(option)}
-                    onViewDetails={() => onViewDetails?.(option)}
-                    className={`option-card ${isSelected ? 'option-card-selected' : ''} ${isDisabled ? 'option-card-disabled' : ''}`}
-                  />
+                    className="animate-[slideInUp_0.4s_ease-out]"
+                    style={{
+                      // Phase 2: Staggered animation for option cards
+                      animationDelay: `${index * 100}ms`
+                    }}
+                  >
+                    <OptionCard
+                      option={option}
+                      categoryId={category.id}
+                      isSelected={isSelected}
+                      disabled={isDisabled}
+                      variant="default"
+                      size="medium"
+                      showPrice={true}
+                      showCompatibility={optionIssues.length > 0}
+                      compatibilityIssues={optionIssues}
+                      onToggle={() => handleOptionClick(option)}
+                      onViewDetails={() => onViewDetails?.(option)}
+                      className={`option-card transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-lg ${isSelected ? 'option-card-selected ring-2 ring-blue-500' : ''} ${isDisabled ? 'option-card-disabled opacity-60' : ''}`}
+                      // Enhanced User Flow Props
+                      currentPrice={currentPrice}
+                      variationCount={variationCount}
+                      isVariable={option.type === 'VARIABLE'}
+                      showVariationCount={showVariationCount}
+                      showRealTimePrice={showRealTimePrice}
+                    />
+                  </div>
                 );
               })}
             </div>

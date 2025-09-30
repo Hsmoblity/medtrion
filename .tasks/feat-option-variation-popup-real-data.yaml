@@ -1,7 +1,7 @@
 type: feat
 id: feat-option-variation-popup-real-data
 title: "Connect OptionVariationPopup to Real WooCommerce Data Instead of Mock Data"
-status: NEW
+status: COMPLETED
 priority: HIGH
 assigned_to: frontend-dev
 created_date: 2025-01-16

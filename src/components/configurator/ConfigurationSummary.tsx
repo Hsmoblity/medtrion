@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useConfiguratorStore } from '../../stores/configuratorStore';
-import { ConfigurableProductSchema } from '../../lib/interfaces/configurator';
+import { ConfigurableProductSchema, SelectedOption, ConfigurationSummaryData } from '../../lib/interfaces/configurator';
 import AnimatedNumber from './AnimatedNumber';
 import { PrimaryButton } from '../ui';
 
@@ -13,6 +13,11 @@ interface ConfigurationSummaryProps {
   onShareConfiguration?: () => void;
   onAddToCart?: () => void;
   onPrintSummary?: () => void;
+  
+  // Enhanced User Flow Props
+  summary?: ConfigurationSummaryData;
+  selectedOptions?: SelectedOption[];
+  onOptionRemove?: (optionId: string) => void;
 }
 
 const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
@@ -23,10 +28,27 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
   onSaveConfiguration,
   onShareConfiguration,
   onAddToCart,
-  onPrintSummary
+  onPrintSummary,
+  // Enhanced User Flow Props
+  summary: propSummary,
+  selectedOptions: propSelectedOptions,
+  onOptionRemove
 }) => {
-  const { model: baseModel, selectedOptions: selectedOptionsMap, summary, previousSummary } = useConfiguratorStore();
-  const selectedOptions = Object.values(selectedOptionsMap).flat();
+  const { 
+    model: baseModel, 
+    selectedOptions: selectedOptionsMap, 
+    summary, 
+    previousSummary,
+    // Enhanced User Flow State
+    selectedOptionsWithVariations,
+    configurationSummary,
+    removeFromConfiguration
+  } = useConfiguratorStore();
+  
+  // Use enhanced data if provided, otherwise fall back to legacy data
+  const enhancedSummary = propSummary || configurationSummary;
+  const enhancedSelectedOptions = propSelectedOptions || selectedOptionsWithVariations;
+  const legacySelectedOptions = Object.values(selectedOptionsMap).flat();
   
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
@@ -39,8 +61,18 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
     }).format(amount);
   };
 
-  // Group options by category
-  const groupedOptions = selectedOptions.reduce((acc, option) => {
+  // Group options by category (enhanced version)
+  const groupedOptions = enhancedSelectedOptions.reduce((acc, selectedOption) => {
+    const category = selectedOption.category || selectedOption.option.optionType || 'Other';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(selectedOption);
+    return acc;
+  }, {} as Record<string, SelectedOption[]>);
+
+  // Legacy grouping for backward compatibility
+  const legacyGroupedOptions = legacySelectedOptions.reduce((acc, option) => {
     const category = option.optionType || 'Other';
     if (!acc[category]) {
       acc[category] = [];
@@ -57,6 +89,15 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
       newExpanded.add(category);
     }
     setExpandedCategories(newExpanded);
+  };
+
+  // Handle option removal
+  const handleOptionRemove = (optionId: string) => {
+    if (onOptionRemove) {
+      onOptionRemove(optionId);
+    } else {
+      removeFromConfiguration(optionId);
+    }
   };
 
   if (loading) {
@@ -161,7 +202,7 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
                 )}
                 <div className="flex items-center mt-2">
                   <span className="text-lg font-semibold text-gray-900">
-                    {formatCurrency(summary.basePrice)}
+                    {formatCurrency(enhancedSummary?.basePrice || summary.basePrice)}
                   </span>
                   {baseModel.adaCompliant && (
                     <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -175,11 +216,112 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
         </div>
 
         {/* Selected Options by Category */}
-        {Object.keys(groupedOptions).length > 0 && (
+        {(Object.keys(groupedOptions).length > 0 || Object.keys(legacyGroupedOptions).length > 0) && (
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Selected Options</h2>
             <div className="space-y-4">
-              {Object.entries(groupedOptions).map(([category, options]) => {
+              {/* Enhanced Options */}
+              {Object.entries(groupedOptions).map(([category, selectedOptions]) => {
+                const isExpanded = expandedCategories.has(category);
+                const categoryTotal = selectedOptions.reduce((sum, selectedOption) => {
+                  return sum + selectedOption.totalPrice;
+                }, 0);
+
+                return (
+                  <div key={category} className="bg-gray-50 rounded-lg overflow-hidden">
+                    <button
+                      onClick={() => toggleCategory(category)}
+                      className="w-full px-4 py-3 text-left hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+                      aria-expanded={isExpanded}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <svg
+                            className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${
+                              isExpanded ? 'transform rotate-90' : ''
+                            }`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                          </svg>
+                          <h3 className="ml-2 text-base font-medium text-gray-900">
+                            {category} ({options.length})
+                          </h3>
+                        </div>
+                        <span className="text-base font-semibold text-gray-900">
+                          {formatCurrency(categoryTotal)}
+                        </span>
+                      </div>
+                    </button>
+                    
+                    {isExpanded && (
+                      <div className="px-4 pb-3">
+                        <div className="space-y-2">
+                          {selectedOptions.map((selectedOption, index) => (
+                            <div key={selectedOption.id} className="flex items-center justify-between py-2 border-b border-gray-200 last:border-b-0">
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between">
+                                  <h4 className="text-sm font-medium text-gray-900">{selectedOption.option.name}</h4>
+                                  <button
+                                    onClick={() => handleOptionRemove(selectedOption.id)}
+                                    className="text-red-500 hover:text-red-700 text-xs font-medium"
+                                    aria-label={`Remove ${selectedOption.option.name}`}
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                                {selectedOption.option.shortDescription && (
+                                  <p className="text-xs text-gray-600 mt-1">{selectedOption.option.shortDescription}</p>
+                                )}
+                                
+                                {/* Show selected variations */}
+                                {selectedOption.selectedVariations.length > 0 && (
+                                  <div className="mt-2">
+                                    <p className="text-xs text-gray-500 mb-1">Selected variations:</p>
+                                    <div className="flex flex-wrap gap-1">
+                                      {selectedOption.selectedVariations.map((variation) => (
+                                        <span key={variation.id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                          {variation.name} (+${parseFloat(variation.price.toString()).toFixed(2)})
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                <div className="flex items-center mt-1 space-x-2">
+                                  {selectedOption.option.installationRequired && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                      Installation Required
+                                    </span>
+                                  )}
+                                  {selectedOption.option.adaCompliant && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                      ADA Compliant
+                                    </span>
+                                  )}
+                                  {selectedOption.option.safetyRating && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                      Safety: {selectedOption.option.safetyRating}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="text-sm font-semibold text-gray-900">
+                                {formatCurrency(selectedOption.totalPrice)}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              
+              {/* Legacy Options for backward compatibility */}
+              {Object.entries(legacyGroupedOptions).map(([category, options]) => {
                 const isExpanded = expandedCategories.has(category);
                 const categoryTotal = options.reduce((sum, option) => {
                   const price = parseFloat(option.regularPrice || '0');
@@ -187,7 +329,7 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
                 }, 0);
 
                 return (
-                  <div key={category} className="bg-gray-50 rounded-lg overflow-hidden">
+                  <div key={`legacy-${category}`} className="bg-gray-50 rounded-lg overflow-hidden">
                     <button
                       onClick={() => toggleCategory(category)}
                       className="w-full px-4 py-3 text-left hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
@@ -265,46 +407,46 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Base Model</span>
               <span className="text-sm font-medium text-gray-900">
-                {formatCurrency(summary.basePrice)}
+                {formatCurrency(enhancedSummary?.basePrice || summary.basePrice)}
               </span>
             </div>
             
-            {summary.optionsTotal > 0 && (
+            {(enhancedSummary?.optionsPrice || summary.optionsTotal) > 0 && (
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Options</span>
                 <AnimatedNumber
                   from={previousSummary?.optionsTotal || 0}
-                  to={summary.optionsTotal}
+                  to={enhancedSummary?.optionsPrice || summary.optionsTotal}
                   prefix="$"
                   className="text-sm font-medium text-gray-900"
                 />
               </div>
             )}
             
-            {summary.installationCost > 0 && (
+            {(enhancedSummary?.installationPrice || summary.installationCost) > 0 && (
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Installation</span>
                 <span className="text-sm font-medium text-gray-900">
-                  {formatCurrency(summary.installationCost)}
+                  {formatCurrency(enhancedSummary?.installationPrice || summary.installationCost)}
                 </span>
               </div>
             )}
             
-            {summary.shippingCost > 0 && (
+            {(enhancedSummary?.shippingPrice || summary.shippingCost) > 0 && (
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Shipping</span>
                 <span className="text-sm font-medium text-gray-900">
-                  {formatCurrency(summary.shippingCost)}
+                  {formatCurrency(enhancedSummary?.shippingPrice || summary.shippingCost)}
                 </span>
               </div>
             )}
             
-            {summary.taxAmount > 0 && (
+            {(enhancedSummary?.taxAmount || summary.taxAmount) > 0 && (
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Tax</span>
                  <AnimatedNumber
                   from={previousSummary?.taxAmount || 0}
-                  to={summary.taxAmount}
+                  to={enhancedSummary?.taxAmount || summary.taxAmount}
                   prefix="$"
                   className="text-sm font-medium text-gray-900"
                 />
@@ -316,7 +458,7 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
                 <span className="text-lg font-semibold text-gray-900">Total</span>
                 <AnimatedNumber
                   from={previousSummary?.grandTotal || 0}
-                  to={summary.grandTotal}
+                  to={enhancedSummary?.totalPrice || summary.grandTotal}
                   prefix="$"
                   className="text-2xl font-bold text-gray-900"
                 />

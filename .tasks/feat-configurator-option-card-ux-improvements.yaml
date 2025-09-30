@@ -2,7 +2,7 @@ type: feature
 id: feat-configurator-option-card-ux-improvements
 title: "Improve Option Card UX: Toggle selection and fix description display"
 created: 2025-09-29
-status: open
+status: COMPLETED
 priority: medium
 agent: frontend-dev
 

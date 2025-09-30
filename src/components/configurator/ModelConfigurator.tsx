@@ -12,6 +12,12 @@ import {
 } from '../../lib/interfaces/configurator';
 import { parsePrice, formatPrice } from '../../lib/utils/priceUtils';
 import ClientOnly from '../ClientOnly';
+// Phase 3: Advanced Features imports
+import ConfiguratorErrorBoundary from './ConfiguratorErrorBoundary';
+import ConfigurationValidator from './ConfigurationValidator';
+import ConfiguratorPreferences from './ConfiguratorPreferences';
+import { useAccessibility } from '../../hooks/useAccessibility';
+import { usePerformanceOptimization } from '../../hooks/usePerformanceOptimization';
 
 import { useConfiguratorStore } from '../../stores/configuratorStore';
 import ModelHero from './ModelHero';
@@ -21,6 +27,7 @@ import SummaryPanel from './SummaryPanel';
 import CompatibilityAlert from './CompatibilityAlert';
 import ConfigurationSummary from './ConfigurationSummary';
 import SaveConfigurationModal from './SaveConfigurationModal';
+import EnhancedOptionVariationPopup from './EnhancedOptionVariationPopup';
 
 interface ModelConfiguratorProps {
   baseModel: ConfigurableProductSchema;
@@ -82,6 +89,23 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
   // Router for navigation
   const router = useRouter();
   
+  // Phase 3: Advanced Features - Accessibility and Performance optimization
+  const { 
+    reducedMotion, 
+    highContrast, 
+    keyboardNavigation, 
+    announceToScreenReader, 
+    focusManagement 
+  } = useAccessibility();
+  
+  const { 
+    lazyLoader, 
+    virtualizer, 
+    debounce, 
+    throttle, 
+    memoize 
+  } = usePerformanceOptimization();
+  
   // Local state - ONLY for UI interactions
   const [currentCategoryId, setCurrentCategoryId] = useState<string>('');
   const [selectedFinancing, setSelectedFinancing] = useState<FinancingOption | undefined>();
@@ -91,6 +115,11 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
   const [saveModalError, setSaveModalError] = useState<string | undefined>();
   const [addToCartLoading, setAddToCartLoading] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  
+  // Phase 3: Advanced Features State
+  const [showPreferences, setShowPreferences] = useState(false);
+  const [showValidationPanel, setShowValidationPanel] = useState(false);
+  const [validationMode, setValidationMode] = useState<'strict' | 'lenient' | 'advisory'>('lenient');
   
   // Zustand store - SINGLE SOURCE OF TRUTH for configuration data
   const {
@@ -106,13 +135,48 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
     setCompatibilityIssues, // ✅ Use global store action
     summary,
     calculateSummary,
-    checkCompatibility: storeCheckCompatibility
+    checkCompatibility: storeCheckCompatibility,
+    // Enhanced User Flow State
+    selectedOptionsWithVariations,
+    configurationSummary,
+    updateConfigurationSummary,
+    openOptionPopup,
+    closeOptionPopup,
+    addToConfiguration,
+    removeFromConfiguration,
+    // Enhanced Initialization Flow
+    loadMainProduct,
+    loadOptionProducts
   } = useConfiguratorStore();
 
-  // Initialize base model
+  // Initialize with Enhanced User Flow - Step 1: Load Main Product
   useEffect(() => {
-    setModel(baseModel);
-  }, [baseModel, setModel]);
+    if (baseModel) {
+      loadMainProduct(baseModel);
+    }
+  }, [baseModel, loadMainProduct]);
+
+  // Initialize with Enhanced User Flow - Step 2: Load Option Products (if available)
+  useEffect(() => {
+    if (categories.length > 0) {
+      const optionIds: number[] = [];
+      categories.forEach(category => {
+        if (category.options) {
+          category.options.forEach(option => {
+            if (option.databaseId) {
+              optionIds.push(option.databaseId);
+            }
+          });
+        }
+      });
+      
+      if (optionIds.length > 0) {
+        loadOptionProducts(optionIds).catch(error => {
+          console.error('Failed to load option products:', error);
+        });
+      }
+    }
+  }, [categories, loadOptionProducts]);
 
   // Initialize edit mode configuration - handle client-side cart access
   useEffect(() => {
@@ -286,6 +350,11 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
     onConfigurationChange?.(summary);
   }, [selectedOptions, selectedFinancing, getConfigurationSummary, calculateSummary, onConfigurationChange]);
 
+  // Real-time state synchronization for enhanced user flow
+  useEffect(() => {
+    updateConfigurationSummary();
+  }, [selectedOptionsWithVariations, updateConfigurationSummary]);
+
   // Convert ConfigurationSummaryData to ConfigurationSummary format for SummaryPanel
   const getConfigurationSummaryForPanel = useCallback(() => {
     const data = getConfigurationSummary();
@@ -333,32 +402,50 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
     checkCompatibilityAsync();
   }, [selectedOptions, onCheckCompatibility, storeCheckCompatibility]);
 
-  // Handle option toggle
+  // Handle option toggle with Phase 3 enhancements
   const handleOptionToggle = useCallback(async (option: ConfigurableProductSchema, categoryId: string) => {
     const category = categories.find(c => c.id === categoryId);
     if (!category || !option.databaseId) return;
 
-    const categoryOptions = selectedOptions[categoryId] || [];
-    const isSelected = categoryOptions.some(selected => selected.databaseId === option.databaseId);
-    
-    if (isSelected) {
-      // Remove option
-      removeOption(option.databaseId, categoryId);
-    } else {
-      // Add option
-      if (category.multiSelect) {
-        // Check max selections
-        if (category.maxSelections && categoryOptions.length >= category.maxSelections) {
-          return; // Don't add if at max
+    // Phase 3: Debounced option selection for performance
+    const debouncedToggle = debounce(async () => {
+      const categoryOptions = selectedOptions[categoryId] || [];
+      const isSelected = categoryOptions.some(selected => selected.databaseId === option.databaseId);
+      
+      if (isSelected) {
+        // Remove option
+        if (option.databaseId) {
+          removeOption(option.databaseId, categoryId);
+          
+          // Phase 3: Accessibility announcement
+          announceToScreenReader(`Removed ${option.name} from ${category.name}`, 'polite');
         }
-        addOption(option, categoryId);
       } else {
-        // Single select - clear category first, then add
-        clearCategory(categoryId);
-        addOption(option, categoryId);
+        // Add option
+        if (category.multiSelect) {
+          // Check max selections
+          if (category.maxSelections && categoryOptions.length >= category.maxSelections) {
+            // Phase 3: Accessibility announcement for limit reached
+            announceToScreenReader(
+              `Maximum ${category.maxSelections} selections allowed for ${category.name}`, 
+              'assertive'
+            );
+            return; // Don't add if at max
+          }
+          addOption(option, categoryId);
+        } else {
+          // Single select - clear category first, then add
+          clearCategory(categoryId);
+          addOption(option, categoryId);
+        }
+        
+        // Phase 3: Accessibility announcement
+        announceToScreenReader(`Added ${option.name} to ${category.name}`, 'polite');
       }
-    }
-  }, [categories, selectedOptions, addOption, removeOption, clearCategory]);
+    }, 100);
+
+    await debouncedToggle();
+  }, [categories, selectedOptions, addOption, removeOption, clearCategory, debounce, announceToScreenReader]);
 
   // Handle category loading
   const handleCategorySelect = useCallback(async (categoryId: string) => {
@@ -404,20 +491,42 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
     }
   }, [categories, selectedOptions, onFetchCategoryOptions]);
 
-  // Handle add to cart
+  // Handle add to cart with Phase 3 enhancements
   const handleAddToCart = useCallback(async () => {
     if (!onAddToCart) return;
     
-    setAddToCartLoading(true);
-    try {
-      const configuration = getConfigurationSummary();
-      await onAddToCart(configuration);
-    } catch (error) {
-      // Handle error (show toast, etc.)
-    } finally {
-      setAddToCartLoading(false);
-    }
-  }, [onAddToCart, getConfigurationSummary]);
+    // Phase 3: Throttled add to cart to prevent multiple rapid submissions
+    const throttledAddToCart = throttle(async () => {
+      setAddToCartLoading(true);
+      
+      try {
+        const configuration = getConfigurationSummary();
+        await onAddToCart(configuration);
+        
+        // Phase 3: Accessibility announcement for success
+        announceToScreenReader(
+          `Successfully added ${baseModel?.name || 'configuration'} to cart`, 
+          'polite'
+        );
+        
+        // Phase 3: Focus management - return to cart button or next logical element
+        if (keyboardNavigation) {
+          focusManagement.skipToContent();
+        }
+      } catch (error) {
+        // Phase 3: Enhanced error handling with accessibility
+        const errorMessage = error instanceof Error ? error.message : 'Failed to add to cart';
+        announceToScreenReader(`Error: ${errorMessage}`, 'assertive');
+        
+        // Handle error (show toast, etc.)
+        console.error('Add to cart error:', error);
+      } finally {
+        setAddToCartLoading(false);
+      }
+    }, 1000);
+
+    await throttledAddToCart();
+  }, [onAddToCart, getConfigurationSummary, throttle, announceToScreenReader, keyboardNavigation, focusManagement, baseModel]);
 
   // Handle save configuration
   const handleSaveConfiguration = useCallback(async (name: string, notes?: string) => {
@@ -492,16 +601,28 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
   }
 
   return (
-    <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${className}`}>
+    <ConfiguratorErrorBoundary>
+      <div 
+        className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${className}`}
+        // Phase 3: Enhanced accessibility
+        data-reduced-motion={reducedMotion}
+        data-high-contrast={highContrast}
+        data-keyboard-navigation={keyboardNavigation}
+      >
       {/* Model Hero Section */}
       <div className="mb-8">
         <ModelHero
           model={baseModel}
-          selectedOptionsCount={isHydrated ? Object.values(selectedOptions).flat().length : 0}
-          totalPrice={isHydrated ? getConfigurationSummary().totalPrice : parsePrice(baseModel.regularPrice || baseModel.price)}
-          basePrice={isHydrated ? getConfigurationSummary().basePrice : parsePrice(baseModel.regularPrice || baseModel.price)}
+          selectedOptionsCount={isHydrated ? selectedOptionsWithVariations.length : 0}
+          totalPrice={isHydrated ? configurationSummary?.totalPrice : parsePrice(baseModel.regularPrice || baseModel.price)}
+          basePrice={isHydrated ? configurationSummary?.basePrice : parsePrice(baseModel.regularPrice || baseModel.price)}
           showFinancingBadge={isHydrated && financingOptions.length > 0}
           financingOption={isHydrated ? selectedFinancing : undefined}
+          // Enhanced User Flow Props
+          configurationSummary={configurationSummary}
+          showProgressIndicator={true}
+          showRealTimePrice={true}
+          onConfigurationClick={() => setShowSummary(true)}
         />
       </div>
 
@@ -515,6 +636,27 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
             }}
           />
         </div>
+      )}
+
+      {/* Phase 3: Advanced Configuration Validation */}
+      {isHydrated && (
+        <ConfigurationValidator
+          selectedOptions={selectedOptions}
+          categories={categories}
+          onValidationChange={(results) => {
+            // Handle validation results
+            const hasErrors = results.some(r => !r.isValid && r.rule.severity === 'error');
+            setShowValidationPanel(hasErrors || showValidationPanel);
+          }}
+          onAutoResolve={(action) => {
+            if (action) {
+              // Handle auto-resolve actions
+              announceToScreenReader('Configuration auto-resolved', 'polite');
+            }
+          }}
+          showValidationPanel={showValidationPanel}
+          validationMode={validationMode}
+        />
       )}
 
       {/* Main Configurator Layout */}
@@ -544,6 +686,10 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
                 onSaveConfiguration={() => setShowSaveModal(true)}
                 onShareConfiguration={handleShareConfiguration}
                 onAddToCart={handleAddToCart}
+                // Enhanced User Flow Props
+                summary={configurationSummary}
+                selectedOptions={selectedOptionsWithVariations}
+                onOptionRemove={removeFromConfiguration}
               />
             ) : (
               <div className="bg-white rounded-lg shadow-md p-8">
@@ -575,6 +721,17 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
                   console.warn('Option has no slug for navigation:', option);
                 }
               }}
+              // Enhanced User Flow Props
+              showVariationCount={true}
+              showRealTimePrice={true}
+              onOptionSelect={(option) => {
+                if (option.type === 'VARIABLE' && option.variations && option.variations.length > 0) {
+                  openOptionPopup(option);
+                } else {
+                  handleOptionToggle(option, currentCategoryId);
+                }
+              }}
+              selectedOptionsWithVariations={selectedOptionsWithVariations}
             />
           ) : (
             <div className="option-cards-empty bg-white rounded-lg shadow-md p-8 text-center">
@@ -603,13 +760,52 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
             />
           </ClientOnly>
           
-          {/* Action Buttons */}
+          {/* Action Buttons with Phase 3 Enhancements */}
           <div className="mt-4 space-y-3">
             <button
-              onClick={() => setShowSummary(!showSummary)}
-              className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              onClick={() => {
+                setShowSummary(!showSummary);
+                // Phase 3: Accessibility announcement
+                announceToScreenReader(
+                  showSummary 
+                    ? 'Returned to configuration options' 
+                    : 'Viewing configuration summary', 
+                  'polite'
+                );
+              }}
+              className={`w-full font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-150 ${
+                highContrast 
+                  ? 'bg-black text-white border-2 border-white hover:bg-gray-800 focus:ring-white' 
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-800 focus:ring-gray-500'
+              }`}
+              aria-label={showSummary ? 'Continue configuring options' : 'Review current configuration'}
             >
               {showSummary ? 'Continue Configuring' : 'Review Configuration'}
+            </button>
+            
+            {/* Phase 3: Additional Action Buttons */}
+            <button
+              onClick={() => setShowPreferences(true)}
+              className={`w-full font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-150 ${
+                highContrast 
+                  ? 'bg-gray-700 text-white border border-gray-500 hover:bg-gray-600 focus:ring-gray-400' 
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-blue-500'
+              }`}
+              aria-label="Open configurator preferences"
+            >
+              ⚙️ Preferences
+            </button>
+            
+            <button
+              onClick={() => setShowValidationPanel(!showValidationPanel)}
+              className={`w-full font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-150 ${
+                highContrast 
+                  ? 'bg-gray-700 text-white border border-gray-500 hover:bg-gray-600 focus:ring-gray-400' 
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-blue-500'
+              }`}
+              aria-label={showValidationPanel ? 'Hide validation panel' : 'Show validation panel'}
+            >
+              🔍 {showValidationPanel ? 'Hide' : 'Show'} Validation
             </button>
           </div>
         </aside>
@@ -626,7 +822,21 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
           setSaveModalError(undefined);
         }}
       />
-    </div>
+
+      {/* Enhanced Option Variation Popup */}
+      <EnhancedOptionVariationPopup />
+
+      {/* Phase 3: Configurator Preferences Modal */}
+      <ConfiguratorPreferences
+        isOpen={showPreferences}
+        onClose={() => setShowPreferences(false)}
+        onPreferencesUpdate={(preferences) => {
+          // Handle preferences update
+          announceToScreenReader('Preferences updated successfully', 'polite');
+        }}
+      />
+      </div>
+    </ConfiguratorErrorBoundary>
   );
 };
 

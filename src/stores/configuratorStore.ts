@@ -7,9 +7,21 @@ import {
   ConfigurationSummary,
   SavedConfiguration,
   FinancingOption,
-  InsuranceEstimate
+  InsuranceEstimate,
+  // Enhanced User Flow Interfaces
+  Variation,
+  SelectedOption,
+  OptionPopupState,
+  ConfigurationSummaryData
 } from '../lib/interfaces/configurator';
 import { configuratorAPI } from '../lib/graphql/configurator';
+import { 
+  calculateOptionPrice, 
+  calculateConfigurationTotal, 
+  calculatePricePreview,
+  calculateFinancingOptions as calculateFinancingOptionsUtil,
+  calculateInsuranceEstimate as calculateInsuranceEstimateUtil
+} from '../lib/utils/price-calculations';
 
 interface ConfiguratorStore {
   // State
@@ -22,6 +34,12 @@ interface ConfiguratorStore {
   loading: boolean;
   error: string | null;
   savedConfigurations: SavedConfiguration[];
+  
+  // Enhanced User Flow State
+  selectedOptionsWithVariations: SelectedOption[];
+  optionPopup: OptionPopupState;
+  configurationSummary: ConfigurationSummaryData;
+  optionProducts: ConfigurableProductSchema[];
 
   // Actions
   setModel: (model: ConfigurableProductSchema) => void;
@@ -48,6 +66,19 @@ interface ConfiguratorStore {
   addConfigurationToCart: () => Promise<void>;
   saveConfigurationLive: (name: string, notes?: string) => Promise<SavedConfiguration>;
   updateCartItemConfiguration: (cartItemId: string) => Promise<void>;
+  
+  // Enhanced User Flow Actions
+  loadMainProduct: (product: ConfigurableProductSchema) => void;
+  loadOptionProducts: (optionIds: number[]) => Promise<void>;
+  openOptionPopup: (option: ConfigurableProductSchema) => void;
+  closeOptionPopup: () => void;
+  selectVariation: (variation: Variation) => void;
+  deselectVariation: (variation: Variation) => void;
+  addToConfiguration: (option: ConfigurableProductSchema, variations: Variation[]) => void;
+  removeFromConfiguration: (optionId: string) => void;
+  updateConfigurationSummary: () => void;
+  calculateTotalPrice: () => number;
+  calculateOptionPrice: (option: ConfigurableProductSchema, variations: Variation[]) => number;
 
   // Computed getters
   getSelectedOptionsForCategory: (categoryId: string) => ConfigurableProductSchema[];
@@ -160,6 +191,30 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
       loading: false,
       error: null,
       savedConfigurations: [],
+      
+      // Enhanced User Flow State
+      selectedOptionsWithVariations: [],
+      optionPopup: {
+        isOpen: false,
+        selectedOption: null,
+        selectedVariations: [],
+        tempSelections: [],
+        pricePreview: 0,
+        isAlreadyInConfiguration: false,
+        selectionType: 'radio'
+      },
+      configurationSummary: {
+        baseModel: null as any,
+        selectedOptions: [],
+        totalPrice: 0,
+        basePrice: 0,
+        optionsPrice: 0,
+        installationPrice: 0,
+        shippingPrice: 0,
+        taxAmount: 0,
+        deliveryEstimate: '2-3 weeks'
+      },
+      optionProducts: [],
       
       // Edit session state
       editSession: {
@@ -885,6 +940,185 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
         } finally {
           set({ loading: false });
         }
+      },
+
+      // Enhanced User Flow Actions
+      loadMainProduct: (product: ConfigurableProductSchema) => {
+        set({ 
+          model: product,
+          configurationSummary: {
+            ...get().configurationSummary,
+            baseModel: product,
+            basePrice: parseFloat(product.price?.toString() || product.regularPrice?.toString() || '0')
+          }
+        });
+        get().updateConfigurationSummary();
+      },
+
+      loadOptionProducts: async (optionIds: number[]) => {
+        set({ loading: true, error: null });
+        
+        try {
+          // Import the WooCommerce function
+          const { fetchOptionProductsByIds } = await import('../lib/woocommerce');
+          const optionProducts = await fetchOptionProductsByIds(optionIds);
+          set({ optionProducts, loading: false });
+        } catch (error) {
+          set({ error: error instanceof Error ? error.message : 'Failed to load option products', loading: false });
+        }
+      },
+
+      openOptionPopup: (option: ConfigurableProductSchema) => {
+        const isAlreadySelected = get().selectedOptionsWithVariations.some(so => so.option.id === option.id);
+        const currentVariations = isAlreadySelected 
+          ? get().selectedOptionsWithVariations.find(so => so.option.id === option.id)?.selectedVariations || []
+          : [];
+
+        const selectionType = option.variableType?.toLowerCase() === 'checkbox' ? 'checkbox' : 'radio';
+
+        set({
+          optionPopup: {
+            isOpen: true,
+            selectedOption: option,
+            selectedVariations: currentVariations,
+            tempSelections: currentVariations,
+            pricePreview: calculateOptionPrice(option, currentVariations),
+            isAlreadyInConfiguration: isAlreadySelected,
+            selectionType
+          }
+        });
+      },
+
+      closeOptionPopup: () => {
+        set({
+          optionPopup: {
+            isOpen: false,
+            selectedOption: null,
+            selectedVariations: [],
+            tempSelections: [],
+            pricePreview: 0,
+            isAlreadyInConfiguration: false,
+            selectionType: 'radio'
+          }
+        });
+      },
+
+      selectVariation: (variation: Variation) => {
+        const { optionPopup } = get();
+        if (!optionPopup.isOpen || !optionPopup.selectedOption) return;
+
+        const isSelected = optionPopup.tempSelections.some(v => v.id === variation.id);
+        let newTempSelections: Variation[];
+
+        if (optionPopup.selectionType === 'radio') {
+          // Radio selection - only one variation allowed
+          newTempSelections = isSelected ? [] : [variation];
+        } else {
+          // Checkbox selection - multiple variations allowed
+          if (isSelected) {
+            newTempSelections = optionPopup.tempSelections.filter(v => v.id !== variation.id);
+          } else {
+            newTempSelections = [...optionPopup.tempSelections, variation];
+          }
+        }
+
+        const pricePreview = calculateOptionPrice(optionPopup.selectedOption, newTempSelections);
+
+        set({
+          optionPopup: {
+            ...optionPopup,
+            tempSelections: newTempSelections,
+            pricePreview
+          }
+        });
+      },
+
+      deselectVariation: (variation: Variation) => {
+        const { optionPopup } = get();
+        if (!optionPopup.isOpen) return;
+
+        const newTempSelections = optionPopup.tempSelections.filter(v => v.id !== variation.id);
+        const pricePreview = optionPopup.selectedOption 
+          ? calculateOptionPrice(optionPopup.selectedOption, newTempSelections)
+          : 0;
+
+        set({
+          optionPopup: {
+            ...optionPopup,
+            tempSelections: newTempSelections,
+            pricePreview
+          }
+        });
+      },
+
+      addToConfiguration: (option: ConfigurableProductSchema, variations: Variation[]) => {
+        const { optionPopup } = get();
+        
+        // Remove existing option if it's already in configuration
+        if (optionPopup.isAlreadyInConfiguration) {
+          const filteredOptions = get().selectedOptionsWithVariations.filter(so => so.option.id !== option.id);
+          set({ selectedOptionsWithVariations: filteredOptions });
+        }
+        
+        const totalPrice = calculateOptionPrice(option, variations);
+        const selectedOption: SelectedOption = {
+          id: `${option.id}-${Date.now()}`,
+          option,
+          selectedVariations: variations,
+          totalPrice,
+          quantity: 1,
+          addedAt: new Date(),
+          category: option.optionType || 'General'
+        };
+
+        set(state => ({
+          selectedOptionsWithVariations: [...state.selectedOptionsWithVariations, selectedOption]
+        }));
+
+        // Update configuration summary
+        get().updateConfigurationSummary();
+      },
+
+      removeFromConfiguration: (optionId: string) => {
+        set(state => ({
+          selectedOptionsWithVariations: state.selectedOptionsWithVariations.filter(so => so.id !== optionId)
+        }));
+
+        // Update configuration summary
+        get().updateConfigurationSummary();
+      },
+
+      updateConfigurationSummary: () => {
+        const { model, selectedOptionsWithVariations } = get();
+        
+        if (!model) return;
+
+        const calculation = calculateConfigurationTotal(model, selectedOptionsWithVariations);
+        
+        const summary: ConfigurationSummaryData = {
+          baseModel: model,
+          selectedOptions: selectedOptionsWithVariations.map(so => so.option),
+          totalPrice: calculation.totalPrice,
+          basePrice: calculation.basePrice,
+          optionsPrice: calculation.optionsPrice,
+          installationPrice: calculation.installationPrice,
+          shippingPrice: calculation.shippingPrice,
+          taxAmount: calculation.taxAmount,
+          deliveryEstimate: '2-3 weeks',
+          financingOption: calculateFinancingOptions(calculation.totalPrice)[0],
+          insuranceEstimate: calculateInsuranceEstimate(calculation.totalPrice)
+        };
+
+        set({ configurationSummary: summary });
+      },
+
+      calculateTotalPrice: () => {
+        const { configurationSummary } = get();
+        return configurationSummary.totalPrice;
+      },
+
+      calculateOptionPrice: (option: ConfigurableProductSchema, variations: Variation[]) => {
+        return calculateOptionPrice(option, variations);
       }
     }),
     {

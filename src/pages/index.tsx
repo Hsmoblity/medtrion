@@ -11,6 +11,10 @@ import { Document } from "@contentful/rich-text-types";
 
 import TopProductsStrip from "components/Home/TopProductsStrip";
 import BestSellerSection from "components/Home/BestSellerSection";
+import TrustIndicators from "components/Home/TrustIndicators";
+import ProblemSolutionSection from "components/Home/ProblemSolutionSection";
+import TestimonialCarousel from "components/Home/TestimonialCarousel";
+import FloatingActionButton from "components/ui/FloatingActionButton";
 import { getFeatureFlag } from "lib/featureFlags";
 
 interface ContentfulProduct {
@@ -40,6 +44,10 @@ interface HomeProps {
 const Home = ({ products, error }: HomeProps) => {
   const safeProducts = Array.isArray(products) ? products : [];
   const showcaseEnabled = getFeatureFlag('homepage_showcase_layout');
+  const trustIndicatorsEnabled = getFeatureFlag('homepage_trust_indicators');
+  const problemSolutionEnabled = getFeatureFlag('homepage_problem_solution');
+  const testimonialCarouselEnabled = getFeatureFlag('homepage_testimonial_carousel');
+  const floatingActionEnabled = getFeatureFlag('homepage_floating_action');
   
   
   return (
@@ -47,8 +55,17 @@ const Home = ({ products, error }: HomeProps) => {
       <MetaHead title=" Health Services & Mobility Products for a Better Life" description="Explore hsMobility for a wide range of health services and mobility products designed to improve your quality of life. As affiliate partners of Acron stairlifts, we offer trusted solutions to help you regain independence and enhance your mobility." />
       <Hero />
       
+      {/* Trust Indicators Section */}
+      {trustIndicatorsEnabled && <TrustIndicators />}
+      
       {/* Top Products Showcase - Featured Products Strip */}
       <TopProductsStrip enableShowcase={showcaseEnabled} />
+      
+      {/* Problem-Solution Interactive Section */}
+      {problemSolutionEnabled && <ProblemSolutionSection />}
+      
+      {/* Testimonial Carousel Section */}
+      {testimonialCarouselEnabled && <TestimonialCarousel />}
       
       {/* Best Seller Section with Real Products - HIDDEN */}
       {/* <BestSellerSection initialProducts={safeProducts} /> */}
@@ -70,6 +87,14 @@ const Home = ({ products, error }: HomeProps) => {
       <div>
         <Reviews />
       </div>
+
+      {/* Floating Action Button */}
+      {floatingActionEnabled && (
+        <FloatingActionButton
+          onClick={() => console.log('Floating action clicked')}
+          label="Get Help"
+        />
+      )}
     </>
   );
 };

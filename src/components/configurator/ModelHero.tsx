@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { ConfigurableProductSchema, FinancingOption } from '../../lib/interfaces/configurator';
+import { ConfigurableProductSchema, FinancingOption, ConfigurationSummaryData } from '../../lib/interfaces/configurator';
 import { parsePrice, formatPrice } from '../../lib/utils/priceUtils';
+import { useConfiguratorStore } from '../../stores/configuratorStore';
 
 interface ModelHeroProps {
   model: ConfigurableProductSchema;
@@ -15,6 +16,12 @@ interface ModelHeroProps {
   onImageError?: () => void;
   onPriceClick?: () => void;
   onFinancingClick?: () => void;
+  
+  // Enhanced User Flow Props
+  configurationSummary?: ConfigurationSummaryData;
+  showProgressIndicator?: boolean;
+  showRealTimePrice?: boolean;
+  onConfigurationClick?: () => void;
 }
 
 const ModelHero: React.FC<ModelHeroProps> = ({
@@ -28,10 +35,29 @@ const ModelHero: React.FC<ModelHeroProps> = ({
   error,
   onImageError,
   onPriceClick,
-  onFinancingClick
+  onFinancingClick,
+  // Enhanced User Flow Props
+  configurationSummary,
+  showProgressIndicator = true,
+  showRealTimePrice = true,
+  onConfigurationClick
 }) => {
   const [imageError, setImageError] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Enhanced User Flow Integration
+  const { 
+    selectedOptionsWithVariations, 
+    configurationSummary: storeSummary,
+    calculateTotalPrice 
+  } = useConfiguratorStore();
+
+  // Use enhanced data if provided, otherwise fall back to store data
+  const enhancedSummary = configurationSummary || storeSummary;
+  const enhancedSelectedOptions = selectedOptionsWithVariations;
+  const enhancedTotalPrice = enhancedSummary?.totalPrice || totalPrice || calculateTotalPrice();
+  const enhancedBasePrice = enhancedSummary?.basePrice || basePrice || parsePrice(model.price || model.regularPrice);
+  const enhancedOptionsCount = enhancedSelectedOptions.length || selectedOptionsCount;
 
   // Handle image gallery (assuming model might have multiple images)
   const images = model.image ? [model.image] : [];
@@ -235,38 +261,58 @@ const ModelHero: React.FC<ModelHeroProps> = ({
               </p>
             )}
 
-            {/* Pricing Section */}
+            {/* Phase 2: Enhanced Pricing Section with animations and real-time feedback */}
             <div className="border-t border-gray-200 pt-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-bold text-gray-900">
-                      {formatPriceDisplay(currentPrice)}
+                    <span className={`
+                      text-2xl font-bold transition-all duration-500 ease-out relative
+                      ${showRealTimePrice ? 'text-green-600 animate-[flash_0.6s_ease-out]' : 'text-gray-900'}
+                    `}>
+                      {formatPriceDisplay(showRealTimePrice ? enhancedTotalPrice : currentPrice)}
+                      
+                      {/* Phase 2: Live pricing indicator */}
+                      {showRealTimePrice && (
+                        <div className="absolute -top-2 -right-6">
+                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                        </div>
+                      )}
                     </span>
-                    {selectedOptionsCount > 0 && totalPrice && totalPrice > displayBasePrice && (
-                      <span className="text-sm text-gray-500">
-                        (Base: {formatPriceDisplay(displayBasePrice)})
+                    {enhancedOptionsCount > 0 && enhancedTotalPrice && enhancedTotalPrice > enhancedBasePrice && (
+                      <span className="text-sm text-gray-500 transition-all duration-300 animate-[slideInUp_0.4s_ease-out]">
+                        (Base: {formatPriceDisplay(enhancedBasePrice)})
                       </span>
                     )}
                   </div>
                   
-                  {selectedOptionsCount > 0 ? (
-                    <p className="text-sm text-gray-600 mt-1">
-                      Includes {selectedOptionsCount} selected option{selectedOptionsCount !== 1 ? 's' : ''}
+                  {enhancedOptionsCount > 0 ? (
+                    <p className="text-sm text-gray-600 mt-1 transition-all duration-300 animate-[fadeIn_0.5s_ease-out]">
+                      Includes {enhancedOptionsCount} selected option{enhancedOptionsCount !== 1 ? 's' : ''}
+                      {showRealTimePrice && enhancedSelectedOptions.some(option => option.selectedVariations.length > 0) && (
+                        <span className="ml-2 text-blue-600 animate-pulse">
+                          with {enhancedSelectedOptions.reduce((sum, option) => sum + option.selectedVariations.length, 0)} variations
+                        </span>
+                      )}
                     </p>
                   ) : (
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-gray-600 mt-1">{showRealTimePrice && (
+                        <span className="inline-flex items-center space-x-1 text-xs text-green-600 animate-pulse">
+                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                          <span>Real-time pricing active</span>
+                        </span>
+                      )}
                       Base product price
                     </p>
                   )}
                 </div>
 
-                {onPriceClick && (
+                {(onPriceClick || onConfigurationClick) && (
                   <button
-                    onClick={onPriceClick}
+                    onClick={onConfigurationClick || onPriceClick}
                     className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                   >
-                    View Breakdown
+                    {onConfigurationClick ? 'View Configuration' : 'View Breakdown'}
                   </button>
                 )}
               </div>
@@ -278,14 +324,38 @@ const ModelHero: React.FC<ModelHeroProps> = ({
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Base Product</span>
                     <span className="text-sm font-semibold text-gray-900">
-                      {formatPriceDisplay(displayBasePrice)}
+                      {formatPriceDisplay(showRealTimePrice ? enhancedBasePrice : displayBasePrice)}
                     </span>
                   </div>
-                  {selectedOptionsCount > 0 && totalPrice && totalPrice > displayBasePrice && (
+                  {(enhancedOptionsCount > 0 && enhancedSummary?.optionsPrice) && (
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">Selected Options</span>
                       <span className="text-sm font-semibold text-gray-900">
-                        {formatPriceDisplay(totalPrice - displayBasePrice)}
+                        {formatPriceDisplay(enhancedSummary.optionsPrice)}
+                      </span>
+                    </div>
+                  )}
+                  {enhancedSummary?.installationPrice && enhancedSummary.installationPrice > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Installation</span>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {formatPriceDisplay(enhancedSummary.installationPrice)}
+                      </span>
+                    </div>
+                  )}
+                  {enhancedSummary?.shippingPrice && enhancedSummary.shippingPrice > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Shipping</span>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {formatPriceDisplay(enhancedSummary.shippingPrice)}
+                      </span>
+                    </div>
+                  )}
+                  {enhancedSummary?.taxAmount && enhancedSummary.taxAmount > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Tax</span>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {formatPriceDisplay(enhancedSummary.taxAmount)}
                       </span>
                     </div>
                   )}
@@ -293,7 +363,7 @@ const ModelHero: React.FC<ModelHeroProps> = ({
                     <div className="flex justify-between items-center">
                       <span className="text-base font-medium text-gray-900">Total</span>
                       <span className="text-lg font-bold text-blue-600">
-                        {formatPriceDisplay(currentPrice)}
+                        {formatPriceDisplay(showRealTimePrice ? enhancedTotalPrice : currentPrice)}
                       </span>
                     </div>
                   </div>
@@ -322,6 +392,36 @@ const ModelHero: React.FC<ModelHeroProps> = ({
                       </button>
                     )}
                   </div>
+                </div>
+              )}
+
+              {/* Progress Indicator */}
+              {showProgressIndicator && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-medium text-blue-900">Configuration Progress</h4>
+                    <span className="text-sm text-blue-600">
+                      {enhancedOptionsCount} option{enhancedOptionsCount !== 1 ? 's' : ''} selected
+                    </span>
+                  </div>
+                  <div className="w-full bg-blue-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ 
+                        width: `${Math.min((enhancedOptionsCount / 5) * 100, 100)}%` 
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs text-blue-600 mt-1">
+                    {enhancedOptionsCount === 0 
+                      ? 'Start by selecting options from the categories below'
+                      : enhancedOptionsCount < 3
+                      ? 'Great start! Consider adding more options for a complete configuration'
+                      : enhancedOptionsCount < 5
+                      ? 'Almost there! Add a few more options to complete your configuration'
+                      : 'Excellent! Your configuration is complete and ready for purchase'
+                    }
+                  </p>
                 </div>
               )}
             </div>

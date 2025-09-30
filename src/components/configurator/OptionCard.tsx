@@ -8,6 +8,10 @@ import OptionImage from './OptionImage';
 import RichContent from '../RichContent';
 import styles from './OptionCard.module.css';
 import { cn } from '../../lib/utils';
+// Phase 3: Advanced Features imports
+import { useAccessibility } from '../../hooks/useAccessibility';
+import { usePerformanceOptimization, useImageLoadingOptimization } from '../../hooks/usePerformanceOptimization';
+import ConfiguratorErrorBoundary from './ConfiguratorErrorBoundary';
 
 interface OptionCardProps {
   // Required Props
@@ -56,6 +60,13 @@ interface OptionCardProps {
   financingOptions?: FinancingOption[];
   insuranceEstimate?: InsuranceEstimate;
   
+  // Enhanced User Flow Props (feat-model-configurator-user-flow-state-management)
+  currentPrice?: number;
+  variationCount?: number;
+  isVariable?: boolean;
+  showVariationCount?: boolean;
+  showRealTimePrice?: boolean;
+  
   // Event Handlers
   onToggle?: (option: ConfigurableProductSchema, categoryId?: string) => void;
   onSelect?: (option: ConfigurableProductSchema, categoryId?: string) => void;
@@ -97,6 +108,14 @@ const OptionCard: React.FC<OptionCardProps> = ({
   compatibilityIssues = [],
   financingOptions = [],
   insuranceEstimate,
+  
+  // Enhanced User Flow Props
+  currentPrice,
+  variationCount = 0,
+  isVariable = false,
+  showVariationCount = false,
+  showRealTimePrice = false,
+  
   onToggle,
   onSelect,
   onDeselect,
@@ -124,6 +143,25 @@ const OptionCard: React.FC<OptionCardProps> = ({
 
   // Refs
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Phase 3: Advanced Features - Accessibility and Performance
+  const accessibility = useAccessibility();
+  const { debounce, lazyLoader } = usePerformanceOptimization();
+  const { loadImage, isImageLoaded } = useImageLoadingOptimization();
+
+  // Override props with accessibility preferences when not explicitly set
+  const effectiveReducedMotion = reducedMotion || accessibility.reducedMotion;
+  const effectiveHighContrast = highContrast || accessibility.highContrast;
+  const effectiveLargeText = largeText || accessibility.largeText;
+  const effectiveScreenReaderOptimized = screenReaderOptimized || accessibility.screenReaderOptimized;
+
+  // Phase 3: Enhanced error handling state
+  const [errorState, setErrorState] = useState({
+    hasError: false,
+    message: '',
+    retryCount: 0,
+    lastErrorTime: 0
+  });
 
   // Global configurator state (aligned with ModelConfigurator store structure)
   const {
@@ -197,32 +235,73 @@ const OptionCard: React.FC<OptionCardProps> = ({
     );
   }, [isSelected, disabled, loading, compatibilityStatus, highContrast, reducedMotion, variant, size, internalState.priceUpdated, className]);
 
-  // Event handlers
+  // Phase 3: Enhanced Event handlers with error handling and accessibility
   const handleClick = useCallback(async (event: React.MouseEvent) => {
     event.preventDefault();
     
     if (disabled || loading) return;
+
+    // Phase 3: Enhanced error handling with retry logic
+    const executeWithRetry = async (action: () => Promise<void>, maxRetries = 3) => {
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          await action();
+          // Reset error state on success
+          setErrorState({ hasError: false, message: '', retryCount: 0, lastErrorTime: 0 });
+          return;
+        } catch (error) {
+          if (attempt === maxRetries) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+            setErrorState({
+              hasError: true,
+              message: errorMessage,
+              retryCount: attempt,
+              lastErrorTime: Date.now()
+            });
+            onError?.(option, error instanceof Error ? error : new Error(errorMessage));
+            
+            // Phase 3: Announce error to screen reader
+            accessibility.announceToScreenReader(
+              `Error selecting ${option.name}: ${errorMessage}`, 
+              'assertive'
+            );
+            return;
+          }
+          // Wait before retry with exponential backoff
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt - 1) * 1000));
+        }
+      }
+    };
     
-    // Haptic feedback for mobile
-    if ('vibrate' in navigator) {
+    // Haptic feedback for mobile (accessibility consideration)
+    if ('vibrate' in navigator && !effectiveReducedMotion) {
       navigator.vibrate(50);
     }
+
+    // Phase 3: Enhanced accessibility announcements
+    accessibility.announceToScreenReader(
+      `${isSelected ? 'Deselecting' : 'Selecting'} ${option.name}`,
+      'polite'
+    );
     
     // Check if option has variations (VARIABLE type)
     if (option.type === 'VARIABLE' && option.variations && option.variations.length > 0) {
       setInternalState(prev => ({ ...prev, variationPopupVisible: true }));
+      accessibility.announceToScreenReader(
+        `Opening variation selection for ${option.name}`,
+        'polite'
+      );
       return;
     }
     
-    try {
+    await executeWithRetry(async () => {
       // Check compatibility before selection
       if (onCheckCompatibility && !isSelected) {
         setInternalState(prev => ({ ...prev, compatibilityChecking: true }));
         const issues = await onCheckCompatibility(option);
         
         if (issues.some(issue => issue.rule.severity === 'ERROR')) {
-          onError?.(option, new Error('Compatibility conflict detected'));
-          return;
+          throw new Error('Compatibility conflict detected');
         }
       }
       
@@ -230,9 +309,11 @@ const OptionCard: React.FC<OptionCardProps> = ({
       if (isSelected) {
         removeOption(option.databaseId || 0, categoryId);
         onDeselect?.(option, categoryId);
+        accessibility.announceToScreenReader(`${option.name} deselected`, 'polite');
       } else {
         addOption(option, categoryId);
         onSelect?.(option, categoryId);
+        accessibility.announceToScreenReader(`${option.name} selected`, 'polite');
       }
       
       // Emit toggle event
@@ -247,17 +328,12 @@ const OptionCard: React.FC<OptionCardProps> = ({
           is_selected: !isSelected
         });
       }
-      
-    } catch (error) {
-      console.error('Option toggle failed:', error);
-      onError?.(option, error as Error);
-    } finally {
-      setInternalState(prev => ({ ...prev, compatibilityChecking: false }));
-    }
+    });
+
   }, [
     disabled, loading, isSelected, option, categoryId, 
     onCheckCompatibility, onError, onDeselect, onSelect, onToggle,
-    addOption, removeOption
+    addOption, removeOption, accessibility, effectiveReducedMotion
   ]);
 
   const handleViewDetails = useCallback(() => {
@@ -377,7 +453,32 @@ const OptionCard: React.FC<OptionCardProps> = ({
   ]);
 
   return (
-    <>
+    <ConfiguratorErrorBoundary
+      onError={(error, errorInfo) => {
+        console.error('OptionCard Error:', error, errorInfo);
+        onError?.(option, error);
+      }}
+      resetKeys={[option.databaseId || 0, isSelected ? 1 : 0]}
+    >
+      {/* Phase 3: Error State Display */}
+      {errorState.hasError && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+          <div className="flex items-center space-x-2">
+            <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            <span className="text-sm text-red-700">{errorState.message}</span>
+            <button
+              onClick={() => setErrorState({ hasError: false, message: '', retryCount: 0, lastErrorTime: 0 })}
+              className="text-red-600 hover:text-red-800 text-sm underline"
+              aria-label="Dismiss error"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       <div
         ref={cardRef}
         className={cardClasses}
@@ -389,18 +490,44 @@ const OptionCard: React.FC<OptionCardProps> = ({
         onBlur={handleBlur}
         onClick={handleClick}
         role="article"
-        {...cardAriaProps}
+        // Phase 3: Enhanced accessibility attributes
+        tabIndex={disabled ? -1 : 0}
+        aria-disabled={disabled}
+        aria-busy={loading || internalState.compatibilityChecking}
+        aria-describedby={`${option.databaseId}-description ${option.databaseId}-price ${errorState.hasError ? `${option.databaseId}-error` : ''}`}
+        aria-label={`${option.name || option.title} option card, ${formatPrice(currentPrice || option.price)}${
+          option.installationRequired ? ', installation required' : ''
+        }${
+          option.adaCompliant ? ', ADA compliant' : ''
+        }${
+          hasCompatibilityIssues ? ', has compatibility warnings' : ''
+        }${
+          isSelected ? ', currently selected' : ', not selected'
+        }${
+          isVariable ? `, variable option with ${variationCount} variations` : ''
+        }`}
+        // Phase 3: Keyboard navigation support
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick(e as any);
+          }
+          if (e.key === 'Escape' && internalState.variationPopupVisible) {
+            setInternalState(prev => ({ ...prev, variationPopupVisible: false }));
+          }
+        }}
       >
-        {/* Selection Status Indicator */}
-        <div className="absolute top-4 right-4">
+        {/* Phase 2: Enhanced Selection Status Indicator with improved animations */}
+        <div className="absolute top-4 right-4 z-10">
           {isSelected ? (
             <div className={`
               w-8 h-8 bg-green-600 rounded-full 
               flex items-center justify-center text-white transform 
-              transition-transform duration-200 shadow-lg
-              ${reducedMotion ? 'transition-none' : 'scale-100 opacity-100'}
+              transition-all duration-300 ease-out shadow-lg ring-2 ring-green-200
+              ${reducedMotion ? 'transition-none' : 'scale-110 animate-[bounce_0.6s_ease-out]'}
+              hover:scale-125 hover:shadow-xl hover:ring-4 hover:ring-green-300
             `}>
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <svg className={`w-5 h-5 transition-transform duration-200 ${!reducedMotion ? 'animate-[scale_0.3s_ease-out]' : ''}`} fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
             </div>
@@ -408,15 +535,37 @@ const OptionCard: React.FC<OptionCardProps> = ({
             <div className={`
               w-8 h-8 bg-gray-200 rounded-full 
               flex items-center justify-center text-gray-500 transform 
-              transition-all duration-200 hover:bg-gray-300
+              transition-all duration-300 ease-out hover:bg-blue-100 hover:text-blue-600
+              hover:scale-110 hover:shadow-md hover:ring-2 hover:ring-blue-200
               ${reducedMotion ? 'transition-none' : 'scale-100 opacity-100'}
+              focus:ring-2 focus:ring-blue-300 focus:outline-none
             `}>
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <svg className={`w-5 h-5 transition-transform duration-200 ${!reducedMotion ? 'group-hover:rotate-45' : ''}`} fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
               </svg>
             </div>
           )}
         </div>
+
+        {/* Phase 2: Enhanced Variable Option Indicator with pulse animation */}
+        {isVariable && showVariationCount && (
+          <div className="absolute top-16 right-4 z-10">
+            <div className={`
+              bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full
+              border border-purple-200 shadow-sm
+              transition-all duration-300 ease-out
+              hover:bg-purple-200 hover:shadow-md hover:scale-105
+              ${!reducedMotion ? 'animate-pulse' : ''}
+            `}>
+              Variable
+              {variationCount > 0 && (
+                <span className="ml-1 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-purple-600 bg-purple-200 rounded-full">
+                  {variationCount}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Compatibility Warning */}
         {hasCompatibilityIssues && showCompatibility && (
@@ -462,13 +611,54 @@ const OptionCard: React.FC<OptionCardProps> = ({
             `}
           />
 
-          {/* Price */}
+          {/* Phase 2: Enhanced Price Section with animations and feedback */}
           {showPrice && (
-            <div className={`
-              font-bold text-blue-600 mb-2
-              ${largeText ? 'text-4xl' : size === 'large' ? 'text-3xl' : 'text-2xl'}
-            `}>
-              {formatPrice(option.price)}
+            <div className="mb-3 relative">
+              <div className={`
+                font-bold text-blue-600 mb-1 transition-all duration-500 ease-out
+                ${largeText ? 'text-4xl' : size === 'large' ? 'text-3xl' : 'text-2xl'}
+                ${showRealTimePrice && currentPrice !== undefined ? 'text-green-600' : 'text-blue-600'}
+                ${!reducedMotion && showRealTimePrice ? 'animate-[fadeIn_0.5s_ease-out]' : ''}
+                relative
+              `}>
+                {showRealTimePrice && currentPrice !== undefined
+                  ? formatPrice(currentPrice)
+                  : formatPrice(option.price)
+                }
+                
+                {/* Phase 2: Price change animation overlay */}
+                {showRealTimePrice && currentPrice !== undefined && !reducedMotion && (
+                  <div className="absolute inset-0 bg-green-100 rounded-md -z-10 animate-[flash_0.6s_ease-out]" />
+                )}
+              </div>
+              
+              {/* Phase 2: Enhanced Variation Count Display with animation */}
+              {showVariationCount && isVariable && variationCount > 0 && (
+                <div className={`
+                  text-sm text-gray-600 flex items-center space-x-2
+                  transition-all duration-300 ease-out
+                  ${!reducedMotion ? 'animate-[slideInUp_0.4s_ease-out]' : ''}
+                `}>
+                  <svg className="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <span>
+                    {variationCount} variation{variationCount !== 1 ? 's' : ''} available
+                  </span>
+                </div>
+              )}
+              
+              {/* Phase 2: Enhanced Real-time Price Indicator with pulse */}
+              {showRealTimePrice && currentPrice !== undefined && (
+                <div className={`
+                  text-xs text-green-600 mt-1 flex items-center space-x-1
+                  transition-all duration-300 ease-out
+                  ${!reducedMotion ? 'animate-pulse' : ''}
+                `}>
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <span className="font-medium">Live pricing</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -644,7 +834,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
           }
         }}
       />
-    </>
+    </ConfiguratorErrorBoundary>
   );
 };
 

@@ -2,7 +2,7 @@ type: feat
 id: feat-configurator-variation-popup
 title: "Model Configurator: Variable Option Card Variation Popup"
 created: 2025-09-29
-status: open
+status: COMPLETED
 priority: high
 agent: frontend-dev
 

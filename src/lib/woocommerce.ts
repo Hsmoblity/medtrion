@@ -86,6 +86,7 @@ export async function runClientRequest(query: any, variables?: Record<string, an
 
     // console.log('GraphQL query:', query);
 
+    // Hard limit of 3 attempts to prevent infinite loops
     const maxAttempts = 3;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
@@ -228,30 +229,43 @@ export async function fetchGraphQLProducts() {
         };
 
         // Enrich nodes with REST media when GraphQL image/gallery are empty
-        await Promise.all(nodes.map(async (p) => {
-            try {
-                const hasImage = p.image && p.image.sourceUrl;
-                const hasGallery = p.galleryImages && Array.isArray(p.galleryImages.nodes) && p.galleryImages.nodes.length > 0;
-                if (!hasImage && !hasGallery && p.databaseId) {
-                    const media = await fetchMediaForProduct(Number(p.databaseId));
-                    if (media && media.length > 0) {
-                        // Use first attachment as featured image and map the rest as gallery
-                        p.image = { sourceUrl: media[0].source_url || media[0].sourceUrl };
-                        p.galleryImages = { nodes: media.map((m: any) => ({ sourceUrl: m.source_url || m.sourceUrl })) };
-                    }
-                }
-            } catch (e) {
-                // ignore per-item errors
+        // Only during client-side requests to reduce server memory usage
+        if (typeof window !== 'undefined') {
+            // Limit concurrent requests to prevent memory exhaustion
+            const maxConcurrentRequests = 5;
+            const chunkedNodes = [];
+            for (let i = 0; i < nodes.length; i += maxConcurrentRequests) {
+                chunkedNodes.push(nodes.slice(i, i + maxConcurrentRequests));
             }
-        }));
+            
+            for (const chunk of chunkedNodes) {
+                await Promise.all(chunk.map(async (p) => {
+                    try {
+                        const hasImage = p.image && p.image.sourceUrl;
+                        const hasGallery = p.galleryImages && Array.isArray(p.galleryImages.nodes) && p.galleryImages.nodes.length > 0;
+                        if (!hasImage && !hasGallery && p.databaseId) {
+                            const media = await fetchMediaForProduct(Number(p.databaseId));
+                            if (media && media.length > 0) {
+                                // Use first attachment as featured image and map the rest as gallery
+                                p.image = { sourceUrl: media[0].source_url || media[0].sourceUrl };
+                                p.galleryImages = { nodes: media.map((m: any) => ({ sourceUrl: m.source_url || m.sourceUrl })) };
+                            }
+                        }
+                    } catch (e) {
+                        // ignore per-item errors
+                    }
+                }));
+            }
+        }
 
         // If any product declares related options, fetch those related product
         // objects now so the client doesn't need to fetch them later.
+        // Limit to prevent memory exhaustion
         try {
             const allRelatedIds = Array.from(new Set(nodes.reduce((acc: number[], p: any) => {
                 const ids = Array.isArray(p._related_options) ? p._related_options.map((n: any) => Number(n)).filter((x: any) => !isNaN(x)) : [];
                 return acc.concat(ids);
-            }, [])));
+            }, []))).slice(0, 100); // Limit to first 100 related products
 
             if (allRelatedIds.length > 0) {
                 // Use the new fetchProductsByIds with display format instead of deprecated function

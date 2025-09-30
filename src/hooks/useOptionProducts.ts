@@ -33,7 +33,7 @@ interface UseOptionProductsOptions {
   trackingLabel?: string;
 }
 
-// Simple in-memory cache for option products
+// Simple in-memory cache for option products with size limit
 const optionProductsCache = new Map<string, {
   data: ConfigurableProductSchema[];
   timestamp: number;
@@ -42,6 +42,23 @@ const optionProductsCache = new Map<string, {
 
 // Cache TTL: 5 minutes
 const DEFAULT_CACHE_TTL = 5 * 60 * 1000;
+// Maximum cache entries to prevent memory exhaustion
+const MAX_CACHE_SIZE = 50;
+
+// Helper function to maintain cache size limit
+const maintainCacheSize = () => {
+  if (optionProductsCache.size >= MAX_CACHE_SIZE) {
+    // Remove oldest entries when cache is full
+    const entries = Array.from(optionProductsCache.entries());
+    entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+    
+    // Remove oldest 25% of entries
+    const entriesToRemove = Math.floor(MAX_CACHE_SIZE * 0.25);
+    for (let i = 0; i < entriesToRemove; i++) {
+      optionProductsCache.delete(entries[i][0]);
+    }
+  }
+};
 
 /**
  * Hook for lazy loading option products with caching and error handling
@@ -150,8 +167,9 @@ export function useOptionProducts(
       // Products are already in ConfigurableProductSchema format from fetchOptionProductsByIds
       const mappedProducts: ConfigurableProductSchema[] = optionProducts;
 
-      // Cache the results
+      // Cache the results with size management
       if (effectiveCacheKey) {
+        maintainCacheSize(); // Clean cache before adding new entry
         optionProductsCache.set(effectiveCacheKey, {
           data: mappedProducts,
           timestamp: Date.now(),

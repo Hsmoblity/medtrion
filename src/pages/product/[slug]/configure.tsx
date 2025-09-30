@@ -41,7 +41,7 @@ const ConfigurePage: React.FC<ConfigurePageProps> = ({
     try {
       // Use the cart store directly with WooCommerce product data
       const { useCartStore } = await import('stores/cartStore');
-      const { addToCart } = useCartStore.getState();
+      const { addToCart, replaceCartItem } = useCartStore.getState();
       
       // Calculate total price from base product + selected options
       const selectedOptions = configuration.selectedOptions || [];
@@ -83,7 +83,15 @@ const ConfigurePage: React.FC<ConfigurePageProps> = ({
         _related_options_products: baseModel?._related_options_products || []
       };
       
-      addToCart(cartItem);
+      // Check if we're in edit mode
+      if (isEditMode && editSessionData?.cartItemId) {
+        // Replace existing cart item instead of adding duplicate
+        replaceCartItem(editSessionData.cartItemId, cartItem);
+        console.log('Replaced existing cart item:', editSessionData.cartItemId);
+      } else {
+        // Add new item to cart (with duplicate checking)
+        addToCart(cartItem);
+      }
       
       // Navigate to cart on success
       router.push('/cart?added=true');
@@ -462,7 +470,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       // weightCapacity will be sanitized by sanitizeConfigurableProduct
       // Additional fields
       productPictures: mappedProduct.productPictures || [],
-      variations: mappedProduct.variations || [],
+      variations: [], // Variations will be loaded separately
       options: mappedProduct.options || [],
       _related_options: mappedProduct._related_options || [],
       productSpecifications: mappedProduct.productSpecifications || ''

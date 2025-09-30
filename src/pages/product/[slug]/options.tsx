@@ -280,7 +280,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             
             // Additional fields
             productPictures: product.productPictures || [],
-            variations: product.variations || [],
+            variations: [], // Variations will be loaded separately
             options: product.options || [],
             _related_options: product._related_options || [],
             _related_options_products: (product._related_options_products || []) as any

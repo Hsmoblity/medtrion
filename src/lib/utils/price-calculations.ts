@@ -7,6 +7,47 @@ import { ConfigurableProductSchema, Variation } from '../interfaces/configurator
 import { parsePrice } from './priceUtils';
 
 /**
+ * Calculate shipping cost based on product weight, location, and total order value
+ * @param totalValue - Total order value before shipping
+ * @param weight - Total weight in pounds (optional)
+ * @param location - Shipping location (optional) 
+ * @returns Calculated shipping cost
+ */
+export const calculateShippingCost = (
+  totalValue: number,
+  weight?: number,
+  location?: string
+): number => {
+  // Free shipping for orders over $2000
+  if (totalValue >= 2000) {
+    return 0;
+  }
+  
+  // Base shipping rate
+  let shippingCost = 150; // Base rate for mobility equipment
+  
+  // Weight-based adjustments
+  if (weight) {
+    if (weight > 100) {
+      shippingCost += 100; // Heavy item surcharge
+    } else if (weight > 50) {
+      shippingCost += 50; // Medium weight surcharge
+    }
+  }
+  
+  // Location-based adjustments (simplified)
+  if (location) {
+    const remoteLocations = ['AK', 'HI', 'remote', 'international'];
+    if (remoteLocations.some(loc => location.toLowerCase().includes(loc.toLowerCase()))) {
+      shippingCost += 200; // Remote location surcharge
+    }
+  }
+  
+  // Standard mobility equipment ranges from $150-$450 shipping
+  return Math.min(shippingCost, 450);
+};
+
+/**
  * Calculate total price for an option with its selected variations
  * @param option - The base option product
  * @param variations - Array of selected variations
@@ -53,11 +94,14 @@ export const calculateConfigurationTotal = (
     option.option.installationRequired
   ) ? 300 : 0;
   
-  // Calculate shipping (simplified)
-  const shippingPrice = 50;
+  // Calculate subtotal before shipping
+  const subtotalBeforeShipping = basePrice + optionsPrice + installationPrice;
+  
+  // Calculate shipping using dynamic function
+  const shippingPrice = calculateShippingCost(subtotalBeforeShipping);
   
   // Calculate tax (8% on total before tax)
-  const subtotal = basePrice + optionsPrice + installationPrice + shippingPrice;
+  const subtotal = subtotalBeforeShipping + shippingPrice;
   const taxAmount = subtotal * 0.08;
   
   const totalPrice = subtotal + taxAmount;
@@ -147,4 +191,57 @@ export const calculateInsuranceEstimate = (totalPrice: number) => {
     deductible: 250,
     provider: 'HSM Mobility Insurance'
   };
+};
+
+/**
+ * Validate price calculation consistency
+ * Ensures that totalPrice includes variation costs when variations are present
+ * @param option - The option product
+ * @param variations - Selected variations
+ * @param totalPrice - The calculated total price
+ * @returns Validation result with warnings if any
+ */
+export const validatePriceCalculation = (
+  option: ConfigurableProductSchema,
+  variations: Variation[],
+  totalPrice: number
+): {
+  isValid: boolean;
+  warnings: string[];
+  expectedPrice: number;
+  actualPrice: number;
+} => {
+  const basePrice = parsePrice(option.price || option.regularPrice);
+  const variationsTotal = variations.reduce((sum, v) => sum + parsePrice(v.price), 0);
+  const expectedPrice = basePrice + variationsTotal;
+  
+  const warnings: string[] = [];
+  
+  // Check if variations are present but totalPrice doesn't include them
+  if (variations.length > 0 && Math.abs(totalPrice - basePrice) < 0.01) {
+    warnings.push(`Option "${option.name}" has ${variations.length} variations but totalPrice (${totalPrice}) equals basePrice (${basePrice}). Variation costs may be missing.`);
+  }
+  
+  // Check if totalPrice is significantly different from expected
+  if (Math.abs(totalPrice - expectedPrice) > 0.01) {
+    warnings.push(`Option "${option.name}" totalPrice (${totalPrice}) doesn't match expected price (${expectedPrice}). Base: ${basePrice}, Variations: ${variationsTotal}`);
+  }
+  
+  return {
+    isValid: warnings.length === 0,
+    warnings,
+    expectedPrice,
+    actualPrice: totalPrice
+  };
+};
+
+/**
+ * Get the correct price for an option, prioritizing totalPrice over base price
+ * This is the recommended way to get option prices to avoid calculation bugs
+ * @param option - The option product
+ * @returns The correct price to use (totalPrice if available, otherwise base price)
+ */
+export const getOptionPrice = (option: ConfigurableProductSchema): number => {
+  // Use totalPrice if available (includes variations), otherwise fallback to base price
+  return option.totalPrice || parsePrice(option.price || option.regularPrice);
 };

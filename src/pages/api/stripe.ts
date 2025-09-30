@@ -52,7 +52,16 @@ export default async function handler(
         `;
 
         try {
-          const input = { orderId: parseInt(wpOrderId, 10), successUrl: `${req.headers.origin}/success`, cancelUrl: `${req.headers.origin}` };
+          // Enhanced WordPress session creation with webhook URLs
+          const input = { 
+            orderId: parseInt(wpOrderId, 10), 
+            successUrl: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}&wp_order_id=${wpOrderId}`, 
+            cancelUrl: `${req.headers.origin}/payment/cancel?session_id={CHECKOUT_SESSION_ID}&wp_order_id=${wpOrderId}`,
+            metadata: {
+              source: 'headless-nextjs-webhook-enhanced',
+              timestamp: new Date().toISOString(),
+            }
+          };
           if (!wpClient) {
             res.status(500).json({ message: 'WP_GRAPHQL_URL not configured or invalid; cannot create session via WP.' });
             return;
@@ -99,6 +108,7 @@ export default async function handler(
         const shippingRates = await stripe.shippingRates.list({ limit: 5 });
         const shippingOptions = shippingRates.data.map(rate => ({ shipping_rate: rate.id }));
 
+        // Enhanced session creation with webhook metadata
         const session = await stripe.checkout.sessions.create({
           submit_type: "pay",
           payment_method_types: ["card"],
@@ -107,8 +117,27 @@ export default async function handler(
           shipping_options: shippingOptions,
           line_items,
           mode: "payment",
-          success_url: `${req.headers.origin}/success`,
-          cancel_url: `${req.headers.origin}`,
+          success_url: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${req.headers.origin}/payment/cancel?session_id={CHECKOUT_SESSION_ID}`,
+          // Enhanced metadata for webhook processing
+          metadata: {
+            source: 'headless-nextjs',
+            cartItems: JSON.stringify(items.map((item: any) => ({
+              productId: item.productId,
+              variationId: item.variationId,
+              quantity: item.quantity,
+              title: item.title
+            }))),
+            timestamp: new Date().toISOString(),
+          },
+          // Enhanced payment intent data for webhook processing
+          payment_intent_data: {
+            metadata: {
+              source: 'headless-nextjs',
+              itemCount: items.length.toString(),
+              timestamp: new Date().toISOString(),
+            }
+          }
         });
 
         res.status(200).json({
@@ -132,10 +161,12 @@ export default async function handler(
           unitPrice: Math.round((it.price || 0) * 100),
         })),
         metadata: {
-          source: 'headless-nextjs',
+          source: 'headless-nextjs-webhook-enhanced',
+          timestamp: new Date().toISOString(),
+          itemCount: items.length.toString(),
         },
-        successUrl: `${req.headers.origin}/success`,
-        cancelUrl: `${req.headers.origin}`,
+        successUrl: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${req.headers.origin}/payment/cancel?session_id={CHECKOUT_SESSION_ID}`,
       };
 
       try {

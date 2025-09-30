@@ -5,7 +5,7 @@ import Link from "next/link";
 import { FaGithub, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 // import client from "lib/contentful/contentful";
 import TableOfContents from "components/toc";
-import Footer from "components/PageLayout/Footer";
+import PageLayout from "components/PageLayout/PageLayout";
 import { BLOCKS, INLINES, MARKS } from "@contentful/rich-text-types";
 import FAQ from "components/faq";
 import Banner from "components/banner";
@@ -15,23 +15,74 @@ import { Reviews } from "components/reviews";
 export async function getServerSideProps(context: any) {
     const { slug } = context.params;
 
-    // const response = await client.getEntries({
-    //     content_type: "blog",
-    //     "fields.url[in]": slug,
-    //     limit: 1,
-    // });
-
-    // if (response.items.length === 0) {
-    return {
-        notFound: true,
+    // Temporary blog data mapping
+    const TEMPORARY_BLOG_DETAILS: Record<string, any> = {
+        'mobility-solutions-seniors': {
+            title: 'Understanding Mobility Solutions for Seniors',
+            description: 'Learn about the latest mobility solutions designed to help seniors maintain independence and improve quality of life.',
+            content: 'This comprehensive guide covers various mobility solutions available for seniors, including stairlifts, lift chairs, and home modifications.',
+            image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=400&fit=crop',
+            date: '2024-01-15'
+        },
+        'stairlift-installation-guide': {
+            title: 'Stairlift Installation: What to Expect',
+            description: 'A comprehensive guide to stairlift installation process, timeline, and what homeowners should expect.',
+            content: 'Learn about the stairlift installation process, from initial assessment to final testing and handover.',
+            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=400&fit=crop',
+            date: '2024-01-10'
+        },
+        'home-safety-tips': {
+            title: 'Home Safety Tips for Mobility Challenges',
+            description: 'Essential home safety modifications and tips for individuals with mobility challenges.',
+            content: 'Discover practical home safety modifications and tips to create a safer environment for individuals with mobility challenges.',
+            image: 'https://images.unsplash.com/photo-1581578731548-c6a0c3f2f6c5?w=800&h=400&fit=crop',
+            date: '2024-01-05'
+        }
     };
-    // }
 
-    // return {
-    //     props: {
-    //         blogDetailData: response.items[0],
-    //     },
-    // };
+    const blogData = TEMPORARY_BLOG_DETAILS[slug as string];
+
+    if (!blogData) {
+        return {
+            notFound: true,
+        };
+    }
+
+    return {
+        props: {
+            blogDetailData: {
+                fields: {
+                    title: blogData.title,
+                    description: blogData.description,
+                    body: {
+                        content: [
+                            {
+                                nodeType: 'paragraph',
+                                content: [
+                                    {
+                                        nodeType: 'text',
+                                        value: blogData.content
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    slug: slug,
+                    mainImage: {
+                        fields: {
+                            file: {
+                                url: blogData.image
+                            },
+                            title: blogData.title
+                        }
+                    }
+                },
+                sys: {
+                    createdAt: new Date(blogData.date).toISOString()
+                }
+            }
+        },
+    };
 }
 
 const BlogDetailPage = ({ blogDetailData }: any) => {
@@ -141,7 +192,7 @@ const BlogDetailPage = ({ blogDetailData }: any) => {
     });
 
     return (
-        <>
+        <PageLayout>
             <Head>
                 <title>{title}</title>
                 <meta name="description" content={description} />
@@ -233,7 +284,7 @@ const BlogDetailPage = ({ blogDetailData }: any) => {
                 {/* <Specs /> */}
 
             </section>
-        </>
+        </PageLayout>
     );
 };
 

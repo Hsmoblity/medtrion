@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useCartStore, useCartItems, useCartTotal } from 'stores/cartStore';
 import CartPageGroups from 'components/Cart/CartPageGroups';
 import { useRouter } from 'next/router';
 import { PrimaryButton } from '../components/ui';
 import { formatPrice, calculateOrderTotal } from 'lib/utils/priceUtils';
-import Link from 'next/link';
 
 const CartPage = () => {
     const cart = useCartItems();
@@ -36,11 +36,6 @@ const CartPage = () => {
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
-                    <nav className="flex text-sm text-gray-500">
-                        <Link href="/" className="hover:text-gray-700">Home</Link>
-                        <span className="mx-2">/</span>
-                        <span>Cart</span>
-                    </nav>
                 </div>
 
                 {cart.length > 0 ? (

@@ -3,6 +3,7 @@ import { useConfiguratorStore } from '../../stores/configuratorStore';
 import { ConfigurableProductSchema, SelectedOption, ConfigurationSummaryData } from '../../lib/interfaces/configurator';
 import AnimatedNumber from './AnimatedNumber';
 import { PrimaryButton } from '../ui';
+import RichContent from '../RichContent';
 
 interface ConfigurationSummaryProps {
   loading?: boolean;
@@ -198,7 +199,12 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
               <div className="flex-1">
                 <h3 className="text-lg font-medium text-gray-900">{baseModel.name}</h3>
                 {baseModel.shortDescription && (
-                  <p className="text-sm text-gray-600 mt-1">{baseModel.shortDescription}</p>
+                  <div className="text-sm text-gray-600 mt-1">
+                    <RichContent 
+                      content={baseModel.shortDescription}
+                      className="prose prose-sm max-w-none text-gray-600"
+                    />
+                  </div>
                 )}
                 <div className="flex items-center mt-2">
                   <span className="text-lg font-semibold text-gray-900">
@@ -247,7 +253,7 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                           </svg>
                           <h3 className="ml-2 text-base font-medium text-gray-900">
-                            {category} ({options.length})
+                            {category} ({selectedOptions.length})
                           </h3>
                         </div>
                         <span className="text-base font-semibold text-gray-900">
@@ -273,7 +279,12 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
                                   </button>
                                 </div>
                                 {selectedOption.option.shortDescription && (
-                                  <p className="text-xs text-gray-600 mt-1">{selectedOption.option.shortDescription}</p>
+                                  <div className="text-xs text-gray-600 mt-1">
+                                    <RichContent 
+                                      content={selectedOption.option.shortDescription}
+                                      className="prose prose-xs max-w-none text-gray-600"
+                                    />
+                                  </div>
                                 )}
                                 
                                 {/* Show selected variations */}
@@ -365,7 +376,12 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
                               <div className="flex-1">
                                 <h4 className="text-sm font-medium text-gray-900">{option.name}</h4>
                                 {option.shortDescription && (
-                                  <p className="text-xs text-gray-600 mt-1">{option.shortDescription}</p>
+                                  <div className="text-xs text-gray-600 mt-1">
+                                    <RichContent 
+                                      content={option.shortDescription}
+                                      className="prose prose-xs max-w-none text-gray-600"
+                                    />
+                                  </div>
                                 )}
                                 <div className="flex items-center mt-1 space-x-2">
                                   {option.installationRequired && (

@@ -1,0 +1,258 @@
+/**
+ * Typography System CSS - Global typography styles and utilities
+ * Provides responsive typography, font loading, and accessibility enhancements
+ */
+
+/* Font Loading and Performance */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+}
+
+/* CSS Custom Properties for Dynamic Typography */
+:root {
+  /* Base Font Sizes */
+  --font-size-xs: 0.75rem;      /* 12px */
+  --font-size-sm: 0.875rem;     /* 14px */
+  --font-size-base: 1rem;       /* 16px */
+  --font-size-lg: 1.125rem;     /* 18px */
+  --font-size-xl: 1.25rem;      /* 20px */
+  --font-size-2xl: 1.5rem;      /* 24px */
+  --font-size-3xl: 1.875rem;    /* 30px */
+  --font-size-4xl: 2.25rem;     /* 36px */
+  --font-size-5xl: 3rem;        /* 48px */
+  --font-size-6xl: 3.75rem;     /* 60px */
+  --font-size-7xl: 4.5rem;      /* 72px */
+
+  /* Responsive Scale Factor */
+  --typography-scale: 1;
+
+  /* Font Families */
+  --font-primary: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Poppins', 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+}
+
+/* Responsive Typography Scaling */
+@media (min-width: 768px) and (max-width: 1024px) {
+  :root {
+    --typography-scale: 1.1;
+  }
+}
+
+@media (min-width: 1025px) {
+  :root {
+    --typography-scale: 1.2;
+    --font-size-base: 1.125rem; /* 18px on desktop */
+  }
+}
+
+/* Responsive Text Utility Class */
+.responsive-text {
+  font-size: calc(var(--font-size-base) * var(--typography-scale));
+}
+
+/* Typography Reset and Base Styles */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+p, blockquote, figure {
+  margin: 0;
+}
+
+/* Enhanced Focus Indicators for Typography */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Code Block Styles */
+.code-block {
+  position: relative;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.dark .code-block {
+  background: #1f2937;
+  border-color: #374151;
+  color: #f9fafb;
+}
+
+.inline-code {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+
+.dark .inline-code {
+  background: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+/* Quote Styles */
+.quote-container {
+  margin: 1.5rem 0;
+}
+
+.quote-text {
+  position: relative;
+  font-style: italic;
+  color: #4b5563;
+}
+
+.dark .quote-text {
+  color: #9ca3af;
+}
+
+.quote-attribution {
+  text-align: right;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .code-block,
+  .inline-code {
+    border-width: 2px;
+    border-color: currentColor;
+  }
+  
+  a {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+  
+  blockquote {
+    page-break-inside: avoid;
+  }
+  
+  .code-block {
+    page-break-inside: avoid;
+    background: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
+  }
+}
+
+/* Mobile-First Typography Optimizations */
+@media (max-width: 767px) {
+  /* Ensure readable text on small screens */
+  h1 { font-size: 2rem; }      /* 32px */
+  h2 { font-size: 1.75rem; }   /* 28px */
+  h3 { font-size: 1.5rem; }    /* 24px */
+  h4 { font-size: 1.25rem; }   /* 20px */
+  h5 { font-size: 1.125rem; }  /* 18px */
+  h6 { font-size: 1rem; }      /* 16px */
+  
+  /* Better line height for readability */
+  p, li {
+    line-height: 1.6;
+  }
+  
+  /* Improve code readability on mobile */
+  .code-block {
+    font-size: 0.8rem;
+    padding: 0.75rem;
+  }
+}
+
+/* Dark Mode Typography Enhancements */
+.dark {
+  /* Better contrast ratios for dark mode */
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #9ca3af;
+  --text-muted: #6b7280;
+}
+
+/* Typography Animation Classes */
+.fade-in-text {
+  animation: fadeInText 0.5s ease-out;
+}
+
+@keyframes fadeInText {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Utility Classes for Typography */
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}
+
+.text-nowrap {
+  white-space: nowrap;
+}
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Selection Styles */
+::selection {
+  background: #3b82f6;
+  color: white;
+}
+
+::-moz-selection {
+  background: #3b82f6;
+  color: white;
+}

@@ -15,8 +15,55 @@ module.exports = {
       "2xl": "1536px"
     },
     extend: {
+      // Enhanced Typography System
       fontFamily: {
-        'poppins': ['Poppins'],
+        'primary': ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+        'secondary': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+        'display': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', '"Fira Code"', 'Monaco', 'Consolas', 'monospace'],
+        // Legacy support
+        'poppins': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+        'sans': ['Inter', 'system-ui', 'sans-serif']
+      },
+      
+      fontSize: {
+        // Extended font scale for modern design
+        '7xl': '4.5rem',    // 72px - Large display
+        '8xl': '6rem',      // 96px - Extra large display
+        '9xl': '8rem'       // 128px - Hero display
+      },
+      
+      fontWeight: {
+        // Complete weight scale
+        'thin': 100,
+        'extralight': 200,
+        'light': 300,
+        'normal': 400,
+        'medium': 500,
+        'semibold': 600,
+        'bold': 700,
+        'extrabold': 800,
+        'black': 900
+      },
+      
+      lineHeight: {
+        // Enhanced line height scale
+        'none': 1,
+        'tight': 1.25,
+        'snug': 1.375,
+        'normal': 1.5,
+        'relaxed': 1.625,
+        'loose': 2
+      },
+      
+      letterSpacing: {
+        // Letter spacing for typography refinement
+        'tighter': '-0.05em',
+        'tight': '-0.025em',
+        'normal': '0em',
+        'wide': '0.025em',
+        'wider': '0.05em',
+        'widest': '0.1em'
       },
       width: {
         "custom-31": "31.871429%",

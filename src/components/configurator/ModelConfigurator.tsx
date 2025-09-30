@@ -11,6 +11,7 @@ import {
   GraphQLResponse 
 } from '../../lib/interfaces/configurator';
 import { parsePrice, formatPrice } from '../../lib/utils/priceUtils';
+import { getOptionPrice } from '../../lib/utils/price-calculations';
 import ClientOnly from '../ClientOnly';
 // Phase 3: Advanced Features imports
 import ConfiguratorErrorBoundary from './ConfiguratorErrorBoundary';
@@ -27,7 +28,7 @@ import SummaryPanel from './SummaryPanel';
 import CompatibilityAlert from './CompatibilityAlert';
 import ConfigurationSummary from './ConfigurationSummary';
 import SaveConfigurationModal from './SaveConfigurationModal';
-import EnhancedOptionVariationPopup from './EnhancedOptionVariationPopup';
+import OptionVariationPopup from './OptionVariationPopup';
 
 interface ModelConfiguratorProps {
   baseModel: ConfigurableProductSchema;
@@ -313,20 +314,21 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
     // Use robust price parsing for base price
     const basePrice = parsePrice(baseModel.regularPrice || baseModel.price);
     const optionsPrice = allSelectedOptions.reduce((sum, option) => {
-      return sum + parsePrice(option.regularPrice || option.price);
+      // Use getOptionPrice utility to ensure consistent price calculation
+      return sum + getOptionPrice(option);
     }, 0);
     
     // Calculate installation cost (simplified)
     const installationPrice = allSelectedOptions.some(option => option.installationRequired) ? 500 : 0;
     
-    // Calculate shipping (simplified)
-    const shippingPrice = isHydrated ? 100 : 0;
+    // Calculate subtotal (no shipping or tax in configurator)
+    const subtotal = basePrice + optionsPrice + installationPrice;
     
-    // Calculate tax (simplified - 8% on total before tax)
-    const subtotal = basePrice + optionsPrice + installationPrice + shippingPrice;
-    const taxAmount = isHydrated ? subtotal * 0.08 : 0;
+    // No shipping or tax calculation in configurator - these are calculated on payment page
+    const shippingPrice = 0;
+    const taxAmount = 0;
     
-    const totalPrice = subtotal + taxAmount;
+    const totalPrice = subtotal;
 
     return {
       baseModel,
@@ -638,8 +640,8 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
         </div>
       )}
 
-      {/* Phase 3: Advanced Configuration Validation */}
-      {isHydrated && (
+      {/* Phase 3: Advanced Configuration Validation - Hidden */}
+      {false && isHydrated && (
         <ConfigurationValidator
           selectedOptions={selectedOptions}
           categories={categories}
@@ -762,6 +764,8 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
           
           {/* Action Buttons with Phase 3 Enhancements */}
           <div className="mt-4 space-y-3">
+            {/* Continue Configuration button hidden */}
+            {false && (
             <button
               onClick={() => {
                 setShowSummary(!showSummary);
@@ -782,8 +786,11 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
             >
               {showSummary ? 'Continue Configuring' : 'Review Configuration'}
             </button>
+            )}
             
             {/* Phase 3: Additional Action Buttons */}
+            {/* Preferences button hidden */}
+            {false && (
             <button
               onClick={() => setShowPreferences(true)}
               className={`w-full font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-150 ${
@@ -795,7 +802,10 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
             >
               ⚙️ Preferences
             </button>
+            )}
             
+            {/* Validation button hidden */}
+            {false && (
             <button
               onClick={() => setShowValidationPanel(!showValidationPanel)}
               className={`w-full font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-150 ${
@@ -807,6 +817,7 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
             >
               🔍 {showValidationPanel ? 'Hide' : 'Show'} Validation
             </button>
+            )}
           </div>
         </aside>
       </div>
@@ -823,8 +834,8 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
         }}
       />
 
-      {/* Enhanced Option Variation Popup */}
-      <EnhancedOptionVariationPopup />
+      {/* Unified Option Variation Popup */}
+      <OptionVariationPopup useStore={true} />
 
       {/* Phase 3: Configurator Preferences Modal */}
       <ConfiguratorPreferences

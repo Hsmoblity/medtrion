@@ -127,8 +127,7 @@ const ProblemSolutionSection: React.FC = () => {
                   </PrimaryButton>
                   <PrimaryButton 
                     href="/contact" 
-                    variant="secondary"
-                    className="w-full"
+                    className="w-full bg-gray-600 hover:bg-gray-700"
                   >
                     Get Free Consultation
                   </PrimaryButton>
@@ -156,7 +155,7 @@ const ProblemSolutionSection: React.FC = () => {
               <PrimaryButton href="/contact" size="lg">
                 Schedule Free Consultation
               </PrimaryButton>
-              <PrimaryButton href="/products" variant="secondary" size="lg">
+              <PrimaryButton href="/products" size="lg" className="bg-gray-600 hover:bg-gray-700">
                 Browse All Products
               </PrimaryButton>
             </div>

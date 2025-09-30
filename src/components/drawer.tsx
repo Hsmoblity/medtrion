@@ -120,19 +120,6 @@ const Drawer: React.FC = () => {
                     </li>
                     <li className="p-2.5 transform-origin-left-5 will-change-transform-opacity-filter hover:bg-gray-100 rounded-md transition-colors duration-200">
                         <button 
-                            aria-label="view all products" 
-                            onClick={(e) => {
-                                e.preventDefault();
-                                toggleDrawer();
-                                handleAnchorNavigation("/products", router, "Products");
-                            }}
-                            className="block text-left w-full"
-                        >
-                            Products
-                        </button>
-                    </li>
-                    <li className="p-2.5 transform-origin-left-5 will-change-transform-opacity-filter hover:bg-gray-100 rounded-md transition-colors duration-200">
-                        <button 
                             aria-label="check Acorn Stairlift designs" 
                             onClick={(e) => {
                                 e.preventDefault();

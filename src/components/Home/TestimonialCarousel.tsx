@@ -174,7 +174,7 @@ const TestimonialCarousel: React.FC = () => {
             <PrimaryButton href="/contact" size="lg">
               Join Our Happy Customers
             </PrimaryButton>
-            <PrimaryButton href="/reviews" variant="secondary" size="lg">
+            <PrimaryButton href="/reviews" size="lg" className="bg-gray-600 hover:bg-gray-700">
               Read More Reviews
             </PrimaryButton>
           </div>

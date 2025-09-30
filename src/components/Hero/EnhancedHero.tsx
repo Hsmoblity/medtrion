@@ -12,9 +12,9 @@ const EnhancedHero: React.FC = () => {
 
   if (loading) {
     return (
-      <section className="relative z-10 w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat px-4 py-24">
+      <section className="relative z-10 w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat px-4 pt-32 pb-12 md:pb-16">
         <div className="container mx-auto">
-          <LoadingOverlay />
+          <LoadingOverlay show={true} />
         </div>
       </section>
     );
@@ -23,7 +23,7 @@ const EnhancedHero: React.FC = () => {
   if (error) {
     // Fallback to original hero content
     return (
-      <section className="relative z-10 w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat px-4 py-24 flex flex-col">
+      <section className="relative z-10 w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat px-4 pt-32 pb-12 md:pb-16 flex flex-col">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-poppins font-semibold text-black mb-6">
             Express Your Freedom with HS Mobility
@@ -32,10 +32,10 @@ const EnhancedHero: React.FC = () => {
             Empowering 1000+ Satisfied Customers to Stay Independent with Exceptional mobility products
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <PrimaryButton href="/products" variant="primary" size="lg">
+            <PrimaryButton href="/products" size="lg">
               Explore Products
             </PrimaryButton>
-            <PrimaryButton href="/contact" variant="secondary" size="lg">
+            <PrimaryButton href="/contact" size="lg" className="bg-gray-600 hover:bg-gray-700">
               Get Free Quote
             </PrimaryButton>
           </div>
@@ -45,7 +45,7 @@ const EnhancedHero: React.FC = () => {
   }
 
   return (
-    <section className="relative z-10 w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat px-4 py-24">
+    <section className="relative z-10 w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat px-4 pt-32 pb-12 md:pb-16">
       <div className="container mx-auto">
         <div className="flex md:flex-row flex-col items-center gap-12">
           {/* Dynamic Content */}
@@ -84,8 +84,8 @@ const EnhancedHero: React.FC = () => {
                 <PrimaryButton
                   key={index}
                   href={button.href}
-                  variant={button.variant}
                   size="lg"
+                  className={button.variant === 'secondary' ? 'bg-gray-600 hover:bg-gray-700' : ''}
                 >
                   {button.text}
                 </PrimaryButton>
@@ -110,7 +110,7 @@ const EnhancedHero: React.FC = () => {
       </div>
       
       {/* Decorative bottom section */}
-      <div className="md:h-56 h-28 relative bottom-20 bg-[url('/nnnoise.svg')] bg-cover bg-repeat w-full -skew-y-6"></div>
+      <div className="md:h-24 h-12 relative bottom-12 bg-[url('/nnnoise.svg')] bg-cover bg-repeat w-full -skew-y-6 -z-10"></div>
     </section>
   );
 };

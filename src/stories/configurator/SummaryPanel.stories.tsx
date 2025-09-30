@@ -150,9 +150,9 @@ export const MinimalConfiguration: Story = {
       basePrice: 25000,
       optionsTotal: 0,
       installationCost: 0,
-      shippingCost: 50,
-      taxAmount: 2004,
-      grandTotal: 27054,
+      shippingCost: 150,
+      taxAmount: 2012,
+      grandTotal: 27162,
       estimatedDelivery: '1-2 weeks'
     },
     onAddToCart: () => console.log('Add to cart clicked')

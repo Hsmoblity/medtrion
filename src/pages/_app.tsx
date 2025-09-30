@@ -5,6 +5,7 @@ import NextTopLoader from "nextjs-toploader";
 import { Cursor } from "components/custom-cursor";
 import { SessionProvider } from "contexts/SessionContext";
 import { CartVisibilityProvider } from "contexts/cartVisibilityContext";
+import ClientOnly from "components/ClientOnly";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -29,9 +30,11 @@ function MyApp({ Component, pageProps }: AppProps) {
 
         {/* Custom cursor - can be disabled by setting environment variable */}
         {process.env.NEXT_PUBLIC_ENABLE_CUSTOM_CURSOR !== 'false' && (
-          <Cursor>
-            <div></div>
-          </Cursor>
+          <ClientOnly>
+            <Cursor>
+              <div></div>
+            </Cursor>
+          </ClientOnly>
         )}
       </CartVisibilityProvider>
     </SessionProvider>

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useCartStore, useCartCount, useIsHydrated } from "stores/cartStore";
 import { handleAnchorNavigation } from "lib/utils/navigation";
 import ClientOnly from 'components/ClientOnly';
+import { Typography } from '../typography';
 
 const Header = () => {
   const toggleCartVisibility = useCartStore(state => state.toggleCartVisibility);
@@ -16,9 +17,8 @@ const Header = () => {
   const router = useRouter();
   const menuItems = [
     { name: "Shop All", href: "/products" },
-    { name: "Products", href: "/products" },
     { name: "Acorn Stairlifts", href: "/product/acorn-stairlifts-acorn-180-curved-stairlift" },
-    { name: "Contact Us", href: "/#contact-us" },
+    { name: "Contact Us", href: "/contact" },
     { name: "Reviews", href: "/#reviews" },
     { name: "FAQs", href: "/#faq" },
     { name: "Blogs", href: "/blogs" },

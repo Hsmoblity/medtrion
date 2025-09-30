@@ -460,10 +460,10 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
             }, 0);
           
           const installationCost = model?.installationRequired ? 300 : 0;
-          const shippingCost = 50;
-          const subtotal = basePrice + optionsTotal + installationCost + shippingCost;
-          const taxAmount = subtotal * 0.08; // 8% tax rate
-          const grandTotal = subtotal + taxAmount;
+          const shippingCost = 0; // No shipping calculation in configurator
+          const subtotal = basePrice + optionsTotal + installationCost;
+          const taxAmount = 0; // No tax calculation in configurator
+          const grandTotal = subtotal;
           
           const newSummary: ConfigurationSummary = {
             basePrice,

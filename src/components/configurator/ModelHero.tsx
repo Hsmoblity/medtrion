@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { ConfigurableProductSchema, FinancingOption, ConfigurationSummaryData } from '../../lib/interfaces/configurator';
 import { parsePrice, formatPrice } from '../../lib/utils/priceUtils';
 import { useConfiguratorStore } from '../../stores/configuratorStore';
+import RichContent from '../RichContent';
 
 interface ModelHeroProps {
   model: ConfigurableProductSchema;
@@ -256,9 +257,12 @@ const ModelHero: React.FC<ModelHeroProps> = ({
 
             {/* Product Description */}
             {model.shortDescription && (
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                {model.shortDescription}
-              </p>
+              <div className="text-gray-600 mb-6 leading-relaxed">
+                <RichContent 
+                  content={model.shortDescription}
+                  className="prose prose-sm max-w-none text-gray-600"
+                />
+              </div>
             )}
 
             {/* Phase 2: Enhanced Pricing Section with animations and real-time feedback */}

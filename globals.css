@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Typography System */
+@import './src/styles/typography.css';
+
 body {
   @apply bg-white;
   /* Ensure cursor is visible by default */

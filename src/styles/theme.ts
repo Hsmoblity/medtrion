@@ -74,33 +74,63 @@ export const designSystem = {
   },
   
   typography: {
+    // Font Families - Following modern design system principles
     fontFamily: {
+      primary: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+      secondary: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+      display: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+      monospace: ['"JetBrains Mono"', '"Fira Code"', 'Monaco', 'Consolas', 'monospace'],
+      // Legacy aliases for backward compatibility
       sans: ['Inter', 'system-ui', 'sans-serif'],
-      heading: ['Inter', 'system-ui', 'sans-serif']
+      heading: ['Poppins', 'Inter', 'system-ui', 'sans-serif']
     },
     
+    // Comprehensive Font Scale - Extended for modern design needs
     fontSize: {
-      xs: '0.75rem',    // 12px
-      sm: '0.875rem',   // 14px
-      base: '1rem',     // 16px
-      lg: '1.125rem',   // 18px
-      xl: '1.25rem',    // 20px
-      '2xl': '1.5rem',  // 24px
-      '3xl': '1.875rem',// 30px
-      '4xl': '2.25rem'  // 36px
+      xs: '0.75rem',      // 12px - Captions, labels
+      sm: '0.875rem',     // 14px - Small text, metadata
+      base: '1rem',       // 16px - Body text (minimum readable)
+      lg: '1.125rem',     // 18px - Large body text
+      xl: '1.25rem',      // 20px - Small headings
+      '2xl': '1.5rem',    // 24px - Section headings
+      '3xl': '1.875rem',  // 30px - Page headings
+      '4xl': '2.25rem',   // 36px - Large headings
+      '5xl': '3rem',      // 48px - Hero headings
+      '6xl': '3.75rem',   // 60px - Display headings
+      '7xl': '4.5rem'     // 72px - Large display
     },
     
+    // Complete Font Weight Scale
     fontWeight: {
+      thin: 100,
+      extralight: 200,
+      light: 300,
       normal: 400,
       medium: 500,
       semibold: 600,
-      bold: 700
+      bold: 700,
+      extrabold: 800,
+      black: 900
     },
     
+    // Comprehensive Line Height System
     lineHeight: {
-      tight: 1.25,
-      normal: 1.5,
-      relaxed: 1.75
+      none: 1,
+      tight: 1.25,        // Headings
+      snug: 1.375,        // Subheadings
+      normal: 1.5,        // Body text
+      relaxed: 1.625,     // Large body text
+      loose: 2            // Spacious text
+    },
+    
+    // Letter Spacing for Typography Refinement
+    letterSpacing: {
+      tighter: '-0.05em',
+      tight: '-0.025em',
+      normal: '0em',
+      wide: '0.025em',
+      wider: '0.05em',
+      widest: '0.1em'
     }
   },
   
@@ -128,6 +158,145 @@ export const designSystem = {
     md: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
     lg: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
     xl: '0 20px 25px -5px rgb(0 0 0 / 0.1)'
+  },
+
+  // Semantic Typography Tokens - For consistent content hierarchy
+  semanticTypography: {
+    // Heading Variants with semantic meaning
+    headings: {
+      h1: {
+        fontSize: '3rem',      // 48px
+        fontWeight: 700,       // bold
+        lineHeight: 1.25,      // tight
+        fontFamily: 'display',
+        letterSpacing: '-0.025em'
+      },
+      h2: {
+        fontSize: '2.25rem',   // 36px
+        fontWeight: 600,       // semibold
+        lineHeight: 1.25,      // tight
+        fontFamily: 'display',
+        letterSpacing: '-0.025em'
+      },
+      h3: {
+        fontSize: '1.875rem',  // 30px
+        fontWeight: 600,       // semibold
+        lineHeight: 1.375,     // snug
+        fontFamily: 'display'
+      },
+      h4: {
+        fontSize: '1.5rem',    // 24px
+        fontWeight: 500,       // medium
+        lineHeight: 1.375,     // snug
+        fontFamily: 'display'
+      },
+      h5: {
+        fontSize: '1.25rem',   // 20px
+        fontWeight: 500,       // medium
+        lineHeight: 1.5,       // normal
+        fontFamily: 'display'
+      },
+      h6: {
+        fontSize: '1.125rem',  // 18px
+        fontWeight: 500,       // medium
+        lineHeight: 1.5,       // normal
+        fontFamily: 'display'
+      }
+    },
+
+    // Body Text Variants
+    body: {
+      large: {
+        fontSize: '1.125rem',  // 18px
+        fontWeight: 400,       // normal
+        lineHeight: 1.625,     // relaxed
+        fontFamily: 'primary'
+      },
+      base: {
+        fontSize: '1rem',      // 16px
+        fontWeight: 400,       // normal
+        lineHeight: 1.5,       // normal
+        fontFamily: 'primary'
+      },
+      small: {
+        fontSize: '0.875rem',  // 14px
+        fontWeight: 400,       // normal
+        lineHeight: 1.5,       // normal
+        fontFamily: 'primary'
+      },
+      caption: {
+        fontSize: '0.75rem',   // 12px
+        fontWeight: 400,       // normal
+        lineHeight: 1.5,       // normal
+        fontFamily: 'primary'
+      }
+    },
+
+    // Interactive Text Elements
+    interactive: {
+      link: {
+        fontSize: '1rem',      // 16px
+        fontWeight: 500,       // medium
+        lineHeight: 1.5,       // normal
+        fontFamily: 'primary',
+        textDecoration: 'underline'
+      },
+      button: {
+        fontSize: '1rem',      // 16px
+        fontWeight: 600,       // semibold
+        lineHeight: 1.5,       // normal
+        fontFamily: 'primary',
+        letterSpacing: '0.025em'
+      },
+      label: {
+        fontSize: '0.875rem',  // 14px
+        fontWeight: 500,       // medium
+        lineHeight: 1.5,       // normal
+        fontFamily: 'primary'
+      }
+    },
+
+    // Special Purpose Typography
+    special: {
+      code: {
+        fontSize: '0.875rem',  // 14px
+        fontWeight: 400,       // normal
+        lineHeight: 1.5,       // normal
+        fontFamily: 'monospace'
+      },
+      quote: {
+        fontSize: '1.125rem',  // 18px
+        fontWeight: 400,       // normal
+        lineHeight: 1.625,     // relaxed
+        fontFamily: 'primary',
+        fontStyle: 'italic'
+      },
+      highlight: {
+        fontSize: '1rem',      // 16px
+        fontWeight: 500,       // medium
+        lineHeight: 1.5,       // normal
+        fontFamily: 'primary'
+      }
+    }
+  },
+
+  // Responsive Typography System
+  responsiveTypography: {
+    mobile: {
+      baseSize: '16px',
+      scaleFactor: 1.0,
+      maxWidth: '768px'
+    },
+    tablet: {
+      baseSize: '16px',
+      scaleFactor: 1.1,
+      maxWidth: '1024px'
+    },
+    desktop: {
+      baseSize: '18px',
+      scaleFactor: 1.2,
+      minWidth: '1025px'
+    }
   }
 };
 
@@ -150,10 +319,34 @@ export const themeClasses = {
     ghost: 'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
   },
   
-  // Text styles
+  // Text styles - Enhanced with semantic typography
   text: {
+    // Heading Styles
+    h1: 'text-5xl font-bold font-display leading-tight text-gray-900 dark:text-white tracking-tight',
+    h2: 'text-4xl font-semibold font-display leading-tight text-gray-900 dark:text-white tracking-tight',
+    h3: 'text-3xl font-semibold font-display leading-snug text-gray-900 dark:text-white',
+    h4: 'text-2xl font-medium font-display leading-snug text-gray-900 dark:text-white',
+    h5: 'text-xl font-medium font-display leading-normal text-gray-900 dark:text-white',
+    h6: 'text-lg font-medium font-display leading-normal text-gray-900 dark:text-white',
+    
+    // Body Text Styles
+    bodyLarge: 'text-lg font-normal font-primary leading-relaxed text-gray-700 dark:text-gray-300',
+    body: 'text-base font-normal font-primary leading-normal text-gray-700 dark:text-gray-300',
+    bodySmall: 'text-sm font-normal font-primary leading-normal text-gray-600 dark:text-gray-400',
+    caption: 'text-xs font-normal font-primary leading-normal text-gray-500 dark:text-gray-500',
+    
+    // Interactive Text Styles
+    link: 'text-base font-medium font-primary text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline transition-colors duration-200',
+    button: 'text-base font-semibold font-primary tracking-wide',
+    label: 'text-sm font-medium font-primary text-gray-700 dark:text-gray-300',
+    
+    // Special Purpose Text
+    code: 'text-sm font-mono bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-1 py-0.5 rounded',
+    quote: 'text-lg font-normal font-primary italic text-gray-600 dark:text-gray-400 leading-relaxed',
+    highlight: 'text-base font-medium font-primary bg-yellow-100 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-100 px-1 rounded',
+    
+    // Legacy styles for backward compatibility
     heading: 'text-gray-900 dark:text-white font-semibold',
-    body: 'text-gray-700 dark:text-gray-300',
     secondary: 'text-gray-600 dark:text-gray-400',
     muted: 'text-gray-500 dark:text-gray-500'
   },

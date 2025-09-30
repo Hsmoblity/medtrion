@@ -63,12 +63,12 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
 
   return (
     <div 
-      className="relative w-full max-w-lg mx-auto"
+      className="relative w-full max-w-md md:max-w-xl lg:max-w-2xl mx-auto"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {/* Main Product Display */}
-      <div className="relative h-96 bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div className="relative h-[450px] md:h-[500px] lg:h-[600px] bg-white rounded-2xl shadow-xl overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
@@ -79,7 +79,7 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
             className="relative h-full"
           >
             {/* Product Image */}
-            <div className="relative h-64 overflow-hidden">
+            <div className="relative h-[300px] md:h-[350px] lg:h-[400px] overflow-hidden">
               <Image
                 src={currentProduct.image}
                 alt={currentProduct.title}
@@ -97,21 +97,21 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
             </div>
 
             {/* Product Info */}
-            <div className="p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <div className="p-6 md:p-8">
+              <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-3">
                 {currentProduct.title}
               </h3>
-              <p className="text-gray-600 mb-4 line-clamp-2">
+              <p className="text-gray-600 mb-4 md:mb-6 line-clamp-2 text-sm md:text-base">
                 {currentProduct.description}
               </p>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-2xl font-bold text-gray-900">
+              <div className="flex items-center justify-between mb-4 md:mb-6">
+                <span className="text-2xl md:text-3xl font-bold text-gray-900">
                   {currentProduct.price}
                 </span>
               </div>
               <PrimaryButton 
                 href={`/product/${currentProduct.slug}`}
-                className="w-full"
+                className="w-full text-sm md:text-base py-3 md:py-4"
               >
                 View Details
               </PrimaryButton>
@@ -121,14 +121,14 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
       </div>
 
       {/* Navigation Dots */}
-      <div className="flex justify-center mt-6 space-x-2">
+      <div className="flex justify-center mt-6 md:mt-8 space-x-3">
         {products.map((_, index) => (
           <button
             key={index}
             onClick={() => onSlideChange(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              index === currentSlide
-                ? 'bg-blue-600 scale-125'
+            className={`w-3 h-3 md:w-4 md:h-4 rounded-full transition-all duration-300 ${
+              index === currentSlide 
+                ? 'bg-blue-600 scale-125' 
                 : 'bg-gray-300 hover:bg-gray-400'
             }`}
             aria-label={`Go to slide ${index + 1}`}

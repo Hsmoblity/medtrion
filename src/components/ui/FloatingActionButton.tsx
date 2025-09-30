@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PrimaryButton } from './PrimaryButton';
+import PrimaryButton from './PrimaryButton';
 
 interface FloatingActionButtonProps {
   onClick: () => void;
@@ -83,9 +83,8 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
                     </PrimaryButton>
                     <PrimaryButton
                       href="/products"
-                      variant="secondary"
                       size="sm"
-                      className="w-full"
+                      className="w-full bg-gray-600 hover:bg-gray-700"
                     >
                       Browse Products
                     </PrimaryButton>

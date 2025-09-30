@@ -85,7 +85,7 @@ const ProductOptionsList: React.FC<ProductOptionsListProps> = ({
       >
         {options.map((option, index) => (
           <li 
-            key={`${option.name}-${index}`}
+            key={`${option.name}-${option.value || option.sku || index}-${mainProduct.cartItemId}`}
             className={styles.optionItem}
             role="listitem"
           >

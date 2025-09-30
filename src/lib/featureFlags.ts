@@ -4,12 +4,24 @@
 
 export interface FeatureFlags {
   homepage_showcase_layout: boolean;
+  homepage_enhanced_hero: boolean;
+  homepage_trust_indicators: boolean;
+  homepage_problem_solution: boolean;
+  homepage_testimonial_carousel: boolean;
+  homepage_floating_action: boolean;
+  homepage_enhanced_products: boolean;
   // Add more feature flags as needed
 }
 
 // Default feature flag values
 const DEFAULT_FLAGS: FeatureFlags = {
   homepage_showcase_layout: true, // Enable by default for now
+  homepage_enhanced_hero: true, // Enable enhanced hero by default
+  homepage_trust_indicators: true, // Enable trust indicators by default
+  homepage_problem_solution: true, // Enable problem-solution section by default
+  homepage_testimonial_carousel: true, // Enable testimonial carousel by default
+  homepage_floating_action: true, // Enable floating action button by default
+  homepage_enhanced_products: true, // Enable enhanced products by default
 };
 
 /**

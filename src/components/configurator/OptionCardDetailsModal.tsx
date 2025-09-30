@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { ConfigurableProductSchema, FinancingOption, InsuranceEstimate } from 'lib/interfaces';
+import RichContent from '../RichContent';
 
 interface OptionCardDetailsModalProps {
   option: ConfigurableProductSchema;
@@ -177,7 +178,10 @@ const OptionCardDetailsModal: React.FC<OptionCardDetailsModalProps> = ({
                 id="modal-description"
                 className="text-gray-700 leading-relaxed"
               >
-                {option.shortDescription || option.description}
+                <RichContent 
+                  content={option.shortDescription || option.description || ''}
+                  className="prose prose-sm max-w-none text-gray-700"
+                />
               </div>
             </div>
 

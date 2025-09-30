@@ -36,6 +36,7 @@ interface CartStore {
   getEditStatus: (cartItemId: string) => EditStatus
   setEditStatus: (cartItemId: string, status: EditStatus) => void
   updateCartItemSafe: (cartItemId: string, updates: Partial<CartProduct>, rollback?: () => void) => boolean
+  replaceCartItem: (cartItemId: string, newProduct: Omit<CartProduct, 'cartItemId'>) => void
   
   // Computed Values
   getCartTotal: () => number
@@ -55,6 +56,44 @@ export const useCartStore = create<CartStore>()(
       
       // Cart Actions
       addToCart: (product) => set((state) => {
+        // Check if an identical item already exists in cart
+        const existingItem = state.cart.find(item => {
+          // Check if it's the same product
+          const sameProduct = item.slug === product.slug && item.productId === product.productId;
+          
+          if (!sameProduct) return false;
+          
+          // Check if options are identical
+          const currentOptions = item.options || [];
+          const newOptions = product.options || [];
+          
+          if (currentOptions.length !== newOptions.length) return false;
+          
+          // Compare options by name, value, and priceModifier
+          const optionsMatch = currentOptions.every(currentOption => 
+            newOptions.some(newOption => 
+              currentOption.name === newOption.name &&
+              currentOption.value === newOption.value &&
+              currentOption.priceModifier === newOption.priceModifier &&
+              (currentOption.quantity || 1) === (newOption.quantity || 1)
+            )
+          );
+          
+          return optionsMatch;
+        });
+        
+        if (existingItem) {
+          // Update quantity of existing item instead of adding duplicate
+          return {
+            cart: state.cart.map(item => 
+              item.cartItemId === existingItem.cartItemId
+                ? { ...item, quantity: (item.quantity || 1) + (product.quantity || 1) }
+                : item
+            )
+          };
+        }
+        
+        // Add new item if no duplicate found
         const cartItemId = generateCartItemId()
         const newItem: CartProduct = {
           ...product,
@@ -189,6 +228,14 @@ export const useCartStore = create<CartStore>()(
           return false
         }
       },
+      
+      replaceCartItem: (cartItemId, newProduct) => set((state) => ({
+        cart: state.cart.map(item => 
+          String(item.cartItemId) === String(cartItemId)
+            ? { ...newProduct, cartItemId: item.cartItemId }
+            : item
+        )
+      })),
       
       // Computed Values
       getCartTotal: () => {

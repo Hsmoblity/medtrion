@@ -21,13 +21,14 @@ const CartPageGroups: React.FC = () => {
     const groups: { [key: string]: ProductGroup } = {};
     
     cartItems.forEach((item, index) => {
-      // Use cartItemId as the group key, or slug as fallback
-      const groupKey = item.cartItemId || item.slug || `item-${index}`;
+      // Use product slug or productId as the group key to group by actual product
+      // This ensures that products with the same slug/productId are grouped together
+      const groupKey = item.slug || item.productId?.toString() || `item-${index}`;
       
       if (!groups[groupKey]) {
         groups[groupKey] = {
           mainProduct: item,
-          options: [],
+          options: item.options || [], // Initialize with the item's options
           configId: item.cartItemId ? String(item.cartItemId) : undefined
         };
       } else {

@@ -17,7 +17,11 @@ const CartWithProductGroups: React.FC = () => {
   const cart = useCartItems();
   const cartVisibility = useCartVisibility();
   const toggleCartVisibility = useCartStore(state => state.toggleCartVisibility);
-  const subTotal = useCartTotal().toFixed(2);
+  
+  // Fix: Safely handle cart total to prevent NaN display
+  const rawSubTotal = useCartTotal();
+  const subTotal = (isNaN(rawSubTotal) ? 0 : rawSubTotal).toFixed(2);
+  
   const removeFromCart = useCartStore(state => state.removeFromCart);
   const updateQuantity = useCartStore(state => state.updateQuantity);
   const router = useRouter();
@@ -34,7 +38,7 @@ const CartWithProductGroups: React.FC = () => {
         groups[groupKey] = {
           mainProduct: item,
           options: [],
-          configId: item.cartItemId
+          configId: item.cartItemId ? String(item.cartItemId) : undefined
         };
       } else {
         // If this item has options, add them to the group

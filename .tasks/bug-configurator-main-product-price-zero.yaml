@@ -1,0 +1,603 @@
+type: bug
+id: bug-configurator-main-product-price-zero
+title: "Model Configurator: Main Product Displays with Price 0 Instead of Actual Price"
+status: COMPLETED
+priority: HIGH
+severity: CRITICAL
+assigned_to: frontend-dev
+created_date: 2025-01-16
+updated_date: 2025-01-16
+
+# Problem Statement
+## Issue Summary
+The Model Configurator displays the main product with a price of 0 instead of showing the actual product price. This creates confusion for users who expect to see the correct base price of the product they are configuring.
+
+## Current Behavior
+- Model Configurator shows main product with price $0.00
+- Base product price is not displayed correctly
+- Total calculations may be incorrect due to missing base price
+- Users cannot see the actual cost of the main product
+
+## Expected Behavior
+- Model Configurator should display the correct main product price
+- Base price should be clearly shown in the product display
+- Total calculations should include the correct base price
+- Users should see accurate pricing for the main product
+
+## Impact Assessment
+### User Impact
+- **CRITICAL**: Users cannot see the actual base price of the product
+- **Trust Issues**: Incorrect pricing creates confusion and reduces user trust
+- **Conversion Impact**: Users may abandon configuration due to pricing uncertainty
+- **Support Burden**: Increased support tickets about pricing issues
+
+### Business Impact
+- **Revenue Loss**: Users may not complete purchases due to pricing confusion
+- **Brand Damage**: Professional appearance compromised by incorrect pricing
+- **Customer Satisfaction**: Poor user experience affects satisfaction scores
+- **Operational Cost**: Support team burdened with pricing-related inquiries
+
+### Technical Impact
+- **Data Integrity**: Main product price data not properly processed or displayed
+- **Calculation Errors**: Configuration totals may be incorrect due to missing base price
+- **Component Reliability**: Model Configurator not displaying correct product information
+- **Integration Issues**: May affect checkout process and payment calculations
+
+# Root Cause Analysis
+
+## Likely Causes
+1. **Price Data Not Passed**: Main product price not properly passed to Model Configurator component
+2. **Price Data Format Issues**: Main product price may be in unexpected format (string, null, undefined)
+3. **Component Props Missing**: Model Configurator component may not receive price prop correctly
+4. **Data Mapping Problems**: Product data mapping may not include price field
+5. **Default Value Issues**: Component may be using default value of 0 instead of actual price
+
+## Data Flow Analysis
+```
+Product Selection → Product Data → Model Configurator Props → Price Display
+     ↓                ↓                ↓                    ↓
+  Product ID    →  Product Info  →  Component Props   →  $0.00 Display
+```
+
+## Affected Components
+- `ModelConfigurator` component
+- `ModelHero` component (if used for main product display)
+- `SummaryPanel` component (for total calculations)
+- Product data fetching and mapping functions
+- Configuration state management
+
+# Technical Investigation
+
+## Expected Data Structure
+```typescript
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number; // Should be the actual product price
+  image: string;
+  sku: string;
+  type: 'SIMPLE' | 'VARIABLE';
+  // ... other fields
+}
+
+interface ModelConfiguratorProps {
+  product: Product; // Should include correct price
+  onConfigurationChange?: (config: Configuration) => void;
+  // ... other props
+}
+```
+
+## Current Implementation Issues
+```typescript
+// PROBLEMATIC: Model Configurator not receiving or displaying price correctly
+const ModelConfigurator = ({ product }) => {
+  return (
+    <div className="model-configurator">
+      <div className="model-hero">
+        <h1>{product.name}</h1>
+        <p>{product.description}</p>
+        <div className="model-price">Base Price: ${product.price || 0}</div> {/* Shows $0 if price is missing */}
+      </div>
+      {/* ... rest of configurator */}
+    </div>
+  );
+};
+
+// PROBLEMATIC: Price calculation without proper base price
+const calculateTotal = (basePrice: number, options: Option[]) => {
+  const optionsTotal = options.reduce((sum, option) => sum + option.price, 0);
+  return (basePrice || 0) + optionsTotal; // Uses 0 if basePrice is missing
+};
+```
+
+## Expected Fix Implementation
+```typescript
+// FIXED: Model Configurator with proper price handling
+const ModelConfigurator = ({ product }) => {
+  const basePrice = product.price || 0;
+  
+  return (
+    <div className="model-configurator">
+      <div className="model-hero">
+        <h1>{product.name}</h1>
+        <p>{product.description}</p>
+        <div className="model-price">Base Price: ${formatPrice(basePrice)}</div>
+      </div>
+      <SummaryPanel 
+        basePrice={basePrice}
+        selectedOptions={selectedOptions}
+        total={calculateTotal(basePrice, selectedOptions)}
+      />
+      {/* ... rest of configurator */}
+    </div>
+  );
+};
+
+// FIXED: Price calculation with proper base price validation
+const calculateTotal = (basePrice: number, options: Option[]) => {
+  const validBasePrice = basePrice && !isNaN(basePrice) ? basePrice : 0;
+  const optionsTotal = options.reduce((sum, option) => sum + (option.price || 0), 0);
+  return validBasePrice + optionsTotal;
+};
+```
+
+# Affected Components
+
+## Primary Components
+1. **ModelConfigurator Component**
+   - File: `src/components/configurator/ModelConfigurator.tsx`
+   - Issue: Main product price not displayed correctly
+   - Fix: Ensure product price is properly passed and displayed
+
+2. **ModelHero Component**
+   - File: `src/components/configurator/ModelHero.tsx`
+   - Issue: Product price display in hero section
+   - Fix: Add proper price formatting and validation
+
+3. **SummaryPanel Component**
+   - File: `src/components/configurator/SummaryPanel.tsx`
+   - Issue: Base price not included in total calculations
+   - Fix: Include base price in total calculations
+
+## Secondary Components
+1. **Product Data Fetching**
+   - File: `src/lib/woocommerce.ts` or similar
+   - Issue: Product price may not be fetched correctly
+   - Fix: Ensure price field is included in product queries
+
+2. **Configuration State Management**
+   - File: `src/stores/configuratorStore.ts` or similar
+   - Issue: Base price not stored in configuration state
+   - Fix: Include base price in configuration state
+
+# Expected Fix
+
+## Implementation Steps
+
+### **Step 1: Verify Product Data Structure**
+```typescript
+// Ensure product data includes price field
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number; // Ensure this field is present and correct
+  image: string;
+  sku: string;
+  type: 'SIMPLE' | 'VARIABLE';
+  // ... other fields
+}
+```
+
+### **Step 2: Update ModelConfigurator Component**
+```typescript
+// src/components/configurator/ModelConfigurator.tsx
+import { formatPrice } from '@/utils/priceValidation';
+
+interface ModelConfiguratorProps {
+  product: Product;
+  onConfigurationChange?: (config: Configuration) => void;
+}
+
+const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
+  product,
+  onConfigurationChange
+}) => {
+  const [selectedOptions, setSelectedOptions] = useState<Option[]>([]);
+  
+  // Ensure base price is properly handled
+  const basePrice = product.price || 0;
+  
+  const calculateTotal = useCallback(() => {
+    const optionsTotal = selectedOptions.reduce((sum, option) => sum + (option.price || 0), 0);
+    return basePrice + optionsTotal;
+  }, [basePrice, selectedOptions]);
+
+  return (
+    <div className="model-configurator">
+      {/* Model Hero Section */}
+      <div className="model-hero">
+        <div className="model-info">
+          <h1 className="model-title">{product.name}</h1>
+          <p className="model-description">{product.description}</p>
+          <div className="model-price">Base Price: {formatPrice(basePrice)}</div>
+        </div>
+        <div className="model-image">
+          <img src={product.image} alt={product.name} />
+        </div>
+      </div>
+      
+      {/* Configuration Content */}
+      <div className="configurator-content">
+        <div className="options-section">
+          {/* Options configuration */}
+        </div>
+        
+        <div className="summary-section">
+          <SummaryPanel 
+            basePrice={basePrice}
+            selectedOptions={selectedOptions}
+            total={calculateTotal()}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+### **Step 3: Update ModelHero Component**
+```typescript
+// src/components/configurator/ModelHero.tsx
+import { formatPrice } from '@/utils/priceValidation';
+
+interface ModelHeroProps {
+  product: Product;
+  basePrice: number;
+}
+
+const ModelHero: React.FC<ModelHeroProps> = ({ product, basePrice }) => {
+  return (
+    <div className="model-hero">
+      <div className="model-info">
+        <h1 className="model-title">{product.name}</h1>
+        <p className="model-description">{product.description}</p>
+        <div className="model-price">
+          Base Price: {formatPrice(basePrice)}
+        </div>
+      </div>
+      <div className="model-image">
+        <img src={product.image} alt={product.name} />
+      </div>
+    </div>
+  );
+};
+```
+
+### **Step 4: Update SummaryPanel Component**
+```typescript
+// src/components/configurator/SummaryPanel.tsx
+import { formatPrice } from '@/utils/priceValidation';
+
+interface SummaryPanelProps {
+  basePrice: number;
+  selectedOptions: Option[];
+  total: number;
+}
+
+const SummaryPanel: React.FC<SummaryPanelProps> = ({
+  basePrice,
+  selectedOptions,
+  total
+}) => {
+  return (
+    <div className="summary-panel">
+      <div className="summary-header">
+        <h3 className="summary-title">Configuration Summary</h3>
+      </div>
+      
+      <div className="price-breakdown">
+        <div className="price-item">
+          <span className="price-label">Base Model</span>
+          <span className="price-value">{formatPrice(basePrice)}</span>
+        </div>
+        
+        {selectedOptions.map((option) => (
+          <div key={option.id} className="price-item">
+            <span className="price-label">{option.name}</span>
+            <span className="price-value">+{formatPrice(option.price)}</span>
+          </div>
+        ))}
+        
+        <div className="price-divider"></div>
+        
+        <div className="price-item price-total">
+          <span className="price-label">Total</span>
+          <span className="price-value">{formatPrice(total)}</span>
+        </div>
+      </div>
+      
+      <div className="summary-actions">
+        <button className="btn-add-to-cart">
+          Add to Cart
+        </button>
+      </div>
+    </div>
+  );
+};
+```
+
+### **Step 5: Update Product Data Fetching**
+```typescript
+// src/lib/woocommerce.ts or similar
+export const fetchProductForConfigurator = async (productId: string): Promise<Product> => {
+  const query = `
+    query GetProductForConfigurator($id: ID!) {
+      product(id: $id) {
+        id
+        name
+        description
+        price
+        image {
+          sourceUrl
+          altText
+        }
+        sku
+        type
+        relatedOptions
+        # ... other fields
+      }
+    }
+  `;
+
+  const response = await fetchGraphQL(query, { id: productId });
+  
+  if (!response.data?.product) {
+    throw new Error('Product not found');
+  }
+
+  const product = response.data.product;
+  
+  // Ensure price is properly parsed
+  return {
+    id: product.id,
+    name: product.name,
+    description: product.description,
+    price: parseFloat(product.price) || 0, // Ensure price is a number
+    image: product.image?.sourceUrl || '',
+    sku: product.sku,
+    type: product.type,
+    relatedOptions: product.relatedOptions,
+    // ... other fields
+  };
+};
+```
+
+### **Step 6: Update Configuration State Management**
+```typescript
+// src/stores/configuratorStore.ts
+interface ConfiguratorState {
+  selectedProduct: Product | null;
+  basePrice: number;
+  selectedOptions: Option[];
+  total: number;
+  isLoading: boolean;
+  error: string | null;
+}
+
+interface ConfiguratorActions {
+  setSelectedProduct: (product: Product) => void;
+  addOption: (option: Option) => void;
+  removeOption: (optionId: string) => void;
+  calculateTotal: () => void;
+  clearConfiguration: () => void;
+}
+
+export const useConfiguratorStore = create<ConfiguratorState & ConfiguratorActions>((set, get) => ({
+  selectedProduct: null,
+  basePrice: 0,
+  selectedOptions: [],
+  total: 0,
+  isLoading: false,
+  error: null,
+
+  setSelectedProduct: (product: Product) => {
+    const basePrice = product.price || 0;
+    set({
+      selectedProduct: product,
+      basePrice,
+      selectedOptions: [],
+      total: basePrice,
+      error: null
+    });
+  },
+
+  addOption: (option: Option) => {
+    const state = get();
+    const newOptions = [...state.selectedOptions, option];
+    const optionsTotal = newOptions.reduce((sum, opt) => sum + (opt.price || 0), 0);
+    const total = state.basePrice + optionsTotal;
+    
+    set({
+      selectedOptions: newOptions,
+      total
+    });
+  },
+
+  removeOption: (optionId: string) => {
+    const state = get();
+    const newOptions = state.selectedOptions.filter(opt => opt.id !== optionId);
+    const optionsTotal = newOptions.reduce((sum, opt) => sum + (opt.price || 0), 0);
+    const total = state.basePrice + optionsTotal;
+    
+    set({
+      selectedOptions: newOptions,
+      total
+    });
+  },
+
+  calculateTotal: () => {
+    const state = get();
+    const optionsTotal = state.selectedOptions.reduce((sum, opt) => sum + (opt.price || 0), 0);
+    const total = state.basePrice + optionsTotal;
+    
+    set({ total });
+  },
+
+  clearConfiguration: () => {
+    set({
+      selectedProduct: null,
+      basePrice: 0,
+      selectedOptions: [],
+      total: 0,
+      error: null
+    });
+  }
+}));
+```
+
+## Testing Requirements
+
+### **Unit Tests**
+```typescript
+// src/components/configurator/__tests__/ModelConfigurator.test.tsx
+import { render, screen } from '@testing-library/react';
+import { ModelConfigurator } from '../ModelConfigurator';
+
+describe('ModelConfigurator Component', () => {
+  test('displays correct base price for product', () => {
+    const product = {
+      id: '1',
+      name: 'Test Product',
+      description: 'Test Description',
+      price: 150.00,
+      image: 'test-image.jpg',
+      sku: 'TEST-001',
+      type: 'SIMPLE'
+    };
+
+    render(<ModelConfigurator product={product} />);
+    expect(screen.getByText('Base Price: $150.00')).toBeInTheDocument();
+  });
+
+  test('displays $0.00 for product with no price', () => {
+    const product = {
+      id: '1',
+      name: 'Test Product',
+      description: 'Test Description',
+      price: null,
+      image: 'test-image.jpg',
+      sku: 'TEST-001',
+      type: 'SIMPLE'
+    };
+
+    render(<ModelConfigurator product={product} />);
+    expect(screen.getByText('Base Price: $0.00')).toBeInTheDocument();
+  });
+
+  test('calculates total correctly with base price and options', () => {
+    const product = {
+      id: '1',
+      name: 'Test Product',
+      price: 100.00,
+      // ... other fields
+    };
+
+    render(<ModelConfigurator product={product} />);
+    // Test total calculation includes base price
+  });
+});
+```
+
+### **Integration Tests**
+```typescript
+// src/components/configurator/__tests__/ModelConfigurator.integration.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { ModelConfigurator } from '../ModelConfigurator';
+
+describe('ModelConfigurator Integration', () => {
+  test('updates total when options are added with correct base price', () => {
+    const product = {
+      id: '1',
+      name: 'Test Product',
+      price: 200.00,
+      // ... other fields
+    };
+
+    render(<ModelConfigurator product={product} />);
+    
+    // Add an option
+    const addOptionButton = screen.getByText('Add Option');
+    fireEvent.click(addOptionButton);
+    
+    // Verify total includes base price + option price
+    expect(screen.getByText('Total: $250.00')).toBeInTheDocument(); // 200 + 50
+  });
+});
+```
+
+## Acceptance Criteria
+
+### **Functional Requirements**
+- [ ] Model Configurator displays correct main product price
+- [ ] Base price is clearly shown in the product display
+- [ ] Total calculations include the correct base price
+- [ ] Price display is consistent across all configurator components
+- [ ] Configuration state properly stores and uses base price
+- [ ] Product data fetching includes price field
+
+### **Visual Requirements**
+- [ ] Base price is prominently displayed in the model hero section
+- [ ] Price formatting is consistent (e.g., "$150.00")
+- [ ] Total price calculation is clearly shown in summary panel
+- [ ] No $0.00 display for products with actual prices
+- [ ] Price information is visually distinct and easy to read
+
+### **Technical Requirements**
+- [ ] Product data structure includes price field
+- [ ] Model Configurator component receives price prop correctly
+- [ ] Price validation and formatting utilities are used
+- [ ] Configuration state management includes base price
+- [ ] Unit tests cover price display scenarios
+- [ ] Integration tests verify total calculations
+
+### **User Experience Requirements**
+- [ ] Users can see the actual base price of the product
+- [ ] Total configuration cost is accurate and trustworthy
+- [ ] No confusion about pricing due to $0.00 display
+- [ ] Price information is clear and easy to understand
+
+## Related Issues
+
+- `bug-configurator-product-price-missing`: Related to product pricing display issues
+- `bug-cart-product-group-options-price-nan`: Related to pricing calculation issues
+- `feat-cart-page-product-group-layout`: May be affected by pricing display issues
+
+## Estimated Effort
+
+- **Investigation & Analysis**: 2-3 hours
+- **Component Updates**: 4-6 hours
+- **Data Fetching Fixes**: 2-3 hours
+- **State Management Updates**: 2-3 hours
+- **Testing**: 4-6 hours
+- **Documentation**: 1-2 hours
+- **Total**: 15-23 hours
+
+## Risk Assessment
+
+### **Technical Risks**
+- **Data Format Risk**: Product price data may be in unexpected format
+- **Integration Risk**: Changes may affect other components using product data
+- **State Management Risk**: Configuration state may become inconsistent
+
+### **Mitigation Strategies**
+- **Comprehensive Testing**: Test all possible price data formats
+- **Backward Compatibility**: Ensure changes don't break existing functionality
+- **State Validation**: Add validation to ensure configuration state consistency
+
+## Notes
+- This bug is critical for user trust and conversion
+- Price display should be consistent across all configurator components
+- Consider adding price validation to prevent future pricing issues
+- This fix should be prioritized due to its impact on user experience and revenue

@@ -1,0 +1,70 @@
+id: PRD-XXX
+project: <project-name>
+template: Product Requirement
+version: 1.0
+date: <YYYY-MM-DD>
+status: Draft | In Review | Approved
+
+charter: ../project_charter.yaml
+
+executive_summary: |
+  <1–2 paragraph overview of product/module scope and value>
+
+plan:
+  - gather requirements from stakeholders
+  - structure into functional + non-functional
+  - review with team before approval
+
+context:
+  before: |
+    <describe current product limitations, e.g. "No cart module exists">
+  after: |
+    <describe desired capability, e.g. "Cart module supports add/remove items, discounts, taxes">
+  inputs:
+    - <business input, e.g. "user adds product to cart">
+  expected_outputs:
+    - <output, e.g. "cart updates in real-time">
+
+functional_requirements:
+  - <requirement-1>
+  - <requirement-2>
+
+non_functional_requirements:
+  - <nfr-1>
+  - <nfr-2>
+
+workflow:
+  steps:
+    - draft PRD
+    - review PRD
+    - approve PRD
+  dependencies:
+    - "Draft PRD" → product-manager
+    - "Review PRD" → code-reviewer
+    - "Approval" → stakeholders
+
+conditions:
+  - must align with product roadmap
+  - clear acceptance criteria
+  - concise, no over-specification
+
+tool_permissions:
+  - file_read
+  - file_write
+  - doc_generator
+
+agents:
+  - product-manager
+  - code-reviewer
+
+headless_allowed: false
+
+checklist:
+  - [ ] Draft complete
+  - [ ] Reviewed
+  - [ ] Approved
+  - [ ] Archived in tracking
+
+tracking:
+  document: ../.tracking/prd_tracking.md
+  entry: "PRD-XXX | <prd-title> | <status>"

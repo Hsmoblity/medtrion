@@ -1,0 +1,37 @@
+feature:
+  title: Lazy-load option data from GraphQL to speed initial renders
+  area: frontend
+  priority: p0
+  status: new
+  requested_by: techlead
+  environment: production
+
+summary:
+  goal: Defer optional/large option-product fetches to client-side (or background) requests so initial product detail, cart, and shop pages render faster.
+  scope:
+    - Identify option-heavy data pulls (product detail configurator, cart edits, shop cards) and convert to lazy-loading patterns.
+    - Implement suspense/loading overlay usage while option data arrives, leveraging `fetchRelatedProductsByIds` for option hydration.
+    - Ensure SSR payload stays minimal while preserving SEO-critical content.
+  impact: Reduces time-to-render and avoids blocking main UI on heavy GraphQL responses.
+
+acceptance_criteria:
+  - Product detail page fetches base product SSR, then asynchronously loads option products (via GraphQL) after initial paint, with visible loading state.
+  - Cart and shop pages adopt similar lazy load for option metadata; core pricing/summary still render immediately.
+  - Shared loading overlay/skeleton applied where appropriate (reuse new universal overlay component when fetch exceeds threshold).
+  - Perf benchmarks show improved initial render times; tracking documented.
+
+implementation_plan:
+  - Add client-side hooks (e.g., `useOptionProducts`) that trigger GraphQL fetch after mount using `_related_options` IDs.
+  - Integrate with new single-purpose GraphQL queries; handle caching to avoid duplicate requests, calling `fetchRelatedProductsByIds` (wrapper around `GetProductsByIds`) for option hydration.
+  - Update UI to show shared loading overlay or inline skeleton while options load; fallback to existing data if request fails.
+  - Hook into the shared overlay component introduced in `.tasks/feat-shared-loading-overlay.yaml` and surface it whenever option fetches exceed predefined latency.
+  - Instrument performance metrics (largest contentful paint, time-to-interactive) before/after change.
+
+risks:
+  - Client-side fetch requires hydration; ensure fallback for no-JS scenarios.
+  - Need to manage cache/state to prevent redundant requests when navigating.
+
+stakeholders:
+  - Frontend team
+  - Backend/WooCommerce team
+  - QA

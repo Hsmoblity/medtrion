@@ -1,0 +1,78 @@
+id: FEAT-XXX
+project: <project-name>
+template: Feature
+description: <short feature summary>
+
+charter: ../project_charter.yaml
+
+plan:
+  - analyze user story
+  - break down feature into UI + backend tasks
+  - define acceptance criteria
+
+context:
+  before: |
+    <describe current state, e.g. "Checkout has no discount code input">
+  after: |
+    <describe desired state, e.g. "Checkout form includes discount code input field">
+  inputs:
+    - <input-1>
+    - <input-2>
+  expected_outputs:
+    - <output-1>
+    - <output-2>
+
+tasks:
+  - name: <feature-task>
+    description: <feature detail>
+    files:
+      - <new-or-updated-file>
+    steps:
+      - <step-1>
+      - <step-2>
+
+test_stage:
+  - define acceptance tests
+  - write unit/integration tests
+  - run tests → expect fail
+  - implement feature until pass
+
+conditions:
+  - must follow product spec
+  - DRY, KISS
+  - stable API contracts
+
+tool_permissions:
+  - file_read
+  - file_write
+  - git_commit
+  - test_runner
+
+agents:
+  - frontend-dev
+  - backend-dev
+  - code-reviewer
+  - qa
+
+workflow:
+  order: sequential
+  dependencies:
+    - "Implement feature" → frontend-dev
+    - "Implement backend API" → backend-dev
+    - "Review implementation" → code-reviewer
+    - "Validate with tests" → qa
+
+headless_allowed: true
+
+checklist:
+  - [ ] Feature scoped
+  - [ ] Plan approved
+  - [ ] Implementation done
+  - [ ] Tests passed
+  - [ ] Reviewed
+  - [ ] Docs updated
+  - [ ] Deployed
+
+tracking:
+  document: ../.tracking/feat_tracking.md
+  entry: "FEAT-XXX | <feature-title> | <status>"

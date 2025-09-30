@@ -1,0 +1,50 @@
+id: FEAT-20250926-2
+project: front-store
+template: Feature
+description: "Create a Storybook for a CartOptions component to clearly show a main product and its options."
+
+tasks:
+  - name: "Create Storybook for CartOptions component"
+    description: "Develop a Storybook to visualize the CartOptions component, highlighting the relationship between a main product and its options."
+    style_and_effects:
+      - "The main product and its options should be visually grouped in a single block with a clear border or background color to distinguish them from other items in the cart."
+      - "Use a subtle box-shadow or a border highlight on the container block to make it stand out."
+      - "When hovering over the main product, its associated options should have a subtle highlight effect (e.g., a change in background color or a border)."
+      - "The edit/remove buttons should be icons (e.g., a pencil and a trash can) and should be placed consistently for each item."
+      - "Use smooth transitions for hover effects and any animations."
+    files:
+      - "src/components/Cart/CartOptions.tsx"
+      - "src/components/Cart/CartOptions.stories.tsx"
+    agents:
+      - role: frontend-dev
+        responsibilities:
+          - "Create the CartOptions component if it doesn't exist, ensuring it's a reusable and well-structured React component."
+          - "The component should be styled using Tailwind CSS, following the existing design system of the project."
+          - "Create stories for the CartOptions component in CartOptions.stories.tsx."
+          - "One story should display a main product with its associated options, visually grouped and styled according to the `style_and_effects` section."
+          - "Another story should display a product with no options."
+          - "Ensure each item in the story has clear information (product name, price, quantity) and visible, functional edit/remove buttons (the buttons can have mock actions in Storybook)."
+          - "The implementation should be production-ready, with a focus on performance, accessibility, and reusability."
+    outputs:
+      - "A polished and production-ready Storybook implementation for the CartOptions component."
+
+workflow:
+  order: sequential
+  dependencies: []
+
+rules:
+  - DRY, KISS
+  - stable params/returns
+  - no duplicate functions
+  - no ghost code
+  - no overlaping code
+  - no unnecessary complexity
+  - confirm if confuses requirements
+
+checklist:
+  - [ ] Code reviewed
+  - [ ] Tests passed
+
+tracking:
+  document: "../.tracking/feat_tracking.md"
+  entry: "FEAT-20250926-2 | Storybook for CartOptions Component | new"

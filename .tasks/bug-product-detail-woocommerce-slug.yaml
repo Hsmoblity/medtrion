@@ -1,0 +1,33 @@
+bug:
+  title: Product detail 404 for `vivalift-tranquil-2-plr-935s-lift-chair-warranty`
+  area: frontend
+  severity: high
+  priority: p0
+  status: new
+  reported_by: techlead
+  environment: production
+
+summary:
+  impact: Visiting `/product/vivalift-tranquil-2-plr-935s-lift-chair-warranty` yields “Product not found” because WooCommerce GraphQL lookup fails, so detail page never renders.
+  scope: WooCommerce GraphQL query in `lib/woocommerce.ts` (and configurator API) for slug-based fetch.
+  regression: unknown.
+
+steps_to_reproduce:
+  - Navigate to `/product/vivalift-tranquil-2-plr-935s-lift-chair-warranty`.
+  - Observe fallback error state despite product existing in WooCommerce.
+
+expected_result: WooCommerce query returns product data and page renders normally.
+actual_result: Query returns null; page shows “Product not found”.
+
+root_cause_hypothesis:
+  - `GetModelWithCategories` query may not handle this slug (product type mismatch, slug not synced, or WooGraphQL filtering out non-simple products).
+  - WooCommerce data may require ID-based lookup; slug might be stored differently (e.g., `vivalift-tranquil-2-plr-935s-lift-chair-warranty-2`).
+  - Contentful fallback disabled, so no alternative data path.
+
+proposed_fix:
+  - Verify WooCommerce GraphQL returns product for given slug; adjust query filters or slug normalization logic.
+  - Add defensive fallback for product slug variants or fetch by databaseId when slug lookup fails.
+  - Add integration test ensuring critical slugs return data.
+
+notes:
+  - Coordinate with backend to confirm product slug and type; ensure `woocommerce.ts` covers all product types required by configurator.

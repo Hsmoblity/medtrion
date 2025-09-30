@@ -1,0 +1,447 @@
+id: FEAT-20241022-5
+project: front-store
+template: Feature
+description: Implement the Cart → Configurator edit flow, session management, and Storybook coverage defined in PRD_HSM_CART_CONFIGURATOR_EDIT_FLOW.md.
+
+technical_requirements:
+  interfaces:
+    EditSession:
+      properties:
+        - id: string (UUID)
+        - cartItemId: string
+        - productSlug: string
+        - originalSelectedOptionIds: string[]
+        - currentSelectedOptionIds: string[]
+        - startTime: Date
+        - expiresAt: Date
+        - tabId: string
+    EditSessionStorage:
+      key: "app_session"
+      structure: "{ editSessions: Record<string, EditSession>, activeTabId: string }"
+    CartItemUpdate:
+      properties:
+        - cartItemId: string
+        - selectedOptionIds: string[]
+        - updatedPrice: number
+        - updatedName: string
+
+  routing:
+    edit_url_pattern: "/product/[slug]/options?edit=true&cartItemId=[id]&sessionId=[sessionId]"
+    return_urls:
+      success: "/cart?updated=[cartItemId]"
+      cancel: "/cart"
+
+  graphql_queries:
+    product_with_options: |
+      query GetProductWithOptions($slug: String!) {
+        product(slug: $slug) {
+          id name slug price
+          options { id name price categoryId required }
+          categories { id name required options { id } }
+        }
+      }
+
+  session_management:
+    timeout: 1800000  # 30 minutes in ms
+    cleanup_interval: 300000  # 5 minutes in ms
+    cross_tab_events: ["session_updated", "session_expired", "cart_updated"]
+
+tasks:
+  - name: Deliver cart-to-configurator edit experience with session resilience
+    description: Update cart, configurator pages, and session tooling so shoppers can edit configurations from the cart and return with updated items without duplicates.
+    files:
+      - src/components/PageLayout/Cart/Item.tsx
+      - src/components/PageLayout/Cart/Cart.tsx
+      - src/pages/product/[slug]/options.tsx
+      - src/components/OptionsClientWrapper.tsx
+      - src/components/ProductOptions.tsx
+      - src/contexts/SessionContext.tsx
+      - src/stores/cartStore.ts
+      - src/components/storybook/storyHelpers.tsx
+      - src/stories/cart/CartEditFlow.stories.tsx
+      - src/lib/interfaces/editSession.ts  # New interface file
+      - src/utils/sessionStorage.ts  # New utility file
+    steps:
+      implementation_steps:
+      - step: 1
+        name: Create core interfaces and utilities
+        files: [src/lib/interfaces/editSession.ts, src/utils/sessionStorage.ts]
+        details:
+          - Define EditSession, EditSessionStorage, CartItemUpdate interfaces
+          - Implement sessionStorage utilities with encryption/compression
+          - Add cross-tab event broadcasting with BroadcastChannel API
+          - Include session cleanup and expiry logic
+        acceptance_criteria:
+          - TypeScript interfaces compile without errors
+          - Session persistence survives page refresh
+          - Cross-tab sync works within 200ms
+          - Expired sessions auto-cleanup
+
+      - step: 2
+        name: Update cart item UI with edit functionality
+        files: [src/components/PageLayout/Cart/Item.tsx]
+        details:
+          - Add "Edit Configuration" button with proper ARIA labels
+          - Include tooltip explaining edit functionality
+          - Add loading/disabled states during edit session creation
+          - Implement analytics tracking for edit CTA clicks
+          - Ensure responsive design (mobile-first approach)
+        ui_requirements:
+          - Button accessible via keyboard (Tab navigation)
+          - Tooltip shows on hover/focus (aria-describedby)
+          - Loading spinner during session creation
+          - Disabled state when session already exists
+        acceptance_criteria:
+          - WCAG 2.1 AA compliance
+          - Works on iOS Safari, Chrome Mobile, desktop browsers
+          - Analytics events fire correctly
+
+      - step: 3
+        name: Extend SessionContext with edit session management
+        files: [src/contexts/SessionContext.tsx]
+        details:
+          - Add startEditSession(cartItemId, productSlug) method
+          - Add stopEditSession(sessionId, saveChanges) method  
+          - Add getActiveEditSession() selector
+          - Implement 30-minute session timeout with auto-cleanup
+          - Add cross-tab broadcasting for session state changes
+          - Rename storage key from existing to "app_session"
+        api_methods:
+          - startEditSession: Returns Promise<EditSession | null>
+          - stopEditSession: Returns Promise<boolean>
+          - getActiveEditSession: Returns EditSession | null
+          - subscribeToSessionUpdates: Returns unsubscribe function
+        error_handling:
+          - Handle localStorage quota exceeded
+          - Handle corrupted session data gracefully
+          - Log errors to console.error with context
+        acceptance_criteria:
+          - Session methods work reliably across page refreshes
+          - Cross-tab sync updates within 200ms
+          - Memory leaks prevented (proper cleanup)
+
+      - step: 4
+        name: Enhance cart store with edit-specific functionality
+        files: [src/stores/cartStore.ts]
+        details:
+          - Add findCartItemById(cartItemId) selector
+          - Add updateCartItem(cartItemId, updates) with merge logic
+          - Add storage event listener for cross-tab cart sync
+          - Implement optimistic updates with rollback capability
+          - Add isEditingItem(cartItemId) status checker
+        zustand_methods:
+          - findCartItemById: (cartItemId: string) => CartItem | undefined
+          - updateCartItem: (cartItemId: string, updates: Partial<CartItem>) => void
+          - getEditStatus: (cartItemId: string) => 'idle' | 'editing' | 'saving'
+          - setEditStatus: (cartItemId: string, status: EditStatus) => void
+        acceptance_criteria:
+          - Store updates trigger React re-renders correctly
+          - Optimistic updates don't cause UI flicker
+          - Cross-tab sync maintains data consistency
+
+      - step: 5
+        name: Update product options page with edit session support
+        files: [src/pages/product/[slug]/options.tsx]
+        details:
+          - Validate query parameters (edit, cartItemId, sessionId)
+          - Fetch product data via GraphQL in getServerSideProps
+          - Load cart item data and validate edit session
+          - Handle invalid/expired sessions with proper redirects
+          - Inject initial selected option IDs from cart item
+          - Add SEO meta tags for edit mode (noindex)
+        getServerSideProps_logic: |
+          1. Parse and validate query params
+          2. Verify edit session exists and is valid
+          3. Fetch product data via GraphQL
+          4. Load cart item and extract selected options
+          5. Return props or redirect on error
+        error_scenarios:
+          - Invalid cartItemId: Redirect to /cart with error toast
+          - Expired session: Clear session, redirect to /cart
+          - Product not found: 404 page
+          - GraphQL error: Retry with exponential backoff
+        acceptance_criteria:
+          - SSR data loading completes under 2s
+          - Invalid sessions redirect gracefully
+          - GraphQL errors don't crash the page
+
+      - step: 6
+        name: Upgrade OptionsClientWrapper for edit mode
+        files: [src/components/OptionsClientWrapper.tsx]
+        details:
+          - Detect edit mode from URL parameters
+          - Display edit session banner with cancel/save actions
+          - Show loading states during save operations
+          - Handle edit session expiry with user notification
+          - Coordinate between ProductOptions and session context
+        edit_banner_features:
+          - "Editing configuration" header with original item name
+          - "Cancel" button (returns to cart without saving)
+          - "Save Changes" button (updates cart item)
+          - Price difference indicator (+$X or -$X)
+          - Session timeout countdown (last 5 minutes)
+        toast_notifications:
+          - "Configuration updated successfully"
+          - "Changes cancelled"
+          - "Session expired - redirecting to cart"
+          - "Error saving changes - please try again"
+        acceptance_criteria:
+          - Edit banner responsive on all screen sizes
+          - Toast notifications accessible (screen reader friendly)
+          - Price calculations update in real-time
+
+      - step: 7
+        name: Extend ProductOptions component for edit functionality
+        files: [src/components/ProductOptions.tsx]
+        details:
+          - Accept initialSelectedOptionIds prop
+          - Emit onChange callbacks for configuration changes
+          - Validate option compatibility and show alerts
+          - Handle required category validation
+          - Display financing impact of changes
+        new_props:
+          - initialSelectedOptionIds?: string[]
+          - onConfigurationChange?: (optionIds: string[]) => void
+          - editMode?: boolean
+          - originalPrice?: number
+        validation_rules:
+          - Required categories must have selection
+          - Incompatible options show warning alerts
+          - Price impact calculated in real-time
+          - Financing eligibility updates dynamically
+        error_display:
+          - Required field alerts (red border + icon)
+          - Compatibility warnings (yellow alert banner)
+          - Financing impact (+/- financing monthly payment)
+        acceptance_criteria:
+          - Initial options pre-selected correctly
+          - Validation errors clear and actionable
+          - Real-time price updates don't lag
+
+      - step: 8
+        name: Implement save/cancel flow coordination
+        files: [src/components/OptionsClientWrapper.tsx, src/contexts/SessionContext.tsx]
+        details:
+          - Handle save action: update cart item, clear session, redirect
+          - Handle cancel action: clear session without updates, redirect
+          - Show confirmation modals for unsaved changes
+          - Implement optimistic UI updates
+          - Add analytics tracking for flow completion
+        save_flow_logic: |
+          1. Validate current configuration
+          2. Show loading state
+          3. Update cart store optimistically
+          4. Clear edit session
+          5. Navigate to cart with success message
+        cancel_flow_logic: |
+          1. Check for unsaved changes
+          2. Show confirmation modal if changes exist
+          3. Clear edit session without cart updates
+          4. Navigate to cart
+        analytics_events:
+          - edit_session_started
+          - edit_session_completed
+          - edit_session_cancelled
+          - edit_session_expired
+        acceptance_criteria:
+          - Save completes within 1s (optimistic updates)
+          - Cancel shows confirmation only when needed
+          - Navigation works in all browser scenarios
+
+      - step: 9
+        name: Create comprehensive Storybook documentation
+        files: [src/stories/cart/CartEditFlow.stories.tsx, src/components/storybook/storyHelpers.tsx]
+        details:
+          - Document cart item edit CTA states
+          - Show edit banner variations (normal, warning, error)
+          - Demo happy path edit flow
+          - Show invalid session handling
+          - Demo cross-tab synchronization
+          - Include mobile viewport testing
+        story_scenarios:
+          - Default cart item with edit button
+          - Edit button loading state
+          - Edit button disabled (session exists)
+          - Edit banner normal state
+          - Edit banner with price increase/decrease
+          - Edit banner with session timeout warning
+          - Invalid session error state
+          - Network error retry flow
+          - Cross-tab update demonstration
+          - Mobile responsive layout
+        mock_data_enhancements:
+          - Add editSession mock objects
+          - Include cart items with various option configurations
+          - Add network error simulation helpers
+          - Include cross-tab event simulators
+        acceptance_criteria:
+          - All stories render without errors
+          - Interactive controls work properly
+          - Mobile stories demonstrate responsive behavior
+          - Documentation explains each scenario clearly
+    testing_requirements:
+      unit_tests:
+        - SessionContext methods (start, stop, get, cleanup)
+        - Cart store selectors and updaters
+        - Session storage utilities
+        - Component prop handling and validation
+        - Price calculation logic
+      integration_tests:
+        - Complete edit flow (cart → configurator → back to cart)
+        - Cross-tab synchronization scenarios
+        - Session expiry and cleanup
+        - GraphQL data fetching and error handling
+        - Navigation and URL parameter handling
+      e2e_tests:
+        - Happy path: Edit item, make changes, save successfully
+        - Cancel flow: Edit item, make changes, cancel and confirm
+        - Session expiry: Start edit, wait for timeout, handle gracefully
+        - Invalid session: Direct URL access with bad sessionId
+        - Cross-tab: Edit in one tab, see updates in another
+        - Mobile responsive: Complete flow on mobile device
+      performance_tests:
+        - Edit session creation under 300ms
+        - Cross-tab sync under 200ms
+        - Page load with edit session under 2s
+        - Large cart (50+ items) edit performance
+
+    error_scenarios:
+      session_errors:
+        - localStorage quota exceeded → Show error toast, disable edit
+        - Corrupted session data → Clear storage, redirect to cart
+        - Session expired → Clear session, show toast, redirect
+        - Cross-tab session conflict → Use most recent, notify user
+      network_errors:
+        - GraphQL timeout → Retry with exponential backoff
+        - GraphQL error → Show error banner with retry button
+        - Save operation fails → Rollback optimistic update, show error
+      validation_errors:
+        - Required category missing → Highlight field, show alert
+        - Incompatible options selected → Show warning, suggest fixes
+        - Price calculation fails → Use fallback pricing, log error
+
+    accessibility_requirements:
+      keyboard_navigation:
+        - All interactive elements focusable via Tab
+        - Edit button accessible via Enter/Space
+        - Modal dialogs trap focus properly
+        - Skip links for screen readers
+      screen_reader_support:
+        - Edit button has descriptive aria-label
+        - Loading states announced via aria-live
+        - Error messages associated via aria-describedby
+        - Price changes announced dynamically
+      visual_requirements:
+        - Color contrast meets WCAG 2.1 AA standards
+        - Focus indicators clearly visible
+        - Text scalable to 200% without layout breaking
+        - Interactive elements minimum 44px touch target
+
+    agents:
+      - role: frontend-dev
+        responsibilities:
+          - Implement all 9 steps with proper TypeScript interfaces
+          - Ensure GraphQL integration uses existing patterns
+          - Create comprehensive Storybook documentation
+          - Follow accessibility requirements strictly
+          - Implement proper error handling and loading states
+        deliverables:
+          - Working edit flow with session persistence
+          - TypeScript interfaces and utilities
+          - Updated components with edit functionality
+          - Comprehensive Storybook stories
+          - Unit tests for all new utilities and methods
+      - role: backend-dev
+        responsibilities:
+          - Review GraphQL queries and suggest optimizations
+          - Plan future mutation endpoints for cart synchronization
+          - Ensure server-side logging captures edit session metrics
+          - Validate SSR data fetching patterns
+        deliverables:
+          - GraphQL query validation and optimization suggestions
+          - Server-side logging implementation plan
+          - Backend cart synchronization roadmap
+      - role: qa
+        responsibilities:
+          - Execute all testing scenarios defined above
+          - Validate accessibility compliance (WCAG 2.1 AA)
+          - Test cross-browser compatibility (Chrome, Firefox, Safari, Edge)
+          - Test mobile responsiveness on iOS and Android
+          - Verify performance requirements are met
+        deliverables:
+          - Complete test execution report
+          - Accessibility audit report
+          - Cross-browser compatibility matrix
+          - Performance benchmark results
+          - Bug reports with reproduction steps
+    outputs:
+      - Fully functional cart-to-configurator edit loop with session persistence and documented Storybook coverage ready for regression.
+
+workflow:
+  order: sequential
+  dependencies: []
+
+rules:
+  - DRY, KISS
+  - stable params/returns
+  - no duplicate functions
+  - no ghost code
+  - no overlaping code
+  - no unnecessary complexity
+  - confirm if confuses requirements
+
+acceptance_criteria:
+  functional_requirements:
+    - [ ] Edit button appears on all cart items with configurable options
+    - [ ] Edit button creates valid session and navigates to configurator
+    - [ ] Configurator pre-loads cart item's selected options correctly
+    - [ ] Edit banner shows in configurator with proper context
+    - [ ] Save action updates cart item and returns to cart successfully
+    - [ ] Cancel action returns to cart without modifying item
+    - [ ] Session expires after 30 minutes with proper cleanup
+    - [ ] Cross-tab synchronization works reliably
+    - [ ] Invalid sessions redirect gracefully to cart
+    - [ ] No duplicate cart items created during edit process
+
+  technical_requirements:
+    - [ ] All TypeScript interfaces compile without errors
+    - [ ] Session storage encrypted and compressed properly
+    - [ ] GraphQL queries use existing patterns and error handling
+    - [ ] SSR data fetching completes under 2 seconds
+    - [ ] Cross-tab sync updates within 200ms
+    - [ ] Optimistic updates prevent UI flicker
+    - [ ] Memory leaks prevented with proper cleanup
+    - [ ] Analytics events fire correctly for all user actions
+
+  quality_requirements:
+    - [ ] WCAG 2.1 AA accessibility compliance verified
+    - [ ] Cross-browser testing passed (Chrome, Firefox, Safari, Edge)
+    - [ ] Mobile responsiveness verified on iOS and Android
+    - [ ] Unit test coverage above 80% for new code
+    - [ ] Integration tests cover all major user flows
+    - [ ] E2E tests pass in CI/CD pipeline
+    - [ ] Performance benchmarks meet specified targets
+    - [ ] Storybook documentation complete and accurate
+
+  security_requirements:
+    - [ ] Session data encrypted in localStorage
+    - [ ] No sensitive data exposed in URLs
+    - [ ] Session IDs generated with cryptographically secure randomness
+    - [ ] Cross-tab messaging validates message origin
+    - [ ] Error messages don't leak internal system details
+
+checklist:
+  - [ ] All acceptance criteria verified
+  - [ ] Code reviewed by senior developer
+  - [ ] Unit tests written and passing
+  - [ ] Integration tests written and passing
+  - [ ] E2E tests written and passing
+  - [ ] Accessibility audit completed
+  - [ ] Performance testing completed
+  - [ ] Security review completed
+  - [ ] Storybook documentation updated
+  - [ ] Technical documentation updated
+
+tracking:
+  document: ../.tracking/feat_tracking.md
+  entry: "FEAT-20241022-5 | Cart→Configurator edit flow implementation | new"

@@ -1,0 +1,72 @@
+id: BUG-XXX
+project: <project-name>
+template: Bug Fix
+description: <short bug summary>
+
+charter: ../project_charter.yaml
+
+plan:
+  - <investigate suspected cause>
+  - <analyze logs/code paths>
+  - <decide proposed fix approach>
+
+context:
+  before: |
+    <describe current state, e.g. "Checkout button disabled even when cart is valid">
+  after: |
+    <describe desired state, e.g. "Checkout button enabled when cart has items">
+  inputs:
+    - <trigger, e.g. user with cart adds item>
+  expected_outputs:
+    - <expected result, e.g. checkout button active>
+
+tasks:
+  - name: <bug-fix-task>
+    description: <detailed fix description>
+    files:
+      - <affected-file-1>
+      - <affected-file-2>
+    steps:
+      - <step-1>
+      - <step-2>
+
+test_stage:
+  - write failing test that reproduces bug
+  - run test suite and confirm failure
+  - apply fix until test passes
+
+conditions:
+  - follow DRY, KISS
+  - no duplicate or ghost code
+
+tool_permissions:
+  - file_read
+  - file_write
+  - test_runner
+
+agents:
+  - frontend-dev
+  - backend-dev
+  - code-reviewer
+  - qa
+
+workflow:
+  order: sequential
+  dependencies:
+    - "Apply fix" → frontend-dev
+    - "Review fix" → code-reviewer
+    - "Run regression tests" → qa
+
+headless_allowed: false
+
+checklist:
+  - [ ] Bug reproducible
+  - [ ] Plan approved
+  - [ ] Fix applied
+  - [ ] Reviewed
+  - [ ] Tests passed
+  - [ ] Deployed
+
+tracking:
+  document: ../.tracking/bug_tracking.md
+  entry: "BUG-XXX | <bug-title> | <status>"

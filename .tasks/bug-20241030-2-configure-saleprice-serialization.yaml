@@ -1,0 +1,174 @@
+id: BUG-20241030-2
+project: front-store
+template: Bug Fix
+description: Product configurator SSR fails because `baseModel.salePrice` is left undefined in getServerSideProps response.
+
+metadata:
+  severity: major
+  priority: p1
+  status: completed
+  regression: unknown
+  resolved_date: 2025-09-28
+  resolved_by: frontend-team
+  environment:
+    - Browser: Chrome 119 (desktop)
+    - Node: 18.x (Next.js runtime)
+    - Route: /product/[slug]/configure (SSR)
+  reported_by: qa-audit
+  discovered_on: 2024-10-30
+  related_work:
+    - FEAT-20241022-5
+  references:
+    - src/pages/product/[slug]/configure.tsx
+    - src/pages/product/[slug]/options.tsx
+    - src/lib/contentful/contentful.ts
+    - src/lib/woocommerce.ts
+  overlap_review:
+    related_initiatives:
+      - id: FEAT-20241022-5
+        status: in-flight
+      - id: FEAT-20241030-1
+        status: new
+    resolution: unique
+    notes: |
+      No existing bug covers the serialization failure. Cart/edit initiatives address client flows but not this SSR error. Product team notified via this ticket.
+
+observed_behavior:
+  summary: |
+    Visiting /product/[slug]/configure triggers Next.js SSR error: “Error serializing `.baseModel.salePrice` returned from getServerSideProps… `undefined` cannot be serialized as JSON.” The page crashes before rendering.
+  reproduction_steps:
+    - Step 1: Navigate to /product/acorn-stairlifts-acorn-180-curved-stairlift/configure (or any product with configure route).
+    - Step 2: Observe server error in console/logs.
+  actual_result: SSR crash with serialization error; user receives 500 page.
+  supporting_artifacts:
+    logs:
+      - Next.js server log showing serialization error stack trace.
+    screenshots: []
+    recordings: []
+
+expected_behavior:
+  summary: |
+    getServerSideProps should only return serializable values, using `null` for missing price data, so the configurator renders with fallback pricing.
+  confirmation_source:
+    - Next.js requirement for serializable props
+    - FEAT-20241022-5 PRD configurator data contract
+
+impact_analysis:
+  affected_users:
+    - All shoppers accessing configure route for products lacking salePrice data
+  business_impact:
+    - Configurator unusable, blocks upsell and purchase flow
+  frequency: always for affected products
+  blocking_release: yes
+
+technical_analysis:
+  hypothesized_root_cause: |
+    Product data fetched from Contentful/WooCommerce leaves `baseModel.salePrice` undefined when no sale price exists. getServerSideProps spreads raw model into props without normalizing, violating Next.js serialization rules.
+  diagnostic_notes:
+    - baseModel.price is defined; salePrice missing.
+    - Similar issue likely for other optional numeric fields.
+  scope_of_failure:
+    code_paths:
+      - src/pages/product/[slug]/configure.tsx
+      - src/pages/product/[slug]/options.tsx
+      - src/lib/contentful/contentful.ts
+      - src/lib/woocommerce.ts
+    data_entities:
+      - ProductSchema.baseModel.salePrice
+  risk_if_unresolved:
+    - Configurator remains inaccessible, halting FEAT-20241022-5 adoption.
+
+fix_plan:
+  owner: frontend-dev
+  tasks:
+    - name: Confirm no duplicate fix in-flight
+      description: Audit backlog/PRs for configurator SSR fixes; update overlap review.
+      files:
+        - n/a
+      steps:
+        - Search .tasks and repo PRs for salePrice serialization work.
+        - Coordinate with FEAT-20241022-5 owner if overlap discovered.
+      safeguards:
+        - Escalate to tech lead if conflicting refactor underway.
+      acceptance_checks:
+        - metadata.overlap_review updated with findings and acknowledgements.
+    - name: Normalize product pricing before returning props
+      description: Ensure getServerSideProps sanitizes pricing fields.
+      files:
+        - src/pages/product/[slug]/configure.tsx
+        - src/pages/product/[slug]/options.tsx
+        - src/lib/contentful/contentful.ts
+      steps:
+        - Introduce helper that converts undefined numeric fields to null.
+        - Apply helper to baseModel, add-ons, variations before returning props.
+      safeguards:
+        - Unit test helper with undefined inputs.
+      acceptance_checks:
+        - Configure page loads without serialization error.
+    - name: Harden product schema typing and tests
+      description: Update ProductSchema to mark optional pricing as nullable and cover with tests.
+      files:
+        - src/lib/interfaces.ts
+        - tests/unit/productSanitizer.test.ts
+      steps:
+        - Adjust TypeScript definitions to expect number|null.
+        - Add unit tests verifying sanitization results.
+      safeguards:
+        - Run type check and lint to ensure no regressions.
+      acceptance_checks:
+        - Test suite passes; lint/type-check clean.
+    - name: Regression validation
+      description: Add integration test covering configurator SSR response.
+      files:
+        - tests/integration/configurePage.test.tsx
+      steps:
+        - Use next-test-utils to call getServerSideProps with mock data lacking salePrice.
+        - Assert response serializes successfully and renders base price fallback.
+      safeguards:
+        - Ensure test runs in CI.
+      acceptance_checks:
+        - Integration test fails pre-fix, passes post-fix.
+  rollback_plan:
+    - Revert sanitization changes if unexpected regressions; temporarily disable configure route while investigating.
+  communication_plan:
+    - channel: #frontend
+      audience: FE/QA/Product
+      message: Configurator serialization bug fixed; confirm restart of FEAT-20241022-5 QA.
+
+verification_matrix:
+  test_cases:
+    regression:
+      - getServerSideProps returns serializable props for products without salePrice.
+    guardrail:
+      - Products with sale price still render correct value.
+    performance:
+      - Sanitization adds negligible overhead (<5ms per request).
+    security:
+      - No PII in logs; sanitizer does not log sensitive data.
+  data_validation:
+    - Sanity check resulting props in development to confirm null fallback.
+  monitoring:
+    - metric: configure_page_errors
+      expected_change: decrease to zero
+      alert_if: error resurfaces post deploy.
+
+acceptance_criteria:
+  - [ ] Bug reproduction steps now succeed without issue
+  - [ ] Automated tests updated/added to cover regression
+  - [ ] Logs/analytics show expected healthy signals post-fix
+  - [ ] Stakeholders validated the fix in target environments
+  - [ ] Related documentation/runbooks updated
+
+checklist:
+  - [ ] Bug reproducible and documented
+  - [ ] Root cause confirmed or best-effort rationale captured
+  - [ ] Overlap review completed and owners notified (metadata.overlap_review)
+  - [ ] Fix implemented behind feature flag or safe rollout plan
+  - [ ] Tests (unit/integration/e2e) executed and passed
+  - [ ] Monitoring configured or updated
+  - [ ] QA sign-off recorded
+  - [ ] Deployment/rollback strategy documented
+
+tracking:
+  document: ../.tracking/bug_tracking.md
+  entry: "BUG-20241030-2 | Configurator salePrice serialization error | new"

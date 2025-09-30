@@ -1,0 +1,193 @@
+type: bug
+id: bug-relatedoptions-field-mapping
+title: "Inconsistent field mapping for related options between CMS and app model"
+created: 2025-09-29
+status: COMPLETED
+priority: high
+severity: major
+agent: backend-dev
+
+## Problem Statement
+
+There is an inconsistency in how the `_related_options` field from WordPress CMS is mapped and used throughout the application. The CMS stores the field as `_related_options` (underscore prefix), but the application model should use the camelCase convention `relatedOptions` for consistency with TypeScript/JavaScript conventions.
+
+### Current Behavior
+
+1. **WordPress CMS**: Stores field as `_related_options` in post meta
+2. **GraphQL Response**: Returns field as `relatedOptions` (camelCase, via WP plugin)
+3. **Data Mapping**: Currently maps to `_related_options` (underscore), causing confusion
+4. **Filter Function**: Tries to check `product.relatedOptions` but ProductSchema only defines `_related_options`
+5. **TypeScript Error**: Type mismatch causes compilation errors and runtime issues
+
+### Expected Behavior
+
+1. **WordPress CMS**: Keep `_related_options` (database constraint)
+2. **GraphQL Response**: Return as `relatedOptions` (via plugin - already working)
+3. **Data Mapping**: Map `_related_options` → `relatedOptions` during transformation
+4. **ProductSchema Interface**: Define `relatedOptions` as the primary field
+5. **App Usage**: All code checks `product.relatedOptions` consistently
+
+## Impact
+
+- **User Impact**: Homepage and shop page fail to display configurable products correctly
+- **Developer Impact**: Type errors and confusion about which field to use
+- **Data Flow**: Broken filter logic prevents products with options from showing
+- **Code Quality**: Inconsistent naming conventions throughout codebase
+
+## Affected Components
+
+### Files to Modify
+
+1. `src/lib/interfaces/schema.ts`
+   - Add `relatedOptions?: Array<number | string>` to ProductSchema
+   - Keep `_related_options` for backward compatibility (or deprecate)
+
+2. `src/lib/contentful/contentful.ts`
+   - In `mapWooToProductSchema()`, map to both fields:
+     ```typescript
+     const relatedOptionsArray = /* normalization logic */;
+     return {
+       // ...
+       _related_options: relatedOptionsArray,  // Keep for backward compat
+       relatedOptions: relatedOptionsArray,    // NEW: Primary field
+     };
+     ```
+
+3. `src/lib/woocommerce.ts`
+   - In `fetchGraphQLProducts()`, ensure `relatedOptions` is set:
+     ```typescript
+     nodes.forEach((p: any) => {
+       if (p.relatedOptions) {
+         p._related_options = p.relatedOptions;  // Backward compat
+         p.relatedOptions = /* normalized array */;
+       }
+     });
+     ```
+
+4. `src/lib/utils/data-validation.ts`
+   - `filterConfigurableProducts()` should check `product.relatedOptions`
+
+5. `src/lib/graphql/configurator.ts`
+   - `normalizeSlugQueryResponse()` should set both fields
+
+### GraphQL Queries (Already Correct)
+
+- `src/lib/graphql/queries.ts` - All queries already request `relatedOptions` field ✅
+
+### WordPress Plugin (Already Correct)
+
+- `wp-expose-related-options-plugin.php` - Already exposes as `relatedOptions` ✅
+
+## Root Cause
+
+Historical inconsistency where:
+1. Initial implementation used underscore prefix following WordPress meta field convention
+2. GraphQL plugin correctly exposed camelCase version
+3. Mapping layer didn't normalize to camelCase
+4. Filter functions tried to use camelCase but data only had underscore version
+
+## Steps to Reproduce
+
+1. Fetch products from GraphQL endpoint
+2. Map products using `mapWooToProductSchema()`
+3. Call `filterConfigurableProducts()` with mapped products
+4. Observe: Filter returns empty array despite products having `_related_options`
+5. Check: `product.relatedOptions` is undefined, only `product._related_options` exists
+
+## Acceptance Criteria
+
+- [ ] ProductSchema interface includes `relatedOptions: Array<number | string>`
+- [ ] `mapWooToProductSchema()` sets both `_related_options` and `relatedOptions`
+- [ ] `fetchGraphQLProducts()` normalizes to both field names
+- [ ] `filterConfigurableProducts()` checks `product.relatedOptions`
+- [ ] No TypeScript compilation errors
+- [ ] Homepage shows configurable products correctly
+- [ ] Shop page filters work as expected
+- [ ] All tests pass with new field mapping
+
+## Testing Plan
+
+### Unit Tests
+```typescript
+// Test data mapping
+describe('mapWooToProductSchema', () => {
+  it('should map _related_options to relatedOptions', () => {
+    const wooProduct = { relatedOptions: [1, 2, 3], /* ... */ };
+    const result = mapWooToProductSchema(wooProduct);
+    expect(result.relatedOptions).toEqual([1, 2, 3]);
+    expect(result._related_options).toEqual([1, 2, 3]); // Backward compat
+  });
+});
+
+// Test filtering
+describe('filterConfigurableProducts', () => {
+  it('should filter products with relatedOptions', () => {
+    const products = [
+      { relatedOptions: [1, 2], slug: 'product-1', title: 'Product 1' },
+      { relatedOptions: [], slug: 'product-2', title: 'Product 2' },
+    ];
+    const result = filterConfigurableProducts(products);
+    expect(result).toHaveLength(1);
+    expect(result[0].slug).toBe('product-1');
+  });
+});
+```
+
+### Integration Tests
+- Verify homepage fetches and displays configurable products
+- Verify shop page filtering works correctly
+- Verify product detail pages load related options
+- Verify cart configurator edit flow uses correct field
+
+### Manual Testing
+1. Navigate to homepage → Should see configurable products
+2. Navigate to /products → Should see filtered products
+3. Open product detail → Should load related options
+4. Add to cart and edit → Should show configuration options
+
+## Migration Strategy
+
+### Phase 1: Add Field (Non-Breaking)
+- Add `relatedOptions` to ProductSchema interface
+- Update mapping functions to set both fields
+- Keep all existing code using `_related_options` working
+
+### Phase 2: Update Usage
+- Update filter functions to use `relatedOptions`
+- Update components to prefer `relatedOptions` over `_related_options`
+- Add deprecation warnings for `_related_options` usage
+
+### Phase 3: Cleanup (Future)
+- Remove `_related_options` from ProductSchema (breaking change)
+- Update all references to use only `relatedOptions`
+- Document in migration guide
+
+## Related Issues
+
+- feat-product-detail-option-fetch: Relies on correct field mapping
+- feat-home-shop-filter-configurable: Filter function depends on this fix
+- bug-product-cart-view-more: May be affected by field inconsistency
+
+## Notes
+
+- GraphQL response from WordPress already uses `relatedOptions` (camelCase)
+- Only the mapping layer needs to be fixed
+- Backward compatibility should be maintained during transition
+- Consider creating a migration utility to update existing cached data
+
+## Implementation Priority
+
+**HIGH** - Blocks critical features:
+- Homepage product showcase
+- Shop page filtering
+- Product configurator functionality
+
+## Estimated Effort
+
+- **Development**: 2-3 hours
+- **Testing**: 1-2 hours
+- **Total**: 3-5 hours
+
+---
+
+**Agent Signature: 290925 - backend-dev - bug-relatedoptions-field-mapping**

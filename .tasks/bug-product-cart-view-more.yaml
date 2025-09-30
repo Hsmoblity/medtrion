@@ -1,0 +1,38 @@
+bug:
+  title: Product cart “View More” opens missing product page
+  area: frontend
+  severity: high
+  priority: p1
+  status: new
+  reported_by: techlead
+  environment: production
+
+summary:
+  impact: Shoppers trying to view more details from the cart hit a “Product not found” state, breaking the checkout journey.
+  scope: Cart drawer/page CTA labelled “View More” that routes to product detail.
+  regression: unknown
+
+steps_to_reproduce:
+  - Add any item to the cart.
+  - In the cart view, click the `View More` link/button for the line item.
+  - Observe that the resulting page displays a “Product not found” message.
+
+expected_result: View More should route to the correct product detail page and display the product content.
+actual_result: Navigation lands on a missing or 404 product view.
+
+root_cause_hypothesis:
+  - Cart metadata may reference slug/id combos that no longer exist or mismatch the product detail route.
+  - View More handler could be pointing to outdated path (e.g., `/product/${id}` vs slug) causing Next.js to fall back to notFound.
+  - Possible mismatch between WooCommerce databaseId and Contentful slug mapping during serialization.
+
+proposed_fix:
+  - Audit cart item data source (Zustand store + Woo response) to ensure slug is present when rendering View More.
+  - Normalize cart line items so routing uses `slug` and fallback logic handles missing slug gracefully.
+  - Add integration test verifying cart View More navigates to `product/[slug]` and returns 200.
+
+testing:
+  - Automated test covering View More navigation path.
+  - Manual QA: add multiple products, use View More from cart and mini-cart; confirm detail page renders.
+
+notes:
+  - Coordinate with data normalization feature to guarantee slug availability across cart items.

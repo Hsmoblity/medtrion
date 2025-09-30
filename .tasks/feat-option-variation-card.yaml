@@ -1,0 +1,380 @@
+type: feat
+id: feat-option-variation-card
+title: "Create OptionVariationCard Component for Displaying Individual Variation Products"
+status: NEW
+priority: HIGH
+assigned_to: frontend-dev
+created_date: 2025-01-16
+updated_date: 2025-01-16
+
+# Business Context
+## Problem Statement
+The current OptionVariationPopup displays variation products using basic HTML elements without a dedicated component. This creates inconsistent styling, poor reusability, and makes it difficult to maintain consistent variation display across the application.
+
+## Business Impact
+- **User Experience**: Inconsistent variation display affects user confidence in product selection
+- **Maintainability**: Hard-coded variation display makes updates difficult and error-prone
+- **Scalability**: No reusable component for variation display limits future feature development
+- **Design Consistency**: Variations don't follow the same design patterns as OptionCard
+
+## Success Metrics
+- Consistent variation display across all popups and modals
+- Reusable component that can be used in multiple contexts
+- Improved user experience with professional variation presentation
+- Reduced development time for future variation-related features
+
+# User Story
+**As a** customer using the Model Configurator
+**I want** to see variation products displayed in a consistent, professional format
+**So that** I can easily compare and select the variations that best meet my needs
+
+**Acceptance Criteria:**
+- Variation cards display with consistent styling matching OptionCard design
+- Each variation shows name, price, attributes, and selection state clearly
+- Variations support both radio (single selection) and checkbox (multiple selection) modes
+- Component is reusable across different contexts (popups, modals, comparison views)
+- Accessibility features match OptionCard standards
+
+# Technical Requirements
+
+## Component Architecture
+```typescript
+interface OptionVariationCardProps {
+  // Core Props
+  variation: Variation;
+  option: OptionProduct;
+  
+  // Selection Props
+  isSelected: boolean;
+  selectionType: 'radio' | 'checkbox';
+  disabled?: boolean;
+  
+  // Display Props
+  variant?: 'default' | 'compact' | 'featured';
+  size?: 'small' | 'medium' | 'large';
+  showPrice?: boolean;
+  showAttributes?: boolean;
+  showImage?: boolean;
+  showStockStatus?: boolean;
+  
+  // Interaction Props
+  onSelect?: (variation: Variation) => void;
+  onDeselect?: (variation: Variation) => void;
+  onToggle?: (variation: Variation) => void;
+  
+  // Accessibility Props
+  highContrast?: boolean;
+  largeText?: boolean;
+  reducedMotion?: boolean;
+  screenReaderOptimized?: boolean;
+  
+  // Styling Props
+  className?: string;
+  selectedClassName?: string;
+  disabledClassName?: string;
+}
+
+interface Variation {
+  id: string;
+  databaseId: number;
+  name: string;
+  price: number; // Price modifier (can be 0, positive, or negative)
+  sku: string;
+  image?: {
+    sourceUrl: string;
+    altText: string;
+  };
+  attributes: Array<{
+    id: string;
+    name: string;
+    value: string;
+  }>;
+  stockStatus?: 'instock' | 'outofstock' | 'onbackorder';
+}
+```
+
+## Component Structure
+```typescript
+const OptionVariationCard: React.FC<OptionVariationCardProps> = ({
+  variation,
+  option,
+  isSelected,
+  selectionType,
+  disabled = false,
+  variant = 'default',
+  size = 'medium',
+  showPrice = true,
+  showAttributes = true,
+  showImage = true,
+  showStockStatus = true,
+  onSelect,
+  onDeselect,
+  onToggle,
+  highContrast = false,
+  largeText = false,
+  reducedMotion = false,
+  screenReaderOptimized = false,
+  className = '',
+  selectedClassName = '',
+  disabledClassName = ''
+}) => {
+  // Component implementation
+};
+```
+
+## Design Specifications
+
+### Visual Design
+- **Layout**: Card-based design matching OptionCard aesthetic
+- **Dimensions**: Responsive sizing (small: 200px, medium: 250px, large: 300px)
+- **Spacing**: Consistent padding and margins following design system
+- **Colors**: Blue accent for selection, gray for disabled states
+- **Typography**: Clear hierarchy with variation name, attributes, and price
+
+### Selection States
+- **Unselected**: Gray border, white background
+- **Selected**: Blue border, light blue background
+- **Disabled**: Grayed out with reduced opacity
+- **Hover**: Subtle shadow and border color change
+
+### Selection Indicators
+- **Radio Mode**: Single selection with circular indicator
+- **Checkbox Mode**: Multiple selection with square indicator
+- **Visual Feedback**: Clear selected/unselected states
+
+## Data Integration
+
+### Variation Data Source
+```typescript
+// Use real variation data from option.variations
+const variations = option.variations || [];
+
+// Map to Variation interface
+const mappedVariations: Variation[] = variations.map(variation => ({
+  id: variation.id,
+  databaseId: variation.databaseId,
+  name: variation.name || '',
+  price: variation.price || 0,
+  sku: variation.sku || '',
+  image: variation.image,
+  attributes: variation.attributes || [],
+  stockStatus: 'instock' // Default, could be enhanced with real stock data
+}));
+```
+
+### Price Display Logic
+```typescript
+const formatVariationPrice = (price: number): string => {
+  if (price === 0) return 'Included';
+  if (price > 0) return `+$${price}`;
+  return `-$${Math.abs(price)}`;
+};
+
+const getTotalPrice = (optionPrice: number, variationPrice: number): number => {
+  return optionPrice + variationPrice;
+};
+```
+
+## Accessibility Features
+
+### Keyboard Navigation
+- **Tab Order**: Logical tab sequence through variation cards
+- **Enter/Space**: Select/deselect variation
+- **Arrow Keys**: Navigate between variations in radio mode
+- **Escape**: Close popup or return focus to parent
+
+### Screen Reader Support
+- **ARIA Labels**: Clear labels for variation names and prices
+- **Role Attributes**: Proper roles for interactive elements
+- **State Announcements**: Announce selection changes
+- **Descriptive Text**: Clear descriptions of variation attributes
+
+### Visual Accessibility
+- **High Contrast**: Support for high contrast mode
+- **Large Text**: Scalable text sizes
+- **Reduced Motion**: Respect user motion preferences
+- **Color Independence**: Information not conveyed by color alone
+
+## Integration Points
+
+### OptionVariationPopup Integration
+```typescript
+// In OptionVariationPopup component
+{variations.map((variation) => (
+  <OptionVariationCard
+    key={variation.id}
+    variation={variation}
+    option={option}
+    isSelected={selectedVariations.includes(variation)}
+    selectionType={selectionType}
+    onToggle={handleVariationToggle}
+    variant="compact"
+    size="medium"
+    showPrice={true}
+    showAttributes={true}
+    showImage={true}
+    showStockStatus={true}
+  />
+))}
+```
+
+### ModelConfigurator Integration
+```typescript
+// In ModelConfigurator for comparison views
+<OptionVariationCard
+  variation={variation}
+  option={option}
+  isSelected={isVariationSelected(variation.id)}
+  selectionType="radio"
+  onSelect={handleVariationSelect}
+  variant="default"
+  size="large"
+/>
+```
+
+## File Structure
+```
+src/components/configurator/
+├── OptionVariationCard.tsx           # Main component
+├── OptionVariationCard.module.css    # Component styles
+├── OptionVariationCard.test.tsx      # Unit tests
+└── OptionVariationCard.stories.tsx   # Storybook stories
+```
+
+## Testing Requirements
+
+### Unit Tests
+- **Rendering**: Component renders with all props
+- **Selection**: Selection state changes correctly
+- **Events**: Click handlers fire with correct data
+- **Accessibility**: ARIA attributes and keyboard navigation
+- **Price Display**: Price formatting and calculations
+
+### Integration Tests
+- **OptionVariationPopup**: Integration with popup component
+- **ModelConfigurator**: Integration with main configurator
+- **Data Flow**: Real variation data display
+- **State Management**: Selection state persistence
+
+### Visual Tests
+- **Design Consistency**: Matches OptionCard design
+- **Responsive Design**: Works across all screen sizes
+- **Selection States**: All selection states display correctly
+- **Accessibility**: High contrast and large text modes
+
+## Performance Considerations
+
+### Optimization
+- **Memoization**: Use React.memo for performance
+- **Lazy Loading**: Load variation images on demand
+- **Bundle Size**: Minimize component bundle impact
+- **Rendering**: Efficient re-rendering on state changes
+
+### Memory Management
+- **Event Handlers**: Proper cleanup of event listeners
+- **State Updates**: Efficient state update patterns
+- **Image Loading**: Proper image loading and error handling
+
+## Implementation Plan
+
+### Phase 1: Core Component (Week 1)
+1. Create OptionVariationCard component structure
+2. Implement basic rendering and styling
+3. Add selection state management
+4. Create unit tests
+
+### Phase 2: Integration (Week 2)
+1. Integrate with OptionVariationPopup
+2. Connect to real variation data
+3. Add accessibility features
+4. Create integration tests
+
+### Phase 3: Enhancement (Week 3)
+1. Add advanced features (comparison, filtering)
+2. Optimize performance
+3. Create Storybook stories
+4. Documentation and examples
+
+## Dependencies
+
+### Internal Dependencies
+- **OptionCard**: Design inspiration and styling patterns
+- **OptionVariationPopup**: Integration target
+- **ModelConfigurator**: Usage context
+- **Design System**: Colors, typography, spacing
+
+### External Dependencies
+- **React**: Component framework
+- **TypeScript**: Type safety
+- **Tailwind CSS**: Styling framework
+- **Testing Library**: Unit testing
+
+## Risk Assessment
+
+### Technical Risks
+- **Performance**: Large number of variations could impact performance
+- **Data Mapping**: Complex variation data structure mapping
+- **State Management**: Selection state synchronization across components
+
+### Mitigation Strategies
+- **Virtualization**: Use virtual scrolling for large variation lists
+- **Data Validation**: Robust data validation and error handling
+- **State Testing**: Comprehensive state management testing
+
+## Success Criteria
+
+### Functional Requirements
+- ✅ Component renders variation data correctly
+- ✅ Selection states work for both radio and checkbox modes
+- ✅ Price display and calculations are accurate
+- ✅ Integration with OptionVariationPopup works seamlessly
+
+### Non-Functional Requirements
+- ✅ Component follows OptionCard design patterns
+- ✅ Accessibility standards are met
+- ✅ Performance is optimized for large variation lists
+- ✅ Code is maintainable and well-documented
+
+### User Experience Requirements
+- ✅ Variations are easy to compare and select
+- ✅ Selection feedback is clear and immediate
+- ✅ Component works across all devices and screen sizes
+- ✅ Loading states and error handling are user-friendly
+
+## Definition of Done
+
+### Code Quality
+- [ ] Component passes all unit tests
+- [ ] Integration tests pass
+- [ ] Code review approved
+- [ ] TypeScript compilation without errors
+- [ ] ESLint passes without warnings
+
+### Functionality
+- [ ] All selection modes work correctly
+- [ ] Price display and calculations are accurate
+- [ ] Real variation data displays properly
+- [ ] Integration with popup works seamlessly
+
+### Design & UX
+- [ ] Design matches OptionCard aesthetic
+- [ ] All selection states display correctly
+- [ ] Responsive design works across devices
+- [ ] Accessibility requirements are met
+
+### Documentation
+- [ ] Component documentation is complete
+- [ ] Storybook stories are created
+- [ ] Usage examples are provided
+- [ ] API documentation is updated
+
+## Related Tasks
+- **feat-option-variation-popup-real-data**: Connect popup to real data
+- **bug-configurator-option-cards-overlap**: Fix option card layout issues
+- **feat-configurator-option-card-ux-improvements**: Improve option card UX
+
+## Notes
+- Use OptionCard as design inspiration but adapt for variation-specific needs
+- Ensure component is flexible enough for future use cases
+- Focus on performance optimization for large variation lists
+- Maintain consistency with existing design system patterns

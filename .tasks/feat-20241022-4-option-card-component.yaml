@@ -1,0 +1,69 @@
+id: FEAT-20241022-4
+project: front-store
+template: Feature
+description: Implement the Option Card component and Storybook coverage per PRD_OPTION_CARD_DETAILED.md.
+
+tasks:
+  - name: Deliver OptionCard component with full state coverage
+    description: Build the OptionCard UI, props/events API, and Storybook stories exactly as defined in the Option Card PRD.
+    files:
+      - src/components/configurator/OptionCard.tsx
+      - src/components/configurator/OptionCardDetailsModal.tsx
+      - src/components/configurator/OptionCardSkeleton.tsx
+      - src/stories/configurator/OptionCard.stories.tsx
+      - src/components/storybook/storyHelpers.tsx
+    steps:
+      - Map PRD requirements:
+        - Display: name, price, description, high-quality image, SKU, badges (ADA/compliance), availability indicator, optional financing/installation icons.
+        - Layout variants: default (4:3), compact, featured with image emphasis.
+        - States: default, hover, focus, selected (pulse animation), disabled, loading skeleton, error fallback image, recommended highlight.
+        - Actions: toggle select/deselect, view details button/modal, optional add-to-cart and compare actions.
+      - Build OptionCard.tsx with TypeScript props matching PRD API (option payload, variant, size, theme, toggles). Include internal state for hover/pressed/image loading and expose events (`toggle`, `select`, `deselect`, `view-details`, `add-to-cart`, `compare`, `loading-start/end`, `error`).
+      - Implement OptionCardDetailsModal for expanded specs: accessibility features, financing info, compatibility notes. Ensure focus trapping, keyboard close, and responsive design.
+      - Provide OptionCardSkeleton for loading state (shimmer) and fallback image handling when asset fails.
+      - Create Storybook stories covering:
+        - Default selectable card (desktop + mobile viewport).
+        - Selected state with animation and summary overlay.
+        - Disabled/unavailable option.
+        - Loading skeleton.
+        - Error fallback image and error banner.
+        - Recommended option (highlight styling).
+        - Variant layouts (compact grid, featured hero card).
+        - Details modal open state with keyboard navigation demo.
+        - Accessibility showcase (screen reader labels, focus indicators, large touch targets).
+        - Event logging via Storybook actions (toggle, view-details, add-to-cart).
+      - Populate data fixtures via storyHelpers to simulate ConfiguratorOption structures (pricing, descriptions, compliance tags, compatibility flags).
+      - Document props/events/usage in Storybook MDX notes and controls for QA.
+      - Add unit test placeholders/notes (selection toggles, event emissions, modal accessibility) aligning with PRD testing plan.
+    agents:
+      - role: frontend-dev
+        responsibilities:
+          - Implement OptionCard, modal, skeleton, styles, and Storybook stories per PRD.
+          - Ensure responsive design, animations, and accessibility meet spec.
+      - role: qa
+        responsibilities:
+          - Review Storybook against PRD acceptance criteria and log gaps.
+          - Validate accessibility (keyboard, screen reader) scenarios.
+    outputs:
+      - OptionCard component suite satisfying PRD_OPTION_CARD_DETAILED.md with documented Storybook coverage ready for integration.
+
+workflow:
+  order: sequential
+  dependencies: []
+
+rules:
+  - DRY, KISS
+  - stable params/returns
+  - no duplicate functions
+  - no ghost code
+  - no overlaping code
+  - no unnecessary complexity
+  - confirm if confuses requirements
+
+checklist:
+  - [ ] Code reviewed
+  - [ ] Tests passed
+
+tracking:
+  document: ../.tracking/feat_tracking.md
+  entry: "FEAT-20241022-4 | OptionCard component + Storybook (PRD) | new"

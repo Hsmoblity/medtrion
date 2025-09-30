@@ -1,0 +1,35 @@
+bug:
+  title: Inconsistent data sources across app cause divergence from WooCommerce schema
+  area: frontend
+  severity: high
+  priority: p0
+  status: new
+  reported_by: techlead
+  environment: production
+
+summary:
+  impact: Pages/components fetch data through multiple ad-hoc routes (Contentful helpers, mock APIs, direct fetches), leading to mismatched fields vs. WooCommerce GraphQL and causing regressions when schemas change.
+  scope: All data-fetching code; aim to centralize on `lib/woocommerce.ts` GraphQL templates.
+  regression: architectural debt (long-standing).
+
+steps_to_reproduce:
+  - Review product detail/configurator SSR: falls back to Contentful and mock GraphQL even when WooCommerce data exists.
+  - Inspect components for direct calls to `/api/graphql` mocks or Contentful helper functions.
+  - Observe inconsistent fields (missing salePrice normalization, etc.) depending on which route responds.
+
+expected_result: All product-centric data flows resolve through the single WooCommerce GraphQL client (`lib/woocommerce.ts`) and shared templates.
+actual_result: Multiple redundant fetch paths exist, making data inconsistent and hard to maintain.
+
+root_cause_hypothesis:
+  - Legacy Contentful integration left behind after WooCommerce adoption.
+  - Mock GraphQL API used for early development never removed.
+  - No central strategy enforced for data access, leading to scattered helpers.
+
+proposed_fix:
+  - Inventory every data fetch and refactor to use `woocommerce.ts` GraphQL helpers exclusively.
+  - Remove mock endpoints/contentful fallbacks unless explicitly required for marketing content; document exceptions.
+  - Ensure WooCommerce GraphQL templates in `woocommerce.ts` cover required fields for all views (detail, list, configurator) so consumers have one source of truth.
+
+notes:
+  - Coordinate with backend/content owners to migrate any remaining Contentful-only data to WooCommerce or another sanctioned source.
+  - Update documentation to reflect new data access policy.

@@ -442,7 +442,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         altText: `${mappedProduct.title} image`
       } : undefined,
       price: typeof mappedProduct.price === 'number' ? mappedProduct.price : parseFloat(String(mappedProduct.price || '0')),
-      regularPrice: String(mappedProduct.price || ''),
+      regularPrice: mappedProduct.price ? String(typeof mappedProduct.price === 'number' ? mappedProduct.price : parseFloat(String(mappedProduct.price || '0'))) : undefined,
       // salePrice will be sanitized by sanitizeConfigurableProduct - don't set to undefined
       // sku will be sanitized by sanitizeConfigurableProduct
       // type: 'configurable',
@@ -509,8 +509,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             databaseId: relatedProduct.databaseId,
             name: relatedProduct.name,
             image: relatedProduct.image,
-            regularPrice: relatedProduct.regularPrice,
-            salePrice: relatedProduct.salePrice,
+            regularPrice: relatedProduct.regularPrice ? String(parseFloat(relatedProduct.regularPrice.replace(/[^0-9.-]/g, '') || '0')) : undefined,
+            salePrice: relatedProduct.salePrice ? String(parseFloat(relatedProduct.salePrice.replace(/[^0-9.-]/g, '') || '0')) : undefined,
             sku: relatedProduct.sku,
             
             // Additional fields

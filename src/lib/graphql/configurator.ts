@@ -173,9 +173,24 @@ const handleConfiguratorError = (error: any, operation: string) => {
   };
 };
 
+// Import price parsing utilities
+import { parsePrice } from '../utils/priceUtils';
+
 // Normalize slug query response to ConfigurableProductSchema
 export function normalizeSlugQueryResponse(wooProduct: any): any {
   if (!wooProduct) return null;
+
+  // Helper function to safely parse price strings like "$10.00" to numbers
+  const safeParsePriceForConfigurator = (priceValue: any): number => {
+    if (priceValue === null || priceValue === undefined) return 0;
+    if (typeof priceValue === 'number') return isNaN(priceValue) ? 0 : priceValue;
+    if (typeof priceValue === 'string') {
+      // Use the parsePrice utility for consistent parsing
+      const parsed = parsePrice(priceValue);
+      return parsed;
+    }
+    return 0;
+  };
 
   // Normalize relatedOptions (server-provided field) into _related_options
   let relatedOptions: number[] = [];
@@ -205,18 +220,27 @@ export function normalizeSlugQueryResponse(wooProduct: any): any {
   const localAttributes = wooProduct.localAttributes?.nodes || [];
   const globalAttributes = wooProduct.globalAttributes?.nodes || [];
 
-  // Normalize variations
+  // Normalize variations with proper price parsing
   const variations = wooProduct.variations?.nodes?.map((variation: any) => ({
     id: variation.id || variation.databaseId?.toString() || '',
     databaseId: variation.databaseId || undefined,
     name: variation.name || '',
-    price: variation.price || 0,
-    regularPrice: variation.regularPrice || undefined,
-    salePrice: variation.salePrice || undefined,
+    price: safeParsePriceForConfigurator(variation.price),
+    regularPrice: variation.regularPrice ? String(safeParsePriceForConfigurator(variation.regularPrice)) : undefined,
+    salePrice: variation.salePrice ? String(safeParsePriceForConfigurator(variation.salePrice)) : undefined,
     sku: variation.sku || undefined,
     image: variation.image?.sourceUrl || '',
     attributes: variation.attributes?.nodes || []
   })) || [];
+
+  // Log price parsing for debugging
+  console.log('🚨 PRICE PARSING DEBUG:', {
+    originalPrice: wooProduct.price,
+    originalType: typeof wooProduct.price,
+    parsedPrice: safeParsePriceForConfigurator(wooProduct.price),
+    regularPrice: wooProduct.regularPrice,
+    salePrice: wooProduct.salePrice
+  });
 
   return {
     id: wooProduct.id || wooProduct.databaseId?.toString() || '',
@@ -231,9 +255,9 @@ export function normalizeSlugQueryResponse(wooProduct: any): any {
       sourceUrl: featuredImage,
       altText: `${wooProduct.name} image`
     } : undefined,
-    price: wooProduct.price || 0,
-    regularPrice: wooProduct.regularPrice || undefined,
-    salePrice: wooProduct.salePrice || undefined,
+    price: safeParsePriceForConfigurator(wooProduct.price),
+    regularPrice: wooProduct.regularPrice ? String(safeParsePriceForConfigurator(wooProduct.regularPrice)) : undefined,
+    salePrice: wooProduct.salePrice ? String(safeParsePriceForConfigurator(wooProduct.salePrice)) : undefined,
     sku: wooProduct.sku || undefined,
     type: wooProduct.__typename?.replace('Product', '').toLowerCase() || 'simple',
     affiliate: false,

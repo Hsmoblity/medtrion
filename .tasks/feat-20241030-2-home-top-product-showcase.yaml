@@ -1,0 +1,522 @@
+id: FEAT-20241030-2
+project: front-store
+template: Feature
+description: Elevate the homepage product list with a curated top-product showcase and polished card layouts to drive conversions.
+
+context:
+  background: |
+    The current homepage grid renders all products uniformly using `ProductList` and `Card` components. Cards display minimal information, lack merchandising badges, and do not differentiate hero products. Stakeholders requested a richer presentation for flagship mobility products, including financing highlights, accessibility cues, and improved CTAs. A curated “Top Products” strip paired with refined default cards aligns with merchandising goals and PRD_CART_PAGE_COMPREHENSIVE.md performance targets.
+  personas:
+    - Shopper — Evaluates premium mobility options, needs quick access to specs and financing info.
+    - Caregiver — Skims highlights to recommend the best product to loved ones.
+    - Internal Sales — Uses homepage to guide customers to featured bundles during calls.
+  dependencies:
+    upstream:
+      - Product data from GraphQL (featured flag, badges, financing text)
+      - Design direction for hero cards (to be provided)
+    downstream:
+      - Analytics dashboards tracking hero CTA clicks
+      - Storybook pages showcasing new layout patterns
+  artefacts:
+    prd: .docs/PRD_CART_PAGE_COMPREHENSIVE.md
+    design_spec: TBD (Homepage hero card visuals)
+    analytics_dashboard: TBD (Home funnel metrics)
+  existing_initiatives:
+    related_items:
+      - id: FEAT-20241030-1
+        summary: Cart experience restoration referencing homepage navigation
+        status: new
+    overlap_rationale: |
+      Cart restoration handles flows post-click. This feature focuses on homepage merchandising and does not conflict. Navigation fixes from FEAT-20241030-1 will benefit recalibrated CTAs.
+    owner_notified: yes
+
+technical_requirements:
+  architecture:
+    data_models:
+      - name: ProductCardView
+        description: View-model used by homepage cards.
+        fields:
+          - slug: string — Link target.
+          - title: string
+          - description: string — Short teaser (from Contentful field or curated copy).
+          - price: number|null — Base price in dollars.
+          - financingCopy: string|null — CTA text (e.g., “from $99/mo”).
+          - badges: string[] — Merchandising badges (e.g., “Top Seller”).
+          - imageUrl: string — Normalized hero image.
+          - rating: number|null — Optional review average.
+          - isFeatured: boolean — Featured flag.
+          - optionsSummary: string|null — Quick summary of key add-ons.
+    state_management:
+      storage_keys: []
+      caches:
+        - name: homepageProductCache
+          invalidation: Revalidate on GraphQL mutation or time-based revalidation.
+      stores:
+        - name: useHomepageStore
+          description: Zustand store for homepage state including featured products.
+    services:
+      apis:
+        - name: getProducts
+          method: query
+          contract: Returns Contentful product list; must include featured flag, financing snippet.
+          error_handling: Fallback to non-featured list with default layout.
+    feature_flags:
+      - id: homepage_showcase_layout
+        default: off
+        rollout_plan: Enable in staging, then 50% production A/B test.
+  ux_requirements:
+    routing:
+      entry_points:
+        - path: /
+          gate: CSR (existing SSR fetch remains)
+      exit_paths:
+        - product_detail: /product/[slug]
+        - configure: /product/[slug]/options
+    states:
+      loading: Skeleton cards mimic final layout for hero strip and grid.
+      success: Hero carousel + responsive grid.
+      error: Inline fallback to legacy grid with toast.
+      empty: Hide sections if no featured products.
+    accessibility:
+      keyboard: Hero cards focusable with arrow navigation; CTA buttons accessible via tab.
+      screen_reader: Provide aria-labels summarizing product badge + price; use `aria-live` on spotlight carousel.
+      visual: Maintain AA contrast, include hover/focus animations within 200ms.
+    responsive_breakpoints:
+      - name: mobile
+        min_width: 0
+        max_width: 767
+        adjustments: Horizontal scroll hero cards, two-column grid.
+      - name: tablet
+        min_width: 768
+        max_width: 1023
+        adjustments: Two hero cards per row, three-column grid.
+      - name: desktop
+        min_width: 1024
+        adjustments: Carousel hero strip, four-column grid with equal height cards.
+  analytics_requirements:
+    events:
+      - name: hero_product_click
+        trigger: Hero card primary CTA click.
+        payload:
+          - productSlug: string
+          - badge: string
+          - position: number
+        owner: Analytics team
+      - name: product_card_secondary_click
+        trigger: Secondary CTA (e.g., “View options”).
+        payload:
+          - productSlug: string
+          - featured: boolean
+        owner: Analytics team
+    funnels:
+      - name: homepage_to_cart
+        steps:
+          - hero_product_click
+          - product_detail_view
+          - add_to_cart
+        success_metric: +20% hero-to-add conversion.
+  performance_budget:
+    initial_load_ms: 2200
+    interaction_latency_ms: 150
+    bundle_delta_kb: <= 15KB (shared components + CSS)
+  security_considerations:
+    data_sensitivity: low
+    storage_policy: No new persistence.
+    logging: Avoid logging full product objects; log ids only.
+    threat_vectors:
+      - None specific (render-only feature)
+
+customer_journeys:
+  - scenario: Shopper discovers a top product from homepage
+    preconditions:
+      - Homepage load successful.
+    steps:
+      - View hero strip with curated top products.
+      - Click “View details” on lead product.
+      - Land on product detail with context preserved.
+    success_criteria:
+      - Hero card communicates value quickly and drives click-through.
+
+non_functional_requirements:
+  reliability: Hero data gracefully falls back to legacy list if fetch fails.
+  observability:
+    logs: Instrument hero fetch errors.
+    metrics: Track hero impressions, clicks.
+    alerts: Alert if hero section fails to render over 5% of page loads.
+
+rollout_strategy:
+  phases:
+    - name: staging
+      description: Implement layout and analytics instrumentation.
+      exit_criteria:
+        - Design/QA approval.
+        - Storybook snapshots updated.
+    - name: canary
+      description: Enable feature flag for 10% of production traffic.
+      exit_criteria:
+        - Hero error rate < 1%.
+        - Conversion uplift validated.
+    - name: full_launch
+      description: Roll out to 100%.
+      exit_criteria:
+        - Analytics confirm sustained engagement.
+  fallback_plan: Disable `homepage_showcase_layout` flag to revert to legacy grid.
+
+risks:
+  known_risks:
+    - description: Contentful products may lack featured metadata.
+      mitigation: Provide defaults; maintain manual curated list fallback.
+      owner: Product content
+    - description: Additional imagery may impact LCP.
+      mitigation: Use Next/Image with priority on first hero card, lazy load rest.
+      owner: Frontend dev
+  open_questions:
+    - How many hero slots should rotate (3 or 4)?
+
+communications:
+  stakeholders:
+    - name: Product manager
+      update_cadence: Weekly homepage sync
+    - name: Design lead
+      update_cadence: Design review on milestone completion
+    - name: Analytics owner
+      update_cadence: Post-launch report
+  documentation:
+    - Homepage layout README
+    - Storybook docs for hero card component
+
+
+  - name: "Design and implement Top Products showcase"
+    description: "Create a curated hero strip for featured products with premium card styling and CTA instrumentation."
+    rationale: "Hero products need visual emphasis and analytics to drive conversions per homepage strategy."
+    files:
+      - "src/components/Home/TopProductsStrip.tsx"  # new component
+      - "src/components/Home/ProductHeroCard.tsx"  # new component
+      - "src/components/Home/index.ts"
+      - "src/pages/index.tsx"
+    dependencies:
+      internal:
+        - step or module dependency
+      external:
+        - Design specs for hero card visuals
+    steps:
+      implementation_steps:
+        - step: 0
+          name: "Audit existing initiatives"
+          files: []
+          details:
+            - "Review .tasks and open PRs for homepage redesign overlap."
+            - "Document findings in context.existing_initiatives.overlap_rationale."
+            - "Notify product/design owners of new hero layout work."
+          acceptance_criteria:
+            - "Overlap assessment captured and stakeholders acknowledged."
+        - step: 1
+          name: "Build TopProductsStrip layout"
+          files:
+            - "src/components/Home/TopProductsStrip.tsx"
+            - "src/pages/index.tsx"
+          details:
+            - "Fetch featured products from GraphQL (limit 3-4) and map to ProductCardView model."
+            - "Render responsive strip (carousel on desktop, scroll on mobile)."
+            - "Instrument hero_product_click event on primary CTA."
+          acceptance_criteria:
+            - "Hero strip renders without layout shifts at common breakpoints."
+        - step: 1.5
+          name: "Create Zustand store for homepage"
+          files:
+            - "src/stores/homepageStore.ts"
+          details:
+            - "Create a new Zustand store to manage the state of featured products."
+          acceptance_criteria:
+            - "Store is created and can hold the list of featured products."
+        - step: 2
+          name: "Create ProductHeroCard component"
+          files:
+            - "src/components/Home/ProductHeroCard.tsx"
+          details:
+            - "Display image, badge, price, financing copy, rating, primary & secondary CTAs."
+            - "Include accessibility enhancements (aria-labels, focus states)."
+            - "Use Next/Image with priority for first card."
+          acceptance_criteria:
+            - "Card passes accessibility audit and matches design spec."
+        - step: 3
+          name: "Wire analytics and feature flag"
+          files:
+            - "src/pages/index.tsx"
+            - "analytics tracking config"
+          details:
+            - "Wrap hero strip rendering behind `homepage_showcase_layout` flag."
+            - "Emit hero_product_click payloads to analytics."
+            - "Add logging when hero data unavailable."
+          acceptance_criteria:
+            - "Flag toggles layout; events visible in analytics staging."
+      testing_requirements:
+        unit_tests:
+          - "ProductHeroCard renders props (badge, price, financing)."
+        integration_tests:
+          - "TopProductsStrip displays limited featured list and fires analytics callback."
+        e2e_tests:
+          - "Playwright scenario: Scroll hero on mobile viewport, click CTA navigates correctly."
+        performance_tests:
+          - metric: "hero_lcp"
+            threshold: 2500
+      monitoring_plan:
+        dashboards:
+          - "Hero engagement dashboard (analytics)."
+        alerts:
+          - name: "hero_render_failure"
+            condition: "Hero component logs errors > 5% of page loads"
+    deliverables:
+      code:
+        - "New hero components and feature flag wiring"
+      documentation:
+        - "Storybook stories for ProductHeroCard"
+      operational:
+        - "Feature flag rollout plan"
+
+  - name: "Polish default product cards"
+    description: "Refine standard grid cards with badges, option teasers, and improved CTAs for non-featured products."
+    rationale: "Even non-featured items need consistent branding and clearer information hierarchy."
+    files:
+      - "src/components/ProductList/ProductList.tsx"
+      - "src/components/ProductList/Card.tsx"
+      - "globals.css"  # for shared styles
+    dependencies:
+      internal:
+        - step or module dependency
+      external:
+        - Contentful fields for badges/financing copy
+    steps:
+      implementation_steps:
+        - step: 0
+          name: "Audit existing initiatives"
+          files: []
+          details:
+            - "Ensure no other branch is refactoring ProductList layout."
+            - "Update overlap notes accordingly."
+          acceptance_criteria:
+            - "Stakeholder acknowledgement recorded."
+        - step: 1
+          name: "Extend ProductCardView data mapping"
+          files:
+            - "src/pages/index.tsx"
+          details:
+            - "Map new fields (badges, financing, options summary) from Contentful response."
+            - "Handle null/empty gracefully."
+          acceptance_criteria:
+            - "Data mapping handles missing fields without runtime errors."
+        - step: 2
+          name: "Polish Card component UI"
+          files:
+            - "src/components/ProductList/Card.tsx"
+            - "globals.css"
+          details:
+            - "Add badge pill, financing text, options preview list, dual CTA buttons."
+            - "Improve hover/focus states with transitions."
+            - "Ensure Add to Cart button accessible (44px height)."
+          acceptance_criteria:
+            - "Card matches design spec and passes AA contrast."
+        - step: 3
+          name: "Update ProductList layout"
+          files:
+            - "src/components/ProductList/ProductList.tsx"
+          details:
+            - "Adjust grid spacing, ensure equal height cards via CSS grid."
+            - "Support two-column layout on mobile, four on desktop."
+          acceptance_criteria:
+            - "Responsive layout verified in Chrome DevTools device modes."
+      testing_requirements:
+        unit_tests:
+          - "Card renders badges and financing text when provided."
+        integration_tests:
+          - "ProductList snapshot with sample data matches expected layout."
+        e2e_tests:
+          - "Visual regression in Chromatic for mobile/desktop states."
+        performance_tests:
+          - metric: "grid_render_time"
+            threshold: 150
+      monitoring_plan:
+        dashboards:
+          - "Chromatic diff dashboard"
+        alerts:
+          - name: "product_card_regression"
+            condition: "Chromatic reports blocking diff post-merge"
+    deliverables:
+      code:
+        - "Updated ProductList layout and card styling"
+      documentation:
+        - "Storybook 'Product Card' stories for default and badge states"
+      operational:
+        - "Manual QA checklist for home grid"
+
+  - name: "Analytics & QA enablement"
+    description: "Instrument analytics, add Storybook coverage, and document manual QA for the new layouts."
+    rationale: "Ensures visibility into hero performance and provides QA/UX references."
+    files:
+      - "src/stories/home/TopProductsStrip.stories.tsx"  # new
+      - "src/stories/home/ProductCard.stories.tsx"  # new
+      - "tests/integration/homeLayout.test.tsx"
+      - "docs/homepage-qa-checklist.md"
+      - "analytics tracking configuration"
+    dependencies:
+      internal:
+        - Previous tasks delivered components
+      external:
+        - Analytics owner approval for event schema
+    steps:
+      implementation_steps:
+        - step: 0
+          name: "Audit existing initiatives"
+          files: []
+          details:
+            - "Check for ongoing analytics/Storybook refactors to avoid conflict."
+          acceptance_criteria:
+            - "Overlap documented."
+        - step: 1
+          name: "Add Storybook coverage"
+          files:
+            - "src/stories/home/TopProductsStrip.stories.tsx"
+            - "src/stories/home/ProductCard.stories.tsx"
+          details:
+            - "Create stories for hero cards (default, financing, badge combos)."
+            - "Show responsive knobs (mobile/desktop)."
+          acceptance_criteria:
+            - "Stories render without control panel errors."
+        - step: 2
+          name: "Instrument analytics & tests"
+          files:
+            - "tests/integration/homeLayout.test.tsx"
+            - "analytics tracking configuration"
+          details:
+            - "Mock analytics module to assert hero events fire."
+            - "Integration test ensures feature flag gating works."
+          acceptance_criteria:
+            - "Tests fail pre-implementation, pass after instrumentation."
+        - step: 3
+          name: "Document QA checklist"
+          files:
+            - "docs/homepage-qa-checklist.md"
+          details:
+            - "List manual scenarios (hero animation, CTA focus, mobile scroll)."
+            - "Include analytics verification steps."
+          acceptance_criteria:
+            - "QA sign-off references checklist."
+      testing_requirements:
+        unit_tests:
+          - "Storybook snapshot tests for hero card props (via storybook test runner)."
+        integration_tests:
+          - "homeLayout.test.tsx verifying event tracking + feature flag."
+        e2e_tests:
+          - "Playwright script clicking hero CTA and verifying navigation."
+        performance_tests:
+          - metric: "storybook_story_render"
+            threshold: 200
+      monitoring_plan:
+        dashboards:
+          - "Analytics hero event dashboard"
+        alerts:
+          - name: "hero_event_drop"
+            condition: "hero_product_click count < threshold post-launch"
+    deliverables:
+      code:
+        - "Storybook stories, integration tests"
+      documentation:
+        - "Homepage QA checklist"
+      operational:
+        - "Analytics validation notes"
+
+workflow:
+  order: sequential
+  dependencies:
+    - Polish default product cards depends-on Design and implement Top Products showcase
+    - Analytics & QA enablement depends-on Polish default product cards
+  cadences:
+    standups: Tue/Thu sync
+    demos: Mid-sprint design review, sprint-end showcase
+
+rules:
+  - DRY, KISS
+  - stable params/returns
+  - no duplicate functions
+  - no ghost code
+  - no overlapping code
+  - no unnecessary complexity
+  - confirm if requirements are ambiguous before implementing
+
+acceptance_criteria:
+  functional_requirements:
+    - [ ] Hero strip renders featured products with accessible CTAs.
+    - [ ] Standard product grid cards include badges, financing text, and option teasers.
+    - [ ] Feature flag toggles between new and legacy layouts without errors.
+    - [ ] Analytics events (`hero_product_click`, `product_card_secondary_click`) fire with payloads.
+  technical_requirements:
+    - [ ] Adds ≤ 15KB to homepage bundle and maintains LCP < 2.5s at 75th percentile.
+    - [ ] Next/Image optimizations applied to hero imagery.
+    - [ ] Storybook stories and automated tests updated for new components.
+    - [ ] No console warnings or hydration mismatches.
+  quality_requirements:
+    - [ ] Accessibility audit (mobile/desktop) passes WCAG 2.1 AA.
+    - [ ] QA executes homepage checklist on staging and canary.
+    - [ ] Chromatic visual diffs approved.
+    - [ ] Documentation updated for content editors (badges/financing fields).
+  security_requirements:
+    - [ ] No sensitive data logged.
+    - [ ] External links validated (if used for financing info).
+  analytics_requirements:
+    - [ ] Events populate analytics dashboard with correct schema.
+
+validation_matrix:
+  test_plan:
+    unit:
+      owner: Frontend dev
+      status: planned
+    integration:
+      owner: Frontend dev
+      status: planned
+    e2e:
+      owner: QA lead
+      status: planned
+    accessibility:
+      owner: QA lead
+      status: planned
+    performance:
+      owner: Frontend dev
+      status: planned
+  sign_offs:
+    - role: frontend-dev
+      person: TBD
+      status: pending
+    - role: backend-dev
+      person: N/A
+      status: approved
+    - role: qa
+      person: TBD
+      status: pending
+
+metrics_and_observability:
+  baseline_metrics:
+    - name: hero_product_click
+      current_value: 0 (feature not present)
+      source: analytics
+  target_metrics:
+    - name: hero_product_click
+      target_value: 500 clicks / week
+      measurement_window: First 2 weeks post-launch
+    - name: homepage_to_cart_conversion
+      target_value: +20% relative improvement
+      measurement_window: First month post-launch
+
+checklist:
+  - [ ] Code reviewed
+  - [ ] Tests passed (unit/integration/e2e)
+  - [ ] Storybook/docs updated where applicable
+  - [ ] Feature flag rollout plan documented
+  - [ ] Analytics events validated
+  - [ ] Accessibility audit completed
+  - [ ] Performance benchmarks documented
+  - [ ] Operational runbook updated
+  - [ ] Dedupe scan recorded and related owners notified (context.existing_initiatives)
+
+tracking:
+  document: ../.tracking/feat_tracking.md
+  entry: "FEAT-20241030-2 | Homepage top-product showcase | new"

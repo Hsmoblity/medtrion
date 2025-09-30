@@ -1,0 +1,65 @@
+id: FEAT-20250926-1
+project: front-store
+template: Feature
+description: Create a centralized session as localStorage to keep data persistence due to all kind of interruption
+
+tasks:
+  - name: Implement centralized session management
+    description: Use localStorage to persist session data across browser interruptions.
+    data_model:
+      description: "The data will be stored in localStorage as a single JSON object under the key 'app_session'. Each piece of data within this object will have a unique key."
+      json_structure: |
+        {
+          "cart": {
+            "items": [
+              { "id": "prod-123", "quantity": 1, "price": 100 },
+              { "id": "prod-456", "quantity": 2, "price": 50 }
+            ],
+            "total": 200
+          },
+          "user_preferences": {
+            "theme": "dark",
+            "language": "en"
+          },
+          "form_data": {
+            "contact_form": {
+              "name": "John Doe",
+              "email": "john.doe@example.com"
+            }
+          }
+        }
+    files:
+      - src/contexts/SessionContext.tsx
+      - src/hooks/useSession.ts
+    agents:
+      - role: frontend-dev
+        responsibilities:
+          - "Create a new context (SessionContext) for session management."
+          - "Implement a hook (useSession) to interact with the session context."
+          - "The useSession hook should expose methods to get, set, and remove data from the session."
+          - "Data should be stored in localStorage under a single key ('app_session') as a JSON string."
+          - "When setting data, the hook should update the corresponding key in the JSON object and save the whole object to localStorage."
+          - "When getting data, the hook should retrieve the JSON object from localStorage, parse it, and return the value for the requested key."
+    outputs:
+      - A persistent session that survives page reloads and tab closures.
+
+workflow:
+  order: sequential
+  dependencies: []
+
+rules:
+  - DRY, KISS
+  - stable params/returns
+  - no duplicate functions
+  - no ghost code
+  - no overlaping code
+  - no unnecessary complexity
+  - confirm if confuses requirements
+
+checklist:
+  - [ ] Code reviewed
+  - [ ] Tests passed
+  
+tracking:
+  document: ../.tracking/feat_tracking.md
+  entry: "FEAT-20250926-1 | Centralized Session Management with LocalStorage | new"

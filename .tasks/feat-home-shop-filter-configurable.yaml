@@ -1,0 +1,36 @@
+feature:
+  title: Filter homepage and shop feeds to configurable products
+  area: frontend
+  priority: p0
+  status: new
+  requested_by: techlead
+  environment: production
+
+summary:
+  goal: Update product fetch queries for the homepage and shop pages so only products with non-empty `relatedOptions` are returned (configurable products).
+  scope:
+    - Adjust WooCommerce GraphQL fetch logic to filter by `relatedOptions` presence.
+    - Ensure homepage store (`useHomepageStore`, TopProductsStrip) and shop page SSR apply the filter.
+    - Provide fallback handling if fewer products available after filter.
+  impact: Keeps showcase focused on configurable products with option data available.
+
+acceptance_criteria:
+  - Home and shop data requests (GraphQL) exclude products where `relatedOptions` is empty or null.
+  - Mapping functions confirm the field exists and produce correct `ProductCardView` entries.
+  - UI gracefully handles reduced product count (fallback to curated list or messaging).
+  - Tests verify the filter and serialization logic.
+
+implementation_plan:
+  - Add filter logic inside `fetchGraphQLProducts` or construct GraphQL query to include only products with options (e.g., post-filter in code until GraphQL supports direct filter).
+  - Update homepage/shop stores/components to rely on the filtered dataset.
+  - Adjust curated list logic to handle cases where not enough configurable products present.
+  - Update docs/tests accordingly.
+
+risks:
+  - WooGraphQL may not natively filter on `relatedOptions`; may require client-side filtering or backend change.
+  - Reduced product pool might leave gaps; coordinate content strategy.
+
+stakeholders:
+  - Frontend team
+  - Backend/WooCommerce team
+  - Product/UX

@@ -1,0 +1,47 @@
+id: FEAT-20250926-4
+project: front-store
+template: Feature
+description: "Create a common, shared lazy-loading image component for use across all views and other components."
+
+tasks:
+  - name: "Create Lazy-Loading Image Component"
+    description: "Develop a reusable image component that lazy-loads images to improve performance, with placeholders and fail-safe mechanisms."
+    style_and_effects:
+      - "The component should display a low-quality image placeholder (LQIP) or a shimmer/skeleton effect while the high-resolution image is loading."
+      - "Once the image has loaded, it should fade in smoothly to avoid a jarring effect."
+      - "If the image fails to load or the source is null, a designated placeholder image should be displayed instantly."
+    files:
+      - "src/components/common/LazyImage.tsx"
+      - "public/placeholder.png"
+    agents:
+      - role: frontend-dev
+        responsibilities:
+          - "Create a new reusable component at src/components/common/LazyImage.tsx."
+          - "Use the Intersection Observer API to detect when the image is in the viewport before starting the download."
+          - "Implement a placeholder strategy (LQIP or shimmer effect) to maintain layout integrity and improve user experience."
+          - "Implement a fail-safe mechanism to show a default placeholder image (e.g., public/placeholder.png) if the image source is invalid or the image fails to load."
+          - "Ensure the component is accessible by requiring an `alt` prop."
+          - "The component should be production-ready, with a focus on performance, reusability, and responsiveness."
+    outputs:
+      - "A reusable LazyImage component that can be used across the entire application."
+
+workflow:
+  order: sequential
+  dependencies: []
+
+rules:
+  - DRY, KISS
+  - stable params/returns
+  - no duplicate functions
+  - no ghost code
+  - no overlaping code
+  - no unnecessary complexity
+  - confirm if confuses requirements
+
+checklist:
+  - [ ] Code reviewed
+  - [ ] Tests passed
+
+tracking:
+  document: "../.tracking/feat_tracking.md"
+  entry: "FEAT-20250926-4 | Common Lazy-Loading Image Component | new"

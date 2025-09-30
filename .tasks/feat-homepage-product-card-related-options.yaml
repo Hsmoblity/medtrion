@@ -1,0 +1,36 @@
+feature:
+  title: Enrich homepage product cards with related option metadata
+  area: frontend
+  priority: p0
+  status: new
+  requested_by: techlead
+  environment: production
+
+summary:
+  goal: Pipe WooCommerce `relatedOptions` data through the homepage `ProductCardView` so hero/strip components know which products are configurable.
+  scope:
+    - Update homepage data pipeline (TopProductsStrip, ProductHeroCard, ProductListTest) to consume the enriched `ProductCardView` with `relatedOptions`.
+    - Ensure shared mapping logic surfaces option IDs on the home feed as well as shop page.
+    - Keep SSR/CSR payloads sanitized (no `undefined`).
+  impact: Homepage showcases can signal configuration capability and trigger the right flows without extra lookups.
+
+acceptance_criteria:
+  - Homepage `ProductCardView` objects include `relatedOptions: number[]` populated from WooCommerce.
+  - Components using the cards (hero strip, best sellers, product list) accept the new field and, at minimum, store/predict configuration availability.
+  - Validation utilities updated so `relatedOptions` defaults to empty array when absent.
+  - Tests/story fixtures updated to include the new field and TypeScript types pass.
+
+implementation_plan:
+  - Extend `ProductCardView` interface/mapping in `src/lib/interfaces/homepage.ts` (shared with shop) to expose `relatedOptions`.
+  - Update homepage data fetch (`useHomepageStore`, `TopProductsStrip`, etc.) to rely on WooCommerce source and pass through the field.
+  - Adjust any manual fixtures/debug components to include sample `relatedOptions` arrays.
+  - Add unit/integration checks ensuring homepage cards render with the field present.
+
+risks:
+  - Without backend support, field stays empty—coordinate rollout with WooCommerce team.
+  - Additional data may require slight UI tweaks; plan design review.
+
+stakeholders:
+  - Frontend team
+  - Backend/WooCommerce team
+  - Product/UX

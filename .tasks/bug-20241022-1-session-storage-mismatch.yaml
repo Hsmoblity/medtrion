@@ -1,0 +1,38 @@
+id: BUG-20241022-1
+project: front-store
+template: Bug Fix
+description: Session management implementation diverges from FEAT-20250926-1 centralized localStorage requirements
+
+tasks:
+  - name: Align session storage contract with feature spec
+    description: Update SessionContext and related hooks so that the centralized session behaves exactly as FEAT-20250926-1 describes.
+    files:
+      - src/contexts/SessionContext.tsx
+      - src/hooks/useSession.ts
+    steps:
+      - Restate the expected behaviour: one `localStorage` entry named `app_session` that serializes an object shaped like the feature’s example (e.g. `cart`, `user_preferences`, `form_data`) and is readable/writeable across reloads.
+      - Audit the current implementation to list each deviation (wrong storage key, fixed `SessionData` shape, missing generic get/set/remove helpers, broken `useSession` export).
+      - Replace the storage key with `app_session`, ensure load/save logic gracefully merges defaults, and guard for SSR/JSON parse failures.
+      - Implement typed helper methods that `get`, `set`, and `remove` arbitrary nested values in the stored object while keeping TypeScript types usable for callers.
+      - Fix the main `useSession` export and keep any convenience hooks wired through the new helper methods; update or add tests/docs that prove the helpers persist data and retrieve it correctly after a reload simulation.
+    expectations:
+      - `localStorage['app_session']` always reflects the latest session snapshot as a JSON string.
+      - Calling `set`/`get`/`remove` on the hook updates the same object without blowing away sibling keys.
+      - Server-side rendering paths never touch `window`/`localStorage` and instead fall back to safe defaults.
+    conditions:
+      - follow DRY, KISS
+      - no duplicate functions
+      - no ghost code
+      - no overlaping code
+      - confirm if the bug confused
+      - no unnecessary complexity
+
+    checklist:
+      - [ ] Bug reproducible
+      - [ ] Fix applied
+      - [ ] Tests passed
+      
+
+tracking:
+  document: ../.tracking/bug_tracking.md
+  entry: "BUG-20241022-1 | SessionContext violates app_session contract | new"

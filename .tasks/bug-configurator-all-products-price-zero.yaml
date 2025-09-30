@@ -1,0 +1,719 @@
+type: bug
+id: bug-configurator-all-products-price-zero
+title: "Model Configurator: Main Product and All Option Products Display Price 0"
+status: NEW
+priority: CRITICAL
+severity: CRITICAL
+assigned_to: frontend-dev
+created_date: 2025-01-16
+updated_date: 2025-01-16
+
+# Problem Statement
+## Issue Summary
+The Model Configurator displays both the main product AND all option products with a price of 0, making it impossible for users to see any pricing information. This is a complete pricing system failure in the configurator interface.
+
+## Current Behavior
+- Main product shows price: $0.00
+- ALL option products show price: $0.00
+- No pricing information visible anywhere in configurator
+- Total calculations show $0.00
+- Users cannot determine actual product costs
+- Configuration summary shows all items as free
+
+## Expected Behavior
+- Main product should display its actual price
+- Each option product should display its actual price
+- Total calculations should include all correct prices
+- Users should see accurate pricing for entire configuration
+- Summary panel should show correct total cost
+
+## Impact Assessment
+### User Impact
+- **🚨 CRITICAL**: Complete pricing information failure
+- **💰 Revenue Loss**: Users cannot see any costs, may abandon purchase
+- **🤝 Trust Damage**: Zero prices create serious credibility issues
+- **😕 User Confusion**: No way to understand actual product costs
+- **📞 Support Overload**: High volume of pricing-related inquiries
+
+### Business Impact
+- **💸 Revenue Loss**: Users will not purchase without seeing prices
+- **🏢 Brand Damage**: Professional credibility severely compromised
+- **📉 Conversion Rate**: Near-zero conversion rate expected
+- **⚠️ Legal Risk**: Potential issues with pricing transparency
+- **🔥 Critical Severity**: This is a show-stopper bug
+
+### Technical Impact
+- **🔴 System-Wide Failure**: Pricing data not flowing through system
+- **🔗 Integration Broken**: WooCommerce to frontend data pipeline broken
+- **💾 Data Loss**: Price data either not fetched or not mapped correctly
+- **🎯 Multiple Components**: Affects all configurator pricing components
+- **🔧 Root Cause Critical**: Suggests fundamental data flow issue
+
+# Root Cause Analysis
+
+## Likely Causes
+1. **GraphQL Query Missing Price Fields**: Price fields not included in product queries
+2. **Data Mapping Broken**: Price data not mapped from WooCommerce to ProductSchema
+3. **Price Parsing Failure**: Price data exists but parsing logic broken
+4. **State Management Issue**: Prices fetched but not stored in state correctly
+5. **Component Props Not Passed**: Prices not passed down to child components
+6. **Type Conversion Error**: Price strings not converted to numbers correctly
+7. **Null/Undefined Handling**: Default value of 0 used when price is null/undefined
+
+## Data Flow Analysis
+```
+WooCommerce Products
+    ↓ (GraphQL Query)
+Product Data with Prices
+    ↓ (Data Mapping)
+ProductSchema Objects
+    ↓ (State Management)
+Configurator Store
+    ↓ (Component Props)
+UI Components
+    ↓ (Display)
+$0.00 (BROKEN)
+```
+
+## Affected Components
+### Primary Components
+- `ModelConfigurator` - Main configurator interface
+- `ModelHero` - Main product display
+- `OptionCard` - Individual option display
+- `CategoryGroup` - Option category display
+- `SummaryPanel` - Configuration summary and total
+- `PriceCalculator` - Price calculation logic
+
+### Secondary Components
+- GraphQL queries (`GET_PRODUCT_BY_SLUG`, `GET_OPTION_PRODUCTS_BY_IDS`)
+- Data mapping functions (`mapWooToProductSchema`, `fetchOptionProductsByIds`)
+- State management (`configuratorStore`, `homepageStore`)
+- Price utilities (`parsePrice`, `formatPrice`)
+
+# Technical Investigation
+
+## Expected Data Structure
+```typescript
+interface Product {
+  id: string;
+  name: string;
+  price: number; // Should NOT be 0
+  regularPrice?: number;
+  salePrice?: number;
+  type: 'SIMPLE' | 'VARIABLE';
+  // ... other fields
+}
+
+interface OptionProduct extends Product {
+  optionType: 'SAFETY' | 'COMFORT' | 'INSTALLATION' | 'ACCESSORY' | 'DELIVERY' | 'WARRANTY';
+  variableType?: 'radio' | 'checkbox';
+  variations?: Variation[];
+}
+```
+
+## Current Implementation Issues
+
+### Issue 1: GraphQL Query Missing Price Fields
+```graphql
+# PROBLEMATIC: Query may not include all price fields
+query GetProductBySlug($slug: String!) {
+  products(where: { slugIn: [$slug] }, first: 1) {
+    nodes {
+      id
+      name
+      # price field may be missing or not formatted correctly
+      price
+      # Missing regularPrice and salePrice?
+    }
+  }
+}
+```
+
+### Issue 2: Data Mapping Not Extracting Prices
+```typescript
+// PROBLEMATIC: Price mapping may be broken
+const mapWooToProductSchema = (wooProduct: any): ProductSchema => {
+  return {
+    id: wooProduct.id,
+    name: wooProduct.name,
+    price: wooProduct.price || 0, // Default to 0 if missing!
+    // ... other fields
+  };
+};
+```
+
+### Issue 3: Price Parsing Broken
+```typescript
+// PROBLEMATIC: Price parsing may fail silently
+const parsePrice = (price: any): number => {
+  if (!price) return 0; // Returns 0 for null/undefined
+  if (typeof price === 'string') {
+    const parsed = parseFloat(price.replace(/[^0-9.-]/g, ''));
+    return isNaN(parsed) ? 0 : parsed; // Returns 0 for NaN
+  }
+  return 0; // Default to 0
+};
+```
+
+### Issue 4: Component Not Receiving Prices
+```typescript
+// PROBLEMATIC: ModelConfigurator may not pass prices to children
+const ModelConfigurator = ({ product }) => {
+  return (
+    <div>
+      <ModelHero product={product} /> {/* price prop missing? */}
+      <CategoryGroup 
+        options={options} // options may have price: 0
+      />
+      <SummaryPanel 
+        total={0} // total calculation broken
+      />
+    </div>
+  );
+};
+```
+
+## Expected Fix Implementation
+
+### Fix 1: Update GraphQL Queries to Include All Price Fields
+```graphql
+# FIXED: Comprehensive price fields in query
+query GetProductBySlug($slug: String!) {
+  products(where: { slugIn: [$slug] }, first: 1) {
+    nodes {
+      id
+      databaseId
+      name
+      description
+      shortDescription
+      sku
+      type
+      
+      # Price fields for SIMPLE products
+      price
+      regularPrice
+      salePrice
+      
+      # Additional fields for VARIABLE products
+      ... on VariableProduct {
+        price
+        regularPrice
+        salePrice
+        variableType
+        variations(first: 50) {
+          nodes {
+            id
+            databaseId
+            name
+            price
+            regularPrice
+            salePrice
+            sku
+          }
+        }
+      }
+    }
+  }
+}
+
+# FIXED: Option products query with prices
+query GetOptionProductsByIds($ids: [ID!]!) {
+  products(where: { in: $ids }, first: 100) {
+    nodes {
+      id
+      databaseId
+      name
+      price
+      regularPrice
+      salePrice
+      type
+      
+      ... on VariableProduct {
+        price
+        regularPrice
+        salePrice
+        variableType
+        variations(first: 50) {
+          nodes {
+            id
+            databaseId
+            name
+            price
+            regularPrice
+            salePrice
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### Fix 2: Update Data Mapping to Properly Extract Prices
+```typescript
+// FIXED: Robust price extraction and mapping
+const mapWooToProductSchema = (wooProduct: any): ProductSchema => {
+  // Extract price with fallback logic
+  const extractPrice = (priceData: any): number => {
+    if (!priceData) return 0;
+    
+    // Handle string prices (e.g., "$150.00" or "150.00")
+    if (typeof priceData === 'string') {
+      const cleanPrice = priceData.replace(/[^0-9.-]/g, '');
+      const parsed = parseFloat(cleanPrice);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+    
+    // Handle numeric prices
+    if (typeof priceData === 'number') {
+      return isNaN(priceData) ? 0 : priceData;
+    }
+    
+    return 0;
+  };
+
+  return {
+    id: wooProduct.id,
+    databaseId: wooProduct.databaseId,
+    name: wooProduct.name,
+    description: wooProduct.description,
+    shortDescription: wooProduct.shortDescription,
+    sku: wooProduct.sku,
+    type: wooProduct.type,
+    
+    // Extract all price fields
+    price: extractPrice(wooProduct.price),
+    regularPrice: extractPrice(wooProduct.regularPrice),
+    salePrice: extractPrice(wooProduct.salePrice),
+    
+    // Map variations if present
+    variations: wooProduct.variations?.nodes?.map((variation: any) => ({
+      id: variation.id,
+      databaseId: variation.databaseId,
+      name: variation.name,
+      sku: variation.sku,
+      price: extractPrice(variation.price),
+      regularPrice: extractPrice(variation.regularPrice),
+      salePrice: extractPrice(variation.salePrice),
+    })) || [],
+    
+    // ... other fields
+  };
+};
+```
+
+### Fix 3: Update Option Products Fetching
+```typescript
+// FIXED: fetchOptionProductsByIds with proper price mapping
+export const fetchOptionProductsByIds = async (ids: number[]): Promise<ConfigurableProductSchema[]> => {
+  const query = GET_OPTION_PRODUCTS_BY_IDS;
+  const variables = { ids: ids.map(String) };
+  
+  const response = await fetchGraphQL(query, variables);
+  
+  if (!response.data?.products?.nodes) {
+    return [];
+  }
+
+  return response.data.products.nodes.map((node: any) => {
+    const extractPrice = (priceData: any): number => {
+      if (!priceData) return 0;
+      if (typeof priceData === 'string') {
+        const cleanPrice = priceData.replace(/[^0-9.-]/g, '');
+        const parsed = parseFloat(cleanPrice);
+        return isNaN(parsed) ? 0 : parsed;
+      }
+      if (typeof priceData === 'number') {
+        return isNaN(priceData) ? 0 : priceData;
+      }
+      return 0;
+    };
+
+    const configurableProduct: ConfigurableProductSchema = {
+      id: node.id,
+      databaseId: node.databaseId,
+      name: node.name,
+      slug: node.slug,
+      description: node.description,
+      shortDescription: node.shortDescription,
+      type: node.type,
+      
+      // Extract prices
+      price: extractPrice(node.price),
+      regularPrice: extractPrice(node.regularPrice),
+      salePrice: extractPrice(node.salePrice),
+      
+      // Map variations with prices
+      variations: (node.variations?.nodes || []).map((variation: any) => ({
+        id: variation.id,
+        databaseId: variation.databaseId,
+        name: variation.name,
+        sku: variation.sku,
+        price: extractPrice(variation.price),
+        regularPrice: extractPrice(variation.regularPrice),
+        salePrice: extractPrice(variation.salePrice),
+        attributes: variation.attributes?.nodes || []
+      })),
+      
+      // ... other fields
+    };
+    
+    return configurableProduct;
+  });
+};
+```
+
+### Fix 4: Update ModelConfigurator Component
+```typescript
+// FIXED: ModelConfigurator with proper price handling
+const ModelConfigurator: React.FC = ({ product }) => {
+  const [selectedOptions, setSelectedOptions] = useState<OptionProduct[]>([]);
+  const [categories, setCategories] = useState<ConfiguratorCategory[]>([]);
+  
+  // Ensure base price is properly extracted
+  const basePrice = product.price || 0;
+  
+  // Calculate total with proper price handling
+  const calculateTotal = useCallback(() => {
+    const optionsTotal = selectedOptions.reduce((sum, option) => {
+      const optionPrice = option.price || 0;
+      return sum + optionPrice;
+    }, 0);
+    
+    return basePrice + optionsTotal;
+  }, [basePrice, selectedOptions]);
+
+  return (
+    <div className="model-configurator">
+      {/* Model Hero with Base Price */}
+      <ModelHero 
+        product={product}
+        basePrice={basePrice}
+        displayPrice={formatPrice(basePrice)}
+      />
+      
+      {/* Configuration Options */}
+      <div className="configurator-content">
+        <div className="options-section">
+          {categories.map((category) => (
+            <CategoryGroup
+              key={category.id}
+              category={category}
+              options={category.options.map(option => ({
+                ...option,
+                // Ensure price is included
+                price: option.price || 0,
+                displayPrice: formatPrice(option.price || 0)
+              }))}
+              onToggleOption={handleOptionToggle}
+            />
+          ))}
+        </div>
+        
+        {/* Summary Panel with Prices */}
+        <SummaryPanel
+          basePrice={basePrice}
+          baseDisplayPrice={formatPrice(basePrice)}
+          selectedOptions={selectedOptions.map(option => ({
+            ...option,
+            displayPrice: formatPrice(option.price || 0)
+          }))}
+          total={calculateTotal()}
+          totalDisplayPrice={formatPrice(calculateTotal())}
+        />
+      </div>
+    </div>
+  );
+};
+```
+
+### Fix 5: Update OptionCard Component
+```typescript
+// FIXED: OptionCard with proper price display
+const OptionCard: React.FC<OptionCardProps> = ({
+  option,
+  isSelected,
+  onToggle,
+  onViewOption
+}) => {
+  // Extract and validate price
+  const optionPrice = option.price || 0;
+  const displayPrice = formatPrice(optionPrice);
+  
+  return (
+    <div className="option-card" onClick={() => onViewOption(option)}>
+      <div className="option-header">
+        <h3 className="option-name">{option.name}</h3>
+        <div className="option-price">{displayPrice}</div>
+      </div>
+      
+      <div className="option-body">
+        <p className="option-description">{option.shortDescription}</p>
+        
+        {option.type === 'VARIABLE' && option.variations && (
+          <div className="option-variations-info">
+            {option.variations.length} variations available
+          </div>
+        )}
+      </div>
+      
+      <div className="option-footer">
+        <span className="option-type-badge">{option.optionType}</span>
+        {isSelected && <span className="selected-badge">Selected</span>}
+      </div>
+    </div>
+  );
+};
+```
+
+### Fix 6: Add Comprehensive Price Validation Utility
+```typescript
+// FIXED: Comprehensive price validation and formatting utilities
+export const validatePrice = (price: any): number => {
+  // Handle null, undefined, or empty string
+  if (price === null || price === undefined || price === '') {
+    console.warn('Price is null/undefined/empty, defaulting to 0');
+    return 0;
+  }
+  
+  // Handle numeric values
+  if (typeof price === 'number') {
+    if (isNaN(price) || !isFinite(price)) {
+      console.warn('Price is NaN or Infinity, defaulting to 0');
+      return 0;
+    }
+    return price;
+  }
+  
+  // Handle string values
+  if (typeof price === 'string') {
+    // Remove currency symbols and whitespace
+    const cleanPrice = price.replace(/[$,\s]/g, '');
+    const parsed = parseFloat(cleanPrice);
+    
+    if (isNaN(parsed) || !isFinite(parsed)) {
+      console.warn(`Failed to parse price string: "${price}", defaulting to 0`);
+      return 0;
+    }
+    
+    return parsed;
+  }
+  
+  console.warn(`Unexpected price type: ${typeof price}, defaulting to 0`);
+  return 0;
+};
+
+export const formatPrice = (price: any): string => {
+  const validPrice = validatePrice(price);
+  return `$${validPrice.toFixed(2)}`;
+};
+
+export const formatPriceRange = (minPrice: any, maxPrice: any): string => {
+  const min = validatePrice(minPrice);
+  const max = validatePrice(maxPrice);
+  
+  if (min === max) {
+    return formatPrice(min);
+  }
+  
+  return `${formatPrice(min)} - ${formatPrice(max)}`;
+};
+```
+
+## Debugging Steps
+
+### Step 1: Verify GraphQL Response
+```typescript
+// Add logging to GraphQL queries
+const response = await fetchGraphQL(GET_PRODUCT_BY_SLUG, { slug });
+console.log('GraphQL Response:', JSON.stringify(response, null, 2));
+console.log('Product Price:', response.data?.products?.nodes?.[0]?.price);
+```
+
+### Step 2: Verify Data Mapping
+```typescript
+// Add logging to data mapping
+const mappedProduct = mapWooToProductSchema(wooProduct);
+console.log('Mapped Product:', JSON.stringify(mappedProduct, null, 2));
+console.log('Mapped Price:', mappedProduct.price);
+```
+
+### Step 3: Verify Component Props
+```typescript
+// Add logging to component
+const ModelConfigurator = ({ product }) => {
+  console.log('ModelConfigurator Product:', product);
+  console.log('Product Price:', product.price);
+  console.log('Product Type:', typeof product.price);
+  // ... rest of component
+};
+```
+
+### Step 4: Verify Price Utilities
+```typescript
+// Test price utilities
+console.log('Validate "$150.00":', validatePrice('$150.00')); // Should be 150
+console.log('Validate "150":', validatePrice('150')); // Should be 150
+console.log('Validate 150:', validatePrice(150)); // Should be 150
+console.log('Validate null:', validatePrice(null)); // Should be 0
+console.log('Validate NaN:', validatePrice(NaN)); // Should be 0
+```
+
+## Testing Requirements
+
+### Unit Tests
+```typescript
+describe('Price Validation', () => {
+  test('validates numeric prices', () => {
+    expect(validatePrice(150)).toBe(150);
+    expect(validatePrice(0)).toBe(0);
+    expect(validatePrice(99.99)).toBe(99.99);
+  });
+
+  test('validates string prices', () => {
+    expect(validatePrice('$150.00')).toBe(150);
+    expect(validatePrice('150')).toBe(150);
+    expect(validatePrice('99.99')).toBe(99.99);
+  });
+
+  test('handles invalid prices', () => {
+    expect(validatePrice(null)).toBe(0);
+    expect(validatePrice(undefined)).toBe(0);
+    expect(validatePrice(NaN)).toBe(0);
+    expect(validatePrice('invalid')).toBe(0);
+  });
+});
+
+describe('ModelConfigurator', () => {
+  test('displays correct base price', () => {
+    const product = { name: 'Test', price: 150 };
+    render(<ModelConfigurator product={product} />);
+    expect(screen.getByText('$150.00')).toBeInTheDocument();
+  });
+
+  test('displays correct option prices', () => {
+    const options = [
+      { id: '1', name: 'Option 1', price: 50 },
+      { id: '2', name: 'Option 2', price: 75 }
+    ];
+    render(<OptionCard option={options[0]} />);
+    expect(screen.getByText('$50.00')).toBeInTheDocument();
+  });
+});
+```
+
+### Integration Tests
+```typescript
+describe('Configurator Price Flow', () => {
+  test('fetches and displays all prices correctly', async () => {
+    const { getByText } = render(<ModelConfigurator productSlug="acorn-130" />);
+    
+    // Wait for data to load
+    await waitFor(() => {
+      expect(getByText(/\$[0-9]+\.[0-9]{2}/)).toBeInTheDocument();
+    });
+    
+    // Verify main product price
+    expect(getByText('$2,995.00')).toBeInTheDocument();
+    
+    // Verify option prices are not $0.00
+    const priceElements = screen.getAllByText(/\$[0-9]+\.[0-9]{2}/);
+    priceElements.forEach(element => {
+      expect(element.textContent).not.toBe('$0.00');
+    });
+  });
+});
+```
+
+## Acceptance Criteria
+
+### Functional Requirements
+- [ ] Main product displays actual price (not $0.00)
+- [ ] All option products display actual prices (not $0.00)
+- [ ] Variable option variations display correct prices
+- [ ] Total calculation includes all correct prices
+- [ ] Summary panel shows accurate total
+- [ ] Price changes reflect immediately in UI
+
+### Data Requirements
+- [ ] GraphQL queries include all price fields
+- [ ] Data mapping extracts all price fields correctly
+- [ ] Price validation handles all data types
+- [ ] Price formatting is consistent across UI
+- [ ] Price state management works correctly
+
+### Visual Requirements
+- [ ] Prices displayed in consistent format ($X,XXX.XX)
+- [ ] No $0.00 displayed for products with actual prices
+- [ ] Price information clearly visible and readable
+- [ ] Total price prominently displayed in summary
+
+### Technical Requirements
+- [ ] Comprehensive logging for price data flow
+- [ ] Error handling for missing/invalid prices
+- [ ] Unit tests for price validation utilities
+- [ ] Integration tests for complete price flow
+- [ ] Performance: Price calculations don't impact UI responsiveness
+
+## Related Issues
+
+### Duplicate/Related Bugs
+- `bug-configurator-main-product-price-zero`: Specific to main product (may be consolidated)
+- `bug-configurator-product-price-missing`: Related configurator pricing issue
+- `bug-cart-product-group-options-price-nan`: Cart pricing issue (different but related)
+
+### Dependencies
+- GraphQL schema must include price fields
+- WooCommerce products must have prices set
+- Data mapping layer must handle all price formats
+- State management must preserve price data
+
+## Estimated Effort
+
+- **Investigation & Analysis**: 4-6 hours (comprehensive debugging)
+- **GraphQL Query Updates**: 2-3 hours
+- **Data Mapping Fixes**: 4-6 hours
+- **Component Updates**: 6-8 hours
+- **Price Utility Development**: 3-4 hours
+- **Testing**: 6-8 hours
+- **Documentation**: 2-3 hours
+- **Total**: **27-38 hours**
+
+## Risk Assessment
+
+### Technical Risks
+- **Data Format Risk**: WooCommerce may return prices in unexpected format
+- **Integration Risk**: Changes may affect other pricing displays (cart, checkout)
+- **Performance Risk**: Price validation may impact rendering performance
+- **Type Safety Risk**: TypeScript types may need updating
+
+### Mitigation Strategies
+- **Comprehensive Logging**: Log all price data at every step
+- **Robust Validation**: Handle all possible price data types
+- **Gradual Rollout**: Test thoroughly before deploying
+- **Rollback Plan**: Keep previous implementation for quick rollback
+- **Monitor Performance**: Track rendering performance during testing
+
+## Priority Justification
+
+### Why CRITICAL Priority
+1. **Complete Functionality Failure**: No pricing information visible at all
+2. **Revenue Impact**: Users cannot make purchase decisions without prices
+3. **Brand Damage**: Zero prices severely damage credibility
+4. **User Experience**: Configurator is completely unusable for real purchases
+5. **Business Blocker**: This prevents any real sales through configurator
+
+### Immediate Actions Required
+1. **Stop all non-critical work** - This blocks revenue
+2. **Debug data flow immediately** - Find where prices are lost
+3. **Implement comprehensive fix** - Address root cause, not symptoms
+4. **Test thoroughly** - Ensure all prices display correctly
+5. **Deploy urgently** - Restore configurator functionality ASAP
+
+## Notes
+- This bug affects the ENTIRE configurator pricing system
+- Suggests a fundamental data flow or mapping issue
+- May require changes across multiple layers (GraphQL, mapping, state, UI)
+- Should be treated as the highest priority bug
+- Consider consolidating with other pricing bugs for a comprehensive fix
+- Requires thorough testing across all product types and option combinations

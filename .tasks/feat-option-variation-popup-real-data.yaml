@@ -1,0 +1,624 @@
+type: feat
+id: feat-option-variation-popup-real-data
+title: "Connect OptionVariationPopup to Real WooCommerce Data Instead of Mock Data"
+status: NEW
+priority: HIGH
+assigned_to: frontend-dev
+created_date: 2025-01-16
+updated_date: 2025-01-16
+
+# Business Context
+## Problem Statement
+The current OptionVariationPopup component uses hardcoded mock data instead of real variation data from WooCommerce. This creates a disconnect between the actual product variations available in the system and what users see in the popup, leading to incorrect pricing, missing variations, and poor user experience.
+
+## Business Impact
+- **Data Accuracy**: Users see incorrect variation names, prices, and availability
+- **User Experience**: Mock data doesn't reflect real product options, confusing customers
+- **Sales Impact**: Customers may make decisions based on incorrect information
+- **Maintenance**: Hardcoded data requires manual updates and doesn't scale
+- **Trust**: Inconsistent data undermines customer confidence in the platform
+
+## Success Metrics
+- 100% of variation data comes from real WooCommerce product data
+- Accurate pricing and availability information displayed
+- Real-time data updates when product variations change
+- Improved user confidence in product selection process
+- Reduced support tickets related to incorrect variation information
+
+# User Story
+**As a** customer using the Model Configurator
+**I want** to see real, accurate variation data from the product catalog
+**So that** I can make informed decisions about my configuration with confidence
+
+**Acceptance Criteria:**
+- All variation data comes from real WooCommerce products
+- Variation names, prices, and attributes are accurate
+- Stock status reflects real inventory levels
+- Price calculations are correct and match the backend
+- Data updates automatically when products change
+
+# Technical Requirements
+
+## Data Flow Architecture
+```typescript
+// Current (BROKEN): Mock data
+const [variations] = useState<Variation[]>([
+  {
+    id: 'var-1',
+    name: 'Red Leather',  // ← HARDCODED
+    price: 0,             // ← HARDCODED
+    // ... more mock data
+  }
+]);
+
+// Target (FIXED): Real data from option
+const variations = option.variations || [];
+const mappedVariations: Variation[] = variations.map(variation => ({
+  id: variation.id,
+  databaseId: variation.databaseId,
+  name: variation.name || '',
+  price: variation.price || 0,
+  sku: variation.sku || '',
+  image: variation.image,
+  attributes: variation.attributes || [],
+  stockStatus: getStockStatus(variation) // Real stock status
+}));
+```
+
+## Component Updates
+
+### OptionVariationPopup Props Update
+```typescript
+interface OptionVariationPopupProps {
+  option: OptionProduct;  // ← Must contain real variations data
+  isOpen: boolean;
+  onClose: () => void;
+  onAddToConfiguration: (option: OptionProduct, variations?: Variation[]) => void;
+  isAlreadySelected?: boolean;
+  
+  // NEW: Real data validation
+  variations?: Variation[];  // Optional override for specific use cases
+  onVariationDataError?: (error: Error) => void;  // Error handling
+}
+```
+
+### Data Validation and Mapping
+```typescript
+// Validate and map real variation data
+const validateAndMapVariations = (option: OptionProduct): Variation[] => {
+  if (!option.variations || !Array.isArray(option.variations)) {
+    console.warn('OptionVariationPopup: No variations data found for option:', option.id);
+    return [];
+  }
+
+  return option.variations.map((variation: any) => {
+    // Validate required fields
+    if (!variation.id || !variation.databaseId) {
+      console.error('Invalid variation data:', variation);
+      return null;
+    }
+
+    return {
+      id: variation.id,
+      databaseId: variation.databaseId,
+      name: variation.name || 'Unnamed Variation',
+      price: parseFloat(variation.price || '0'),
+      sku: variation.sku || '',
+      image: variation.image ? {
+        sourceUrl: variation.image.sourceUrl || '',
+        altText: variation.image.altText || variation.name || 'Variation image'
+      } : undefined,
+      attributes: variation.attributes || [],
+      stockStatus: determineStockStatus(variation)
+    };
+  }).filter(Boolean); // Remove null entries
+};
+```
+
+## WooCommerce Data Integration
+
+### GraphQL Query Enhancement
+```typescript
+// Ensure variations are properly fetched in option product queries
+export const GET_OPTION_PRODUCTS_BY_IDS = gql`
+  query GetOptionProductsByIds($ids: [Int]) {
+    products(where: { include: $ids, typeIn: [VARIABLE] }) {
+      nodes {
+        id
+        databaseId
+        name
+        type
+        variableType  # ← Important for selection behavior
+        
+        # Enhanced variation data
+        variations(first: 50) {
+          nodes {
+            id
+            databaseId
+            name
+            price
+            regularPrice
+            salePrice
+            sku
+            stockStatus  # ← Real stock status
+            image { 
+              sourceUrl 
+              altText 
+            }
+            attributes { 
+              nodes { 
+                id 
+                name 
+                value 
+              } 
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+```
+
+### Data Mapping in fetchOptionProductsByIds
+```typescript
+// In src/lib/woocommerce.ts - fetchOptionProductsByIds()
+variations: (node.variations?.nodes || []).map((variation: any) => ({
+  id: variation.id,
+  databaseId: variation.databaseId,
+  name: variation.name || '',
+  sku: variation.sku || '',
+  price: variation.price ? parseFloat(variation.price.replace(/[^0-9.-]/g, '')) : 0,
+  regularPrice: variation.regularPrice || variation.price || '',
+  salePrice: variation.salePrice || null,
+  stockStatus: variation.stockStatus || 'instock',  // ← Real stock status
+  image: variation.image?.sourceUrl || '',
+  attributes: variation.attributes?.nodes || []
+}))
+```
+
+## Component Implementation Updates
+
+### OptionVariationPopup Component
+```typescript
+const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
+  option,
+  isOpen,
+  onClose,
+  onAddToConfiguration,
+  isAlreadySelected = false,
+  variations: overrideVariations,
+  onVariationDataError
+}) => {
+  // Use real variations data instead of mock data
+  const realVariations = useMemo(() => {
+    try {
+      // Use override variations if provided, otherwise use option variations
+      const sourceVariations = overrideVariations || option.variations || [];
+      return validateAndMapVariations({ ...option, variations: sourceVariations });
+    } catch (error) {
+      console.error('Error processing variation data:', error);
+      onVariationDataError?.(error as Error);
+      return [];
+    }
+  }, [option, overrideVariations, onVariationDataError]);
+
+  // Determine selection type from option data
+  const selectionType = useMemo(() => {
+    return option.variableType?.toLowerCase() === 'checkbox' ? 'checkbox' : 'radio';
+  }, [option.variableType]);
+
+  // Calculate total price with real variation data
+  const totalPrice = useMemo(() => {
+    const basePrice = parseFloat(option.price || '0');
+    const variationPrice = selectedVariations.reduce((sum, variation) => {
+      return sum + (variation.price || 0);
+    }, 0);
+    return basePrice + variationPrice;
+  }, [option.price, selectedVariations]);
+
+  // Rest of component logic...
+};
+```
+
+### Error Handling and Fallbacks
+```typescript
+// Handle missing or invalid variation data
+const handleVariationDataError = useCallback((error: Error) => {
+  console.error('Variation data error:', error);
+  
+  // Show user-friendly error message
+  setErrorState({
+    hasError: true,
+    message: 'Unable to load variation options. Please try again.',
+    retry: () => {
+      // Retry loading variation data
+      setErrorState({ hasError: false, message: '', retry: null });
+    }
+  });
+}, []);
+
+// Fallback UI for missing variations
+if (realVariations.length === 0) {
+  return (
+    <div className="p-6 text-center">
+      <p className="text-gray-600 mb-4">
+        No variations available for this option.
+      </p>
+      <button
+        onClick={onClose}
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+      >
+        Close
+      </button>
+    </div>
+  );
+}
+```
+
+## Integration with OptionCard
+
+### Update OptionCard Click Handler
+```typescript
+// In OptionCard component - handleClick method
+const handleClick = useCallback(async (event: React.MouseEvent) => {
+  event.preventDefault();
+  
+  if (disabled || loading) return;
+  
+  // Check if option has variations (VARIABLE type)
+  if (option.type === 'VARIABLE' && option.variations && option.variations.length > 0) {
+    // Show variation popup instead of direct toggle
+    setInternalState(prev => ({ ...prev, variationPopupVisible: true }));
+    return;
+  }
+  
+  // For SIMPLE options, proceed with normal toggle
+  // ... existing toggle logic
+}, [option, disabled, loading, ...]);
+```
+
+### Pass Real Data to Popup
+```typescript
+// In OptionCard render method
+<OptionVariationPopup
+  option={option}  // ← Contains real variations data
+  isOpen={internalState.variationPopupVisible}
+  onClose={handleCloseVariationPopup}
+  onAddToConfiguration={(option, variations) => {
+    // Handle adding to configuration with real variation data
+    if (onToggle) {
+      onToggle(option, categoryId);
+    }
+  }}
+  isAlreadySelected={isSelected}
+  onVariationDataError={(error) => {
+    console.error('Variation data error in popup:', error);
+    // Handle error appropriately
+  }}
+/>
+```
+
+## Data Validation and Error Handling
+
+### Validation Functions
+```typescript
+// Validate variation data structure
+const validateVariationData = (variation: any): boolean => {
+  return !!(
+    variation &&
+    variation.id &&
+    variation.databaseId &&
+    typeof variation.name === 'string' &&
+    typeof variation.price === 'number'
+  );
+};
+
+// Determine stock status from variation data
+const determineStockStatus = (variation: any): 'instock' | 'outofstock' | 'onbackorder' => {
+  if (variation.stockStatus) {
+    return variation.stockStatus;
+  }
+  
+  // Fallback logic based on other fields
+  if (variation.stockQuantity !== undefined) {
+    return variation.stockQuantity > 0 ? 'instock' : 'outofstock';
+  }
+  
+  return 'instock'; // Default assumption
+};
+```
+
+### Error Boundaries
+```typescript
+// Error boundary for variation data issues
+class VariationDataErrorBoundary extends React.Component {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error('Variation data error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-800">
+            Unable to load variation data. Please refresh the page.
+          </p>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+```
+
+## Testing Requirements
+
+### Unit Tests
+```typescript
+// Test real data integration
+describe('OptionVariationPopup Real Data Integration', () => {
+  it('should display real variation data from option', () => {
+    const mockOption = {
+      id: 'option-1',
+      name: 'Seat Color Selection',
+      type: 'VARIABLE',
+      price: 199,
+      variations: [
+        {
+          id: 'var-1',
+          databaseId: 101,
+          name: 'Red Leather',
+          price: 0,
+          sku: 'SEAT-RED-001',
+          attributes: [
+            { id: 'color', name: 'Color', value: 'Red' }
+          ]
+        }
+      ]
+    };
+
+    render(
+      <OptionVariationPopup
+        option={mockOption}
+        isOpen={true}
+        onClose={jest.fn()}
+        onAddToConfiguration={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText('Red Leather')).toBeInTheDocument();
+    expect(screen.getByText('Included')).toBeInTheDocument();
+  });
+
+  it('should handle missing variation data gracefully', () => {
+    const mockOption = {
+      id: 'option-1',
+      name: 'Simple Option',
+      type: 'SIMPLE',
+      price: 99,
+      variations: []
+    };
+
+    render(
+      <OptionVariationPopup
+        option={mockOption}
+        isOpen={true}
+        onClose={jest.fn()}
+        onAddToConfiguration={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText('No variations available for this option.')).toBeInTheDocument();
+  });
+});
+```
+
+### Integration Tests
+```typescript
+// Test data flow from WooCommerce to popup
+describe('WooCommerce Data Flow Integration', () => {
+  it('should fetch and display real variation data', async () => {
+    // Mock GraphQL response with real variation data
+    const mockGraphQLResponse = {
+      products: {
+        nodes: [{
+          id: 'option-1',
+          type: 'VARIABLE',
+          variations: {
+            nodes: [
+              {
+                id: 'var-1',
+                databaseId: 101,
+                name: 'Blue Leather',
+                price: '50.00',
+                sku: 'SEAT-BLUE-001',
+                stockStatus: 'instock'
+              }
+            ]
+          }
+        }]
+      }
+    };
+
+    // Test the complete data flow
+    const result = await fetchOptionProductsByIds([1]);
+    expect(result[0].variations).toHaveLength(1);
+    expect(result[0].variations[0].name).toBe('Blue Leather');
+    expect(result[0].variations[0].price).toBe(50);
+  });
+});
+```
+
+## Performance Considerations
+
+### Data Optimization
+```typescript
+// Memoize variation data processing
+const processedVariations = useMemo(() => {
+  return validateAndMapVariations(option);
+}, [option.variations, option.id]);
+
+// Optimize re-renders
+const OptionVariationPopup = React.memo<OptionVariationPopupProps>(({
+  option,
+  isOpen,
+  onClose,
+  onAddToConfiguration,
+  isAlreadySelected
+}) => {
+  // Component implementation
+}, (prevProps, nextProps) => {
+  // Custom comparison for performance
+  return (
+    prevProps.option.id === nextProps.option.id &&
+    prevProps.isOpen === nextProps.isOpen &&
+    prevProps.isAlreadySelected === nextProps.isAlreadySelected
+  );
+});
+```
+
+### Lazy Loading
+```typescript
+// Lazy load variation images
+const LazyVariationImage: React.FC<{ variation: Variation }> = ({ variation }) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  if (!variation.image?.sourceUrl) {
+    return <div className="w-full h-32 bg-gray-200 rounded" />;
+  }
+
+  return (
+    <div className="relative w-full h-32 bg-gray-200 rounded overflow-hidden">
+      {!isLoaded && !hasError && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+        </div>
+      )}
+      <img
+        src={variation.image.sourceUrl}
+        alt={variation.image.altText || variation.name}
+        className={`w-full h-full object-cover transition-opacity duration-200 ${
+          isLoaded ? 'opacity-100' : 'opacity-0'
+        }`}
+        onLoad={() => setIsLoaded(true)}
+        onError={() => setHasError(true)}
+        loading="lazy"
+      />
+    </div>
+  );
+};
+```
+
+## Implementation Plan
+
+### Phase 1: Data Integration (Week 1)
+1. Remove mock data from OptionVariationPopup
+2. Implement real data mapping and validation
+3. Update GraphQL queries to include all variation fields
+4. Add error handling for missing data
+
+### Phase 2: Component Updates (Week 2)
+1. Update OptionVariationPopup to use real data
+2. Implement proper selection type detection
+3. Add stock status handling
+4. Update price calculations
+
+### Phase 3: Integration & Testing (Week 3)
+1. Update OptionCard click handler
+2. Integrate with ModelConfigurator
+3. Add comprehensive tests
+4. Performance optimization
+
+## Dependencies
+
+### Internal Dependencies
+- **OptionVariationCard**: New component for variation display
+- **fetchOptionProductsByIds**: Enhanced to include complete variation data
+- **OptionCard**: Updated click handler for VARIABLE options
+- **ModelConfigurator**: Integration with real variation data
+
+### External Dependencies
+- **WooCommerce GraphQL**: Enhanced queries for variation data
+- **React**: Component framework and hooks
+- **TypeScript**: Type safety for variation data
+
+## Risk Assessment
+
+### Technical Risks
+- **Data Structure Changes**: WooCommerce variation data structure may change
+- **Performance**: Large number of variations could impact popup performance
+- **Error Handling**: Invalid variation data could break the popup
+
+### Mitigation Strategies
+- **Data Validation**: Robust validation and fallback handling
+- **Performance Testing**: Load testing with large variation sets
+- **Error Boundaries**: Graceful error handling and user feedback
+
+## Success Criteria
+
+### Functional Requirements
+- ✅ All variation data comes from real WooCommerce products
+- ✅ Variation names, prices, and attributes are accurate
+- ✅ Selection behavior matches option variableType setting
+- ✅ Price calculations are correct and match backend
+
+### Non-Functional Requirements
+- ✅ Popup loads quickly with real data
+- ✅ Error handling is graceful and user-friendly
+- ✅ Code is maintainable and well-documented
+- ✅ Performance is optimized for large variation sets
+
+### User Experience Requirements
+- ✅ Users see accurate, real-time variation information
+- ✅ Selection process is intuitive and reliable
+- ✅ Error states are handled gracefully
+- ✅ Loading states provide appropriate feedback
+
+## Definition of Done
+
+### Code Quality
+- [ ] All mock data removed from OptionVariationPopup
+- [ ] Real data integration is complete and tested
+- [ ] Error handling is comprehensive
+- [ ] Code review approved
+- [ ] TypeScript compilation without errors
+
+### Functionality
+- [ ] Real variation data displays correctly
+- [ ] Price calculations are accurate
+- [ ] Selection behavior works for both radio and checkbox modes
+- [ ] Stock status is displayed when available
+
+### Integration
+- [ ] OptionCard click handler updated for VARIABLE options
+- [ ] Integration with ModelConfigurator works seamlessly
+- [ ] Data flow from WooCommerce to popup is complete
+
+### Testing
+- [ ] Unit tests pass for real data integration
+- [ ] Integration tests verify complete data flow
+- [ ] Error handling tests cover edge cases
+- [ ] Performance tests with large variation sets
+
+## Related Tasks
+- **feat-option-variation-card**: Create dedicated variation card component
+- **bug-relatedoptions-field-mapping**: Fix data mapping inconsistencies
+- **feat-configurator-option-card-ux-improvements**: Improve option card UX
+
+## Notes
+- This task is critical for data accuracy and user trust
+- Focus on robust error handling for production reliability
+- Ensure backward compatibility with existing option data
+- Consider caching strategies for variation data performance

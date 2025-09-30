@@ -1,0 +1,743 @@
+type: bug
+id: bug-option-variation-popup-price-calculation
+title: "OptionVariationPopup: Selected Variation Prices Not Added to Parent Option Price"
+status: NEW
+priority: HIGH
+severity: HIGH
+assigned_to: frontend-dev
+created_date: 2025-01-16
+updated_date: 2025-01-16
+
+# Problem Statement
+## Issue Summary
+The OptionVariationPopup does not properly calculate the total price by adding selected variation prices to the parent option's base price. This results in incorrect price display and calculations, preventing users from seeing the accurate total cost of their configuration.
+
+## Current Behavior
+- OptionVariationPopup shows only variation price OR only parent option price
+- Selected variation prices are not added to parent option price
+- Total price display is incorrect
+- "Add to Configuration" adds item with wrong price
+- Configuration summary shows incorrect totals
+- Users cannot see accurate combined pricing
+
+## Expected Behavior
+- OptionVariationPopup should display parent option base price
+- Selected variation prices should be added to parent price
+- Total should be: Parent Price + Selected Variation(s) Price
+- Price preview should update as variations are selected/deselected
+- "Add to Configuration" should use correct combined price
+- Configuration summary should reflect accurate totals
+
+## Impact Assessment
+### User Impact
+- **🚨 HIGH**: Users see incorrect pricing information
+- **💰 Price Confusion**: Cannot determine actual cost
+- **🤝 Trust Issues**: Incorrect prices damage credibility
+- **😕 Decision Making**: Cannot make informed selections
+- **📞 Support Burden**: Increased pricing-related inquiries
+
+### Business Impact
+- **💸 Revenue Loss**: Incorrect pricing may prevent purchases
+- **🏢 Brand Damage**: Pricing errors damage professional image
+- **📉 Conversion Rate**: Users abandon due to pricing confusion
+- **⚠️ Legal Risk**: Incorrect pricing could create legal issues
+- **🔥 High Severity**: Critical for variation-based products
+
+### Technical Impact
+- **🔴 Calculation Error**: Price calculations fundamentally broken
+- **🔗 Integration Broken**: Variation prices not integrated with option prices
+- **💾 State Error**: Configuration state stores incorrect prices
+- **🎯 Component Logic**: Popup component logic flawed
+- **🔧 Total Calculation**: Cart totals will be incorrect
+
+# Root Cause Analysis
+
+## Likely Causes
+1. **Missing Price Calculation Logic**: Popup doesn't calculate combined price
+2. **Incorrect Price Display**: Shows only variation price, not total
+3. **State Management Issue**: Selected variations not tracked for price calculation
+4. **Component Logic Error**: AddToConfiguration doesn't include variation prices
+5. **Price Aggregation Missing**: No logic to sum parent + variation prices
+6. **Data Structure Issue**: Variation prices not properly structured
+7. **Missing Price Preview**: No real-time price preview as variations selected
+
+## Data Flow Analysis
+```
+Parent Option Price: $100
+    +
+Selected Variation Price: $25
+    =
+Expected Total: $125
+    ↓
+Current Display: $25 (WRONG) or $100 (WRONG)
+    ↓
+Should Display: $125 (CORRECT)
+```
+
+## Affected Components
+### Primary Components
+- **OptionVariationPopup**: Price calculation and display logic
+- **OptionVariationCard**: Variation price display
+- **ModelConfigurator**: Receives incorrect price from popup
+- **SummaryPanel**: Displays incorrect configuration totals
+- **ConfiguratorStore**: Stores incorrect prices in state
+
+### Secondary Components
+- Price utilities (`calculateOptionPrice`, `formatPrice`)
+- Configuration summary calculations
+- Cart integration (receives wrong prices)
+
+# Technical Investigation
+
+## Current Implementation Issues
+
+### Issue 1: Missing Price Calculation in Popup
+```typescript
+// PROBLEMATIC: Popup may only show variation price
+const OptionVariationPopup = ({ option, selectedVariations, onAddToConfiguration }) => {
+  // ❌ Missing: Combined price calculation
+  const displayPrice = selectedVariations[0]?.price || 0; // WRONG
+  
+  return (
+    <div className="popup-footer">
+      <div className="total-price">
+        Total: ${displayPrice} {/* ❌ Only shows variation price */}
+      </div>
+      <button onClick={() => onAddToConfiguration(option, selectedVariations)}>
+        Add to Configuration
+      </button>
+    </div>
+  );
+};
+```
+
+### Issue 2: Missing Real-time Price Preview
+```typescript
+// PROBLEMATIC: Price doesn't update as selections change
+const [selectedVariations, setSelectedVariations] = useState([]);
+
+// ❌ Missing: Price preview calculation
+// Should recalculate when selectedVariations changes
+```
+
+### Issue 3: Incorrect Price in AddToConfiguration
+```typescript
+// PROBLEMATIC: Option added with wrong price
+const handleAddToConfiguration = () => {
+  onAddToConfiguration(option, selectedVariations);
+  // ❌ Missing: Combined price calculation before adding
+};
+```
+
+## Expected Fix Implementation
+
+### Fix 1: Add Price Calculation Logic
+```typescript
+// FIXED: Calculate combined price correctly
+import { parsePrice, formatPrice } from '@/lib/utils/priceUtils';
+import { useMemo, useCallback } from 'react';
+
+const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
+  option,
+  isOpen,
+  selectedVariations,
+  onClose,
+  onAddToConfiguration,
+  onCancel
+}) => {
+  // Parse parent option base price
+  const baseOptionPrice = useMemo(() => {
+    return parsePrice(option.price || option.regularPrice);
+  }, [option.price, option.regularPrice]);
+
+  // Calculate selected variations total
+  const variationsTotal = useMemo(() => {
+    return selectedVariations.reduce((sum, variation) => {
+      const variationPrice = parsePrice(variation.price || variation.regularPrice);
+      return sum + variationPrice;
+    }, 0);
+  }, [selectedVariations]);
+
+  // Calculate combined total
+  const totalPrice = useMemo(() => {
+    // For radio type: Parent price + ONE selected variation price
+    if (option.variableType === 'radio') {
+      const selectedVariation = selectedVariations[0];
+      if (selectedVariation) {
+        const variationPrice = parsePrice(selectedVariation.price);
+        return baseOptionPrice + variationPrice;
+      }
+      return baseOptionPrice;
+    }
+    
+    // For checkbox type: Parent price + ALL selected variation prices
+    if (option.variableType === 'checkbox') {
+      return baseOptionPrice + variationsTotal;
+    }
+    
+    // Default: Parent price only
+    return baseOptionPrice;
+  }, [baseOptionPrice, variationsTotal, selectedVariations, option.variableType]);
+
+  // Format for display
+  const displayTotal = formatPrice(totalPrice);
+
+  return (
+    <div className="option-variation-popup">
+      <div className="popup-header">
+        <h3>{option.name}</h3>
+        <button onClick={onClose}>×</button>
+      </div>
+      
+      <div className="popup-body">
+        {/* Price Breakdown */}
+        <div className="price-breakdown">
+          <div className="price-item">
+            <span className="label">Base Option Price:</span>
+            <span className="value">{formatPrice(baseOptionPrice)}</span>
+          </div>
+          
+          {selectedVariations.length > 0 && (
+            <>
+              <div className="price-divider">+</div>
+              <div className="price-item">
+                <span className="label">Selected Variations:</span>
+                <span className="value">{formatPrice(variationsTotal)}</span>
+              </div>
+            </>
+          )}
+          
+          <div className="price-divider total-divider">=</div>
+          
+          <div className="price-item price-total">
+            <span className="label">Total Price:</span>
+            <span className="value">{displayTotal}</span>
+          </div>
+        </div>
+        
+        {/* Variations Grid */}
+        <div className="variations-grid">
+          {option.variations?.map((variation) => (
+            <OptionVariationCard
+              key={variation.id}
+              variation={variation}
+              option={option}
+              isSelected={isVariationSelected(variation.id)}
+              selectionType={option.variableType === 'checkbox' ? 'checkbox' : 'radio'}
+              onToggle={handleVariationToggle}
+              showPrice={true}
+            />
+          ))}
+        </div>
+      </div>
+      
+      <div className="popup-footer">
+        <div className="footer-total">
+          <span className="total-label">Total:</span>
+          <span className="total-value">{displayTotal}</span>
+        </div>
+        
+        <div className="footer-actions">
+          <button 
+            className="btn-cancel" 
+            onClick={onCancel}
+          >
+            Cancel
+          </button>
+          <button 
+            className="btn-add" 
+            onClick={() => handleAddWithCorrectPrice()}
+            disabled={selectedVariations.length === 0 && option.type === 'VARIABLE'}
+          >
+            Add to Configuration
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+### Fix 2: Update handleAddToConfiguration
+```typescript
+// FIXED: Add option with combined price
+const handleAddWithCorrectPrice = useCallback(() => {
+  // Create enhanced option object with combined price
+  const optionWithTotalPrice = {
+    ...option,
+    selectedVariations,
+    totalPrice: totalPrice, // ⭐ Combined price
+    priceBreakdown: {
+      basePrice: baseOptionPrice,
+      variationsTotal: variationsTotal,
+      combinedTotal: totalPrice
+    }
+  };
+
+  // Log for debugging
+  console.log('Adding option with combined price:', {
+    optionId: option.id,
+    optionName: option.name,
+    basePrice: baseOptionPrice,
+    variationsTotal: variationsTotal,
+    totalPrice: totalPrice,
+    selectedVariations: selectedVariations.map(v => ({
+      id: v.id,
+      name: v.name,
+      price: parsePrice(v.price)
+    }))
+  });
+
+  // Pass to parent with correct pricing
+  onAddToConfiguration(optionWithTotalPrice, selectedVariations);
+  
+  // Close popup
+  onClose();
+}, [option, selectedVariations, totalPrice, baseOptionPrice, variationsTotal, onAddToConfiguration, onClose]);
+```
+
+### Fix 3: Update ConfiguratorStore to Use Combined Price
+```typescript
+// src/stores/configuratorStore.ts
+addOption: (option, categoryId) => {
+  // Log incoming option price structure
+  console.log('Adding option to store:', {
+    optionId: option.id,
+    optionName: option.name,
+    basePrice: option.price,
+    totalPrice: option.totalPrice, // ⭐ Should include variations
+    hasVariations: option.selectedVariations?.length > 0,
+    selectedVariations: option.selectedVariations?.map(v => ({
+      id: v.id,
+      name: v.name,
+      price: v.price
+    }))
+  });
+
+  set((state) => {
+    const newSelectedOptions = { ...state.selectedOptions };
+    
+    if (!newSelectedOptions[categoryId]) {
+      newSelectedOptions[categoryId] = [];
+    }
+    
+    // Add option with combined price
+    if (category?.multiSelect) {
+      const exists = newSelectedOptions[categoryId].some(
+        opt => opt.databaseId === option.databaseId
+      );
+      if (!exists) {
+        newSelectedOptions[categoryId].push(option);
+      }
+    } else {
+      newSelectedOptions[categoryId] = [option];
+    }
+    
+    return { selectedOptions: newSelectedOptions };
+  });
+  
+  // Recalculate summary with correct prices
+  get().calculateSummary();
+  get().updateProgressCount();
+},
+
+calculateSummary: () => {
+  set((state) => {
+    const { model, selectedOptions } = state;
+    
+    const basePrice = parseFloat(model?.price?.toString() || '0');
+    
+    // ⭐ Use totalPrice if available (includes variations)
+    const optionsTotal = Object.values(selectedOptions)
+      .flat()
+      .reduce((total, option) => {
+        // Use combined price (base + variations) if available
+        const optionPrice = option.totalPrice || parseFloat(option.price?.toString() || '0');
+        
+        console.log('Calculating option price:', {
+          optionId: option.id,
+          optionName: option.name,
+          basePrice: parseFloat(option.price?.toString() || '0'),
+          totalPrice: option.totalPrice,
+          usedPrice: optionPrice
+        });
+        
+        return total + optionPrice;
+      }, 0);
+    
+    // Calculate final totals
+    const installationCost = model?.installationRequired ? 300 : 0;
+    const shippingCost = 50;
+    const subtotal = basePrice + optionsTotal + installationCost + shippingCost;
+    const taxAmount = subtotal * 0.08;
+    const grandTotal = subtotal + taxAmount;
+    
+    const newSummary: ConfigurationSummary = {
+      basePrice,
+      optionsTotal,
+      installationCost,
+      shippingCost,
+      taxAmount: Math.round(taxAmount * 100) / 100,
+      grandTotal: Math.round(grandTotal * 100) / 100,
+      estimatedDelivery: '2-3 weeks',
+      financingOptions: calculateFinancingOptions(grandTotal),
+      insuranceEstimate: calculateInsuranceEstimate(grandTotal)
+    };
+    
+    return { summary: newSummary, previousSummary: state.summary };
+  });
+}
+```
+
+### Fix 4: Update SummaryPanel to Show Price Breakdown
+```typescript
+// src/components/SummaryPanel.tsx
+const SummaryPanel = ({ basePrice, selectedOptions, summary }) => {
+  return (
+    <div className="summary-panel">
+      <h3>Configuration Summary</h3>
+      
+      {/* Base Model Price */}
+      <div className="price-item">
+        <span className="label">Base Model:</span>
+        <span className="value">{formatPrice(basePrice)}</span>
+      </div>
+      
+      {/* Selected Options with Breakdown */}
+      {selectedOptions.map((option) => (
+        <div key={option.id} className="option-group">
+          <div className="price-item">
+            <span className="label">{option.name}:</span>
+            <span className="value">
+              {formatPrice(option.totalPrice || option.price)}
+            </span>
+          </div>
+          
+          {/* Show variation breakdown if available */}
+          {option.selectedVariations && option.selectedVariations.length > 0 && (
+            <div className="variation-breakdown">
+              <div className="sub-item">
+                <span className="label">Base Option:</span>
+                <span className="value">{formatPrice(option.price)}</span>
+              </div>
+              {option.selectedVariations.map((variation) => (
+                <div key={variation.id} className="sub-item">
+                  <span className="label">+ {variation.name}:</span>
+                  <span className="value">{formatPrice(variation.price)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+      
+      {/* Total */}
+      <div className="price-divider"></div>
+      <div className="price-item price-total">
+        <span className="label">Total:</span>
+        <span className="value">{formatPrice(summary.grandTotal)}</span>
+      </div>
+    </div>
+  );
+};
+```
+
+## Price Calculation Examples
+
+### Example 1: Radio Type (Single Variation Selection)
+```typescript
+Parent Option: "Seat Color" - $100
+Selected Variation: "Red Leather" - $25
+
+Calculation:
+  Base Option Price: $100
+  + Selected Variation: $25
+  = Total: $125
+
+User sees in popup:
+  "Base Option Price: $100.00"
+  "+ Selected Variation: $25.00"
+  "─────────────────────────"
+  "Total: $125.00"
+```
+
+### Example 2: Checkbox Type (Multiple Variation Selection)
+```typescript
+Parent Option: "Safety Features" - $200
+Selected Variations:
+  - "Emergency Stop" - $50
+  - "LED Lights" - $30
+
+Calculation:
+  Base Option Price: $200
+  + Emergency Stop: $50
+  + LED Lights: $30
+  = Total: $280
+
+User sees in popup:
+  "Base Option Price: $200.00"
+  "+ Emergency Stop: $50.00"
+  "+ LED Lights: $30.00"
+  "─────────────────────────"
+  "Total: $280.00"
+```
+
+### Example 3: Simple Option (No Variations)
+```typescript
+Parent Option: "Extended Warranty" - $150
+No Variations
+
+Calculation:
+  Base Option Price: $150
+  + Variations: $0
+  = Total: $150
+
+User sees in popup:
+  "Option Price: $150.00"
+  "Total: $150.00"
+```
+
+## User Experience Flow
+
+### Selection Flow
+1. **User clicks option card** → OptionVariationPopup opens
+2. **Popup displays**:
+   - Parent option name and description
+   - Base option price: $100
+   - Available variations with individual prices
+   - Current total: $100 (base only)
+3. **User selects variation** (e.g., Red Leather - $25)
+4. **Price preview updates**:
+   - Base option price: $100
+   - + Selected variation: $25
+   - = Total: $125
+5. **User clicks "Add to Configuration"**
+6. **Configuration summary updates**:
+   - Shows "Seat Color (Red Leather): $125"
+   - Updates grand total correctly
+
+### Price Preview Requirements
+- **Real-time Updates**: Price updates as variations selected/deselected
+- **Clear Breakdown**: Shows base + variations = total
+- **Visual Feedback**: Highlight selected variations
+- **Accurate Totals**: Always shows correct combined price
+
+# Testing Requirements
+
+## Unit Tests
+```typescript
+describe('OptionVariationPopup Price Calculation', () => {
+  test('calculates total for radio type (single variation)', () => {
+    const option = {
+      id: '1',
+      name: 'Seat Color',
+      price: 100,
+      type: 'VARIABLE',
+      variableType: 'radio',
+      variations: [
+        { id: 'v1', name: 'Red', price: 25 },
+        { id: 'v2', name: 'Blue', price: 30 }
+      ]
+    };
+    
+    const selectedVariations = [{ id: 'v1', name: 'Red', price: 25 }];
+    
+    const { getByText } = render(
+      <OptionVariationPopup 
+        option={option} 
+        selectedVariations={selectedVariations}
+        isOpen={true}
+      />
+    );
+    
+    // Should show combined price: 100 + 25 = 125
+    expect(getByText('$125.00')).toBeInTheDocument();
+  });
+
+  test('calculates total for checkbox type (multiple variations)', () => {
+    const option = {
+      id: '1',
+      name: 'Safety Features',
+      price: 200,
+      type: 'VARIABLE',
+      variableType: 'checkbox',
+      variations: [
+        { id: 'v1', name: 'Emergency Stop', price: 50 },
+        { id: 'v2', name: 'LED Lights', price: 30 }
+      ]
+    };
+    
+    const selectedVariations = [
+      { id: 'v1', name: 'Emergency Stop', price: 50 },
+      { id: 'v2', name: 'LED Lights', price: 30 }
+    ];
+    
+    const { getByText } = render(
+      <OptionVariationPopup 
+        option={option} 
+        selectedVariations={selectedVariations}
+        isOpen={true}
+      />
+    );
+    
+    // Should show combined price: 200 + 50 + 30 = 280
+    expect(getByText('$280.00')).toBeInTheDocument();
+  });
+
+  test('updates price preview when variations selected', () => {
+    const { rerender, getByText } = render(
+      <OptionVariationPopup 
+        option={option} 
+        selectedVariations={[]}
+      />
+    );
+    
+    // Initially shows base price only
+    expect(getByText('$100.00')).toBeInTheDocument();
+    
+    // Select a variation
+    rerender(
+      <OptionVariationPopup 
+        option={option} 
+        selectedVariations={[{ id: 'v1', name: 'Red', price: 25 }]}
+      />
+    );
+    
+    // Should now show combined price
+    expect(getByText('$125.00')).toBeInTheDocument();
+  });
+});
+```
+
+## Integration Tests
+```typescript
+describe('Variation Price Integration', () => {
+  test('adds option to configuration with correct combined price', async () => {
+    const user = userEvent.setup();
+    const mockAddToConfiguration = jest.fn();
+    
+    render(
+      <ModelConfigurator>
+        <OptionVariationPopup
+          option={testOption}
+          isOpen={true}
+          onAddToConfiguration={mockAddToConfiguration}
+        />
+      </ModelConfigurator>
+    );
+    
+    // Select a variation
+    await user.click(screen.getByText('Red Leather'));
+    
+    // Click Add to Configuration
+    await user.click(screen.getByText('Add to Configuration'));
+    
+    // Verify correct combined price passed
+    expect(mockAddToConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        totalPrice: 125, // 100 (base) + 25 (variation)
+        selectedVariations: expect.arrayContaining([
+          expect.objectContaining({ name: 'Red Leather', price: 25 })
+        ])
+      }),
+      expect.any(Array)
+    );
+  });
+
+  test('configuration summary shows correct total with variations', async () => {
+    // ... test that summary panel displays combined price correctly
+  });
+});
+```
+
+## Manual Testing Checklist
+- [ ] Test radio variation type: Select one variation, verify price = base + variation
+- [ ] Test checkbox variation type: Select multiple variations, verify price = base + all variations
+- [ ] Test variation selection changes: Price updates in real-time
+- [ ] Test add to configuration: Summary shows combined price
+- [ ] Test configuration total: Grand total includes all combined prices
+- [ ] Test with variations that have price 0
+- [ ] Test with variations that have sale prices
+- [ ] Test deselecting variations: Price reduces correctly
+
+# Acceptance Criteria
+
+## Functional Requirements
+- [ ] OptionVariationPopup calculates combined price (parent + variations)
+- [ ] Price preview updates in real-time as variations selected/deselected
+- [ ] Radio type: Base price + ONE selected variation price
+- [ ] Checkbox type: Base price + ALL selected variation prices
+- [ ] "Add to Configuration" passes correct combined price
+- [ ] Configuration summary displays combined prices correctly
+- [ ] Grand total includes all combined option prices
+
+## Visual Requirements
+- [ ] Clear price breakdown shown in popup
+- [ ] Base option price displayed separately
+- [ ] Selected variation prices displayed separately
+- [ ] Combined total prominently displayed
+- [ ] Price updates smoothly without flicker
+- [ ] Formatting consistent ($X.XX) throughout
+
+## Data Requirements
+- [ ] Option objects include totalPrice field
+- [ ] Variation prices properly parsed and validated
+- [ ] Price breakdown data structure implemented
+- [ ] State management stores combined prices
+- [ ] Cart receives correct combined prices
+
+## Technical Requirements
+- [ ] Price calculation uses useMemo for performance
+- [ ] Handles null/undefined prices gracefully
+- [ ] Supports both radio and checkbox types
+- [ ] Comprehensive logging for debugging
+- [ ] Unit tests cover all calculation scenarios
+- [ ] Integration tests verify end-to-end flow
+
+# Related Issues
+
+## Connected to Other Pricing Bugs
+- `bug-configurator-all-products-price-zero`: May share root cause
+- `bug-option-variations-price-zero`: Variation pricing issues
+- Price calculation is fundamental to all configurator functionality
+
+## Dependencies
+- Requires proper variation price data from GraphQL
+- Requires price utilities (`parsePrice`, `formatPrice`)
+- Requires state management to store combined prices
+- May be blocked by `bug-option-variations-price-zero`
+
+# Estimated Effort
+
+- **Investigation & Analysis**: 1-2 hours
+- **Component Updates**: 3-4 hours (OptionVariationPopup, ModelConfigurator)
+- **State Management Updates**: 2-3 hours (configuratorStore)
+- **Price Calculation Logic**: 2-3 hours
+- **Testing**: 3-4 hours
+- **Documentation**: 1 hour
+- **Total**: **12-17 hours**
+
+# Priority Justification
+
+## Why HIGH Priority
+1. **Pricing Accuracy**: Critical for user trust
+2. **Revenue Impact**: Incorrect prices prevent sales
+3. **User Experience**: Confusing pricing damages UX
+4. **Business Logic**: Fundamental calculation error
+5. **Dependencies**: Blocks accurate configuration pricing
+
+## Immediate Benefits
+- Users see accurate pricing for options with variations
+- Configuration totals are correct
+- Cart receives accurate pricing
+- Reduces pricing-related support tickets
+- Improves user trust and conversion
+
+# Notes
+- This is a **fundamental business logic error** in pricing calculations
+- Must handle both radio (single) and checkbox (multiple) variation types
+- Price breakdown should be clear and transparent to users
+- Real-time price preview improves user experience
+- **IMPORTANT**: Test thoroughly with different variation types and price combinations
+- **IMPORTANT**: Ensure cart and checkout receive correct combined prices
+- Consider showing price breakdown in configuration summary for transparency

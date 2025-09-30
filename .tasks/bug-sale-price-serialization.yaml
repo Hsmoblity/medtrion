@@ -1,0 +1,41 @@
+bug:
+  title: Product detail page crashes on featured CTA
+  area: frontend
+  severity: high
+  priority: p0
+  status: completed
+  reported_by: techlead
+  environment: production
+  resolved_date: 2025-09-28
+  resolved_by: frontend-team
+
+summary:
+  impact: Users cannot open featured products from home page; page hard-crashes with 500 error.
+  scope: Featured Product card -> View Detail; reproducible for any item missing `salePrice`.
+  regression: unknown
+
+steps_to_reproduce:
+  - Navigate to home page.
+  - Scroll to Featured Product section.
+  - Click `View Detail` on any card.
+  - Observe Next.js error page.
+
+expected_result: Product detail page loads, sale price displays or hides gracefully.
+actual_result: Next.js throws `Error serializing .product.salePrice` from `getServerSideProps`, blocking page.
+
+root_cause_hypothesis:
+  - `getServerSideProps` returns `product.salePrice` as `undefined` when no sale price applies.
+  - Next.js cannot JSON-serialize `undefined` during SSR payload generation.
+  - Need to normalize missing prices to `null` or omit the field.
+
+proposed_fix:
+  - Adjust product transform in `/product/[slug]` GSSP to set `salePrice: null` when value is missing.
+  - Update consuming components to handle `null` explicitly.
+  - Add unit / integration check ensuring serialization-safe payload.
+
+testing:
+  - Run `yarn test` (or relevant suite) after adjustments.
+  - Manual QA: repeat repro steps; ensure page renders without error and pricing UI behaves correctly.
+
+notes:
+  - Verify other nullable fields returned from the API follow same pattern to avoid similar crashes.

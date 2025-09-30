@@ -1,0 +1,42 @@
+feature:
+  title: Connect configurator to live GraphQL endpoint
+  area: frontend
+  priority: p0
+  status: new
+  requested_by: techlead
+  environment: production
+
+summary:
+  goal: Replace mock configurator GraphQL responses with live WooCommerce/WordPress data so base products and options load in production.
+  scope:
+    - Update `configuratorGraphQL` client to target real endpoint via env configuration.
+    - Remove or gate the mock handler in `src/pages/api/graphql.ts` outside dev environments.
+    - Populate categories/options with actual data, including fallbacks when service unavailable.
+  impact: Enables real product configurations, eliminating static dummy payloads.
+
+acceptance_criteria:
+  - `configuratorAPI.getModelWithCategories` fetches live data in production, confirmed via integration test hitting staging endpoint.
+  - Mock `/api/graphql` only used in local dev; production build bypasses it.
+  - Configurator page renders real categories/options for at least one model slug; fallback logic handles service errors gracefully.
+  - QA sign-off confirms end-to-end flow from configurator to cart uses live data.
+
+implementation_plan:
+  - Parameterize `configuratorGraphQL` endpoint (env vars, per env defaults) and document setup.
+  - Introduce runtime check to disable mock API in prod; adjust Next.js rewrites or feature flags if needed.
+  - Implement real option hydration (WooCommerce REST/GraphQL) filling `ConfiguratorCategory.options`, mapping fields per PRD specs.
+  - Write integration tests hitting mocked HTTP layer to ensure client parses live schema; add smoke test in CI verifying env config.
+  - Update ops/README with deployment instructions and rollback plan.
+
+risks:
+  - Live endpoint auth requirements may block unauthenticated calls; coordinate with backend.
+  - Schema drift between mock and real endpoint could break parsing; add validation layer.
+  - Increased latency or failures from live service could degrade UX; implement loading/error states.
+
+stakeholders:
+  - Frontend team
+  - Backend/API team
+  - QA
+  - Product
+
+notes:
+  - Align with data normalization initiative to ensure missing fields handled post-integration.

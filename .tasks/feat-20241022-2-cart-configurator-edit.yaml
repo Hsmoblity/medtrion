@@ -1,0 +1,47 @@
+id: FEAT-20241022-2
+project: front-store
+template: Feature
+description: Allow shoppers to jump from cart items to the product configurator to edit selections.
+
+tasks:
+  - name: Enable cart-to-configurator editing flow
+    description: Add an "Edit configuration" link on each base cart item that routes to the existing configurator with context.
+    files:
+      - src/components/PageLayout/Cart/Item.tsx
+      - src/components/OptionsClientWrapper.tsx
+      - src/pages/product/[slug]/options.tsx
+    steps:
+      - Surface an accessible "Edit configuration" control for base products in the cart UI, positioned at the top of each item block.
+      - Pass the cart item identifier and slug through the router (e.g. `/product/{slug}/options?cartItemId=...`) so the configurator can preload the current state.
+      - Ensure the options page recognises the edit intent and displays product details plus available option sets for modification.
+    agents:
+      - role: frontend-dev
+        responsibilities:
+          - Update cart item markup and styling to include the edit link and ensure it works for keyboard users.
+          - Confirm `OptionsClientWrapper` receives the `cartItemId` query param and loads the existing selection.
+      - role: backend-dev
+        responsibilities:
+          - Verify `/product/[slug]/options` server-side props handle the new routing pattern and return required data.
+    outputs:
+      - Cart UI exposes an edit link per product that opens the configurator populated with existing options.
+
+workflow:
+  order: sequential
+  dependencies: []
+
+rules:
+  - DRY, KISS
+  - stable params/returns
+  - no duplicate functions
+  - no ghost code
+  - no overlaping code
+  - no unnecessary complexity
+  - confirm if confuses requirements
+
+checklist:
+  - [ ] Code reviewed
+  - [ ] Tests passed
+
+tracking:
+  document: ../.tracking/feat_tracking.md
+  entry: "FEAT-20241022-2 | Cart item edit link opens configurator | new"

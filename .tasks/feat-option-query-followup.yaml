@@ -1,0 +1,47 @@
+feature:
+  title: Fetch option products via GetProductsByIds after main product load
+  area: frontend
+  priority: p0
+  status: completed
+  requested_by: techlead
+  environment: production
+  completed_date: 2025-09-28
+  implemented_by: frontend-team
+
+summary:
+  goal: Once a product detail page receives `relatedOptions`, trigger the WooCommerce `GetProductsByIds` query to hydrate option products on demand.
+  scope:
+    - Use existing GraphQL template `GetProductsByIds($ids: [Int])` (include, typeIn: [VARIABLE]) to pull option data.
+    - Integrate into product detail lifecycle (SSR or lazy load) so options render only when needed.
+    - Normalize response with attributes/specifications for configurator use.
+  impact: Ensures options data is fetched precisely when related IDs exist, avoiding unnecessary bulk requests.
+
+acceptance_criteria:
+  - Product detail flow collects `relatedOptions` and calls `GetProductsByIds` with numeric IDs when array is non-empty.
+  - Response mapped to option schema, including `productSpecifications`, `globalAttributes`, variations, and nested `relatedOptions`.
+  - Option data caches or memoizes to prevent redundant queries on re-renders/navigation.
+  - Tests cover scenario where options exist (data fetched) and when array empty (query skipped).
+
+implementation_plan:
+  - Wire `_related_options` (normalized) into a helper that invokes `fetchProductsByDatabaseIds`.
+  - Attach result to page props or client state (`_related_options_products`).
+  - Handle loading/error states (hook into shared overlay when lazy loading). 
+  - Update documentation/tests to reflect new behavior.
+
+risks:
+  - Large option arrays increase latency; combine with lazy-loading strategy.
+  - Ensure backend returns complete data for option products; coordinate as needed.
+
+stakeholders:
+  - Frontend team
+  - Backend/WooCommerce team
+  - QA
+
+implementation_summary:
+  - Added fetchOptionProductsByIds() function in src/lib/woocommerce.ts using complete GetProductsByIds query template
+  - Updated useOptionProducts hook to use the new specialized function with full option product data
+  - Query includes all required fields: productSpecifications, globalAttributes, variations, relatedOptions
+  - Implements caching and memoization to prevent redundant queries
+  - Provides graceful error handling that returns empty array instead of throwing
+  - Maps WooCommerce response to ConfigurableProductSchema format for configurator compatibility
+  - Supports both simple and variable product types with proper price normalization

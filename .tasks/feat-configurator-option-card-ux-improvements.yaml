@@ -1,0 +1,579 @@
+type: feature
+id: feat-configurator-option-card-ux-improvements
+title: "Improve Option Card UX: Toggle selection and fix description display"
+created: 2025-09-29
+status: open
+priority: medium
+agent: frontend-dev
+
+## Feature Overview
+
+Improve the user experience of option cards in the Model Configurator by replacing the "Add to Configuration" button with a toggle selection mechanism and fixing the description display to show normal text instead of HTML code.
+
+### Business Value
+
+- **User Experience**: More intuitive selection mechanism with visual feedback
+- **Usability**: Clear toggle states (selected/deselected) improve user understanding
+- **Content Display**: Proper text rendering instead of raw HTML improves readability
+- **Accessibility**: Better screen reader support with clear selection states
+- **Consistency**: Unified selection pattern across all option cards
+
+## Current State
+
+**Problems**:
+1. **Button Text**: "Add to Configuration" button doesn't clearly indicate selection state
+2. **No Toggle Feedback**: Users can't easily see if an option is already selected
+3. **HTML Display**: Short descriptions show raw HTML code instead of formatted text
+4. **Poor UX**: Confusing interaction pattern for selection/deselection
+
+**Current Implementation**:
+```tsx
+// Current problematic implementation
+<OptionCard
+  option={option}
+  onToggle={() => handleOptionToggle(option)}
+  // Button shows "Add to Configuration" regardless of state
+  // Description shows HTML: "<p>This is a <strong>description</strong></p>"
+/>
+```
+
+## Desired State
+
+**Improved Implementation**:
+1. **Toggle Selection**: Replace button with clear toggle mechanism
+2. **Visual States**: Clear selected/deselected visual indicators
+3. **Text Rendering**: Display descriptions as formatted text, not HTML
+4. **Better UX**: Intuitive selection pattern with immediate feedback
+
+## Technical Details
+
+### Affected Components
+
+**Primary**: `src/components/configurator/OptionCard.tsx`
+- Main option card component
+- Contains selection button and description display
+- Needs toggle mechanism and text rendering fixes
+
+**Secondary**: `src/components/configurator/CategoryGroup.tsx`
+- Renders OptionCard components
+- May need to pass selection state properly
+
+**State Management**: `src/components/configurator/ModelConfigurator.tsx`
+- Manages selected options state
+- Handles toggle selection logic
+
+### Current Issues Analysis
+
+#### Issue 1: Button Text and Selection State
+
+**Problem**: Button always shows "Add to Configuration" regardless of selection state
+
+**Current Code**:
+```tsx
+// OptionCard.tsx - Current implementation
+<button 
+  onClick={onToggle}
+  className="btn-add-to-configuration"
+>
+  Add to Configuration
+</button>
+```
+
+**Issues**:
+- No indication if option is already selected
+- Confusing for users who want to deselect
+- No visual feedback for current state
+
+#### Issue 2: HTML Description Display
+
+**Problem**: Short descriptions display raw HTML instead of formatted text
+
+**Current Code**:
+```tsx
+// OptionCard.tsx - Current implementation
+<div className="option-description">
+  {option.shortDescription} // Shows: "<p>This is a <strong>description</strong></p>"
+</div>
+```
+
+**Issues**:
+- Raw HTML visible to users
+- Poor readability
+- Unprofessional appearance
+
+## Proposed Solutions
+
+### Solution 1: Toggle Selection with Visual States
+
+**Approach**: Replace button with toggle mechanism showing clear selection states
+
+```tsx
+// OptionCard.tsx - Improved implementation
+interface OptionCardProps {
+  option: ConfigurableProductSchema;
+  isSelected: boolean;
+  onToggle: (option: ConfigurableProductSchema) => void;
+  // ... other props
+}
+
+const OptionCard: React.FC<OptionCardProps> = ({ option, isSelected, onToggle }) => {
+  return (
+    <div className={`option-card ${isSelected ? 'option-card-selected' : 'option-card-unselected'}`}>
+      {/* Card content */}
+      <div className="option-content">
+        <h3 className="option-title">{option.name}</h3>
+        
+        {/* Fixed description rendering */}
+        <div 
+          className="option-description"
+          dangerouslySetInnerHTML={{ __html: option.shortDescription }}
+        />
+        
+        <div className="option-price">${option.price}</div>
+      </div>
+      
+      {/* Toggle selection button */}
+      <button
+        onClick={() => onToggle(option)}
+        className={`option-toggle-btn ${isSelected ? 'selected' : 'unselected'}`}
+        aria-label={isSelected ? `Remove ${option.name} from configuration` : `Add ${option.name} to configuration`}
+      >
+        {isSelected ? (
+          <>
+            <span className="toggle-icon">✓</span>
+            <span className="toggle-text">Selected</span>
+          </>
+        ) : (
+          <>
+            <span className="toggle-icon">+</span>
+            <span className="toggle-text">Select</span>
+          </>
+        )}
+      </button>
+    </div>
+  );
+};
+```
+
+**CSS for Toggle States**:
+```css
+.option-card {
+  @apply border-2 border-gray-200 rounded-lg p-4 transition-all duration-200;
+}
+
+.option-card-selected {
+  @apply border-blue-500 bg-blue-50;
+}
+
+.option-card-unselected {
+  @apply border-gray-200 bg-white hover:border-gray-300;
+}
+
+.option-toggle-btn {
+  @apply w-full py-2 px-4 rounded-md font-medium transition-all duration-200 flex items-center justify-center gap-2;
+}
+
+.option-toggle-btn.selected {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.option-toggle-btn.unselected {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.toggle-icon {
+  @apply text-lg font-bold;
+}
+```
+
+### Solution 2: Alternative Toggle Design
+
+**Approach**: Use checkbox-style toggle for more familiar UX
+
+```tsx
+// Alternative toggle implementation
+<div className="option-selection-area">
+  <label className="option-checkbox-label">
+    <input
+      type="checkbox"
+      checked={isSelected}
+      onChange={() => onToggle(option)}
+      className="option-checkbox"
+    />
+    <span className="option-checkbox-custom">
+      {isSelected && <span className="checkmark">✓</span>}
+    </span>
+    <span className="option-selection-text">
+      {isSelected ? 'Selected' : 'Select Option'}
+    </span>
+  </label>
+</div>
+```
+
+**CSS for Checkbox Toggle**:
+```css
+.option-checkbox-label {
+  @apply flex items-center gap-3 cursor-pointer;
+}
+
+.option-checkbox {
+  @apply sr-only; /* Hide default checkbox */
+}
+
+.option-checkbox-custom {
+  @apply w-6 h-6 border-2 border-gray-300 rounded flex items-center justify-center transition-all duration-200;
+}
+
+.option-checkbox:checked + .option-checkbox-custom {
+  @apply bg-blue-600 border-blue-600;
+}
+
+.checkmark {
+  @apply text-white text-sm font-bold;
+}
+
+.option-selection-text {
+  @apply text-sm font-medium;
+}
+```
+
+### Solution 3: Card-Level Toggle
+
+**Approach**: Make entire card clickable for selection
+
+```tsx
+// Card-level toggle implementation
+<div 
+  className={`option-card ${isSelected ? 'option-card-selected' : 'option-card-unselected'} cursor-pointer`}
+  onClick={() => onToggle(option)}
+  role="button"
+  tabIndex={0}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onToggle(option);
+    }
+  }}
+>
+  {/* Selection indicator */}
+  <div className="option-selection-indicator">
+    {isSelected ? (
+      <div className="selected-badge">
+        <span className="selected-icon">✓</span>
+        <span className="selected-text">Selected</span>
+      </div>
+    ) : (
+      <div className="unselected-badge">
+        <span className="unselected-icon">+</span>
+        <span className="unselected-text">Click to Select</span>
+      </div>
+    )}
+  </div>
+  
+  {/* Card content */}
+  <div className="option-content">
+    <h3 className="option-title">{option.name}</h3>
+    <div 
+      className="option-description"
+      dangerouslySetInnerHTML={{ __html: option.shortDescription }}
+    />
+    <div className="option-price">${option.price}</div>
+  </div>
+</div>
+```
+
+## Implementation Requirements
+
+### Files to Modify
+
+1. **`src/components/configurator/OptionCard.tsx`**
+   - Replace "Add to Configuration" button with toggle mechanism
+   - Fix description rendering to display formatted text
+   - Add selection state visual indicators
+   - Implement proper accessibility attributes
+
+2. **`src/components/configurator/CategoryGroup.tsx`**
+   - Pass `isSelected` prop to OptionCard components
+   - Ensure proper selection state management
+
+3. **`src/components/configurator/ModelConfigurator.tsx`**
+   - Update selection state management
+   - Ensure toggle logic works correctly
+
+4. **CSS/Styling Files**
+   - Add styles for selected/unselected states
+   - Implement toggle button styles
+   - Add hover and focus states
+
+### Description Rendering Fix
+
+**Current Problem**:
+```tsx
+// Shows raw HTML
+<div className="option-description">
+  {option.shortDescription} // "<p>This is a <strong>description</strong></p>"
+</div>
+```
+
+**Fixed Implementation**:
+```tsx
+// Shows formatted text
+<div 
+  className="option-description prose prose-sm max-w-none"
+  dangerouslySetInnerHTML={{ __html: option.shortDescription }}
+/>
+```
+
+**Alternative Safe Rendering**:
+```tsx
+// If HTML content needs sanitization
+import DOMPurify from 'dompurify';
+
+const sanitizedDescription = DOMPurify.sanitize(option.shortDescription);
+
+<div 
+  className="option-description prose prose-sm max-w-none"
+  dangerouslySetInnerHTML={{ __html: sanitizedDescription }}
+/>
+```
+
+### State Management Updates
+
+**CategoryGroup.tsx**:
+```tsx
+// Pass selection state to OptionCard
+<OptionCard
+  key={option.databaseId}
+  option={option}
+  isSelected={isSelected(option)} // Add this prop
+  onToggle={() => onToggleOption?.(option)}
+  // ... other props
+/>
+```
+
+**ModelConfigurator.tsx**:
+```tsx
+// Ensure proper selection state management
+const isSelected = (option: ConfigurableProductSchema): boolean => {
+  return selectedOptions.some(selected => selected.databaseId === option.databaseId);
+};
+
+const handleOptionToggle = (option: ConfigurableProductSchema) => {
+  if (isSelected(option)) {
+    // Remove from selection
+    setSelectedOptions(prev => 
+      prev.filter(selected => selected.databaseId !== option.databaseId)
+    );
+  } else {
+    // Add to selection
+    setSelectedOptions(prev => [...prev, option]);
+  }
+};
+```
+
+## Acceptance Criteria
+
+- [ ] "Add to Configuration" button replaced with toggle mechanism
+- [ ] Clear visual indication of selected/unselected states
+- [ ] Toggle button shows "Select" when unselected, "Selected" when selected
+- [ ] Option cards have visual feedback for selection state (border, background)
+- [ ] Short descriptions display as formatted text, not HTML code
+- [ ] HTML tags in descriptions are properly rendered
+- [ ] Toggle functionality works correctly (select/deselect)
+- [ ] Selection state persists when navigating between categories
+- [ ] Accessibility attributes are properly implemented
+- [ ] Keyboard navigation works for toggle functionality
+- [ ] Hover and focus states are clearly visible
+- [ ] Visual design is consistent with existing UI
+- [ ] No visual regressions in other parts of configurator
+- [ ] Performance is not degraded
+- [ ] Works across all supported browsers
+
+## Testing Plan
+
+### Manual Testing
+
+1. **Toggle Functionality**:
+   - [ ] Click option card to select (button shows "Selected")
+   - [ ] Click selected option to deselect (button shows "Select")
+   - [ ] Visual state changes are immediate and clear
+   - [ ] Selection state persists when switching categories
+
+2. **Description Rendering**:
+   - [ ] Descriptions show formatted text, not HTML code
+   - [ ] Bold, italic, and other formatting displays correctly
+   - [ ] Long descriptions wrap properly
+   - [ ] No HTML tags visible to users
+
+3. **Visual States**:
+   - [ ] Selected cards have distinct visual appearance
+   - [ ] Unselected cards have clear default appearance
+   - [ ] Hover states work correctly
+   - [ ] Focus states are visible for keyboard navigation
+
+4. **Accessibility**:
+   - [ ] Screen readers announce selection state correctly
+   - [ ] Keyboard navigation works (Tab, Enter, Space)
+   - [ ] ARIA labels are descriptive and accurate
+
+### Automated Testing
+
+```typescript
+// E2E Test - Option Card Toggle
+describe('Option Card Toggle Functionality', () => {
+  it('should toggle selection state correctly', () => {
+    cy.visit('/product/acorn-stairlift/configure');
+    
+    // Navigate to a category
+    cy.get('.configuration-category-item').contains('Warranty').click();
+    
+    // Wait for options to load
+    cy.get('.option-card').should('be.visible');
+    
+    // Test initial state (unselected)
+    cy.get('.option-card').first().should('have.class', 'option-card-unselected');
+    cy.get('.option-toggle-btn').first().should('contain', 'Select');
+    
+    // Click to select
+    cy.get('.option-toggle-btn').first().click();
+    
+    // Verify selected state
+    cy.get('.option-card').first().should('have.class', 'option-card-selected');
+    cy.get('.option-toggle-btn').first().should('contain', 'Selected');
+    
+    // Click to deselect
+    cy.get('.option-toggle-btn').first().click();
+    
+    // Verify unselected state
+    cy.get('.option-card').first().should('have.class', 'option-card-unselected');
+    cy.get('.option-toggle-btn').first().should('contain', 'Select');
+  });
+  
+  it('should display descriptions as formatted text', () => {
+    cy.visit('/product/acorn-stairlift/configure');
+    cy.get('.configuration-category-item').contains('Warranty').click();
+    
+    // Check that descriptions don't contain raw HTML
+    cy.get('.option-description').each(($desc) => {
+      cy.wrap($desc).should('not.contain', '<p>');
+      cy.wrap($desc).should('not.contain', '<strong>');
+      cy.wrap($desc).should('not.contain', '<em>');
+    });
+    
+    // Check that formatting is applied
+    cy.get('.option-description').should('be.visible');
+  });
+  
+  it('should maintain selection state across categories', () => {
+    cy.visit('/product/acorn-stairlift/configure');
+    
+    // Select an option in first category
+    cy.get('.configuration-category-item').first().click();
+    cy.get('.option-toggle-btn').first().click();
+    
+    // Switch to another category
+    cy.get('.configuration-category-item').eq(1).click();
+    
+    // Switch back to first category
+    cy.get('.configuration-category-item').first().click();
+    
+    // Verify option is still selected
+    cy.get('.option-card').first().should('have.class', 'option-card-selected');
+    cy.get('.option-toggle-btn').first().should('contain', 'Selected');
+  });
+});
+```
+
+### Visual Regression Testing
+
+```typescript
+// Visual regression test
+describe('Option Card Visual Regression', () => {
+  it('should match baseline for unselected state', () => {
+    cy.visit('/product/acorn-stairlift/configure');
+    cy.get('.configuration-category-item').contains('Warranty').click();
+    cy.wait(1000);
+    cy.matchImageSnapshot('option-cards-unselected-state');
+  });
+  
+  it('should match baseline for selected state', () => {
+    cy.visit('/product/acorn-stairlift/configure');
+    cy.get('.configuration-category-item').contains('Warranty').click();
+    cy.get('.option-toggle-btn').first().click();
+    cy.wait(1000);
+    cy.matchImageSnapshot('option-cards-selected-state');
+  });
+});
+```
+
+## Performance Considerations
+
+### Optimization Strategies
+
+1. **Memoization**: Use `React.memo` for OptionCard to prevent unnecessary re-renders
+2. **State Updates**: Batch state updates to prevent multiple re-renders
+3. **Description Parsing**: Cache parsed descriptions to avoid re-parsing HTML
+
+### Performance Tests
+
+```typescript
+// Performance test
+describe('Option Card Performance', () => {
+  it('should render many option cards without performance issues', () => {
+    const startTime = performance.now();
+    
+    cy.visit('/product/acorn-stairlift/configure');
+    cy.get('.configuration-category-item').contains('Warranty').click();
+    
+    cy.get('.option-card').should('have.length.greaterThan', 5);
+    
+    cy.then(() => {
+      const endTime = performance.now();
+      const renderTime = endTime - startTime;
+      expect(renderTime).to.be.lessThan(2000);
+    });
+  });
+});
+```
+
+## Related Issues
+
+- `bug-configurator-option-controls-missing`: Related to option card interaction
+- `bug-configurator-option-cards-overlap`: Layout improvements will benefit from better UX
+- `feat-configurator-semantic-section-classes`: Will use semantic classes for styling
+
+## Rollback Plan
+
+If the changes cause issues:
+
+1. **Immediate**: Revert to original "Add to Configuration" button
+2. **Alternative**: Implement simpler toggle without visual states
+3. **Long-term**: Redesign with different interaction pattern
+
+## Success Metrics
+
+- **User Experience**: Clear selection states and intuitive interaction
+- **Content Quality**: Proper text rendering without HTML artifacts
+- **Accessibility**: Improved screen reader support and keyboard navigation
+- **Performance**: No degradation in rendering or interaction speed
+- **Consistency**: Unified selection pattern across all option cards
+
+## Estimated Effort
+
+- **Planning**: 30 minutes
+- **Implementation**: 3-4 hours
+- **Testing**: 1-2 hours
+- **Documentation**: 30 minutes
+- **Total**: 5-7 hours
+
+## Notes
+
+- This is a UX improvement that will significantly enhance user experience
+- Consider user testing to validate the toggle interaction pattern
+- Ensure accessibility compliance for selection states
+- Test with various description content types (HTML, plain text, mixed)
+- Consider adding loading states for selection actions
+
+---
+
+**Agent Signature: 290925 - frontend-dev - feat-configurator-option-card-ux-improvements**

@@ -1,0 +1,540 @@
+type: bug
+id: bug-duplicate-fetch-functions
+title: "Code Quality: Duplicate/Overlapping Functions - fetchRelatedProductsByIds vs fetchOptionProductsByIds"
+status: COMPLETED
+priority: MEDIUM
+severity: MEDIUM
+assigned_to: backend-dev
+created_date: 2025-01-16
+updated_date: 2025-09-29
+completed_date: 2025-09-29
+
+# Problem Statement
+## Issue Summary
+The codebase contains duplicate or overlapping functions `fetchRelatedProductsByIds` and `fetchOptionProductsByIds` that appear to serve similar purposes. This violates the DRY (Don't Repeat Yourself) principle and creates maintenance issues, potential bugs, and code inconsistency.
+
+## Current Behavior
+- Two separate functions exist with similar functionality
+- Both functions fetch product data by IDs
+- May have different implementations for the same purpose
+- Causes confusion about which function to use
+- Increases maintenance burden
+- Risk of bugs due to inconsistent implementations
+- Code duplication increases codebase size
+
+## Expected Behavior
+- Single, well-designed function to fetch products by IDs
+- Clear naming convention that indicates purpose
+- Consistent implementation across codebase
+- Easy to maintain and extend
+- Well-documented with clear usage guidelines
+- Follows DRY principles
+
+## Impact Assessment
+### Technical Impact
+- **Code Quality**: DRY principle violation
+- **Maintainability**: Duplicate code increases maintenance burden
+- **Bug Risk**: Changes to one function may not be reflected in the other
+- **Performance**: Potential inefficiency from duplicate logic
+- **Developer Experience**: Confusion about which function to use
+
+### Development Impact
+- **Onboarding**: New developers confused by duplicate functions
+- **Code Reviews**: More complex reviews due to duplication
+- **Testing**: Duplicate test coverage needed
+- **Refactoring**: Harder to refactor with duplicate code
+- **Technical Debt**: Accumulates technical debt
+
+### Business Impact
+- **Velocity**: Slower development due to confusion
+- **Quality**: Higher risk of bugs from inconsistent implementations
+- **Cost**: More time spent maintaining duplicate code
+
+# Root Cause Analysis
+
+## Likely Causes
+1. **Historical Development**: Functions created at different times for similar purposes
+2. **Incomplete Refactoring**: One function created, but old one not removed
+3. **Different Use Cases**: Functions intended for different contexts but ended up similar
+4. **Lack of Code Review**: Duplication not caught during review
+5. **Missing Documentation**: Unclear which function to use for what purpose
+6. **Team Communication**: Different developers created similar functions independently
+
+## Code Analysis Required
+1. **Compare Function Signatures**: Analyze parameters, return types, and usage
+2. **Compare Implementations**: Identify differences in logic and data handling
+3. **Analyze Call Sites**: Understand how each function is used
+4. **Review GraphQL Queries**: Check if they use different queries
+5. **Check Data Mapping**: Compare how data is mapped and transformed
+
+# Technical Investigation
+
+## Function Comparison
+
+### Function 1: fetchRelatedProductsByIds
+**Expected Location**: `src/lib/woocommerce.ts` or similar
+**Expected Purpose**: Fetch related products by their IDs
+
+```typescript
+// Expected signature
+export const fetchRelatedProductsByIds = async (
+  ids: number[]
+): Promise<ProductSchema[]> => {
+  // Implementation details
+};
+```
+
+### Function 2: fetchOptionProductsByIds
+**Expected Location**: `src/lib/woocommerce.ts` or similar
+**Expected Purpose**: Fetch option products by their IDs
+
+```typescript
+// Expected signature
+export const fetchOptionProductsByIds = async (
+  ids: number[]
+): Promise<ConfigurableProductSchema[]> => {
+  // Implementation details
+};
+```
+
+## Key Questions to Answer
+1. **What are the differences in return types?**
+   - Does one return `ProductSchema[]` and other `ConfigurableProductSchema[]`?
+   - Are the return types actually different or just named differently?
+
+2. **What are the differences in data fetching?**
+   - Do they use different GraphQL queries?
+   - Do they fetch different fields?
+   - Do they have different error handling?
+
+3. **What are the differences in data mapping?**
+   - Do they map data differently?
+   - Do they apply different transformations?
+   - Do they validate data differently?
+
+4. **What are the differences in usage?**
+   - Are they called from different contexts?
+   - Do they serve different purposes?
+   - Can they be consolidated?
+
+## Expected Findings
+
+### Scenario 1: Identical Functions (Complete Duplication)
+If functions are identical:
+- **Action**: Remove one function
+- **Migration**: Update all call sites to use single function
+- **Effort**: Low (2-4 hours)
+
+### Scenario 2: Similar Functions with Minor Differences
+If functions have minor differences:
+- **Action**: Merge into single function with optional parameters
+- **Migration**: Update call sites with new parameters
+- **Effort**: Medium (4-8 hours)
+
+### Scenario 3: Different Purposes, Similar Implementation
+If functions serve different purposes but share logic:
+- **Action**: Extract shared logic to common utility function
+- **Migration**: Both functions use shared utility
+- **Effort**: Medium (6-10 hours)
+
+### Scenario 4: Significantly Different Functions
+If functions are actually different:
+- **Action**: Rename functions for clarity, document differences
+- **Migration**: Update documentation and comments
+- **Effort**: Low (2-4 hours)
+
+# Expected Fix Implementation
+
+## Step 1: Analyze Current Implementation
+
+### Analyze fetchRelatedProductsByIds
+```typescript
+// Read and analyze implementation
+// Check:
+// - GraphQL query used
+// - Data mapping logic
+// - Error handling
+// - Return type
+// - Call sites
+```
+
+### Analyze fetchOptionProductsByIds
+```typescript
+// Read and analyze implementation
+// Check:
+// - GraphQL query used
+// - Data mapping logic
+// - Error handling
+// - Return type
+// - Call sites
+```
+
+## Step 2: Determine Consolidation Strategy
+
+### Strategy A: Complete Consolidation (If Identical)
+```typescript
+// RECOMMENDED: Single function with clear name
+export const fetchProductsByIds = async (
+  ids: number[],
+  options?: {
+    includeVariations?: boolean;
+    includeRelatedOptions?: boolean;
+    type?: 'product' | 'option' | 'configurable';
+  }
+): Promise<ProductSchema[]> => {
+  // Unified implementation
+  const query = options?.includeVariations 
+    ? GET_PRODUCTS_WITH_VARIATIONS_BY_IDS 
+    : GET_PRODUCTS_BY_IDS;
+  
+  const response = await fetchGraphQL(query, { ids });
+  
+  // Unified data mapping
+  return response.data.products.nodes.map(mapWooToProductSchema);
+};
+
+// Create type-specific convenience functions
+export const fetchOptionProductsByIds = async (
+  ids: number[]
+): Promise<ConfigurableProductSchema[]> => {
+  return fetchProductsByIds(ids, {
+    includeVariations: true,
+    includeRelatedOptions: true,
+    type: 'option'
+  }) as Promise<ConfigurableProductSchema[]>;
+};
+
+export const fetchRelatedProductsByIds = async (
+  ids: number[]
+): Promise<ProductSchema[]> => {
+  return fetchProductsByIds(ids, {
+    includeRelatedOptions: true,
+    type: 'product'
+  });
+};
+```
+
+### Strategy B: Extract Shared Logic (If Similar)
+```typescript
+// RECOMMENDED: Extract common logic
+const fetchProductsCore = async (
+  ids: number[],
+  query: string,
+  mapFunction: (data: any) => any
+) => {
+  const response = await fetchGraphQL(query, { ids });
+  if (!response.data?.products?.nodes) {
+    return [];
+  }
+  return response.data.products.nodes.map(mapFunction);
+};
+
+// Specific implementations using core
+export const fetchRelatedProductsByIds = async (
+  ids: number[]
+): Promise<ProductSchema[]> => {
+  return fetchProductsCore(
+    ids,
+    GET_PRODUCTS_BY_IDS,
+    mapWooToProductSchema
+  );
+};
+
+export const fetchOptionProductsByIds = async (
+  ids: number[]
+): Promise<ConfigurableProductSchema[]> => {
+  return fetchProductsCore(
+    ids,
+    GET_OPTION_PRODUCTS_BY_IDS,
+    mapWooToConfigurableProductSchema
+  );
+};
+```
+
+### Strategy C: Clear Separation (If Different)
+```typescript
+// RECOMMENDED: Rename for clarity and document differences
+
+/**
+ * Fetches related products by their IDs
+ * Used for: Homepage product cards, related product displays
+ * Returns: Basic product information without variations
+ */
+export const fetchRelatedProductsByIds = async (
+  ids: number[]
+): Promise<ProductSchema[]> => {
+  // Implementation for related products
+};
+
+/**
+ * Fetches option products by their IDs for configurator
+ * Used for: Model Configurator option loading
+ * Returns: Complete product information with variations and attributes
+ */
+export const fetchOptionProductsByIds = async (
+  ids: number[]
+): Promise<ConfigurableProductSchema[]> => {
+  // Implementation for option products
+};
+```
+
+## Step 3: Update Call Sites
+
+### Find All Call Sites
+```bash
+# Search for fetchRelatedProductsByIds
+grep -r "fetchRelatedProductsByIds" src/
+
+# Search for fetchOptionProductsByIds
+grep -r "fetchOptionProductsByIds" src/
+```
+
+### Update Imports
+```typescript
+// OLD
+import { fetchRelatedProductsByIds, fetchOptionProductsByIds } from '@/lib/woocommerce';
+
+// NEW (if consolidated)
+import { fetchProductsByIds, fetchOptionProductsByIds } from '@/lib/woocommerce';
+// or
+import { fetchProductsByIds } from '@/lib/woocommerce';
+```
+
+### Update Function Calls
+```typescript
+// OLD
+const relatedProducts = await fetchRelatedProductsByIds([1, 2, 3]);
+const optionProducts = await fetchOptionProductsByIds([4, 5, 6]);
+
+// NEW (if consolidated)
+const relatedProducts = await fetchProductsByIds([1, 2, 3], { type: 'product' });
+const optionProducts = await fetchProductsByIds([4, 5, 6], { type: 'option' });
+```
+
+## Step 4: Update Tests
+
+### Add Comprehensive Tests
+```typescript
+describe('Product Fetching Functions', () => {
+  describe('fetchProductsByIds (consolidated)', () => {
+    test('fetches basic products', async () => {
+      const products = await fetchProductsByIds([1, 2, 3]);
+      expect(products).toHaveLength(3);
+      expect(products[0]).toMatchObject({
+        id: expect.any(String),
+        name: expect.any(String),
+        price: expect.any(Number)
+      });
+    });
+
+    test('fetches option products with variations', async () => {
+      const products = await fetchProductsByIds([1, 2, 3], {
+        includeVariations: true,
+        type: 'option'
+      });
+      expect(products[0].variations).toBeDefined();
+    });
+  });
+
+  describe('fetchOptionProductsByIds (convenience)', () => {
+    test('fetches option products correctly', async () => {
+      const products = await fetchOptionProductsByIds([1, 2, 3]);
+      expect(products).toHaveLength(3);
+      expect(products[0].variations).toBeDefined();
+    });
+  });
+
+  describe('fetchRelatedProductsByIds (convenience)', () => {
+    test('fetches related products correctly', async () => {
+      const products = await fetchRelatedProductsByIds([1, 2, 3]);
+      expect(products).toHaveLength(3);
+    });
+  });
+});
+```
+
+## Step 5: Documentation
+
+### Add JSDoc Comments
+```typescript
+/**
+ * Fetches products by their IDs with configurable options
+ * 
+ * @param ids - Array of product database IDs
+ * @param options - Optional configuration
+ * @param options.includeVariations - Include product variations (for VARIABLE products)
+ * @param options.includeRelatedOptions - Include related options IDs
+ * @param options.type - Product type hint for type-specific handling
+ * 
+ * @returns Promise resolving to array of ProductSchema objects
+ * 
+ * @example
+ * // Fetch basic products
+ * const products = await fetchProductsByIds([1, 2, 3]);
+ * 
+ * @example
+ * // Fetch option products with variations
+ * const options = await fetchProductsByIds([4, 5, 6], {
+ *   includeVariations: true,
+ *   type: 'option'
+ * });
+ */
+export const fetchProductsByIds = async (
+  ids: number[],
+  options?: FetchProductsOptions
+): Promise<ProductSchema[]> => {
+  // Implementation
+};
+```
+
+### Update README/Documentation
+```markdown
+## Product Fetching Functions
+
+### fetchProductsByIds
+Main function for fetching products by IDs. Supports various options for different use cases.
+
+### fetchOptionProductsByIds (Convenience)
+Convenience wrapper for fetching option products with variations. 
+Internally uses `fetchProductsByIds` with appropriate options.
+
+### fetchRelatedProductsByIds (Convenience)
+Convenience wrapper for fetching related products.
+Internally uses `fetchProductsByIds` with appropriate options.
+
+### Migration Guide
+If you were using the old duplicate functions, update your code:
+- `fetchRelatedProductsByIds([1,2,3])` → `fetchProductsByIds([1,2,3], { type: 'product' })`
+- `fetchOptionProductsByIds([1,2,3])` → `fetchProductsByIds([1,2,3], { type: 'option' })`
+```
+
+# Acceptance Criteria
+
+## Functional Requirements
+- [ ] Duplicate/overlapping code is eliminated
+- [ ] Single source of truth for product fetching logic
+- [ ] All existing functionality is preserved
+- [ ] Type safety is maintained or improved
+- [ ] Error handling is consistent
+- [ ] Performance is maintained or improved
+
+## Code Quality Requirements
+- [ ] Follows DRY principles
+- [ ] Clear and descriptive function names
+- [ ] Comprehensive JSDoc documentation
+- [ ] Consistent code style
+- [ ] No breaking changes to public API (or migration guide provided)
+- [ ] All call sites updated correctly
+
+## Testing Requirements
+- [ ] Unit tests for consolidated function(s)
+- [ ] Integration tests for all use cases
+- [ ] Tests cover edge cases and error scenarios
+- [ ] Test coverage maintained or improved
+- [ ] All existing tests pass
+
+## Documentation Requirements
+- [ ] JSDoc comments for all public functions
+- [ ] README/documentation updated
+- [ ] Migration guide provided (if breaking changes)
+- [ ] Code comments explain complex logic
+- [ ] Examples provided for common use cases
+
+# Implementation Plan
+
+## Phase 1: Analysis (2-3 hours)
+1. Read and compare both function implementations
+2. Identify differences in logic, queries, and data mapping
+3. Analyze all call sites and usage patterns
+4. Document findings and determine consolidation strategy
+
+## Phase 2: Design (1-2 hours)
+1. Design consolidated function signature
+2. Plan data mapping and transformation logic
+3. Design convenience functions (if needed)
+4. Plan migration strategy for call sites
+
+## Phase 3: Implementation (3-5 hours)
+1. Implement consolidated function(s)
+2. Extract shared logic to utilities
+3. Create convenience functions
+4. Update all call sites
+5. Update imports
+
+## Phase 4: Testing (2-4 hours)
+1. Write/update unit tests
+2. Write/update integration tests
+3. Test all use cases
+4. Verify no regressions
+
+## Phase 5: Documentation (1-2 hours)
+1. Add JSDoc comments
+2. Update README/documentation
+3. Create migration guide
+4. Add code examples
+
+## Phase 6: Cleanup (1-2 hours)
+1. Remove old duplicate code
+2. Clean up unused imports
+3. Run linter and fix issues
+4. Final code review
+
+# Related Issues
+
+## Code Quality Issues
+- Technical debt accumulation
+- DRY principle violations
+- Code maintainability concerns
+
+## Potential Related Functions
+- May be other duplicate functions in the codebase
+- Consider broader refactoring of product fetching logic
+- Review other utility functions for similar issues
+
+# Estimated Effort
+
+- **Analysis & Design**: 3-5 hours
+- **Implementation**: 3-5 hours
+- **Testing**: 2-4 hours
+- **Documentation**: 1-2 hours
+- **Cleanup & Review**: 1-2 hours
+- **Total**: **10-18 hours**
+
+# Risk Assessment
+
+## Technical Risks
+- **Breaking Changes**: Consolidation may require API changes
+- **Regression Risk**: Changes may break existing functionality
+- **Performance Risk**: Consolidated function may be less optimized
+
+## Mitigation Strategies
+- **Comprehensive Testing**: Extensive unit and integration tests
+- **Gradual Migration**: Keep old functions as wrappers initially
+- **Code Review**: Thorough review before merging
+- **Monitoring**: Monitor production after deployment
+- **Rollback Plan**: Easy rollback if issues arise
+
+# Priority Justification
+
+## Why MEDIUM Priority
+1. **Not User-Facing**: Doesn't directly impact user experience
+2. **Technical Debt**: Adds to maintenance burden but not critical
+3. **No Immediate Bug**: Not causing current bugs (that we know of)
+4. **Code Quality**: Important for long-term maintainability
+5. **Can Be Scheduled**: Can be addressed in planned refactoring sprint
+
+## When to Elevate Priority
+- If duplicate code causes bugs due to inconsistency
+- If new features are blocked by this issue
+- If onboarding is significantly impacted
+- If code reviews are taking too long due to confusion
+
+# Notes
+- This is a code quality and maintainability issue
+- Follows software engineering best practices (DRY principle)
+- Should be addressed to prevent future technical debt
+- Good candidate for refactoring sprint
+- May reveal other duplicate code issues
+- Consider as part of broader code quality initiative
+- **IMPORTANT**: Ensure comprehensive testing before deployment
+- **IMPORTANT**: Provide clear migration guide for other developers

@@ -1,0 +1,37 @@
+id: BUG-20241022-3
+project: front-store
+template: Bug Fix
+description: Several hooks skip required dependencies, risking stale data and React warnings
+
+tasks:
+  - name: Align useEffect/useMemo hooks with exhaustive dependency rules
+    description: Review components flagged by lint for missing dependencies and refactor them to avoid stale closures without introducing infinite loops.
+    files:
+      - src/components/ProductOptions.tsx
+      - src/components/Cart/CartOptions.tsx
+      - src/components/blog-preview.tsx
+      - src/components/custom-cursor.tsx
+      - src/components/drawer.tsx
+      - src/pages/success.tsx
+    steps:
+      - Inspect each flagged hook (`npm run lint`) to understand why dependencies were omitted and document the current behaviour.
+      - Refactor by memoising callbacks (e.g., `useCallback` / `useMemo`) or adjusting dependency arrays so that lint warnings clear without triggering re-render loops.
+      - Add unit or integration coverage where feasible to ensure refactors do not alter user-facing behaviour (e.g., cart options recalculation, blog infinite scroll, custom cursor visibility).
+      - Re-run lint and affected tests to confirm warnings are resolved.
+    conditions:
+      - follow DRY, KISS
+      - no duplicate functions
+      - no ghost code
+      - no overlaping code
+      - confirm if the bug confused
+      - no unnecessary complexity
+
+    checklist:
+      - [ ] Bug reproducible
+      - [ ] Fix applied
+      - [ ] Tests passed
+      
+
+tracking:
+  document: ../.tracking/bug_tracking.md
+  entry: "BUG-20241022-3 | Fix missing hook dependencies flagged by lint | new"

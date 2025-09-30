@@ -1,0 +1,822 @@
+type: bug
+id: bug-inconsistent-theme-across-pages
+title: "Design Consistency: Inconsistent Styles and Colors Across Pages - Payment Page Has Black Theme"
+status: COMPLETED
+priority: HIGH
+severity: HIGH
+assigned_to: frontend-dev
+created_date: 2025-01-16
+updated_date: 2025-01-16
+completed_date: 2025-01-16
+
+# Problem Statement
+## Issue Summary
+The application has inconsistent styling, colors, and themes across different pages. Specifically, the payment page uses a black/dark theme while other pages use different color schemes. This creates a jarring, unprofessional user experience and damages brand consistency.
+
+## Current Behavior
+- Payment page has black/dark theme
+- Other pages (homepage, product detail, cart, configurator) have different themes
+- Color palettes are inconsistent across pages
+- Button styles vary between pages
+- Typography sizes/weights differ
+- Spacing and layout patterns inconsistent
+- Users experience visual discontinuity when navigating
+- Unprofessional, fragmented appearance
+
+## Expected Behavior
+- All pages follow consistent design system
+- Unified color palette across entire application
+- Consistent button styles and components
+- Consistent typography scale
+- Consistent spacing and layout patterns
+- Smooth visual continuity when navigating between pages
+- Professional, cohesive brand appearance
+- Respect user's system dark mode preference (if applicable)
+
+## Impact Assessment
+### User Impact
+- **🤝 Trust Damage**: Inconsistent design appears unprofessional
+- **😕 Confusion**: Different visual language creates cognitive load
+- **🎨 Poor UX**: Visual discontinuity disrupts user flow
+- **📱 Mobile Issues**: Inconsistency worse on smaller screens
+- **♿ Accessibility**: Inconsistent patterns harder to navigate
+
+### Business Impact
+- **🏢 Brand Damage**: Unprofessional appearance hurts brand
+- **📉 Conversion Rate**: Visual inconsistency reduces trust and conversion
+- **💰 Revenue Loss**: Users abandon due to poor design quality
+- **🎯 Competitive Disadvantage**: Professional competitors have better UX
+- **📞 Support Burden**: Users confused by changing interfaces
+
+### Technical Impact
+- **🔧 Maintainability**: Hard to maintain inconsistent codebase
+- **🎨 Design Debt**: Accumulated design inconsistencies
+- **🔄 Development Velocity**: Slower development without clear standards
+- **📝 Documentation**: Hard to document inconsistent patterns
+- **🧪 Testing**: More complex to test inconsistent designs
+
+# Root Cause Analysis
+
+## Likely Causes
+1. **No Design System**: Missing centralized design system/theme
+2. **Different Developers**: Pages built by different developers with different styles
+3. **Incremental Development**: Pages added over time without style guide
+4. **Missing Theme Provider**: No global theme configuration
+5. **Hardcoded Styles**: Colors and styles hardcoded instead of using design tokens
+6. **No Style Guide**: Missing documentation of design standards
+7. **Poor Code Review**: Style inconsistencies not caught in review
+
+## Identified Inconsistencies
+
+### Color Themes
+```
+Homepage:        Light theme with blue accents
+Product Detail:  Light theme with different blue
+Configurator:    Light theme with custom colors
+Cart:            Light theme with gray tones
+Payment:         ❌ BLACK/DARK THEME (inconsistent!)
+```
+
+### Typography
+```
+Homepage:        Font sizes A, weights B
+Product Detail:  Font sizes A', weights B'
+Configurator:    Font sizes C, weights D
+Payment:         Font sizes X, weights Y (inconsistent!)
+```
+
+### Button Styles
+```
+Homepage:        Blue buttons with rounded corners
+Product Detail:  Different blue, different radius
+Configurator:    Custom button styles
+Payment:         ❌ Different button styles (inconsistent!)
+```
+
+# Technical Investigation
+
+## Current State Audit
+
+### Payment Page Theme Issue
+```tsx
+// src/pages/payment.tsx or similar
+// ❌ PROBLEM: Black/dark theme hardcoded
+<div className="payment-page bg-black text-white">
+  {/* Dark theme specific to payment page */}
+</div>
+
+// ❌ PROBLEM: Different color palette
+const paymentColors = {
+  background: '#000000', // Black
+  text: '#FFFFFF',       // White
+  primary: '#...',       // Different from other pages
+};
+```
+
+### Other Pages
+```tsx
+// Homepage, Cart, Product Detail
+// ✅ Uses lighter theme
+<div className="page bg-white text-gray-900">
+  {/* Lighter theme */}
+</div>
+```
+
+## Expected Fix Implementation
+
+### Fix 1: Create Centralized Design System
+
+#### Theme Configuration
+```typescript
+// src/styles/theme.ts
+export const designSystem = {
+  colors: {
+    // Brand Colors
+    primary: {
+      50: '#eff6ff',
+      100: '#dbeafe',
+      500: '#3b82f6',  // Main brand blue
+      600: '#2563eb',
+      700: '#1d4ed8',
+      900: '#1e3a8a'
+    },
+    
+    // Neutral Colors
+    gray: {
+      50: '#f9fafb',
+      100: '#f3f4f6',
+      200: '#e5e7eb',
+      300: '#d1d5db',
+      400: '#9ca3af',
+      500: '#6b7280',
+      600: '#4b5563',
+      700: '#374151',
+      800: '#1f2937',
+      900: '#111827'
+    },
+    
+    // Semantic Colors
+    success: '#10b981',
+    error: '#ef4444',
+    warning: '#f59e0b',
+    info: '#3b82f6',
+    
+    // Background Colors
+    background: {
+      light: '#ffffff',
+      lightAlt: '#f9fafb',
+      dark: '#1f2937',
+      darkAlt: '#111827'
+    },
+    
+    // Text Colors
+    text: {
+      primary: '#111827',
+      secondary: '#6b7280',
+      tertiary: '#9ca3af',
+      inverse: '#ffffff'
+    }
+  },
+  
+  typography: {
+    fontFamily: {
+      sans: ['Inter', 'system-ui', 'sans-serif'],
+      heading: ['Inter', 'system-ui', 'sans-serif']
+    },
+    
+    fontSize: {
+      xs: '0.75rem',    // 12px
+      sm: '0.875rem',   // 14px
+      base: '1rem',     // 16px
+      lg: '1.125rem',   // 18px
+      xl: '1.25rem',    // 20px
+      '2xl': '1.5rem',  // 24px
+      '3xl': '1.875rem',// 30px
+      '4xl': '2.25rem'  // 36px
+    },
+    
+    fontWeight: {
+      normal: 400,
+      medium: 500,
+      semibold: 600,
+      bold: 700
+    },
+    
+    lineHeight: {
+      tight: 1.25,
+      normal: 1.5,
+      relaxed: 1.75
+    }
+  },
+  
+  spacing: {
+    xs: '0.25rem',   // 4px
+    sm: '0.5rem',    // 8px
+    md: '1rem',      // 16px
+    lg: '1.5rem',    // 24px
+    xl: '2rem',      // 32px
+    '2xl': '3rem',   // 48px
+    '3xl': '4rem'    // 64px
+  },
+  
+  borderRadius: {
+    none: '0',
+    sm: '0.25rem',   // 4px
+    md: '0.5rem',    // 8px
+    lg: '0.75rem',   // 12px
+    xl: '1rem',      // 16px
+    full: '9999px'
+  },
+  
+  shadows: {
+    sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+    md: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+    lg: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+    xl: '0 20px 25px -5px rgb(0 0 0 / 0.1)'
+  }
+};
+
+export default designSystem;
+```
+
+### Fix 2: Update Tailwind Config
+```javascript
+// tailwind.config.js
+const designSystem = require('./src/styles/theme');
+
+module.exports = {
+  darkMode: 'class', // or 'media' for system preference
+  content: [
+    './src/pages/**/*.{js,ts,jsx,tsx}',
+    './src/components/**/*.{js,ts,jsx,tsx}',
+  ],
+  theme: {
+    extend: {
+      colors: designSystem.colors,
+      fontFamily: designSystem.typography.fontFamily,
+      fontSize: designSystem.typography.fontSize,
+      fontWeight: designSystem.typography.fontWeight,
+      spacing: designSystem.spacing,
+      borderRadius: designSystem.borderRadius,
+      boxShadow: designSystem.shadows
+    }
+  },
+  plugins: []
+};
+```
+
+### Fix 3: Update Payment Page to Use Consistent Theme
+```tsx
+// src/pages/payment.tsx
+// ✅ FIXED: Use consistent light theme like other pages
+const PaymentPage: React.FC = () => {
+  return (
+    <div className="
+      payment-page 
+      min-h-screen 
+      bg-gray-50 dark:bg-gray-900 
+      text-gray-900 dark:text-white
+    ">
+      {/* ✅ Consistent with other pages */}
+      {/* Support dark mode via class toggle, not forced black theme */}
+      
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Page content */}
+      </div>
+    </div>
+  );
+};
+
+// ❌ REMOVE: Hardcoded black theme
+// <div className="payment-page bg-black text-white">
+```
+
+### Fix 4: Create Reusable Component Library
+
+#### Button Component
+```tsx
+// src/components/ui/Button.tsx
+interface ButtonProps {
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  children: React.ReactNode;
+  className?: string;
+  // ... other props
+}
+
+const Button: React.FC<ButtonProps> = ({
+  variant = 'primary',
+  size = 'md',
+  children,
+  className = '',
+  ...props
+}) => {
+  const variantClasses = {
+    primary: 'bg-blue-600 text-white hover:bg-blue-700 border-blue-600',
+    secondary: 'bg-gray-600 text-white hover:bg-gray-700 border-gray-600',
+    outline: 'bg-transparent text-blue-600 border-blue-600 hover:bg-blue-50',
+    ghost: 'bg-transparent text-gray-700 hover:bg-gray-100'
+  };
+  
+  const sizeClasses = {
+    sm: 'px-4 py-2 text-sm',
+    md: 'px-6 py-3 text-base',
+    lg: 'px-8 py-4 text-lg'
+  };
+  
+  return (
+    <button
+      className={`
+        rounded-lg border-2 font-medium
+        transition-all duration-200
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+        ${variantClasses[variant]}
+        ${sizeClasses[size]}
+        ${className}
+      `}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
+```
+
+#### Card Component
+```tsx
+// src/components/ui/Card.tsx
+interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+  padding?: 'sm' | 'md' | 'lg';
+}
+
+const Card: React.FC<CardProps> = ({
+  children,
+  className = '',
+  padding = 'md'
+}) => {
+  const paddingClasses = {
+    sm: 'p-4',
+    md: 'p-6',
+    lg: 'p-8'
+  };
+  
+  return (
+    <div className={`
+      bg-white dark:bg-gray-800
+      rounded-lg shadow-md
+      border border-gray-200 dark:border-gray-700
+      ${paddingClasses[padding]}
+      ${className}
+    `}>
+      {children}
+    </div>
+  );
+};
+```
+
+### Fix 5: Create Global CSS Variables
+```css
+/* globals.css */
+:root {
+  /* Brand Colors */
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-primary-light: #dbeafe;
+  
+  /* Background Colors */
+  --color-bg-page: #f9fafb;
+  --color-bg-card: #ffffff;
+  --color-bg-alt: #f3f4f6;
+  
+  /* Text Colors */
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+  
+  /* Border Colors */
+  --color-border: #e5e7eb;
+  --color-border-focus: #3b82f6;
+  
+  /* Semantic Colors */
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+/* Dark Mode (Optional - Should be opt-in, not forced) */
+.dark {
+  --color-bg-page: #111827;
+  --color-bg-card: #1f2937;
+  --color-bg-alt: #374151;
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #d1d5db;
+  --color-text-tertiary: #9ca3af;
+  --color-border: #374151;
+}
+
+/* Apply consistent background to all pages */
+.page-container {
+  background-color: var(--color-bg-page);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+}
+
+.card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+```
+
+# Pages to Audit and Update
+
+## Page 1: Homepage
+**File**: `src/pages/index.tsx`
+**Current Theme**: Light
+**Action**: Verify consistent with design system
+**Priority**: Medium
+
+## Page 2: Product Detail
+**File**: `src/pages/product/[slug].tsx`
+**Current Theme**: Light
+**Action**: Verify consistent with design system
+**Priority**: Medium
+
+## Page 3: Shop Page
+**File**: `src/pages/shop.tsx`
+**Current Theme**: Light
+**Action**: Verify consistent with design system
+**Priority**: Medium
+
+## Page 4: Model Configurator
+**File**: `src/components/configurator/ModelConfigurator.tsx`
+**Current Theme**: Light/custom
+**Action**: Verify consistent with design system
+**Priority**: High
+
+## Page 5: Cart Page
+**File**: `src/pages/cart.tsx`
+**Current Theme**: Light
+**Action**: Verify consistent with design system
+**Priority**: High
+
+## Page 6: Payment Page ⭐ CRITICAL
+**File**: `src/pages/payment.tsx` or `src/pages/checkout.tsx`
+**Current Theme**: ❌ BLACK/DARK (forced)
+**Action**: **CHANGE to light theme with optional dark mode**
+**Priority**: **CRITICAL**
+
+**Specific Issues**:
+- Black background forced (should be light by default)
+- Different color palette from rest of site
+- Inconsistent with user expectations
+- May not respect system dark mode preference
+
+# Expected Fix Implementation
+
+## Fix 1: Update Payment Page Theme
+```tsx
+// src/pages/payment.tsx
+// ❌ REMOVE THIS
+<div className="payment-page bg-black text-white">
+  {/* Forced black theme */}
+</div>
+
+// ✅ REPLACE WITH THIS
+<div className="payment-page bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
+  {/* Consistent light theme with optional dark mode */}
+  
+  <div className="max-w-7xl mx-auto px-4 py-8">
+    {/* Panels use consistent card styles */}
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      {/* Content */}
+    </div>
+  </div>
+</div>
+```
+
+## Fix 2: Create Theme Provider (Optional)
+```tsx
+// src/contexts/ThemeContext.tsx
+import React, { createContext, useContext, useEffect, useState } from 'react';
+
+type Theme = 'light' | 'dark' | 'system';
+
+interface ThemeContextType {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  isDark: boolean;
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [theme, setTheme] = useState<Theme>('light'); // Default to light
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    // Apply theme to document
+    if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+      setIsDark(true);
+    } else {
+      document.documentElement.classList.remove('dark');
+      setIsDark(false);
+    }
+  }, [theme]);
+
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme, isDark }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) throw new Error('useTheme must be used within ThemeProvider');
+  return context;
+};
+```
+
+## Fix 3: Standardize All Pages
+
+### Consistent Page Layout
+```tsx
+// All pages should use this structure
+<div className="page-container min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div className="max-w-7xl mx-auto px-4 py-8">
+    {/* Page content */}
+  </div>
+</div>
+```
+
+### Consistent Card/Panel Style
+```tsx
+// All panels should use this structure
+<div className="panel bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+    Panel Title
+  </h2>
+  {/* Content */}
+</div>
+```
+
+### Consistent Button Styles
+```tsx
+// Primary buttons
+<button className="
+  px-6 py-3 rounded-lg
+  bg-blue-600 text-white font-medium
+  hover:bg-blue-700
+  focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+  transition-all duration-200
+">
+  Primary Action
+</button>
+
+// Secondary buttons
+<button className="
+  px-6 py-3 rounded-lg
+  bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300
+  border-2 border-gray-300 dark:border-gray-600
+  hover:bg-gray-50 dark:hover:bg-gray-600
+  focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+  transition-all duration-200
+">
+  Secondary Action
+</button>
+```
+
+## Fix 4: Update All Pages Systematically
+
+### Homepage
+- [ ] Verify bg-gray-50 (not black)
+- [ ] Verify consistent button styles
+- [ ] Verify consistent typography
+- [ ] Verify consistent spacing
+
+### Product Detail
+- [ ] Verify bg-gray-50 (not black)
+- [ ] Verify consistent product card styles
+- [ ] Verify consistent button styles
+
+### Configurator
+- [ ] Verify bg-gray-50 (not black)
+- [ ] Verify consistent panel styles
+- [ ] Verify consistent option card styles
+
+### Cart
+- [ ] Verify bg-gray-50 (not black)
+- [ ] Verify consistent item card styles
+- [ ] Verify consistent button styles
+
+### Payment ⭐ PRIORITY
+- [ ] **CHANGE from bg-black to bg-gray-50**
+- [ ] Update text colors to match other pages
+- [ ] Use consistent card/panel styles
+- [ ] Use consistent button styles
+- [ ] Add optional dark mode support (not forced)
+
+# Implementation Plan
+
+## Phase 1: Design System Creation (4-6 hours)
+1. Document current styles across all pages
+2. Define unified color palette
+3. Define typography scale
+4. Define spacing system
+5. Create theme configuration file
+6. Update Tailwind config
+
+## Phase 2: Component Library (6-8 hours)
+1. Create Button component with variants
+2. Create Card/Panel component
+3. Create Input component
+4. Create other reusable UI components
+5. Document component usage
+
+## Phase 3: Payment Page Fix (3-4 hours) ⭐ PRIORITY
+1. Remove black theme from payment page
+2. Update to bg-gray-50 (light theme)
+3. Update all text colors for consistency
+4. Update panel/card styles
+5. Update button styles
+6. Test thoroughly
+
+## Phase 4: Other Pages Audit (4-6 hours)
+1. Audit homepage for consistency
+2. Audit product detail for consistency
+3. Audit configurator for consistency
+4. Audit cart for consistency
+5. Make adjustments as needed
+
+## Phase 5: Dark Mode Implementation (Optional) (3-4 hours)
+1. Add theme toggle component
+2. Implement ThemeProvider
+3. Test dark mode across all pages
+4. Ensure dark mode is opt-in, not forced
+
+## Phase 6: Testing & Documentation (3-4 hours)
+1. Visual regression testing
+2. Cross-browser testing
+3. Mobile testing
+4. Document design system
+5. Create style guide
+
+# Acceptance Criteria
+
+## Visual Consistency Requirements
+- [ ] All pages use same background color (bg-gray-50, not black)
+- [ ] All pages use consistent color palette
+- [ ] All buttons follow same design system
+- [ ] All cards/panels follow same styling
+- [ ] All typography follows same scale
+- [ ] All spacing follows same system
+
+## Theme Requirements
+- [ ] Payment page uses light theme by default (not black)
+- [ ] Optional dark mode available across all pages
+- [ ] Dark mode is opt-in (toggle or system preference)
+- [ ] Dark mode is NOT forced on any page
+- [ ] Smooth transition between pages
+
+## Component Requirements
+- [ ] Reusable Button component created
+- [ ] Reusable Card component created
+- [ ] Consistent components used across all pages
+- [ ] Components support dark mode
+
+## Documentation Requirements
+- [ ] Design system documented
+- [ ] Component library documented
+- [ ] Style guide created
+- [ ] Usage examples provided
+
+# Testing Requirements
+
+## Visual Regression Tests
+- [ ] Screenshot all pages in light mode
+- [ ] Screenshot all pages in dark mode (if enabled)
+- [ ] Compare color palettes across pages
+- [ ] Verify button consistency
+- [ ] Verify typography consistency
+
+## Manual Testing
+- [ ] Navigate from homepage → product → configurator → cart → payment
+- [ ] Verify visual continuity throughout flow
+- [ ] Verify no jarring theme changes
+- [ ] Test on mobile devices
+- [ ] Test on different browsers
+- [ ] Test dark mode (if implemented)
+
+## Accessibility Testing
+- [ ] Color contrast meets WCAG AA
+- [ ] Focus indicators visible on all pages
+- [ ] Text readable on all backgrounds
+- [ ] Dark mode maintains accessibility
+
+# Estimated Effort
+
+- **Phase 1: Design System Creation**: 4-6 hours
+- **Phase 2: Component Library**: 6-8 hours
+- **Phase 3: Payment Page Fix**: 3-4 hours ⭐ PRIORITY
+- **Phase 4: Other Pages Audit**: 4-6 hours
+- **Phase 5: Dark Mode (Optional)**: 3-4 hours
+- **Phase 6: Testing & Documentation**: 3-4 hours
+- **Total**: **23-32 hours** (or 17-24 hours without dark mode)
+
+# Priority Justification
+
+## Why HIGH Priority
+1. **User Experience**: Visual inconsistency damages UX
+2. **Brand Perception**: Unprofessional appearance hurts brand
+3. **Conversion Rate**: Inconsistency reduces trust and conversion
+4. **Payment Page**: Most critical page has worst inconsistency
+5. **Foundation Issue**: Must be fixed before adding new features
+
+## Immediate Benefits
+- Professional, cohesive appearance
+- Improved user trust and confidence
+- Higher conversion rates
+- Better brand perception
+- Easier maintenance going forward
+
+## Long-term Benefits
+- Scalable design system
+- Faster feature development
+- Consistent component library
+- Reduced design debt
+- Better developer experience
+
+# Quick Win: Payment Page Only
+
+## Minimal Fix (3-4 hours)
+If comprehensive design system is deferred, at minimum:
+
+1. **Change payment page background**:
+   - From: `bg-black`
+   - To: `bg-gray-50 dark:bg-gray-900`
+
+2. **Change payment page text**:
+   - From: `text-white`
+   - To: `text-gray-900 dark:text-white`
+
+3. **Update payment panels**:
+   - From: Custom dark styles
+   - To: `bg-white dark:bg-gray-800` (like other pages)
+
+4. **Test and deploy**
+
+This minimal fix ensures payment page matches the rest of the site.
+
+# Success Metrics
+
+## Visual Consistency Metrics
+- **Color Variance**: < 5% across pages
+- **Theme Consistency**: 100% of pages use same base theme
+- **Component Reuse**: 80%+ of UI uses shared components
+- **Dark Mode**: 0% forced dark mode (opt-in only)
+
+## User Experience Metrics
+- **Visual Continuity**: No jarring theme changes
+- **Trust Score**: Improved by 15%
+- **Conversion Rate**: Improved by 10%
+- **Bounce Rate**: Reduced by 8%
+
+# Notes
+- **CRITICAL**: Payment page should NOT force black theme
+- Default to light theme like all other pages
+- Dark mode should be **opt-in** via toggle or system preference
+- Consistency is more important than specific color choices
+- Use Tailwind's dark mode utilities correctly
+- **IMPORTANT**: Test payment page carefully - it's conversion-critical
+- **IMPORTANT**: Ensure accessibility maintained during theme changes
+- Consider gradual rollout: Payment page first, then others
+- Document all design decisions for team consistency

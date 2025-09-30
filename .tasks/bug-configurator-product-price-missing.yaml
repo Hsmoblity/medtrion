@@ -1,0 +1,250 @@
+type: bug
+id: bug-configurator-product-price-missing
+title: "Model Configurator displays product without price when main product has price"
+status: COMPLETED
+priority: HIGH
+severity: MAJOR
+assigned_to: frontend-dev
+created_date: 2025-01-16
+updated_date: 2025-01-16
+
+# Business Context
+## Problem Statement
+When a main product has a price and users click "view detail" to open the Model Configurator, the product is displayed without showing its price. This creates confusion for users who expect to see the base product price in the configurator interface.
+
+## Business Impact
+- **User Experience**: Users cannot see the base product price in the configurator
+- **Trust**: Missing price information undermines user confidence
+- **Sales Impact**: Users may abandon configuration due to unclear pricing
+- **Functionality**: Core pricing display feature is broken in configurator
+
+## Success Metrics
+- Product price is visible in Model Configurator when main product has price
+- Base price is clearly displayed alongside option prices
+- Total price calculation includes base product price
+- No regression in existing configurator functionality
+
+# User Story
+**As a** customer viewing a product with a price
+**I want** to see the base product price when I open the Model Configurator
+**So that** I can understand the total cost of my configuration including the base product
+
+**Acceptance Criteria:**
+- Base product price is displayed in Model Configurator
+- Price is shown in the same format as other prices in the app
+- Base price is included in total price calculations
+- Price display is consistent across all configurator views
+
+# Technical Requirements
+
+## Current Behavior
+1. Main product has a price (e.g., $2,500) ✅
+2. User clicks "view detail" or "Start Configuration" ✅
+3. Model Configurator opens ✅
+4. **Product is displayed without showing its price** ❌
+5. Only option prices are visible ❌
+6. Total price calculation may be missing base price ❌
+
+## Expected Behavior
+1. Main product has a price (e.g., $2,500) ✅
+2. User clicks "view detail" or "Start Configuration" ✅
+3. Model Configurator opens ✅
+4. **Base product price is clearly displayed** ✅
+5. Option prices are shown alongside base price ✅
+6. Total price includes base price + selected options ✅
+
+## Root Cause Analysis
+
+### Likely Causes
+1. **Missing Price Display Component**: Model Configurator may not have a component to display base product price
+2. **Data Not Passed**: Product price data may not be passed to the configurator component
+3. **State Management Issue**: Product price may not be stored in configurator state
+4. **Component Integration**: Price display component may not be integrated with configurator
+5. **Data Mapping Issue**: Product price may not be properly mapped from product data to configurator
+
+### Investigation Areas
+1. **Product Data Flow**: Check if product price is included in configurator data
+2. **Component Rendering**: Verify if price display component exists and renders
+3. **State Management**: Check if product price is stored in configurator state
+4. **Data Mapping**: Verify product price mapping from source to configurator
+
+## Affected Components
+
+### Primary Components
+1. **`src/components/configurator/ModelConfigurator.tsx`** - Main configurator component
+2. **`src/components/configurator/ModelHero.tsx`** - Product display section
+3. **`src/components/SummaryPanel.tsx`** - Price summary display
+4. **`src/components/configurator/ConfiguratorSidebar.tsx`** - Sidebar with product info
+
+### Related Components
+- Product detail page components
+- Price calculation utilities
+- Product data mapping functions
+
+### Pages
+- `/product/[slug]/configure` - Main configurator page
+- `/configurator/[slug]` - Standalone configurator
+- Product detail pages with configurator links
+
+## Investigation Commands
+
+```bash
+# Find configurator components
+find src/components -name "*Configurator*" -o -name "*configurator*"
+
+# Check for price display in configurator
+grep -r "price\|Price" src/components/configurator/
+
+# Check product data in configurator
+grep -r "product\|Product" src/components/configurator/
+
+# Check price calculation logic
+grep -r "total\|Total\|calculate" src/components/configurator/
+```
+
+## Expected Fix
+
+### Data Flow Fix
+```typescript
+// ModelConfigurator.tsx - Ensure product price is included
+const ModelConfigurator: React.FC = ({ product }) => {
+  const basePrice = product.price || 0;
+  const [selectedOptions, setSelectedOptions] = useState([]);
+  
+  const totalPrice = useMemo(() => {
+    const optionsTotal = selectedOptions.reduce((sum, option) => sum + option.price, 0);
+    return basePrice + optionsTotal;
+  }, [basePrice, selectedOptions]);
+
+  return (
+    <div className="model-configurator">
+      <ModelHero 
+        product={product}
+        basePrice={basePrice}
+      />
+      <SummaryPanel 
+        basePrice={basePrice}
+        selectedOptions={selectedOptions}
+        totalPrice={totalPrice}
+      />
+    </div>
+  );
+};
+```
+
+### Price Display Component
+```tsx
+// ModelHero.tsx - Display base product price
+const ModelHero: React.FC = ({ product, basePrice }) => {
+  return (
+    <div className="model-hero">
+      <h1>{product.name}</h1>
+      <div className="product-price">
+        <span className="price-label">Base Price:</span>
+        <span className="price-value">${basePrice.toFixed(2)}</span>
+      </div>
+      {/* Other product details */}
+    </div>
+  );
+};
+```
+
+### Summary Panel Update
+```tsx
+// SummaryPanel.tsx - Include base price in summary
+const SummaryPanel: React.FC = ({ basePrice, selectedOptions, totalPrice }) => {
+  return (
+    <div className="summary-panel">
+      <div className="price-breakdown">
+        <div className="base-price">
+          <span>Base Product:</span>
+          <span>${basePrice.toFixed(2)}</span>
+        </div>
+        {selectedOptions.map(option => (
+          <div key={option.id} className="option-price">
+            <span>{option.name}:</span>
+            <span>${option.price.toFixed(2)}</span>
+          </div>
+        ))}
+        <div className="total-price">
+          <span>Total:</span>
+          <span>${totalPrice.toFixed(2)}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+## Acceptance Criteria
+
+### Functional Requirements
+- [ ] Base product price is displayed in Model Configurator
+- [ ] Price is shown in consistent format with other prices
+- [ ] Base price is included in total price calculations
+- [ ] Price display works for all product types
+- [ ] Price updates correctly when product changes
+
+### Technical Requirements
+- [ ] Product price data is properly passed to configurator
+- [ ] Price display component is integrated with configurator
+- [ ] Price calculation includes base price
+- [ ] No regression in existing configurator functionality
+- [ ] Price display is responsive and accessible
+
+### User Experience Requirements
+- [ ] Price is clearly visible and easy to read
+- [ ] Price format is consistent with app standards
+- [ ] Price information is accessible to screen readers
+- [ ] Price display works on all device sizes
+- [ ] Price updates in real-time with configuration changes
+
+## Testing Requirements
+
+### Manual Testing
+- Test with products that have prices
+- Test with products that have $0 prices
+- Test with products that have sale prices
+- Test price display on different screen sizes
+- Test price calculation with various option combinations
+
+### Automated Testing
+- Unit tests for price display component
+- Integration tests for price calculation
+- E2E tests for complete configurator flow
+- Visual regression tests for price display
+
+## Related Issues
+
+- `bug-configurator-option-controls-missing`: May be related to missing UI elements
+- `bug-configurator-progress-not-updating`: May be related to state management issues
+- `feat-configurator-variation-popup`: May need to include base price in popup
+- `feat-option-variation-card`: May need to show base price context
+
+## Estimated Effort
+
+- **Investigation**: 1-2 hours (identify missing price display)
+- **Implementation**: 2-3 hours (add price display components)
+- **Testing**: 1-2 hours (manual and automated testing)
+- **Documentation**: 30 minutes
+- **Total**: 4.5-7.5 hours
+
+## Risk Assessment
+
+### Technical Risks
+- **Regression Risk**: Adding price display may affect existing functionality
+- **Data Risk**: Price data may not be available in all scenarios
+- **Performance Risk**: Price calculations may impact performance
+
+### Mitigation Strategies
+- **Incremental Testing**: Test each component individually
+- **Fallback Handling**: Handle cases where price data is missing
+- **Performance Monitoring**: Monitor price calculation performance
+- **Code Review**: Thorough review of price display implementation
+
+## Notes
+- This bug affects the core user experience of the configurator
+- Price visibility is critical for user trust and conversion
+- Consider adding price breakdown for better transparency
+- Ensure price display is consistent with other parts of the application
+- This fix should be prioritized as it directly impacts user decision-making

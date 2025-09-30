@@ -1,0 +1,39 @@
+feature:
+  title: Verify and harden top header navigation links
+  area: frontend
+  priority: p1
+  status: new
+  requested_by: techlead
+  environment: production
+
+summary:
+  goal: Audit the primary header menu to ensure every nav item routes to the correct page/view and degrades gracefully on missing destinations.
+  scope:
+    - Desktop and mobile header components (burger/drawer) and associated route configs.
+    - Links pointing to internal pages, external resources, tel/mail actions.
+    - Interaction states (hover, focus, active) that confirm navigation intent.
+  impact: Prevent broken journeys stemming from outdated or miswired navigation entries.
+
+acceptance_criteria:
+  - Inventory of all header menu items mapped to actual routes/pages is documented under `/docs/navigation-map.md`.
+  - Each header link opens the correct view in both desktop and mobile variations; discrepancies are fixed with regression tests.
+  - External, tel, and mail links include target/rel attributes per security guidelines and provide fallbacks when unsupported.
+  - Analytics or logging captures clicks on critical nav items for monitoring.
+
+implementation_plan:
+  - Audit current header components (`src/components/PageLayout/Header.tsx`, mobile drawer) to extract link list.
+  - Cross-check routes against Next.js pages and CMS configuration; update `href` or data sources where mismatched.
+  - Add automated test coverage (Jest/Playwright) to verify key navigation paths resolve successfully.
+  - Update documentation with finalized navigation map and include QA checklist for future changes.
+
+risks:
+  - Hidden dependencies on CMS-managed menus may require coordination with content admins.
+  - Route rename/refactor work might spill into other page links if inconsistencies surface.
+
+stakeholders:
+  - Frontend team
+  - Product/UX
+  - QA
+
+notes:
+  - Align with forthcoming sitemap updates to avoid redundant work.

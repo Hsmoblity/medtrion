@@ -1,0 +1,577 @@
+type: feature
+id: feat-configurator-semantic-section-classes
+title: "Add semantic CSS class names to Model Configurator sections for maintainability"
+created: 2025-09-29
+status: open
+priority: medium
+agent: frontend-dev
+
+## Feature Overview
+
+Add clear, semantic CSS class names to the three main sections of the Model Configurator layout to improve code maintainability, readability, and enable easier future updates. The sections include the left sidebar (configuration options), center content area (option cards display), and right panel (configuration summary).
+
+### Business Value
+
+- **Developer Productivity**: Clear class names make it easier to identify and update specific sections
+- **Maintainability**: Future developers can quickly understand the layout structure
+- **Debugging**: Easier to inspect and debug specific sections in browser DevTools
+- **Styling**: Simplifies targeted CSS updates and theme customizations
+- **Testing**: Enables more reliable E2E and integration test selectors
+- **Documentation**: Self-documenting code through semantic naming
+
+## Current State
+
+The Model Configurator has three main sections, but the class names may be generic or unclear:
+
+```tsx
+// Current implementation (example)
+<div className="grid grid-cols-4 gap-4">
+  <div className="col-span-1">
+    {/* Left sidebar - configuration categories */}
+  </div>
+  <div className="col-span-2">
+    {/* Center section - option cards */}
+  </div>
+  <div className="col-span-1">
+    {/* Right panel - summary */}
+  </div>
+</div>
+```
+
+**Problems**:
+- Generic class names like `col-span-1`, `col-span-2` don't describe purpose
+- Difficult to target specific sections in CSS or tests
+- No semantic meaning for future developers
+- Hard to identify sections in browser DevTools
+
+## Desired State
+
+Add clear, semantic class names to each section:
+
+```tsx
+// Enhanced implementation with semantic classes
+<div className="configurator-layout grid grid-cols-4 gap-4">
+  {/* Left Section: Configuration Options by Category */}
+  <aside className="configurator-sidebar configurator-section-left col-span-1">
+    <div className="configuration-options-container">
+      <h2 className="configuration-options-title">Configuration Options</h2>
+      <nav className="configuration-categories-nav">
+        {/* Category groups */}
+      </nav>
+      <div className="configuration-progress-bar">
+        {/* Progress indicator */}
+      </div>
+    </div>
+  </aside>
+
+  {/* Center Section: Option Cards Display */}
+  <main className="configurator-content configurator-section-center col-span-2">
+    <div className="option-cards-container">
+      <h2 className="option-cards-title">Available Options</h2>
+      <div className="option-cards-grid">
+        {/* Option card components */}
+      </div>
+    </div>
+  </main>
+
+  {/* Right Section: Configuration Summary */}
+  <aside className="configurator-summary configurator-section-right col-span-1">
+    <div className="configuration-summary-container">
+      <h2 className="configuration-summary-title">Configuration Summary</h2>
+      <div className="selected-options-list">
+        {/* Selected option items with name and price */}
+      </div>
+      <div className="configuration-summary-footer">
+        <div className="configuration-total-price">
+          <span className="total-price-label">Total:</span>
+          <span className="total-price-amount">$X,XXX</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+```
+
+## Section Breakdown
+
+### Left Section: Configuration Options (Sidebar)
+
+**Purpose**: Display configuration categories and navigation
+
+**Semantic Class Names**:
+- `configurator-sidebar` - Main sidebar container
+- `configurator-section-left` - Layout position identifier
+- `configuration-options-container` - Inner content wrapper
+- `configuration-options-title` - Section heading
+- `configuration-categories-nav` - Category navigation menu
+- `configuration-category-group` - Individual category group
+- `configuration-category-item` - Individual category item
+- `configuration-category-active` - Active/selected category state
+- `configuration-progress-bar` - Progress indicator at bottom
+- `configuration-progress-fill` - Progress bar fill element
+- `configuration-progress-text` - Progress text (e.g., "5 of 10 options")
+
+**HTML Structure**:
+```tsx
+<aside className="configurator-sidebar configurator-section-left">
+  <div className="configuration-options-container">
+    <h2 className="configuration-options-title">
+      Configuration Options
+    </h2>
+    
+    <nav className="configuration-categories-nav">
+      <div className="configuration-category-group">
+        <button className="configuration-category-item configuration-category-active">
+          <span className="category-icon">🛡️</span>
+          <span className="category-name">Warranty</span>
+          <span className="category-badge">2/5</span>
+        </button>
+      </div>
+      {/* More categories */}
+    </nav>
+    
+    <div className="configuration-progress-bar">
+      <div className="configuration-progress-fill" style={{ width: '40%' }}></div>
+      <p className="configuration-progress-text">
+        4 of 10 options selected
+      </p>
+    </div>
+  </div>
+</aside>
+```
+
+### Center Section: Option Cards Display
+
+**Purpose**: Display available option cards with details
+
+**Semantic Class Names**:
+- `configurator-content` - Main content area
+- `configurator-section-center` - Layout position identifier
+- `option-cards-container` - Main container for option cards
+- `option-cards-title` - Section heading
+- `option-cards-subtitle` - Optional subtitle or description
+- `option-cards-grid` - Grid layout for cards
+- `option-card` - Individual option card (from OptionCard component)
+- `option-card-selected` - Selected state modifier
+- `option-card-disabled` - Disabled state modifier
+- `option-cards-loading` - Loading state container
+- `option-cards-empty` - Empty state container
+- `option-cards-error` - Error state container
+
+**HTML Structure**:
+```tsx
+<main className="configurator-content configurator-section-center">
+  <div className="option-cards-container">
+    <h2 className="option-cards-title">
+      Available Options - {currentCategory.name}
+    </h2>
+    <p className="option-cards-subtitle">
+      Choose from the following options to customize your product
+    </p>
+    
+    <div className="option-cards-grid">
+      {/* Loading State */}
+      {loading && (
+        <div className="option-cards-loading">
+          <div className="loading-spinner"></div>
+          <p>Loading options...</p>
+        </div>
+      )}
+      
+      {/* Option Cards */}
+      {!loading && options.map(option => (
+        <OptionCard
+          key={option.id}
+          option={option}
+          className="option-card"
+          isSelected={isSelected(option)}
+        />
+      ))}
+      
+      {/* Empty State */}
+      {!loading && options.length === 0 && (
+        <div className="option-cards-empty">
+          <p>No options available in this category</p>
+        </div>
+      )}
+    </div>
+  </div>
+</main>
+```
+
+### Right Section: Configuration Summary Panel
+
+**Purpose**: Display selected options summary with prices and total
+
+**Semantic Class Names**:
+- `configurator-summary` - Main summary panel
+- `configurator-section-right` - Layout position identifier
+- `configuration-summary-container` - Inner content wrapper
+- `configuration-summary-title` - Section heading
+- `selected-options-list` - List container for selected options
+- `selected-option-item` - Individual selected option
+- `selected-option-name` - Option name text
+- `selected-option-price` - Option price text
+- `selected-option-remove` - Remove button for option
+- `configuration-summary-empty` - Empty state message
+- `configuration-summary-footer` - Footer section with totals
+- `configuration-total-price` - Total price container
+- `total-price-label` - "Total:" label
+- `total-price-amount` - Total price value
+- `configuration-summary-actions` - Action buttons (Add to Cart, Save, etc.)
+
+**HTML Structure**:
+```tsx
+<aside className="configurator-summary configurator-section-right">
+  <div className="configuration-summary-container">
+    <h2 className="configuration-summary-title">
+      Configuration Summary
+    </h2>
+    
+    {/* Selected Options List */}
+    <div className="selected-options-list">
+      {selectedOptions.length === 0 ? (
+        <div className="configuration-summary-empty">
+          <p>No options selected yet</p>
+          <p className="text-sm text-gray-500">
+            Choose options from the categories to build your configuration
+          </p>
+        </div>
+      ) : (
+        selectedOptions.map(option => (
+          <div key={option.id} className="selected-option-item">
+            <div className="selected-option-details">
+              <span className="selected-option-name">
+                {option.name}
+              </span>
+              <span className="selected-option-price">
+                ${option.price}
+              </span>
+            </div>
+            <button 
+              className="selected-option-remove"
+              aria-label={`Remove ${option.name}`}
+            >
+              ×
+            </button>
+          </div>
+        ))
+      )}
+    </div>
+    
+    {/* Summary Footer with Total */}
+    <div className="configuration-summary-footer">
+      <div className="configuration-total-price">
+        <span className="total-price-label">Total:</span>
+        <span className="total-price-amount">${totalPrice}</span>
+      </div>
+      
+      <div className="configuration-summary-actions">
+        <button className="btn-add-to-cart">
+          Add to Cart
+        </button>
+        <button className="btn-save-configuration">
+          Save Configuration
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
+```
+
+## CSS Class Naming Convention
+
+### Naming Pattern
+
+Follow BEM (Block Element Modifier) inspired naming:
+
+```
+[section]-[element]-[modifier]
+
+Examples:
+- configurator-sidebar (block)
+- configuration-options-title (block-element)
+- configuration-category-active (block-element-modifier)
+```
+
+### Prefix Standards
+
+- **Layout sections**: `configurator-[section]`
+  - `configurator-sidebar`
+  - `configurator-content`
+  - `configurator-summary`
+
+- **Position identifiers**: `configurator-section-[position]`
+  - `configurator-section-left`
+  - `configurator-section-center`
+  - `configurator-section-right`
+
+- **Configuration elements**: `configuration-[element]`
+  - `configuration-options-container`
+  - `configuration-categories-nav`
+  - `configuration-summary-container`
+
+- **Option elements**: `option-[element]`
+  - `option-cards-container`
+  - `option-cards-grid`
+  - `option-card`
+
+- **Selected items**: `selected-[element]`
+  - `selected-options-list`
+  - `selected-option-item`
+
+### State Modifiers
+
+- `-active` - Currently active/selected state
+- `-disabled` - Disabled/unavailable state
+- `-loading` - Loading state
+- `-empty` - Empty state
+- `-error` - Error state
+- `-selected` - Selected state (for options)
+- `-expanded` - Expanded state (for collapsible elements)
+
+## Implementation Requirements
+
+### Files to Modify
+
+1. **`src/components/configurator/ModelConfigurator.tsx`**
+   - Add semantic classes to main layout sections
+   - Add `configurator-layout` to wrapper
+   - Add section classes to left, center, right areas
+
+2. **`src/components/ConfiguratorSidebar.tsx`** or **`src/components/configurator/ConfiguratorSidebar.tsx`**
+   - Add `configurator-sidebar` and `configurator-section-left`
+   - Add `configuration-options-container`
+   - Add `configuration-categories-nav`
+   - Add `configuration-progress-bar` and related classes
+
+3. **`src/components/configurator/CategoryGroup.tsx`**
+   - Add `option-cards-container` to wrapper
+   - Add `option-cards-grid` to grid layout
+   - Add state classes for loading, empty, error
+
+4. **`src/components/SummaryPanel.tsx`** or **`src/components/configurator/SummaryPanel.tsx`**
+   - Add `configurator-summary` and `configurator-section-right`
+   - Add `configuration-summary-container`
+   - Add `selected-options-list`
+   - Add `configuration-summary-footer`
+   - Add `configuration-total-price` with label and amount
+
+5. **`src/components/configurator/OptionCard.tsx`**
+   - Ensure component accepts and uses `className` prop
+   - Add `option-card` as base class
+   - Add state modifiers: `option-card-selected`, `option-card-disabled`
+
+### CSS/Tailwind Integration
+
+The semantic classes should work alongside existing Tailwind utility classes:
+
+```tsx
+<aside className="configurator-sidebar configurator-section-left col-span-1 bg-white rounded-lg shadow-md">
+  {/* Semantic class + Tailwind utilities */}
+</aside>
+```
+
+### Documentation Requirements
+
+1. **Component Documentation**
+   - Add JSDoc comments explaining semantic class structure
+   - Document which classes are for styling vs. identification
+
+2. **Style Guide**
+   - Create or update `docs/CONFIGURATOR_STYLES.md`
+   - Document all semantic classes with purpose
+   - Include HTML structure examples
+
+3. **README Update**
+   - Add section about configurator class naming convention
+   - Explain how to target specific sections
+
+## Acceptance Criteria
+
+- [ ] All three main sections have semantic class names
+- [ ] Left sidebar has `configurator-sidebar` and `configurator-section-left`
+- [ ] Center content has `configurator-content` and `configurator-section-center`
+- [ ] Right panel has `configurator-summary` and `configurator-section-right`
+- [ ] Configuration options container has semantic classes
+- [ ] Option cards grid has semantic classes
+- [ ] Selected options list has semantic classes
+- [ ] Progress bar has semantic classes
+- [ ] Total price section has semantic classes
+- [ ] State modifiers are applied correctly (active, selected, disabled, etc.)
+- [ ] Classes are documented in code comments
+- [ ] Style guide document created or updated
+- [ ] Existing functionality and styling unchanged
+- [ ] No visual regressions
+- [ ] DevTools inspection shows clear section identification
+- [ ] Test selectors updated if necessary
+
+## Testing Plan
+
+### Manual Testing
+
+1. **Visual Inspection**
+   - [ ] Open configurator in browser
+   - [ ] Open DevTools and inspect each section
+   - [ ] Verify semantic classes are present
+   - [ ] Verify existing styles still work
+
+2. **Class Identification**
+   - [ ] Locate left sidebar using `.configurator-sidebar`
+   - [ ] Locate center content using `.configurator-content`
+   - [ ] Locate right panel using `.configurator-summary`
+   - [ ] Verify all nested classes are present
+
+3. **State Changes**
+   - [ ] Select options and verify state classes update
+   - [ ] Check active category has `-active` modifier
+   - [ ] Check selected options have `-selected` modifier
+   - [ ] Verify loading, empty, error states show correct classes
+
+### Automated Testing
+
+```typescript
+// E2E Test - Class verification
+describe('Configurator Semantic Classes', () => {
+  it('should have semantic layout classes', () => {
+    cy.visit('/product/acorn-stairlift/configure');
+    
+    // Verify main sections
+    cy.get('.configurator-layout').should('exist');
+    cy.get('.configurator-sidebar').should('exist');
+    cy.get('.configurator-content').should('exist');
+    cy.get('.configurator-summary').should('exist');
+  });
+  
+  it('should have position identifiers', () => {
+    cy.visit('/product/acorn-stairlift/configure');
+    
+    cy.get('.configurator-section-left').should('exist');
+    cy.get('.configurator-section-center').should('exist');
+    cy.get('.configurator-section-right').should('exist');
+  });
+  
+  it('should have content-specific classes', () => {
+    cy.visit('/product/acorn-stairlift/configure');
+    
+    // Left sidebar
+    cy.get('.configuration-options-container').should('exist');
+    cy.get('.configuration-categories-nav').should('exist');
+    
+    // Center content
+    cy.get('.option-cards-container').should('exist');
+    cy.get('.option-cards-grid').should('exist');
+    
+    // Right panel
+    cy.get('.configuration-summary-container').should('exist');
+    cy.get('.selected-options-list').should('exist');
+    cy.get('.configuration-total-price').should('exist');
+  });
+  
+  it('should apply state modifiers correctly', () => {
+    cy.visit('/product/acorn-stairlift/configure');
+    
+    // Click a category
+    cy.get('.configuration-category-item').first().click();
+    cy.get('.configuration-category-active').should('exist');
+    
+    // Select an option
+    cy.get('.option-card').first().click();
+    cy.get('.option-card-selected').should('exist');
+  });
+});
+```
+
+### Regression Testing
+
+```typescript
+// Visual regression test
+describe('Configurator Visual Regression', () => {
+  it('should match baseline screenshot', () => {
+    cy.visit('/product/acorn-stairlift/configure');
+    cy.matchImageSnapshot('configurator-with-semantic-classes');
+  });
+});
+```
+
+## Benefits
+
+### For Developers
+
+1. **Faster Debugging**
+   - Quickly identify sections in DevTools
+   - Clear element hierarchy
+
+2. **Easier Maintenance**
+   - Self-documenting class names
+   - Easier to update specific sections
+
+3. **Better Testing**
+   - Reliable test selectors
+   - Less brittle E2E tests
+
+4. **Simplified Styling**
+   - Target specific sections with CSS
+   - Create section-specific themes
+
+### For Future Development
+
+1. **Onboarding**
+   - New developers understand layout faster
+   - Clear code structure
+
+2. **Feature Development**
+   - Easy to add new features to specific sections
+   - Clear integration points
+
+3. **Refactoring**
+   - Safe to refactor with clear class contracts
+   - Easier to identify dependencies
+
+## Migration Strategy
+
+### Phase 1: Add Classes (Non-Breaking)
+- Add semantic classes alongside existing classes
+- Keep all existing Tailwind utilities
+- No visual changes
+
+### Phase 2: Documentation
+- Create style guide
+- Document all semantic classes
+- Add code comments
+
+### Phase 3: Test Updates (Optional)
+- Update E2E tests to use semantic selectors
+- More reliable test selectors
+- Better test maintenance
+
+## Related Features
+
+- `bug-configurator-option-controls-missing`: Will benefit from clear section classes
+- `bug-configurator-sidebar-progress-not-updating`: Easier to debug with semantic classes
+- `FEAT-20241022-3`: Storybook will use semantic classes for component isolation
+- Future theming and customization features
+
+## Implementation Priority
+
+**MEDIUM** - This is a code quality improvement that will benefit long-term maintainability and should be implemented before major feature additions.
+
+## Estimated Effort
+
+- **Planning**: 30 minutes (review current classes)
+- **Implementation**: 2-3 hours (add classes to all sections)
+- **Documentation**: 1-2 hours (style guide + comments)
+- **Testing**: 1 hour (manual + automated verification)
+- **Total**: 4.5-6.5 hours
+
+## Notes
+
+- This is a non-breaking change - existing functionality should not be affected
+- Can be implemented incrementally, section by section
+- Sets foundation for future configurator enhancements
+- Improves developer experience and code maintainability
+- Consider creating a CSS/Tailwind plugin for configurator-specific utilities
+
+---
+
+**Agent Signature: 290925 - frontend-dev - feat-configurator-semantic-section-classes**

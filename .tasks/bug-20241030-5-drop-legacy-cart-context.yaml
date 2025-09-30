@@ -1,0 +1,181 @@
+id: BUG-20241030-5
+project: front-store
+template: Bug Fix
+description: Remove legacy CartItemsContext usage and migrate all views to the Zustand cart store.
+
+metadata:
+  severity: major
+  priority: p1
+  status: new
+  regression: yes
+  environment:
+    - Routes: / (home), /cart, /success
+    - Components: ProductList, ProductOptions, Cart page
+  reported_by: frontend-qa
+  discovered_on: 2024-10-30
+  related_work:
+    - BUG-20241022-6
+    - FEAT-20241030-4
+  references:
+    - src/contexts/cartItemsContext.tsx
+    - src/pages/cart.tsx
+    - src/pages/success.tsx
+    - src/components/ProductList/ProductList.tsx
+    - src/components/ProductOptions.tsx
+  overlap_review:
+    related_initiatives:
+      - id: FEAT-20241030-4
+        status: in-flight
+    resolution: complements
+    notes: |
+      FEAT-20241030-4 introduces real GraphQL + cart provider wiring. This bug ensures legacy context is removed afterward so the provider is no longer needed.
+
+observed_behavior:
+  summary: |
+    Multiple pages/components still depend on CartItemsContext legacy reducer even though cart state lives in `useCartStore`. The bridging provider duplicates logic, risks divergence, and breaks when the context is absent. We need to drop the old context and have all flows consume the store directly.
+  reproduction_steps:
+    - Step 1: Inspect `src/pages/cart.tsx`; note `useContext(CartItemsContext)` usage.
+    - Step 2: Check `ProductOptions` and `ProductList` components; they reference CartContext for dispatch/cart.
+    - Step 3: Remove CartProvider from `_app.tsx` locally; cart flows crash.
+  actual_result: Cart flows rely on fragile bridging provider instead of the canonical store; double state maintenance and potential inconsistencies.
+  supporting_artifacts:
+    logs:
+      - CartItemsContext.tsx bridging to Zustand (lines 1-112).
+      - Cart components importing context.
+    screenshots: []
+    recordings: []
+
+expected_behavior:
+  summary: |
+    All cart reads/writes should use the Zustand store selectors/actions. Legacy CartItemsContext should be removed to avoid duplication and ensure consistent state.
+  confirmation_source:
+    - FEAT-20241030-4 scope (cart provider restore & store alignment)
+    - Cart store design in `src/stores/cartStore.ts`
+
+impact_analysis:
+  affected_users:
+    - Every shopper interacting with cart/checkout
+  business_impact:
+    - Risk of cart divergence, broken checkout if context not mounted
+  frequency: always in current codebase
+  blocking_release: yes
+
+technical_analysis:
+  hypothesized_root_cause: |
+    Migration to Zustand cart store left context-based implementations behind for cart page, success page, product list buttons, and ProductOptions. The bridging provider was added as a stop-gap, causing double state management.
+  diagnostic_notes:
+    - Cart page reduces with context state rather than store selectors.
+    - Payment already consumes Zustand, creating mismatch with context-driven components.
+  scope_of_failure:
+    code_paths:
+      - src/pages/cart.tsx
+      - src/pages/success.tsx
+      - src/components/ProductList/ProductList.tsx
+      - src/components/ProductList/ProductItem.tsx
+      - src/components/ProductOptions.tsx
+      - src/components/debug/*.tsx
+    data_entities:
+      - cart state, totals, options
+  risk_if_unresolved:
+    - Future fixes (GraphQL mutations) must maintain two code paths; increased bug surface.
+
+fix_plan:
+  owner: frontend-dev
+  tasks:
+    - name: Confirm no parallel cart refactor
+      description: Review open work to avoid conflicts and document dedupe results.
+      files:
+        - n/a
+      steps:
+        - Check FEAT-20241030-4 branch plans.
+        - Notify cart feature owners.
+      safeguards:
+        - Escalate if overlapping refactor underway.
+      acceptance_checks:
+        - metadata.overlap_review updated with confirmation.
+    - name: Migrate page/components to Zustand selectors
+      description: Replace CartContext usage with `useCartStore` selectors/actions.
+      files:
+        - src/pages/cart.tsx
+        - src/pages/success.tsx
+        - src/components/ProductList/ProductList.tsx
+        - src/components/ProductList/ProductItem.tsx
+        - src/components/ProductOptions.tsx
+      steps:
+        - Inject store hooks for cart items, totals, dispatch actions.
+        - Remove context imports and provider dependencies.
+        - Ensure hooks use memoized selectors to avoid re-renders.
+      safeguards:
+        - Manual regression after refactor; TypeScript enforcement.
+      acceptance_checks:
+        - Cart operations function with CartProvider removed.
+    - name: Remove legacy CartItemsContext and reducer dependency
+      description: Delete CartItemsContext implementation and redundant reducer usage.
+      files:
+        - src/contexts/cartItemsContext.tsx
+        - reducers/cart/* (if unused)
+      steps:
+        - Confirm no references remain.
+        - Remove context file or leave thin wrapper pointing to store if Storybook needs hooking.
+        - Update tests/stories to rely on store wrappers.
+      safeguards:
+        - Keep optional Storybook helper using store provider.
+      acceptance_checks:
+        - Build passes without CartContext; tree-shaking removes reducer.
+    - name: Update Storybook/tests to new provider
+      description: Ensure stories/tests mount store provider directly.
+      files:
+        - src/components/storybook/storyHelpers.tsx
+        - src/stories/**/*.tsx
+        - tests/setup files
+      steps:
+        - Replace CartContext provider with Zustand store provider (if needed).
+        - Update helpers to seed store state via `useCartStore.setState`.
+      safeguards:
+        - Run storybook test runner & integration tests.
+      acceptance_checks:
+        - Stories/tests pass with context removed.
+  rollback_plan:
+    - Reintroduce context wrapper temporarily if critical regression found, but document as temporary.
+  communication_plan:
+    - channel: #frontend
+      audience: FE engineers/QA/Product
+      message: Cart context removed; verify cart flows on staging.
+
+verification_matrix:
+  test_cases:
+    regression:
+      - Add-to-cart → cart → checkout flow works without context.
+    guardrail:
+      - Cart clear/update quantity functions operate via store.
+    performance:
+      - Cart page renders with same or improved performance.
+    security:
+      - No change.
+  data_validation:
+    - Compare store state before/after refactor using sample flow.
+  monitoring:
+    - metric: cart_add_failure_count
+      expected_change: none (should remain zero)
+      alert_if: increases post deploy.
+
+acceptance_criteria:
+  - [ ] Bug reproduction steps now succeed without issue
+  - [ ] Automated tests updated/added to cover regression
+  - [ ] Logs/analytics show expected healthy signals post-fix
+  - [ ] Stakeholders validated the fix in target environments
+  - [ ] Related documentation/runbooks updated
+
+checklist:
+  - [ ] Bug reproducible and documented
+  - [ ] Root cause confirmed or best-effort rationale captured
+  - [ ] Overlap review completed and owners notified (metadata.overlap_review)
+  - [ ] Fix implemented behind feature flag or safe rollout plan
+  - [ ] Tests (unit/integration/e2e) executed and passed
+  - [ ] Monitoring configured or updated
+  - [ ] QA sign-off recorded
+  - [ ] Deployment/rollback strategy documented
+
+tracking:
+  document: ../.tracking/bug_tracking.md
+  entry: "BUG-20241030-5 | Remove legacy cart context"

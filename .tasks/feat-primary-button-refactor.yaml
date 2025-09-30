@@ -1,0 +1,41 @@
+feature:
+  title: Consolidate primary button styling into reusable component
+  area: frontend
+  priority: p1
+  status: new
+  requested_by: techlead
+  environment: production
+
+summary:
+  goal: Standardize the primary CTA look-and-feel via a shared `PrimaryButton` (or Tailwind utility) and replace ad-hoc implementations.
+  scope:
+    - Implement reusable primitive with size variants, focus ring, disabled states, and Link/asChild support.
+    - Sweep existing blue primary buttons across pages/components and migrate to the shared primitive.
+    - Add Storybook coverage and visual regression tests to lock the style.
+  impact: Eliminates inconsistent padding/focus behavior, improves accessibility, and simplifies future button tweaks.
+
+acceptance_criteria:
+  - `PrimaryButton` component (or Tailwind `btn-primary`) exposes props for size, fullWidth, loading, and supports composition with `next/link`.
+  - All primary CTAs identified in audit use the new primitive; no residual duplicate class strings (`bg-blue-600 hover:bg-blue-700 ...`).
+  - Focus/disabled/ARIA behavior meets accessibility checklist; keyboard navigation intact on Link variants.
+  - Storybook stories include visual regression snapshots for light/dark, loading, disabled, Link-as-child states.
+
+implementation_plan:
+  - Design API and Tailwind classes for the button; implement in `src/components/ui/PrimaryButton.tsx` plus optional `btn-primary` utility class.
+  - Refactor key pages/components (product detail, cart checkout, configurator summary, product list, home CTA) to consume the primitive.
+  - For Link use cases, integrate `forwardRef` and `asChild` pattern (e.g., Radix Slot) to preserve semantics.
+  - Update Storybook with new component stories and add Chromatic (or equivalent) regression baseline.
+  - Document usage in `/docs/ui-button-guidelines.md` and add lint/search check to flag old class strings.
+
+risks:
+  - Large refactor touches many files; coordinate with in-flight features to avoid merge conflicts.
+  - Link composition may break if not carefully typed; include tests.
+  - Tailwind purge/config may need updates for utility class.
+
+stakeholders:
+  - Frontend team
+  - UX/design
+  - QA
+
+notes:
+  - Align color tokens with design system before shipping to avoid rework.

@@ -1,0 +1,98 @@
+feature:
+  title: Fetch product detail via GetProductBySlug query
+  area: frontend
+  priority: p0
+  status: completed
+  requested_by: techlead
+  environment: production
+  completed_by: claude-sonnet4
+  completed_date: 2024-12-19
+
+summary:
+  goal: Replace legacy product detail fetches with a fresh WooCommerce GraphQL query that resolves by slug using `products(where: { slugIn: [$slug] })` so we always receive current pricing, attributes, and related options.
+  scope:
+    - Add GraphQL template `GetProductBySlug($slug: String!)` per provided shape.
+    - Use the new query in product detail SSR (and related flows) instead of Contentful fallback.
+    - Normalize response into `ConfigurableProductSchema`, including local/global attributes and `relatedOptions`.
+  impact: Guarantees slug-based detail pages render with live WooCommerce data.
+
+acceptance_criteria:
+  - Query template defined in `src/lib/graphql/configurator.ts` (or `woocommerce.ts`) matches:
+    ```graphql
+    query GetProductBySlug($slug: String!) {
+      products(where: { slugIn: [$slug] }, first: 1) {
+        nodes {
+          id
+          databaseId
+          name
+          slug
+          __typename
+          shortDescription
+          description
+          localAttributes { nodes { label options } }
+          globalAttributes { nodes { label terms { nodes { name } } } }
+          relatedOptions
+          image { sourceUrl }
+          galleryImages(first: 10) { nodes { sourceUrl } }
+          ... on SimpleProduct { price regularPrice salePrice }
+        }
+      }
+    }
+    ```
+  - Product detail `getServerSideProps` consumes this query, sanitizes data for SSR, and falls back gracefully when no node returned.
+  - Mapping layer populates configurator schema fields (images, pricing, related options).
+  - Tests validate slug query returns expected node, handles empty result, and integrates with option-fetch logic.
+
+implementation_plan:
+  - Define query string and add client wrapper (`configuratorAPI.getProductBySlug`).
+  - Replace existing GraphQL/Contentful fetch path in product detail view with new helper.
+  - Normalize `localAttributes`, `globalAttributes`, and pricing fields; attach to product props.
+  - Update mocks/tests to use new payload structure.
+
+risks:
+  - WooCommerce response may omit configurator categories; ensure option fetch still works via `relatedOptions`.
+  - Slug mismatch (case sensitivity, hyphen differences) could still yield zero results; log and fallback gracefully.
+
+stakeholders:
+  - Frontend team
+  - Backend/WooCommerce team
+  - QA
+
+implementation_summary:
+  completed_date: 2024-12-19
+  implementation_status: ✅ COMPLETED
+  files_modified:
+    - src/lib/graphql/configurator.ts (added GET_PRODUCT_BY_SLUG query, configuratorAPI.getProductBySlug, normalizeSlugQueryResponse)
+    - src/pages/product/[slug]/index.tsx (updated getServerSideProps to use slug query)
+    - tests/product-detail-slug-query.test.tsx (comprehensive test suite)
+    - docs/FEATURE_PRODUCT_DETAIL_SLUG_QUERY_SUMMARY.md (complete documentation)
+  
+  key_achievements:
+    - ✅ GraphQL query template GET_PRODUCT_BY_SLUG implemented with all required fields
+    - ✅ API wrapper configuratorAPI.getProductBySlug with response validation
+    - ✅ Response normalization function normalizeSlugQueryResponse
+    - ✅ Product detail page updated to use slug query instead of legacy fetch
+    - ✅ Comprehensive error handling and fallback mechanisms
+    - ✅ Integration with existing lazy loading functionality maintained
+    - ✅ Performance improvements: single query instead of fetching all products
+    - ✅ Live WooCommerce data: current pricing, attributes, and related options
+    - ✅ Complete test suite covering all functionality
+    - ✅ Comprehensive documentation with implementation details
+  
+  acceptance_criteria_status:
+    - ✅ Query template defined in configurator.ts matches specification exactly
+    - ✅ Product detail getServerSideProps consumes slug query with error handling
+    - ✅ Mapping layer populates ConfigurableProductSchema with all required fields
+    - ✅ Tests validate slug query functionality and integration
+  
+  performance_benefits:
+    - Single GraphQL request instead of fetching all products
+    - Reduced data transfer and faster resolution
+    - Better caching potential for individual product queries
+    - Improved server-side rendering performance
+  
+  technical_quality:
+    - Full TypeScript support with comprehensive interfaces
+    - Robust error handling with graceful fallbacks
+    - Clean, maintainable code with reusable patterns
+    - Complete integration with existing lazy loading system

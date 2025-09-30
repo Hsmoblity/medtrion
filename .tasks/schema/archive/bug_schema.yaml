@@ -1,0 +1,141 @@
+id: BUG-XXX
+project: <project-name>
+template: Bug Fix
+description: <Concise summary: what is broken and why it matters>
+
+metadata:
+  severity: <blocker|critical|major|minor|trivial>
+  priority: <p0|p1|p2|p3>
+  status: <new|triaged|in-progress|blocked|fixed|verified>
+  regression: <yes|no|unknown>
+  environment:
+    - <browser/version>
+    - <device/os>
+    - <build or release channel>
+  reported_by: <name/team|user report id>
+  discovered_on: <YYYY-MM-DD>
+  related_work:
+    - <FEAT/BUG/PRD id or link>
+  references:
+    - <Slack thread, ticket, log bundle>
+  overlap_review:
+    related_initiatives:
+      - id: <initiative id or link>
+        status: <in-flight|shipped|backlog>
+    resolution: <unique|duplicate|handoff>
+    notes: |
+      <Summarize dedupe scan results and who was contacted.>
+
+observed_behavior:
+  summary: |
+    <Explain what the user/system currently experiences. Include timestamps or reproduction evidence.>
+  reproduction_steps:
+    - Step 1: <precondition>
+    - Step 2: <action>
+    - Step 3: <result>
+  actual_result: <What happened>
+  supporting_artifacts:
+    logs:
+      - <path-to-log or console output>
+    screenshots:
+      - <image path>
+    recordings:
+      - <loom or mp4 link>
+
+expected_behavior:
+  summary: |
+    <Describe the correct behaviour. Reference spec/feature id if available.>
+  confirmation_source:
+    - <PRD, UX guideline, acceptance criterion>
+
+impact_analysis:
+  affected_users:
+    - <User cohort or percentage>
+  business_impact:
+    - <metric impact, revenue, compliance>
+  frequency: <always|high|intermittent|rare>
+  blocking_release: <yes|no>
+
+technical_analysis:
+  hypothesized_root_cause: |
+    <Describe suspected cause. Include components, recent merges, or configuration changes.>
+  diagnostic_notes:
+    - <Important observations from debugging>
+  scope_of_failure:
+    code_paths:
+      - <file or module>
+    data_entities:
+      - <table/api/interface>
+  risk_if_unresolved:
+    - <What worsens if left unfixed>
+
+fix_plan:
+  owner: <engineer name>
+  tasks:
+    - name: Confirm no duplicate fix in-flight
+      description: Review backlog, release notes, and related initiatives for overlapping fixes; update metadata.overlap_review.
+      files:
+        - <n/a>
+      steps:
+        - Check .tasks folder and recent PRs for similar bugs or features
+        - Coordinate with owners of related items if overlap detected
+      safeguards:
+        - <Escalate to tech lead if ownership unclear>
+      acceptance_checks:
+        - Overlap review populated and stakeholders acknowledge dedupe outcome
+    - name: <triage or fix task>
+      description: <Detailed fix objective>
+      files:
+        - <affected-file-1>
+        - <affected-file-2>
+      steps:
+        - <Explicit change or validation>
+        - <Edge case to cover>
+      safeguards:
+        - <Feature flag, config toggle, fallback>
+      acceptance_checks:
+        - <Condition proving task success>
+  rollback_plan:
+    - <How to revert if fix causes regressions>
+  communication_plan:
+    - channel: <Slack/email/changelog>
+      audience: <stakeholders>
+      message: <key points>
+
+verification_matrix:
+  test_cases:
+    regression:
+      - <Automated or manual test verifying original issue>
+    guardrail:
+      - <Test ensuring no collateral damage>
+    performance:
+      - <Benchmark if relevant>
+    security:
+      - <Pen test, vulnerability scan>
+  data_validation:
+    - <Database or analytics checks>
+  monitoring:
+    - metric: <name>
+      expected_change: <increase/decrease/none>
+      alert_if: <threshold>
+
+acceptance_criteria:
+  - [ ] Bug reproduction steps now succeed without issue
+  - [ ] Automated tests updated/added to cover regression
+  - [ ] Logs/analytics show expected healthy signals post-fix
+  - [ ] Stakeholders validated the fix in target environments
+  - [ ] Related documentation/runbooks updated
+
+checklist:
+  - [ ] Bug reproducible and documented
+  - [ ] Root cause confirmed or best-effort rationale captured
+  - [ ] Overlap review completed and owners notified (metadata.overlap_review)
+  - [ ] Fix implemented behind feature flag or safe rollout plan
+  - [ ] Tests (unit/integration/e2e) executed and passed
+  - [ ] Monitoring configured or updated
+  - [ ] QA sign-off recorded
+  - [ ] Deployment/rollback strategy documented
+
+tracking:
+  document: ../.tracking/bug_tracking.md
+  entry: "BUG-XXX | <bug-title> | <status> | <notes>"

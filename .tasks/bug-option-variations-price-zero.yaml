@@ -1,0 +1,768 @@
+type: bug
+id: bug-option-variations-price-zero
+title: "All Option Variation Products Display Price 0"
+status: NEW
+priority: CRITICAL
+severity: CRITICAL
+assigned_to: frontend-dev
+created_date: 2025-01-16
+updated_date: 2025-01-16
+
+# Problem Statement
+## Issue Summary
+All option variation products are displaying a price of $0.00 in the OptionVariationPopup and OptionVariationCard components. This prevents users from seeing the actual cost of different variations (e.g., color, material options) when configuring their product.
+
+## Current Behavior
+- All variation products show price: $0.00
+- Variation cards display no pricing information
+- Cannot distinguish between different variation prices
+- Total calculations exclude variation prices
+- Users cannot make informed decisions about variations
+
+## Expected Behavior
+- Each variation product should display its actual price
+- Different variations should show different prices (if applicable)
+- Variation prices should be clearly visible in OptionVariationCard
+- Total calculations should include variation prices
+- Users should see accurate pricing for all variations
+
+## Impact Assessment
+### User Impact
+- **🚨 CRITICAL**: Users cannot see variation pricing
+- **💰 Revenue Loss**: Cannot make purchase decisions without prices
+- **🤝 Trust Damage**: Zero prices severely damage credibility
+- **😕 User Confusion**: No way to compare variation costs
+- **📞 Support Overload**: Increased pricing-related support tickets
+
+### Business Impact
+- **💸 Revenue Loss**: Users will not select variations without seeing prices
+- **🏢 Brand Damage**: Professional credibility compromised
+- **📉 Conversion Rate**: Reduced conversion for configurable products
+- **⚠️ Legal Risk**: Pricing transparency issues
+- **🔥 Critical Severity**: Blocks variation sales
+
+### Technical Impact
+- **🔴 Data Flow Failure**: Variation price data not flowing to UI
+- **🔗 GraphQL Issues**: Variation prices may not be fetched
+- **💾 Mapping Broken**: Price mapping from WooCommerce to variation schema broken
+- **🎯 Component Rendering**: OptionVariationCard not displaying prices correctly
+- **🔧 Calculation Error**: Price calculations excluding variations
+
+# Root Cause Analysis
+
+## Likely Causes
+1. **GraphQL Query Missing Variation Price**: Variation price fields not in query
+2. **Data Mapping Broken**: Variation price not mapped from WooCommerce response
+3. **Price Parsing Failure**: Variation price strings not parsed to numbers
+4. **Component Props Not Passed**: Variation prices not passed to OptionVariationCard
+5. **State Management Issue**: Variation prices lost in state updates
+6. **Default Value Issue**: Default value of 0 used when variation price is null/undefined
+7. **Type Mismatch**: Variation price data type incompatible with display logic
+
+## Data Flow Analysis
+```
+WooCommerce Variation Data
+    ↓ (GraphQL Query)
+Option Product with Variations
+    ↓ (fetchOptionProductsByIds)
+Variation Objects with Prices
+    ↓ (OptionVariationPopup)
+Variation Props
+    ↓ (OptionVariationCard)
+Price Display: $0.00 (BROKEN)
+```
+
+## Affected Components
+### Primary Components
+- **OptionVariationPopup**: Manages variation display and selection
+- **OptionVariationCard**: Displays individual variation with price
+- **ModelConfigurator**: May affect variation price calculations
+- **fetchOptionProductsByIds**: Fetches variation data from WooCommerce
+
+### Secondary Components
+- GraphQL queries (`GET_OPTION_PRODUCTS_BY_IDS`)
+- Data mapping functions (`mapWooToProductSchema`)
+- Price utilities (`parsePrice`, `formatPrice`)
+- Configuration summary calculations
+
+# Technical Investigation
+
+## GraphQL Query Verification
+
+### Expected Variation Query
+```graphql
+query GetOptionProductsByIds($ids: [ID!]!) {
+  products(where: { in: $ids }, first: 100) {
+    nodes {
+      id
+      databaseId
+      name
+      type
+      
+      ... on VariableProduct {
+        price
+        regularPrice
+        salePrice
+        variableType
+        
+        variations(first: 50) {
+          nodes {
+            id
+            databaseId
+            name
+            price          # ← CRITICAL: Must be included
+            regularPrice   # ← CRITICAL: Must be included
+            salePrice      # ← CRITICAL: Must be included
+            sku
+            image {
+              sourceUrl
+              altText
+            }
+            attributes {
+              nodes {
+                id
+                name
+                value
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+## Data Mapping Verification
+
+### Expected Variation Mapping
+```typescript
+// In fetchOptionProductsByIds or similar function
+const configurableProduct: ConfigurableProductSchema = {
+  id: node.id,
+  databaseId: node.databaseId,
+  name: node.name,
+  type: node.type,
+  variableType: node.variableType,
+  
+  // Map variations with proper price handling
+  variations: (node.variations?.nodes || []).map((variation: any) => ({
+    id: variation.id,
+    databaseId: variation.databaseId,
+    name: variation.name || '',
+    sku: variation.sku || '',
+    
+    // ⭐ CRITICAL: Ensure prices are properly parsed
+    price: parsePrice(variation.price),
+    regularPrice: parsePrice(variation.regularPrice || variation.price),
+    salePrice: variation.salePrice ? parsePrice(variation.salePrice) : null,
+    
+    image: variation.image?.sourceUrl || '',
+    attributes: variation.attributes?.nodes || []
+  })),
+  
+  // ... other fields
+};
+```
+
+## Component Props Verification
+
+### OptionVariationPopup Props
+```typescript
+// Should pass variation with price to OptionVariationCard
+const OptionVariationPopup = ({ option }) => {
+  const variations = option.variations || [];
+  
+  return (
+    <div className="option-variation-popup">
+      {variations.map((variation) => (
+        <OptionVariationCard
+          key={variation.id}
+          variation={variation}  // ← Must include price
+          option={option}
+          isSelected={isSelected(variation.id)}
+          selectionType={option.variableType === 'checkbox' ? 'checkbox' : 'radio'}
+          onToggle={() => handleToggle(variation)}
+        />
+      ))}
+    </div>
+  );
+};
+```
+
+### OptionVariationCard Price Display
+```typescript
+// Should display variation price
+const OptionVariationCard = ({ variation, option }) => {
+  // ⭐ CRITICAL: Parse and format variation price
+  const variationPrice = parsePrice(variation.price);
+  const displayPrice = formatPrice(variationPrice);
+  
+  return (
+    <div className="option-variation-card">
+      <div className="variation-header">
+        <h4 className="variation-name">{variation.name}</h4>
+        <div className="variation-price">{displayPrice}</div>
+      </div>
+      
+      <div className="variation-attributes">
+        {variation.attributes?.map(attr => (
+          <span key={attr.id} className="attribute">
+            {attr.name}: {attr.value}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+# Expected Fix Implementation
+
+## Fix 1: Verify GraphQL Query Includes Variation Prices
+```typescript
+// Ensure GET_OPTION_PRODUCTS_BY_IDS includes all variation price fields
+export const GET_OPTION_PRODUCTS_BY_IDS = gql`
+  query GetOptionProductsByIds($ids: [ID!]!) {
+    products(where: { in: $ids }, first: 100) {
+      nodes {
+        id
+        databaseId
+        name
+        type
+        price
+        regularPrice
+        salePrice
+        
+        ... on VariableProduct {
+          variableType
+          variations(first: 50) {
+            nodes {
+              id
+              databaseId
+              name
+              price          # ⭐ MUST INCLUDE
+              regularPrice   # ⭐ MUST INCLUDE
+              salePrice      # ⭐ MUST INCLUDE
+              sku
+              image {
+                sourceUrl
+                altText
+              }
+              attributes {
+                nodes {
+                  id
+                  name
+                  value
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+```
+
+## Fix 2: Update fetchOptionProductsByIds to Parse Variation Prices
+```typescript
+// src/lib/woocommerce.ts
+export const fetchOptionProductsByIds = async (
+  ids: number[]
+): Promise<ConfigurableProductSchema[]> => {
+  const query = GET_OPTION_PRODUCTS_BY_IDS;
+  const variables = { ids: ids.map(String) };
+  
+  const response = await fetchGraphQL(query, variables);
+  
+  if (!response.data?.products?.nodes) {
+    return [];
+  }
+
+  return response.data.products.nodes.map((node: any) => {
+    // Robust price parsing function
+    const parsePrice = (priceValue: any): number => {
+      if (priceValue === null || priceValue === undefined) {
+        console.warn('Variation price is null/undefined');
+        return 0;
+      }
+      
+      if (typeof priceValue === 'number') {
+        return isNaN(priceValue) ? 0 : priceValue;
+      }
+      
+      if (typeof priceValue === 'string') {
+        const cleanPrice = priceValue.replace(/[^0-9.-]/g, '');
+        const parsed = parseFloat(cleanPrice);
+        return isNaN(parsed) ? 0 : parsed;
+      }
+      
+      console.warn(`Unexpected price type: ${typeof priceValue}`, priceValue);
+      return 0;
+    };
+
+    const configurableProduct: ConfigurableProductSchema = {
+      id: node.id,
+      databaseId: node.databaseId,
+      name: node.name,
+      type: node.type,
+      price: parsePrice(node.price),
+      regularPrice: parsePrice(node.regularPrice || node.price),
+      salePrice: node.salePrice ? parsePrice(node.salePrice) : null,
+      variableType: node.variableType || undefined,
+      
+      // ⭐ CRITICAL: Map variations with proper price parsing
+      variations: (node.variations?.nodes || []).map((variation: any) => {
+        const variationPrice = parsePrice(variation.price);
+        const variationRegularPrice = parsePrice(variation.regularPrice || variation.price);
+        const variationSalePrice = variation.salePrice ? parsePrice(variation.salePrice) : null;
+        
+        // Debug logging
+        console.log('Variation price mapping:', {
+          variationId: variation.id,
+          variationName: variation.name,
+          rawPrice: variation.price,
+          parsedPrice: variationPrice,
+          rawRegularPrice: variation.regularPrice,
+          parsedRegularPrice: variationRegularPrice
+        });
+        
+        return {
+          id: variation.id,
+          databaseId: variation.databaseId,
+          name: variation.name || '',
+          sku: variation.sku || '',
+          price: variationPrice,
+          regularPrice: variationRegularPrice,
+          salePrice: variationSalePrice,
+          image: variation.image?.sourceUrl || '',
+          attributes: variation.attributes?.nodes || []
+        };
+      }),
+      
+      // ... other fields
+    };
+    
+    return configurableProduct;
+  });
+};
+```
+
+## Fix 3: Update OptionVariationCard to Display Variation Price
+```typescript
+// src/components/configurator/OptionVariationCard.tsx
+import { parsePrice, formatPrice } from '@/lib/utils/priceUtils';
+
+interface OptionVariationCardProps {
+  variation: Variation;
+  option: OptionProduct;
+  isSelected: boolean;
+  selectionType: 'radio' | 'checkbox';
+  onToggle: (variation: Variation) => void;
+  showPrice?: boolean;
+}
+
+const OptionVariationCard: React.FC<OptionVariationCardProps> = ({
+  variation,
+  option,
+  isSelected,
+  selectionType,
+  onToggle,
+  showPrice = true
+}) => {
+  // Parse and validate variation price
+  const variationPrice = parsePrice(variation.price);
+  const displayPrice = formatPrice(variationPrice);
+  
+  // Debug logging
+  console.log('OptionVariationCard render:', {
+    variationId: variation.id,
+    variationName: variation.name,
+    rawPrice: variation.price,
+    parsedPrice: variationPrice,
+    displayPrice
+  });
+
+  return (
+    <div 
+      className={`option-variation-card ${isSelected ? 'selected' : ''}`}
+      onClick={() => onToggle(variation)}
+    >
+      {/* Selection Control */}
+      <div className="variation-control">
+        {selectionType === 'radio' ? (
+          <input
+            type="radio"
+            checked={isSelected}
+            onChange={() => onToggle(variation)}
+            aria-label={`Select ${variation.name}`}
+          />
+        ) : (
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => onToggle(variation)}
+            aria-label={`Select ${variation.name}`}
+          />
+        )}
+      </div>
+      
+      {/* Variation Image */}
+      {variation.image && (
+        <div className="variation-image">
+          <img src={variation.image} alt={variation.name} />
+        </div>
+      )}
+      
+      {/* Variation Content */}
+      <div className="variation-content">
+        <h4 className="variation-name">{variation.name}</h4>
+        
+        {/* Variation Attributes */}
+        <div className="variation-attributes">
+          {variation.attributes?.map((attr) => (
+            <span key={attr.id} className="attribute-badge">
+              {attr.name}: {attr.value}
+            </span>
+          ))}
+        </div>
+        
+        {/* Variation Price */}
+        {showPrice && (
+          <div className="variation-price">
+            <span className="price-label">Price:</span>
+            <span className="price-value">{displayPrice}</span>
+          </div>
+        )}
+        
+        {/* Variation SKU */}
+        {variation.sku && (
+          <div className="variation-sku">
+            SKU: {variation.sku}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default OptionVariationCard;
+```
+
+## Fix 4: Update OptionVariationPopup to Pass Correct Data
+```typescript
+// src/components/configurator/OptionVariationPopup.tsx
+import { useMemo } from 'react';
+import { parsePrice, formatPrice } from '@/lib/utils/priceUtils';
+
+const OptionVariationPopup = ({ option, isOpen, onClose, onAddToConfiguration }) => {
+  // Get variations from option
+  const variations = useMemo(() => {
+    const sourceVariations = option.variations || [];
+    
+    // Validate and log variations
+    console.log('OptionVariationPopup variations:', {
+      optionId: option.id,
+      optionName: option.name,
+      variationCount: sourceVariations.length,
+      variations: sourceVariations.map(v => ({
+        id: v.id,
+        name: v.name,
+        price: v.price,
+        parsedPrice: parsePrice(v.price)
+      }))
+    });
+    
+    return sourceVariations;
+  }, [option.variations]);
+  
+  // Calculate total with selected variations
+  const calculateTotal = useCallback(() => {
+    const basePrice = parsePrice(option.price);
+    const variationsTotal = selectedVariations.reduce((sum, variation) => {
+      return sum + parsePrice(variation.price);
+    }, 0);
+    
+    return basePrice + variationsTotal;
+  }, [option.price, selectedVariations]);
+
+  return (
+    <div className="option-variation-popup">
+      <div className="popup-header">
+        <h3>{option.name}</h3>
+        <button onClick={onClose}>×</button>
+      </div>
+      
+      <div className="popup-body">
+        <div className="variations-grid">
+          {variations.map((variation) => (
+            <OptionVariationCard
+              key={variation.id}
+              variation={variation}
+              option={option}
+              isSelected={isVariationSelected(variation.id)}
+              selectionType={option.variableType === 'checkbox' ? 'checkbox' : 'radio'}
+              onToggle={handleVariationToggle}
+              showPrice={true}
+            />
+          ))}
+        </div>
+      </div>
+      
+      <div className="popup-footer">
+        <div className="total-price">
+          Total: {formatPrice(calculateTotal())}
+        </div>
+        <button onClick={() => onAddToConfiguration(option, selectedVariations)}>
+          Add to Configuration
+        </button>
+      </div>
+    </div>
+  );
+};
+```
+
+## Fix 5: Add Comprehensive Price Validation Utility
+```typescript
+// src/lib/utils/priceUtils.ts or priceValidation.ts
+export const parsePrice = (price: any): number => {
+  // Handle null, undefined, or empty string
+  if (price === null || price === undefined || price === '') {
+    console.warn('Price is null/undefined/empty, defaulting to 0');
+    return 0;
+  }
+  
+  // Handle numeric values
+  if (typeof price === 'number') {
+    if (isNaN(price) || !isFinite(price)) {
+      console.warn('Price is NaN or Infinity, defaulting to 0', price);
+      return 0;
+    }
+    return price;
+  }
+  
+  // Handle string values
+  if (typeof price === 'string') {
+    // Remove currency symbols, commas, and whitespace
+    const cleanPrice = price.replace(/[$,\s]/g, '');
+    const parsed = parseFloat(cleanPrice);
+    
+    if (isNaN(parsed) || !isFinite(parsed)) {
+      console.warn(`Failed to parse price string: "${price}", defaulting to 0`);
+      return 0;
+    }
+    
+    return parsed;
+  }
+  
+  console.warn(`Unexpected price type: ${typeof price}`, price);
+  return 0;
+};
+
+export const formatPrice = (price: any): string => {
+  const validPrice = parsePrice(price);
+  
+  if (validPrice === 0) {
+    return '$0.00';
+  }
+  
+  return `$${validPrice.toFixed(2)}`;
+};
+
+export const formatPriceWithCurrency = (price: any, currency: string = 'USD'): string => {
+  const validPrice = parsePrice(price);
+  
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  
+  return formatter.format(validPrice);
+};
+```
+
+# Debugging Steps
+
+## Step 1: Verify GraphQL Response
+```typescript
+// Add logging to GraphQL query
+const response = await fetchGraphQL(GET_OPTION_PRODUCTS_BY_IDS, { ids });
+console.log('GraphQL Response for variations:', JSON.stringify(response, null, 2));
+console.log('First variation price:', response.data?.products?.nodes?.[0]?.variations?.nodes?.[0]?.price);
+```
+
+## Step 2: Verify Data Mapping
+```typescript
+// Add logging to fetchOptionProductsByIds
+const mappedVariations = node.variations.nodes.map((variation: any) => {
+  console.log('Mapping variation:', {
+    id: variation.id,
+    name: variation.name,
+    rawPrice: variation.price,
+    rawType: typeof variation.price,
+    parsedPrice: parsePrice(variation.price)
+  });
+  
+  return { /* ... */ };
+});
+```
+
+## Step 3: Verify Component Props
+```typescript
+// Add logging to OptionVariationPopup
+console.log('OptionVariationPopup received:', {
+  optionId: option.id,
+  variations: option.variations,
+  firstVariationPrice: option.variations?.[0]?.price
+});
+```
+
+## Step 4: Verify OptionVariationCard Rendering
+```typescript
+// Add logging to OptionVariationCard
+console.log('OptionVariationCard rendering:', {
+  variationId: variation.id,
+  variationName: variation.name,
+  rawPrice: variation.price,
+  parsedPrice: parsePrice(variation.price),
+  displayPrice: formatPrice(variation.price)
+});
+```
+
+# Testing Requirements
+
+## Unit Tests
+```typescript
+describe('Variation Price Handling', () => {
+  test('parsePrice handles numeric variation prices', () => {
+    expect(parsePrice(25.99)).toBe(25.99);
+    expect(parsePrice(0)).toBe(0);
+  });
+
+  test('parsePrice handles string variation prices', () => {
+    expect(parsePrice('$25.99')).toBe(25.99);
+    expect(parsePrice('25.99')).toBe(25.99);
+  });
+
+  test('parsePrice handles invalid variation prices', () => {
+    expect(parsePrice(null)).toBe(0);
+    expect(parsePrice(undefined)).toBe(0);
+    expect(parsePrice('invalid')).toBe(0);
+  });
+});
+
+describe('OptionVariationCard', () => {
+  test('displays variation price correctly', () => {
+    const variation = {
+      id: '1',
+      name: 'Red Leather',
+      price: 50,
+      attributes: []
+    };
+    
+    render(<OptionVariationCard variation={variation} />);
+    expect(screen.getByText('$50.00')).toBeInTheDocument();
+  });
+});
+```
+
+## Integration Tests
+```typescript
+describe('Variation Price Flow', () => {
+  test('fetches and displays variation prices correctly', async () => {
+    const optionProducts = await fetchOptionProductsByIds([123]);
+    const firstVariation = optionProducts[0].variations[0];
+    
+    expect(firstVariation.price).toBeGreaterThan(0);
+    expect(firstVariation.price).not.toBe(NaN);
+    
+    render(<OptionVariationPopup option={optionProducts[0]} />);
+    await waitFor(() => {
+      expect(screen.queryByText('$0.00')).not.toBeInTheDocument();
+      expect(screen.getByText(/\$[0-9]+\.[0-9]{2}/)).toBeInTheDocument();
+    });
+  });
+});
+```
+
+# Acceptance Criteria
+
+## Functional Requirements
+- [ ] All variation products display actual prices (not $0.00)
+- [ ] Different variations show different prices (if applicable)
+- [ ] Variation prices are clearly visible in OptionVariationCard
+- [ ] Total calculations include variation prices correctly
+- [ ] Price changes reflect immediately in UI
+- [ ] Sale prices are displayed when available
+
+## Data Requirements
+- [ ] GraphQL query includes all variation price fields
+- [ ] Data mapping extracts variation prices correctly
+- [ ] Price validation handles all data types
+- [ ] Price formatting is consistent across UI
+- [ ] Variation prices persist in configuration state
+
+## Visual Requirements
+- [ ] Variation prices displayed in consistent format ($X.XX)
+- [ ] No $0.00 displayed for variations with actual prices
+- [ ] Price information clearly visible and readable
+- [ ] Sale prices highlighted (if applicable)
+
+## Technical Requirements
+- [ ] Comprehensive logging for variation price data flow
+- [ ] Error handling for missing/invalid variation prices
+- [ ] Unit tests for variation price validation
+- [ ] Integration tests for complete variation price flow
+- [ ] Performance: Price calculations don't impact UI responsiveness
+
+# Related Issues
+
+## May Be Related To
+- `bug-configurator-all-products-price-zero`: Main product pricing issue
+- `bug-state-management-consistency-audit`: State management may affect variation prices
+- Price data flow issues may be systemic across all product types
+
+## Dependencies
+- GraphQL schema must include variation price fields
+- WooCommerce variations must have prices set
+- Data mapping layer must handle all price formats
+- State management must preserve variation price data
+
+# Estimated Effort
+
+- **Investigation & Analysis**: 2-3 hours (debug variation price flow)
+- **GraphQL Query Updates**: 1-2 hours
+- **Data Mapping Fixes**: 2-3 hours
+- **Component Updates**: 3-4 hours (OptionVariationCard, OptionVariationPopup)
+- **Price Utility Updates**: 2-3 hours
+- **Testing**: 3-4 hours
+- **Documentation**: 1-2 hours
+- **Total**: **14-21 hours**
+
+# Priority Justification
+
+## Why CRITICAL Priority
+1. **Variation Sales Blocked**: Users cannot select variations without seeing prices
+2. **Revenue Impact**: Variation options are key revenue drivers
+3. **User Experience**: Complete failure of variation pricing display
+4. **Trust Issues**: Zero prices damage credibility
+5. **May Be Related to Main Pricing Bug**: Part of larger pricing system failure
+
+## Immediate Actions Required
+1. **Verify GraphQL query** includes variation price fields
+2. **Debug data mapping** for variation prices
+3. **Fix component rendering** to display variation prices
+4. **Test thoroughly** across all variation types
+5. **Deploy urgently** to restore variation pricing
+
+# Notes
+- This bug may be related to `bug-configurator-all-products-price-zero`
+- Both issues suggest a systematic problem with price data flow
+- Should be addressed as part of comprehensive pricing fix
+- Variation pricing is critical for product customization
+- May require fixes across multiple layers (GraphQL, mapping, components)
+- **IMPORTANT**: Test with multiple variation types (color, size, material, etc.)
+- **IMPORTANT**: Ensure both radio and checkbox variations display prices correctly

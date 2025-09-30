@@ -1,0 +1,234 @@
+type: bug
+id: bug-getserversnapshot-hydration
+title: "getServerSnapshot hydration infinite loop in Cart component"
+created: 2025-09-29
+status: COMPLETED
+priority: high
+severity: major
+agent: frontend-dev
+
+## Problem Statement
+
+The Cart component is causing a React hydration error with the warning "The result of getServerSnapshot should be cached to avoid an infinite loop". This occurs because Zustand store with persistence creates a mismatch between server-side rendered state and client-side hydrated state.
+
+### Current Behavior
+
+1. **Server-side**: Zustand store initializes with default empty state
+2. **Client-side**: Zustand store hydrates from localStorage with persisted cart data
+3. **Hydration Mismatch**: React detects different states and triggers infinite re-renders
+4. **Error Location**: Cart.tsx:9:51 (useCartItems hook) → Header.tsx:13:44 (Cart component)
+
+### Expected Behavior
+
+1. **Server-side**: Zustand store should provide consistent initial state
+2. **Client-side**: Smooth hydration without state mismatches
+3. **No Warnings**: No getServerSnapshot infinite loop warnings
+4. **Stable Rendering**: Cart component renders consistently across SSR/CSR
+
+## Impact
+
+- **User Experience**: Potential layout shifts and hydration errors
+- **Performance**: Infinite re-renders consume unnecessary resources
+- **Development**: Console warnings clutter development experience
+- **SEO**: Hydration mismatches can affect Core Web Vitals
+
+## Root Cause Analysis
+
+### Technical Details
+
+1. **Zustand Persistence**: The `persist` middleware creates different states on server vs client
+2. **SSR Hydration**: Next.js SSR renders with default state, client hydrates with persisted state
+3. **React 18 Strict Mode**: Enhanced hydration checks detect the mismatch
+4. **Missing Server Snapshot**: No proper server-side state caching mechanism
+
+### Code Flow
+
+```
+Server Render → Default Zustand State → Cart Component
+Client Hydrate → Persisted Zustand State → Cart Component (DIFFERENT!)
+React Detects Mismatch → getServerSnapshot Warning → Infinite Loop
+```
+
+## Affected Components
+
+### Files to Modify
+
+1. `src/stores/cartStore.ts`
+   - Add proper SSR handling for Zustand persistence
+   - Implement server snapshot caching
+   - Add hydration state management
+
+2. `src/components/PageLayout/Cart/Cart.tsx`
+   - Wrap cart-dependent logic in ClientOnly
+   - Add proper loading states
+   - Handle hydration gracefully
+
+3. `src/components/PageLayout/Header.tsx`
+   - Ensure cart count display is hydration-safe
+   - Use ClientOnly for cart-dependent UI
+
+4. `src/components/ClientOnly.tsx`
+   - Enhance with better SSR handling
+   - Add hydration state management
+
+## Solution Strategy
+
+### Phase 1: Fix Zustand SSR (Immediate)
+
+```typescript
+// Enhanced cart store with proper SSR handling
+export const useCartStore = create<CartStore>()(
+  persist(
+    (set, get) => ({
+      // ... existing implementation
+    }),
+    {
+      name: 'hsm-cart-storage',
+      partialize: (state) => ({ cart: state.cart }),
+      version: 1,
+      // Add SSR-safe configuration
+      skipHydration: true, // Prevent automatic hydration
+      onRehydrateStorage: () => (state) => {
+        // Custom hydration logic
+        if (state) {
+          // Ensure consistent state after hydration
+        }
+      }
+    }
+  )
+)
+```
+
+### Phase 2: Add Hydration State Management
+
+```typescript
+// Add hydration state to store
+interface CartStore {
+  // ... existing state
+  isHydrated: boolean
+  setHydrated: () => void
+}
+
+// Hydration-aware selectors
+export const useCartItems = () => {
+  const items = useCartStore(state => state.cart)
+  const isHydrated = useCartStore(state => state.isHydrated)
+  
+  // Return empty array during SSR, actual data after hydration
+  return isHydrated ? items : []
+}
+```
+
+### Phase 3: Component-Level Fixes
+
+```typescript
+// Cart component with hydration safety
+const Cart = () => {
+  const isHydrated = useCartStore(state => state.isHydrated)
+  const cart = useCartItems()
+  
+  // Show loading state during hydration
+  if (!isHydrated) {
+    return <CartSkeleton />
+  }
+  
+  // Rest of component logic
+}
+```
+
+## Implementation Plan
+
+### Step 1: Update Cart Store
+- [ ] Add `isHydrated` state to CartStore interface
+- [ ] Implement `skipHydration: true` in persist config
+- [ ] Add custom `onRehydrateStorage` handler
+- [ ] Create hydration-aware selectors
+
+### Step 2: Update Cart Component
+- [ ] Add hydration state checks
+- [ ] Implement loading skeleton
+- [ ] Wrap cart logic in ClientOnly where needed
+- [ ] Add error boundaries for hydration failures
+
+### Step 3: Update Header Component
+- [ ] Ensure cart count is hydration-safe
+- [ ] Use ClientOnly for cart-dependent UI elements
+- [ ] Add proper fallback states
+
+### Step 4: Testing
+- [ ] Test SSR rendering consistency
+- [ ] Verify no hydration warnings
+- [ ] Test cart persistence across page reloads
+- [ ] Verify performance improvements
+
+## Testing Strategy
+
+### Unit Tests
+```typescript
+describe('Cart Store Hydration', () => {
+  it('should handle SSR without hydration warnings', () => {
+    // Test server-side rendering
+  })
+  
+  it('should hydrate client-side state correctly', () => {
+    // Test client-side hydration
+  })
+  
+  it('should maintain cart persistence across reloads', () => {
+    // Test persistence functionality
+  })
+})
+```
+
+### Integration Tests
+- Verify cart displays correctly on initial page load
+- Test cart persistence across browser refresh
+- Ensure no console warnings in development
+- Test cart functionality in production build
+
+### Manual Testing
+1. Open browser dev tools → Console
+2. Navigate to homepage
+3. Verify no getServerSnapshot warnings
+4. Add items to cart
+5. Refresh page
+6. Verify cart persists without warnings
+
+## Acceptance Criteria
+
+- [ ] No `getServerSnapshot` warnings in console
+- [ ] Cart component renders consistently on SSR and CSR
+- [ ] Cart persistence works correctly across page reloads
+- [ ] No infinite re-render loops
+- [ ] Performance metrics remain stable
+- [ ] All existing cart functionality preserved
+
+## Related Issues
+
+- bug-relatedoptions-field-mapping: May be affected by hydration issues
+- feat-cart-experience-restoration: Depends on stable cart rendering
+- bug-product-cart-view-more: May have similar hydration issues
+
+## Notes
+
+- This is a common issue with Zustand + Next.js SSR
+- The fix requires careful handling of server/client state differences
+- Consider implementing a global hydration state manager
+- Monitor Core Web Vitals after implementation
+
+## Implementation Priority
+
+**HIGH** - Blocks development experience:
+- Console warnings in development
+- Potential performance issues
+- Hydration mismatches affect SEO
+
+## Estimated Effort
+
+- **Development**: 3-4 hours
+- **Testing**: 1-2 hours
+- **Total**: 4-6 hours
+
+---
+
+**Agent Signature: 290925 - frontend-dev - bug-getserversnapshot-hydration**

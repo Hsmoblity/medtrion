@@ -1,0 +1,251 @@
+id: FEAT-20250926-6
+project: front-store
+template: Feature
+description: Build comprehensive Storybook coverage for the payment page so teams can regress checkout flows without touching production APIs.
+
+technical_requirements:
+  components:
+    PaymentPage:
+      source: src/pages/payment.tsx
+      behaviors:
+        - reads cart data from useCartItems (zustand store)
+        - performs client-side submit via fetch('/api/create-order')
+        - shows status banner message, disabled submit button, and order summary
+    Layout:
+      dependencies:
+        - src/components/PageLayout/Header.tsx
+        - src/components/PageLayout/Footer.tsx
+      requirements:
+        - stories render with header and footer to match production shell
+        - ensure global styles (globals.css, tailwind) load inside Storybook preview
+    CartStore:
+      hook: useCartStore (zustand)
+      requirements:
+        - provide helper to seed cart state per story without leaking across stories
+        - expose selectors for subtotal, tax, total the same way the page expects
+        - support hydrated (persisted) and empty-cart scenarios
+  storybook_configuration:
+    title: Pages/Payment
+    layout: fullscreen
+    parameters:
+      controls: expanded
+      backgrounds:
+        default: light
+      viewport:
+        defaultViewport: responsive
+    decorators:
+      - NextRouter mock providing push/replace spies surfaced to Storybook actions
+      - CartStore provider wrapper that resets state before each story
+      - MSW/Fetch handler decorator for /api/create-order success and failure cases
+    globals:
+      locale: en-CA
+  mock_data:
+    cart_states:
+      populated:
+        - mix of items with and without options (options include priceModifier fallback)
+        - shows quantity changes, subtotal breakdown, and formatted currency
+      empty:
+        - zero items to exercise empty order summary copy and disabled submit button
+      heavy:
+        - 6+ cart items to validate scroll, sticky summary, and performance
+    customer_profiles:
+      valid:
+        - includes required shipping fields populated with realistic data
+      invalid:
+        - missing required address lines to trigger validation errors
+    submission_outcomes:
+      success:
+        - mock returns orderNumber and navigates to /success
+      failure:
+        - mock rejects with error and keeps user on form with error copy
+      slow:
+        - mock delays 2s to preview loading indicator and aria-live updates
+  accessibility_baseline:
+    - labels link to form controls via htmlFor/aria-labelledby
+    - status messages announced through aria-live="polite"
+    - submit button exposes disabled state and focus outline remains visible
+    - ensure keyboard-only users can reach order summary and totals
+  documentation_requirements:
+    - add MDX docs tab summarizing scenarios, controls, and QA checklist
+    - reference cart fixture helper so future stories remain consistent
+
+tasks:
+  - name: Deliver Storybook payment page coverage with stateful mocks
+    description: Expand Payment stories to cover success, failure, validation, responsive, and interaction scenarios with reusable helpers.
+    files:
+      - src/stories/pages/Payment.stories.tsx
+      - src/stories/utils/paymentMocks.ts  # new helper for cart and form fixtures
+      - src/stories/decorators/RouterDecorator.tsx  # new router provider
+      - src/stories/decorators/ZustandDecorator.tsx  # new zustand/reset wrapper
+      - src/stories/msw/paymentHandlers.ts  # new fetch/MSW handler definitions
+      - src/components/PageLayout/Header.tsx
+      - src/components/PageLayout/Footer.tsx
+    steps:
+      implementation_steps:
+        - step: 1
+          name: Audit dependencies and create infrastructure helpers
+          files:
+            - src/stories/decorators/RouterDecorator.tsx
+            - src/stories/decorators/ZustandDecorator.tsx
+            - src/stories/msw/paymentHandlers.ts
+          details:
+            - extract reusable NextRouter mock decorator exposing Storybook actions
+            - add zustand store reset decorator using createStore + StoreApiProvider
+            - configure fetch/MSW handler module with success, failure, and slow responses
+            - document helper usage via JSDoc for internal discoverability
+          acceptance_criteria:
+            - decorators compose without TypeScript errors
+            - stories run without leaking cart or router state between stories
+            - console shows no unhandled fetch warnings
+        - step: 2
+          name: Build typed fixtures for carts and customer forms
+          files:
+            - src/stories/utils/paymentMocks.ts
+          details:
+            - define CartItemMock and CartItemOptionMock interfaces extending CartProduct shape
+            - export factory methods for populated, empty, and heavy carts
+            - provide reusable customer form presets (blank, valid, invalid)
+            - expose helper to compute subtotal/tax/total mirroring page logic for assertions
+          acceptance_criteria:
+            - fixtures align with CartProduct typing and pass linting
+            - subtotal calculations match PaymentPage implementation within 2 decimal places
+            - form presets cover required vs optional fields
+        - step: 3
+          name: Author payment page stories with controls and play functions
+          files:
+            - src/stories/pages/Payment.stories.tsx
+          details:
+            - register default export with title Pages/Payment and decorators array
+            - include story args/controls: cartVariant, taxRate, submitOutcome
+            - implement story variants: PopulatedCart, EmptyCart, ValidationErrors, SubmitSuccess, SubmitFailure, MobileViewport
+            - use Storybook play functions to simulate typing, submit, and verify state changes
+            - surface router navigation and fetch calls via Storybook actions panel
+          acceptance_criteria:
+            - each story renders without runtime errors in Storybook
+            - validation story shows inline errors and disabled submit button correctly
+            - success story triggers mock navigation to /success with encoded wpOrderId
+            - failure story displays error banner and re-enables submit
+        - step: 4
+          name: Document scenarios and ensure QA automation readiness
+          files:
+            - src/stories/pages/Payment.stories.tsx
+            - src/stories/pages/Payment.mdx  # new docs tab content
+          details:
+            - add MDX docs page summarizing flows, props, and testing notes
+            - include table documenting cart variants, expected totals, and messages
+            - wire Storybook accessibility (addon-a11y) checks and log any manual follow-ups
+            - add Chromatic/visual regression notes and how to update snapshots
+          acceptance_criteria:
+            - docs tab renders with scenario table and QA guidance
+            - storybook test-runner passes accessibility audits for each story
+            - notes include steps for verifying responsive mode via viewport addon
+    story_scenarios:
+      - Default populated cart with shipping form ready (happy path)
+      - Empty cart state preventing submission
+      - Validation errors after submit with missing required fields
+      - Successful submission navigating to success page
+      - Failed submission with error banner and retry guidance
+      - Mobile viewport (360px) layout verification with sticky summary collapse
+      - Heavy cart with scrollable summary and performance focus
+      - Slow network to preview loading status text and button state
+    mock_data_requirements:
+      - cart fixtures must include options with priceModifier and quantity > 1 cases
+      - include at least one product missing optional email to show optional handling
+      - prepare MSW handlers returning deterministic orderNumber for snapshot stability
+    interaction_testing:
+      - leverage @storybook/testing-library to type into inputs and trigger submit
+      - assert aria-live region updates using expect from @storybook/jest
+      - verify router.replace called with success URL during happy path play
+    documentation_requirements:
+      - MDX docs include usage instructions, knobs table, and QA checklist
+      - link to payment API contract or mock schema for reference
+    accessibility_requirements:
+      keyboard_navigation:
+        - tab order follows visual order across form and summary
+        - submit button reachable and announces disabled/enabled state
+        - focus returns to heading after navigation failure message
+      screen_reader_support:
+        - message banner uses aria-live="polite"
+        - error list associates with inputs via aria-describedby
+        - totals region announces currency values clearly
+      visual_requirements:
+        - maintain 3:1 contrast for summary text
+        - ensure focus outlines visible on inputs and buttons
+        - mobile viewport retains 44px touch targets
+    performance_requirements:
+      - story render completes under 200ms on baseline hardware (Chromatic)
+      - heavy cart story stays below 60 DOM nodes in summary section
+      - avoid unnecessary re-renders when toggling controls
+    qa_support:
+      - include ready-made QA script in docs tab for regression runs
+      - provide instructions for exporting story to regression screenshot tooling
+
+    agents:
+      - role: frontend-dev
+        responsibilities:
+          - implement decorators, fixtures, and stories with full TypeScript coverage
+          - ensure payment page logic parity between production and Storybook
+          - add docs tab with scenario guidance and controls documentation
+        deliverables:
+          - updated Payment.stories.tsx with scenarios and play functions
+          - new helper/decorator modules checked into src/stories
+          - documentation and typed fixtures supporting reuse
+      - role: qa
+        responsibilities:
+          - validate story interactions align with payment user journeys
+          - run Storybook accessibility and interaction tests, logging gaps
+          - confirm docs tab covers regression steps and edge cases
+        deliverables:
+          - QA notes appended to docs tab or linked in tracking doc
+          - reported accessibility or behavior issues with reproduction steps
+    outputs:
+      - Storybook payment page collection covering happy path, error, responsive, and performance scenarios with reusable mocks and documentation.
+
+workflow:
+  order: sequential
+  dependencies: []
+
+rules:
+  - DRY, KISS
+  - stable params/returns
+  - no duplicate functions
+  - no ghost code
+  - no overlaping code
+  - no unnecessary complexity
+  - confirm if confuses requirements
+
+acceptance_criteria:
+  functional_requirements:
+    - [ ] Payment stories load without runtime errors or missing providers
+    - [ ] Controls allow switching cart state, tax rate, and submit outcome
+    - [ ] Success story triggers router.replace with /success?wpOrderId=... mock value
+    - [ ] Failure story surfaces error copy and keeps user on payment form
+    - [ ] Validation story shows inline errors and prevents submission until fixed
+    - [ ] Mobile viewport story uses Storybook viewport addon to demonstrate layout
+    - [ ] Docs tab documents scenarios, controls, and QA checklist
+  quality_requirements:
+    - [ ] TypeScript compiles with new decorators and fixtures
+    - [ ] Storybook addon-a11y passes for each story or issues documented
+    - [ ] Stories support Chromatic/visual regression with deterministic data
+    - [ ] No console warnings or unhandled promise rejections in stories
+  performance_requirements:
+    - [ ] First render under 200ms in Storybook profiling for default story
+    - [ ] No redundant re-render loops when controls update
+    - [ ] Heavy cart story remains responsive when scrolling summary
+  security_requirements:
+    - [ ] Mock handlers avoid leaking real API credentials or endpoints
+    - [ ] No sensitive user data baked into fixtures
+    - [ ] Router decorator prevents navigation outside Storybook iframe
+
+checklist:
+  - [ ] Code reviewed
+  - [ ] Stories added to Chromatic or visual regression pipeline
+  - [ ] Storybook build succeeds locally (yarn storybook)
+  - [ ] Unit tests (play functions) pass via storybook test-runner
+  - [ ] Accessibility audit noted in docs tab
+  - [ ] QA sign-off recorded in tracking doc
+  - [ ] Documentation updated (MDX/docs tab)
+
+tracking:
+  document: ../.tracking/feat_tracking.md
+  entry: "FEAT-20250926-6 | Storybook payment page coverage | new"

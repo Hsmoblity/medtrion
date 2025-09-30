@@ -1,0 +1,39 @@
+bug:
+  title: Mock data lingering across pages/components blocks production behaviour
+  area: frontend
+  severity: critical
+  priority: p0
+  status: new
+  reported_by: techlead
+  environment: production
+
+summary:
+  impact: Multiple pages/components rely on mock payloads (local GraphQL, dummy JSON) so production users never see live data; features regress to placeholder experiences.
+  scope: Entire Next.js app—configurator flows, product detail, potential debug components still serving fixtures.
+  regression: long-standing (mocks left in codebase beyond initial dev).
+
+steps_to_reproduce:
+  - Load configurator or product detail page in production/staging.
+  - Observe data is identical to mock payload (limited options, static pricing) regardless of CMS/WooCommerce content.
+  - Inspect `/api/graphql` to confirm it returns hard-coded fixture data.
+
+expected_result: All user-facing pages fetch data from live endpoints; mocks used only in local development/testing with explicit flags.
+actual_result: Mocks are active in production bundle, blocking live data fetches.
+
+root_cause_hypothesis:
+  - Mock GraphQL handler (`src/pages/api/graphql.ts`) is bundled without environment gating.
+  - Components default to static arrays or debug data when live fetch fails, without proper fallback detection.
+  - Missing environment variables for live services forced developers to leave mocks as default.
+
+proposed_fix:
+  - Inventory and remove/guard all mock data sources in production builds (GraphQL handler, debug components, fixture imports).
+  - Introduce environment-based toggles so mocks are opt-in for local dev only.
+  - Ensure every data fetch gracefully handles live endpoint errors with user-visible messaging.
+
+testing:
+  - Integration tests hitting staging/live endpoints to confirm real data is rendered.
+  - Static analysis or lint step verifying no mock fixture imports in production bundles.
+  - Manual QA sweep across configurator, product, cart to confirm live data flows.
+
+notes:
+  - Coordinate with backend team to guarantee required endpoints and credentials exist before flipping mocks off.

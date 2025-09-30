@@ -1,0 +1,563 @@
+type: bug
+id: bug-configurator-variation-selection-not-updating-summary
+title: "OptionVariationPopup: Variation Selection Does Not Update Configuration Summary"
+status: OPEN
+priority: CRITICAL
+assigned_to: frontend-dev
+created_date: 2025-01-16
+updated_date: 2025-01-16
+reopened_date: 2025-01-16
+reopened_reason: "Issue still persists - OptionVariationCard selections not updating global configuration state, summary not showing added options, prices not updating"
+
+# Business Context
+## Problem Statement
+In the OptionVariationPopup, when users click on OptionVariationCard to select variations and then hit the "Add to Configuration" button, the configuration summary does not update with the selected items and total price. This breaks the core functionality of adding variations to the configuration, preventing users from seeing their selections reflected in the summary panel.
+
+## Business Impact
+- **User Experience**: Users cannot see their variation selections in the configuration summary
+- **Sales Impact**: Customers cannot complete product configurations with variations
+- **Functionality**: Core variation selection feature is non-functional
+- **Trust**: Broken functionality undermines user confidence in the platform
+- **Support**: Increased support tickets due to non-working variation selection
+
+## Success Metrics
+- 100% of variation selections are reflected in configuration summary
+- Configuration summary shows correct total price including variations
+- Selected variations appear in the summary panel with proper details
+- Price calculations include variation modifiers correctly
+- No console errors related to configuration updates
+
+# User Story
+**As a** customer using the Model Configurator
+**I want** to select variations in the popup and see them added to my configuration summary
+**So that** I can see the total price and selected options for my product configuration
+
+**Acceptance Criteria:**
+- Clicking on OptionVariationCard selects the variation
+- "Add to Configuration" button adds selected variations to summary
+- Configuration summary shows selected variations with names and prices
+- Total price updates to include variation costs
+- Summary panel reflects all selected variations correctly
+
+# Technical Requirements
+
+## Root Cause Analysis
+The issue likely stems from one or more of the following problems:
+
+### 1. Missing Configuration Update Logic
+```typescript
+// Current Issue: onAddToConfiguration may not properly update configuration
+const handleAddToConfiguration = (option: OptionProduct, variations?: Variation[]) => {
+  // MISSING: Logic to update configuration summary
+  // MISSING: Logic to update total price
+  // MISSING: Logic to add variations to selected options
+  
+  // Current implementation may be incomplete
+  if (onToggle) {
+    onToggle(option, categoryId);  // ← This may not handle variations properly
+  }
+};
+```
+
+### 2. State Management Issues
+```typescript
+// Current Issue: Configuration state may not be properly managed
+const [selectedVariations, setSelectedVariations] = useState<Variation[]>([]);
+
+// MISSING: Logic to persist selected variations to parent component
+// MISSING: Logic to update configuration summary state
+// MISSING: Logic to recalculate total price
+```
+
+### 3. Data Flow Problems
+```typescript
+// Current Issue: Variation data may not flow correctly to configuration
+interface ConfigurationSummaryData {
+  baseModel: ProductSchema;
+  selectedOptions: ConfigurableProductSchema[];  // ← May not include variations
+  totalPrice: number;  // ← May not include variation costs
+  basePrice: number;
+  optionsPrice: number;  // ← May not include variation modifiers
+  // ... other fields
+}
+```
+
+### 4. Integration Issues
+```typescript
+// Current Issue: OptionVariationPopup may not be properly integrated with ModelConfigurator
+<OptionVariationPopup
+  option={option}
+  isOpen={internalState.variationPopupVisible}
+  onClose={handleCloseVariationPopup}
+  onAddToConfiguration={(option, variations) => {
+    // MISSING: Proper integration with configuration state
+    // MISSING: Proper integration with summary panel
+    // MISSING: Proper integration with price calculation
+  }}
+  isAlreadySelected={isSelected}
+/>
+```
+
+## Expected Behavior
+```typescript
+// Correct Implementation
+const handleAddToConfiguration = (option: OptionProduct, variations?: Variation[]) => {
+  if (!variations || variations.length === 0) {
+    // Handle simple option without variations
+    addSimpleOptionToConfiguration(option);
+  } else {
+    // Handle variable option with variations
+    addVariableOptionToConfiguration(option, variations);
+  }
+  
+  // Update configuration summary
+  updateConfigurationSummary();
+  
+  // Recalculate total price
+  recalculateTotalPrice();
+  
+  // Close popup
+  setOptionPopup(prev => ({ ...prev, isOpen: false }));
+};
+
+const addVariableOptionToConfiguration = (option: OptionProduct, variations: Variation[]) => {
+  // Create configuration item with variations
+  const configurationItem = {
+    id: option.id,
+    name: option.name,
+    type: option.type,
+    basePrice: option.price,
+    variations: variations.map(variation => ({
+      id: variation.id,
+      name: variation.name,
+      price: variation.price,
+      attributes: variation.attributes
+    })),
+    totalPrice: option.price + variations.reduce((sum, v) => sum + v.price, 0)
+  };
+  
+  // Add to configuration state
+  setSelectedOptions(prev => [...prev, configurationItem]);
+  
+  // Update configuration summary
+  setConfigurationSummary(prev => ({
+    ...prev,
+    selectedOptions: [...prev.selectedOptions, configurationItem],
+    optionsPrice: prev.optionsPrice + configurationItem.totalPrice,
+    totalPrice: prev.basePrice + prev.optionsPrice + configurationItem.totalPrice
+  }));
+};
+```
+
+## Component Integration Issues
+
+### OptionVariationPopup Component
+```typescript
+// Issues to check in OptionVariationPopup.tsx
+const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
+  option,
+  isOpen,
+  onClose,
+  onAddToConfiguration,  // ← Check if this properly handles variations
+  isAlreadySelected = false
+}) => {
+  const [selectedVariations, setSelectedVariations] = useState<Variation[]>([]);
+  
+  // ISSUE 1: Check if variation selection state is properly managed
+  const handleVariationToggle = (variation: Variation) => {
+    if (selectionType === 'radio') {
+      setSelectedVariations([variation]);
+    } else {
+      setSelectedVariations(prev => 
+        prev.includes(variation) 
+          ? prev.filter(v => v.id !== variation.id)
+          : [...prev, variation]
+      );
+    }
+  };
+  
+  // ISSUE 2: Check if "Add to Configuration" button properly calls handler
+  const handleAddToConfiguration = () => {
+    if (selectedVariations.length === 0) {
+      // Handle case where no variations are selected
+      onAddToConfiguration(option, []);
+    } else {
+      // Handle case where variations are selected
+      onAddToConfiguration(option, selectedVariations);
+    }
+  };
+  
+  return (
+    <div className="option-variation-popup">
+      {/* Variation selection UI */}
+      
+      {/* Add to Configuration Button */}
+      <button
+        onClick={handleAddToConfiguration}  // ← Check if this is properly connected
+        className="add-to-configuration-btn"
+      >
+        {isAlreadySelected ? 'Update Configuration' : 'Add to Configuration'}
+      </button>
+    </div>
+  );
+};
+```
+
+### ModelConfigurator Integration
+```typescript
+// Issues to check in ModelConfigurator.tsx
+const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({ ... }) => {
+  const [selectedOptions, setSelectedOptions] = useState<ConfigurableProductSchema[]>([]);
+  const [configurationSummary, setConfigurationSummary] = useState<ConfigurationSummaryData>();
+  
+  // ISSUE 3: Check if handleAddToConfiguration properly updates state
+  const handleAddToConfiguration = (option: OptionProduct, variations?: Variation[]) => {
+    if (variations && variations.length > 0) {
+      // Create configuration item with variations
+      const configurationItem = {
+        ...option,
+        selectedVariations: variations,
+        totalPrice: option.price + variations.reduce((sum, v) => sum + v.price, 0)
+      };
+      
+      // Add to selected options
+      setSelectedOptions(prev => [...prev, configurationItem]);
+      
+      // Update configuration summary
+      updateConfigurationSummary();
+    } else {
+      // Handle simple option
+      setSelectedOptions(prev => [...prev, option]);
+      updateConfigurationSummary();
+    }
+  };
+  
+  // ISSUE 4: Check if updateConfigurationSummary properly calculates totals
+  const updateConfigurationSummary = () => {
+    const basePrice = parseFloat(baseModel.regularPrice || '0');
+    const optionsPrice = selectedOptions.reduce((sum, option) => {
+      return sum + (option.totalPrice || option.price || 0);
+    }, 0);
+    
+    const totalPrice = basePrice + optionsPrice;
+    
+    setConfigurationSummary({
+      baseModel,
+      selectedOptions,
+      totalPrice,
+      basePrice,
+      optionsPrice,
+      // ... other fields
+    });
+  };
+  
+  return (
+    <div className="model-configurator">
+      {/* Configurator content */}
+      
+      <OptionVariationPopup
+        option={option}
+        isOpen={optionPopup.isOpen}
+        onClose={() => setOptionPopup(prev => ({ ...prev, isOpen: false }))}
+        onAddToConfiguration={handleAddToConfiguration}  // ← Check if this is properly connected
+        isAlreadySelected={isOptionInConfiguration(option.id)}
+      />
+    </div>
+  );
+};
+```
+
+## Data Structure Issues
+
+### Configuration Summary Data
+```typescript
+// Check if ConfigurationSummaryData properly handles variations
+interface ConfigurationSummaryData {
+  baseModel: ProductSchema;
+  selectedOptions: Array<{
+    id: string;
+    name: string;
+    type: 'SIMPLE' | 'VARIABLE';
+    basePrice: number;
+    selectedVariations?: Variation[];  // ← Must include variations
+    totalPrice: number;  // ← Must include variation costs
+    // ... other fields
+  }>;
+  totalPrice: number;  // ← Must include all variation costs
+  basePrice: number;
+  optionsPrice: number;  // ← Must include variation modifiers
+  // ... other fields
+}
+```
+
+### Variation Data Structure
+```typescript
+// Check if Variation interface is properly defined
+interface Variation {
+  id: string;
+  databaseId: number;
+  name: string;
+  price: number;  // ← Price modifier
+  sku: string;
+  image?: {
+    sourceUrl: string;
+    altText: string;
+  };
+  attributes: Array<{
+    id: string;
+    name: string;
+    value: string;
+  }>;
+  stockStatus?: 'instock' | 'outofstock' | 'onbackorder';
+}
+```
+
+## Debugging Steps
+
+### 1. Console Logging
+```typescript
+// Add debugging to handleAddToConfiguration
+const handleAddToConfiguration = (option: OptionProduct, variations?: Variation[]) => {
+  console.log('Adding to configuration:', {
+    optionId: option.id,
+    optionName: option.name,
+    variations: variations?.map(v => ({ id: v.id, name: v.name, price: v.price })),
+    selectedVariationsCount: variations?.length || 0
+  });
+  
+  // ... rest of implementation
+};
+```
+
+### 2. State Debugging
+```typescript
+// Add debugging to configuration state updates
+const updateConfigurationSummary = () => {
+  console.log('Updating configuration summary:', {
+    selectedOptionsCount: selectedOptions.length,
+    selectedOptions: selectedOptions.map(opt => ({
+      id: opt.id,
+      name: opt.name,
+      totalPrice: opt.totalPrice,
+      hasVariations: opt.selectedVariations?.length > 0
+    }))
+  });
+  
+  // ... rest of implementation
+};
+```
+
+### 3. Price Calculation Debugging
+```typescript
+// Add debugging to price calculations
+const calculateTotalPrice = () => {
+  const basePrice = parseFloat(baseModel.regularPrice || '0');
+  const optionsPrice = selectedOptions.reduce((sum, option) => {
+    const optionPrice = option.totalPrice || option.price || 0;
+    console.log('Option price calculation:', {
+      optionId: option.id,
+      basePrice: option.price,
+      variationPrice: option.selectedVariations?.reduce((vSum, v) => vSum + v.price, 0) || 0,
+      totalPrice: optionPrice
+    });
+    return sum + optionPrice;
+  }, 0);
+  
+  const totalPrice = basePrice + optionsPrice;
+  console.log('Total price calculation:', { basePrice, optionsPrice, totalPrice });
+  
+  return totalPrice;
+};
+```
+
+## Testing Requirements
+
+### Unit Tests
+```typescript
+describe('OptionVariationPopup Configuration Update', () => {
+  it('should update configuration summary when adding variations', () => {
+    const mockOption = {
+      id: 'option-1',
+      name: 'Seat Color',
+      type: 'VARIABLE',
+      price: 199
+    };
+    
+    const mockVariations = [
+      { id: 'var-1', name: 'Red Leather', price: 0 },
+      { id: 'var-2', name: 'Premium Black', price: 50 }
+    ];
+    
+    const mockOnAddToConfiguration = jest.fn();
+    
+    render(
+      <OptionVariationPopup
+        option={mockOption}
+        isOpen={true}
+        onClose={jest.fn()}
+        onAddToConfiguration={mockOnAddToConfiguration}
+      />
+    );
+    
+    // Select variations
+    fireEvent.click(screen.getByText('Red Leather'));
+    fireEvent.click(screen.getByText('Premium Black'));
+    
+    // Click add to configuration
+    fireEvent.click(screen.getByText('Add to Configuration'));
+    
+    expect(mockOnAddToConfiguration).toHaveBeenCalledWith(mockOption, mockVariations);
+  });
+});
+```
+
+### Integration Tests
+```typescript
+describe('ModelConfigurator Integration', () => {
+  it('should update configuration summary with selected variations', async () => {
+    const mockConfiguratorData = {
+      baseModel: { id: 'model-1', name: 'Test Model', price: 1000 },
+      categories: [{
+        id: 'cat-1',
+        name: 'Options',
+        options: [{
+          id: 'option-1',
+          type: 'VARIABLE',
+          price: 199,
+          variations: [
+            { id: 'var-1', name: 'Red', price: 0 },
+            { id: 'var-2', name: 'Blue', price: 50 }
+          ]
+        }]
+      }]
+    };
+    
+    render(<ModelConfigurator {...mockConfiguratorData} />);
+    
+    // Open variation popup
+    const optionCard = screen.getByText('Seat Color');
+    fireEvent.click(optionCard);
+    
+    // Select variation
+    await waitFor(() => {
+      fireEvent.click(screen.getByText('Blue'));
+    });
+    
+    // Add to configuration
+    fireEvent.click(screen.getByText('Add to Configuration'));
+    
+    // Check configuration summary
+    await waitFor(() => {
+      expect(screen.getByText('$1,249')).toBeInTheDocument(); // 1000 + 199 + 50
+      expect(screen.getByText('Seat Color - Blue')).toBeInTheDocument();
+    });
+  });
+});
+```
+
+## Implementation Plan
+
+### Phase 1: Debugging and Analysis (Day 1)
+1. Add console logging to identify where the flow breaks
+2. Check if onAddToConfiguration is properly called
+3. Verify configuration state updates are working
+4. Test price calculation logic
+
+### Phase 2: Fix Implementation (Day 2)
+1. Fix handleAddToConfiguration to properly update configuration
+2. Ensure configuration summary state is updated correctly
+3. Fix price calculation to include variation costs
+4. Add proper error handling
+
+### Phase 3: Testing and Validation (Day 3)
+1. Add comprehensive unit tests
+2. Test integration with ModelConfigurator
+3. Verify configuration summary updates correctly
+4. Test price calculations with various variation combinations
+
+## Dependencies
+
+### Internal Dependencies
+- **OptionVariationPopup**: Component that triggers configuration updates
+- **ModelConfigurator**: Parent component that manages configuration state
+- **ConfigurationSummary**: Component that displays configuration details
+- **PriceCalculator**: Component that calculates total prices
+
+### External Dependencies
+- **React**: Component framework and state management
+- **TypeScript**: Type safety for configuration data
+- **Testing Library**: Unit and integration testing
+
+## Risk Assessment
+
+### Technical Risks
+- **State Management**: Complex state updates may cause issues
+- **Data Flow**: Configuration data may not flow correctly between components
+- **Price Calculation**: Complex price calculations may have errors
+- **Component Integration**: Multiple components may not be properly integrated
+
+### Mitigation Strategies
+- **Comprehensive Logging**: Add detailed logging to identify issues
+- **Incremental Testing**: Test each component individually before integration
+- **Data Validation**: Validate configuration data structure before updates
+- **Error Boundaries**: Add error boundaries to prevent crashes
+
+## Success Criteria
+
+### Functional Requirements
+- ✅ Clicking on OptionVariationCard selects the variation
+- ✅ "Add to Configuration" button adds selected variations to summary
+- ✅ Configuration summary shows selected variations with names and prices
+- ✅ Total price updates to include variation costs
+- ✅ Summary panel reflects all selected variations correctly
+
+### Non-Functional Requirements
+- ✅ No console errors related to configuration updates
+- ✅ Configuration updates are fast and responsive
+- ✅ State management is reliable and consistent
+- ✅ Price calculations are accurate and consistent
+
+### User Experience Requirements
+- ✅ Clear visual feedback when variations are added
+- ✅ Configuration summary updates immediately
+- ✅ Total price reflects all selected variations
+- ✅ Proper error handling for missing or invalid data
+
+## Definition of Done
+
+### Code Quality
+- [ ] All console errors related to configuration updates are resolved
+- [ ] Configuration state updates work correctly
+- [ ] Price calculations are accurate and consistent
+- [ ] Code review approved
+- [ ] TypeScript compilation without errors
+
+### Functionality
+- [ ] Variation selection updates configuration summary
+- [ ] Total price includes all variation costs
+- [ ] Configuration summary shows all selected variations
+- [ ] "Add to Configuration" button works correctly
+- [ ] Configuration state persists correctly
+
+### Testing
+- [ ] Unit tests pass for all configuration update scenarios
+- [ ] Integration tests verify configuration summary updates
+- [ ] Manual testing confirms configuration works end-to-end
+- [ ] Price calculation tests cover all variation combinations
+
+### Documentation
+- [ ] Bug fix is documented
+- [ ] Code comments explain the fix
+- [ ] Testing notes are updated
+- [ ] User documentation reflects correct behavior
+
+## Related Tasks
+- **feat-option-variation-popup-real-data**: Connect popup to real data
+- **feat-option-variation-card**: Create dedicated variation card component
+- **bug-configurator-option-card-popup-not-showing**: Related popup display issues
+
+## Notes
+- This is a critical bug that breaks core variation selection functionality
+- Focus on identifying the root cause through systematic debugging
+- Ensure fix doesn't break existing simple option functionality
+- Consider adding analytics to track configuration completion rates after fix

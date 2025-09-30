@@ -1,0 +1,58 @@
+project: front-store
+last_updated: 2025-09-28
+
+bugs: [
+  "BUG-20250926-1",
+  "BUG-20250926-2", 
+  "BUG-20241030-6",
+  "BUG-20241030-5",
+  "BUG-20241030-4", 
+  "BUG-20241030-3",
+  "BUG-20241030-2",
+  "BUG-20241022-8",
+  "BUG-20241022-7",
+  "BUG-20241022-6",
+  "BUG-20241022-4",
+  "BUG-20241022-3",
+  "BUG-20241022-2",
+  "BUG-20241022-1",
+  "BUG-SALE-PRICE-SERIALIZATION",
+  "BUG-PRODUCT-DETAIL-WOOCOMMERCE-SLUG"
+]
+
+features: [
+  "FEAT-20250926-1",
+  "FEAT-20250926-2",
+  "FEAT-20250926-3", 
+  "FEAT-20250926-4",
+  "FEAT-20250926-5",
+  "FEAT-20250926-6",
+  "FEAT-20241022-2",
+  "FEAT-20241022-3",
+  "FEAT-20241022-4", 
+  "FEAT-20241022-5",
+  "FEAT-20241030-1",
+  "FEAT-PRODUCT-DETAIL-OPTION-FETCH",
+  "FEAT-SHOP-PAGE-SURFACE",
+  "FEAT-HOMEPAGE-PRODUCT-CARD-RELATED-OPTIONS",
+  "FEAT-LAZY-LOAD-OPTION-DATA",
+  "FEAT-HEADER-NAVIGATION-AUDIT"
+]
+
+research: []
+prd: []
+
+completed_count:
+  bugs: 11
+  features: 4
+  total: 15
+
+in_progress_count:
+  bugs: 1
+  features: 2
+  total: 3
+
+planned_count:
+  bugs: 4
+  features: 10
+  total: 14

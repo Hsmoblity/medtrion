@@ -1,0 +1,557 @@
+type: bug
+id: bug-configurator-option-cards-overlap
+title: "Model Configurator option cards overlap when more than 3 options in center section"
+created: 2025-09-29
+status: COMPLETED
+priority: high
+severity: major
+agent: frontend-dev
+
+## Bug Overview
+
+In the Model Configurator, when the center section (`option-cards-container`) has more than 3 option cards, the cards overlap each other instead of properly wrapping or scrolling. This creates a poor user experience where users cannot see or interact with all available options.
+
+### Business Impact
+
+- **User Experience**: Users cannot see all available configuration options
+- **Functionality**: Overlapping cards prevent proper selection of options
+- **Accessibility**: Screen readers and keyboard navigation may be affected
+- **Mobile Experience**: Likely worse on smaller screens
+- **Conversion**: Users may abandon configuration due to poor UX
+
+## Current State
+
+**Problem**: Option cards in the center section overlap when there are more than 3 options.
+
+**Expected**: Cards should either:
+1. Wrap to new rows (responsive grid)
+2. Scroll horizontally or vertically
+3. Paginate to show all options
+
+**Actual**: Cards stack on top of each other, making them unusable.
+
+## Root Cause Analysis
+
+### Likely Causes
+
+1. **Fixed Width Container**: `option-cards-container` has a fixed width that doesn't accommodate more than 3 cards
+2. **CSS Grid/Flexbox Issues**: Grid columns or flex items not properly configured for overflow
+3. **Missing Responsive Design**: No breakpoints or responsive behavior for different screen sizes
+4. **Absolute Positioning**: Cards might be using absolute positioning instead of flow layout
+5. **Missing Overflow Handling**: Container doesn't handle content overflow properly
+
+### Investigation Plan
+
+1. **Inspect CSS Layout**:
+   ```bash
+   # Check current CSS for option-cards-container
+   grep -r "option-cards" src/components/
+   grep -r "grid\|flex" src/components/configurator/
+   ```
+
+2. **Check Component Structure**:
+   - Find `CategoryGroup.tsx` or similar component
+   - Check how `OptionCard` components are rendered
+   - Verify grid/flex container setup
+
+3. **Test Different Option Counts**:
+   - Test with 1-2 options (should work)
+   - Test with 3 options (should work)
+   - Test with 4+ options (currently broken)
+
+## Technical Details
+
+### Affected Components
+
+**Primary**: `src/components/configurator/CategoryGroup.tsx`
+- Renders the `option-cards-container`
+- Contains the grid layout for option cards
+
+**Secondary**: `src/components/configurator/OptionCard.tsx`
+- Individual option card components
+- May have fixed dimensions causing overlap
+
+**Layout**: `src/components/configurator/ModelConfigurator.tsx`
+- Main configurator layout
+- May have fixed width constraints
+
+### Current CSS Structure (Investigation Needed)
+
+```tsx
+// Likely current structure causing overlap
+<div className="option-cards-container"> {/* Fixed width? */}
+  <div className="option-cards-grid"> {/* Grid issues? */}
+    {options.map(option => (
+      <OptionCard key={option.id} option={option} />
+    ))}
+  </div>
+</div>
+```
+
+### Expected CSS Structure
+
+```tsx
+// Fixed structure with 2-column grid and unlimited rows
+<div className="option-cards-container p-4 overflow-auto"> {/* Allow overflow */}
+  <div className="option-cards-grid grid grid-cols-2 gap-4 auto-rows-max"> {/* Fixed 2 columns, unlimited rows */}
+    {options.map(option => (
+      <OptionCard 
+        key={option.id} 
+        option={option}
+        className="option-card w-full h-auto min-w-0" /* Prevent overflow, maintain dimensions */
+      />
+    ))}
+  </div>
+</div>
+```
+
+## Proposed Solutions
+
+### Solution 1: Fixed 2-Column Grid with Row Stacking (Recommended)
+
+**Approach**: Use CSS Grid with fixed 2 columns that allows unlimited rows, preventing card stretching and maintaining consistent card dimensions
+
+```tsx
+// CategoryGroup.tsx
+<div className="option-cards-container p-4">
+  <div className="option-cards-grid grid grid-cols-2 gap-4 auto-rows-max">
+    {options.map(option => (
+      <OptionCard
+        key={option.id}
+        option={option}
+        className="option-card w-full h-auto"
+      />
+    ))}
+  </div>
+</div>
+```
+
+**CSS Classes**:
+```css
+.option-cards-container {
+  @apply p-4 overflow-auto;
+}
+
+.option-cards-grid {
+  @apply grid gap-4;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: max-content;
+}
+
+.option-card {
+  @apply w-full h-auto min-w-0;
+  max-width: 100%;
+}
+```
+
+**Benefits**:
+- ✅ Fixed 2 columns prevent card stretching/squeezing
+- ✅ Cards maintain consistent dimensions
+- ✅ Unlimited rows accommodate any number of options
+- ✅ 4 options = 2 columns × 2 rows
+- ✅ 6 options = 2 columns × 3 rows
+- ✅ 8 options = 2 columns × 4 rows
+- ✅ Better UX with predictable layout
+
+### Solution 2: Responsive 2-Column Grid (Alternative)
+
+**Approach**: 2 columns on desktop, 1 column on mobile for better mobile experience
+
+```tsx
+<div className="option-cards-container p-4">
+  <div className="option-cards-grid grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-max">
+    {options.map(option => (
+      <OptionCard
+        key={option.id}
+        option={option}
+        className="option-card w-full h-auto"
+      />
+    ))}
+  </div>
+</div>
+```
+
+**CSS Classes**:
+```css
+.option-cards-container {
+  @apply p-4 overflow-auto;
+}
+
+.option-cards-grid {
+  @apply grid gap-4;
+  grid-template-columns: 1fr;
+  grid-auto-rows: max-content;
+}
+
+@media (min-width: 768px) {
+  .option-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.option-card {
+  @apply w-full h-auto min-w-0;
+  max-width: 100%;
+}
+```
+
+**Benefits**:
+- ✅ 1 column on mobile (better touch interaction)
+- ✅ 2 columns on desktop (prevents stretching)
+- ✅ Cards maintain consistent dimensions
+- ✅ Unlimited rows for any number of options
+
+### Solution 3: Horizontal Scroll (Fallback)
+
+**Approach**: Allow horizontal scrolling for many options when vertical space is limited
+
+```tsx
+<div className="option-cards-container overflow-x-auto">
+  <div className="option-cards-grid flex gap-4 min-w-max">
+    {options.map(option => (
+      <OptionCard
+        key={option.id}
+        option={option}
+        className="option-card flex-shrink-0 w-80"
+      />
+    ))}
+  </div>
+</div>
+```
+
+**Benefits**:
+- ✅ Preserves card dimensions
+- ✅ Works when vertical space is limited
+- ✅ Good for very large option lists (20+ options)
+- ⚠️ Less intuitive UX (horizontal scrolling)
+
+### Solution 4: Pagination (For Very Large Lists)
+
+**Approach**: Show limited options per page with pagination for very large option lists (20+ options)
+
+```tsx
+const [currentPage, setCurrentPage] = useState(0);
+const itemsPerPage = 6; // 2 columns × 3 rows
+const totalPages = Math.ceil(options.length / itemsPerPage);
+const currentOptions = options.slice(
+  currentPage * itemsPerPage,
+  (currentPage + 1) * itemsPerPage
+);
+
+<div className="option-cards-container">
+  <div className="option-cards-grid grid grid-cols-2 gap-4 auto-rows-max">
+    {currentOptions.map(option => (
+      <OptionCard key={option.id} option={option} />
+    ))}
+  </div>
+  
+  {totalPages > 1 && (
+    <div className="pagination-controls mt-4 flex justify-center items-center gap-4">
+      <button 
+        onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+        disabled={currentPage === 0}
+        className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+      >
+        Previous
+      </button>
+      <span className="text-sm text-gray-600">
+        {currentPage + 1} of {totalPages}
+      </span>
+      <button 
+        onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+        disabled={currentPage === totalPages - 1}
+        className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+      >
+        Next
+      </button>
+    </div>
+  )}
+</div>
+```
+
+**Benefits**:
+- ✅ Maintains 2-column layout
+- ✅ Good performance for very large lists
+- ✅ Clear navigation controls
+- ⚠️ Additional complexity for users
+
+## Implementation Requirements
+
+### Files to Modify
+
+1. **`src/components/configurator/CategoryGroup.tsx`**
+   - Fix the `option-cards-container` layout
+   - Implement responsive grid or scroll solution
+   - Add proper CSS classes
+
+2. **`src/components/configurator/OptionCard.tsx`**
+   - Ensure cards have proper dimensions
+   - Add `min-w-0` to prevent overflow
+   - Make cards responsive
+
+3. **`src/components/configurator/ModelConfigurator.tsx`**
+   - Check if main layout constrains center section width
+   - Ensure center section can expand as needed
+
+4. **CSS/Styling Files**
+   - Add responsive grid classes
+   - Ensure proper overflow handling
+   - Test on different screen sizes
+
+### CSS Requirements
+
+```css
+/* Fixed 2-Column Grid Solution (Recommended) */
+.option-cards-container {
+  @apply p-4 overflow-auto;
+  min-height: 200px;
+}
+
+.option-cards-grid {
+  @apply grid gap-4;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: max-content;
+}
+
+.option-card {
+  @apply w-full h-auto min-w-0;
+  max-width: 100%;
+}
+
+/* Alternative: Responsive 2-Column Grid */
+.option-cards-grid-responsive {
+  @apply grid gap-4;
+  grid-template-columns: 1fr;
+  grid-auto-rows: max-content;
+}
+
+@media (min-width: 768px) {
+  .option-cards-grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile: Single column for better touch interaction */
+@media (max-width: 767px) {
+  .option-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Ensure cards don't stretch */
+.option-card {
+  @apply w-full h-auto min-w-0;
+  max-width: 100%;
+  min-height: fit-content;
+}
+```
+
+## Acceptance Criteria
+
+- [ ] Option cards display properly with 1-3 options (no regression)
+- [ ] Option cards display properly with 4+ options (no overlap)
+- [ ] Cards display in 2 columns on desktop/tablet (prevents stretching)
+- [ ] Cards stack in 1 column on mobile (better touch interaction)
+- [ ] Cards maintain consistent dimensions (no squeezing/stretching)
+- [ ] All cards are visible and clickable
+- [ ] No horizontal overflow on mobile
+- [ ] Cards maintain consistent sizing
+- [ ] Loading states work correctly
+- [ ] Empty states work correctly
+- [ ] Accessibility is maintained (keyboard navigation, screen readers)
+- [ ] Performance is not degraded
+- [ ] Visual design matches existing style
+- [ ] Works across all supported browsers
+- [ ] Responsive behavior is smooth
+
+## Testing Plan
+
+### Manual Testing
+
+1. **Option Count Testing**:
+   - [ ] Test with 1 option (should display normally)
+   - [ ] Test with 2-3 options (should display normally)
+   - [ ] Test with 4-6 options (should wrap/scroll properly)
+   - [ ] Test with 10+ options (should handle gracefully)
+
+2. **Screen Size Testing**:
+   - [ ] Mobile (320px-767px): Cards in 1 column (better touch interaction)
+   - [ ] Tablet (768px-1024px): Cards in 2 columns
+   - [ ] Desktop (1025px+): Cards in 2 columns (prevents stretching)
+   - [ ] Large desktop (1280px+): Cards in 2 columns (consistent layout)
+
+3. **Interaction Testing**:
+   - [ ] All cards are clickable
+   - [ ] Selection states work correctly
+   - [ ] Hover states work correctly
+   - [ ] Keyboard navigation works
+
+4. **Edge Cases**:
+   - [ ] Very long option names
+   - [ ] Very short option names
+   - [ ] Options with images
+   - [ ] Options without images
+   - [ ] Loading state with many options
+   - [ ] Empty state
+
+### Automated Testing
+
+```typescript
+// E2E Test - Option Cards Layout
+describe('Configurator Option Cards Layout', () => {
+  it('should display cards without overlap', () => {
+    cy.visit('/product/acorn-stairlift/configure');
+    
+    // Navigate to a category with many options
+    cy.get('.configuration-category-item').contains('Warranty').click();
+    
+    // Wait for options to load
+    cy.get('.option-cards-grid').should('be.visible');
+    
+    // Check that cards don't overlap
+    cy.get('.option-card').each(($card) => {
+      cy.wrap($card).should('be.visible');
+      cy.wrap($card).should('not.have.css', 'position', 'absolute');
+    });
+    
+    // Verify grid layout
+    cy.get('.option-cards-grid').should('have.css', 'display', 'grid');
+  });
+  
+  it('should be responsive on different screen sizes', () => {
+    // Test mobile - should be 1 column
+    cy.viewport(375, 667);
+    cy.visit('/product/acorn-stairlift/configure');
+    cy.get('.option-cards-grid').should('have.css', 'grid-template-columns', '1fr');
+    
+    // Test tablet - should be 2 columns
+    cy.viewport(768, 1024);
+    cy.reload();
+    cy.get('.option-cards-grid').should('have.css', 'grid-template-columns', '1fr 1fr');
+    
+    // Test desktop - should be 2 columns
+    cy.viewport(1280, 720);
+    cy.reload();
+    cy.get('.option-cards-grid').should('have.css', 'grid-template-columns', '1fr 1fr');
+  });
+  
+  it('should handle many options gracefully with 2-column layout', () => {
+    cy.visit('/product/acorn-stairlift/configure');
+    
+    // Navigate to category with many options
+    cy.get('.configuration-category-item').contains('Warranty').click();
+    
+    // Check that all options are accessible
+    cy.get('.option-card').should('have.length.greaterThan', 3);
+    cy.get('.option-cards-grid').should('have.css', 'grid-template-columns', '1fr 1fr');
+    
+    // Verify cards don't overlap and maintain dimensions
+    cy.get('.option-card').each(($card, index) => {
+      cy.wrap($card).should('be.visible');
+      cy.wrap($card).should('not.be.covered');
+      cy.wrap($card).should('have.css', 'width');
+      cy.wrap($card).should('have.css', 'height');
+    });
+    
+    // Test specific layout: 4 options = 2 columns × 2 rows
+    cy.get('.option-card').should('have.length', 4);
+    cy.get('.option-cards-grid').should('have.css', 'grid-template-rows');
+  });
+});
+```
+
+### Visual Regression Testing
+
+```typescript
+// Visual regression test
+describe('Configurator Visual Regression', () => {
+  it('should match baseline with many options', () => {
+    cy.visit('/product/acorn-stairlift/configure');
+    cy.get('.configuration-category-item').contains('Warranty').click();
+    cy.wait(1000); // Wait for options to load
+    cy.matchImageSnapshot('configurator-many-options-layout');
+  });
+  
+  it('should match baseline on mobile', () => {
+    cy.viewport(375, 667);
+    cy.visit('/product/acorn-stairlift/configure');
+    cy.get('.configuration-category-item').contains('Warranty').click();
+    cy.wait(1000);
+    cy.matchImageSnapshot('configurator-mobile-options-layout');
+  });
+});
+```
+
+## Performance Considerations
+
+### Optimization Strategies
+
+1. **Virtual Scrolling**: For very large option lists (50+ options)
+2. **Lazy Loading**: Load option images on demand
+3. **Memoization**: Prevent unnecessary re-renders
+4. **CSS Containment**: Use `contain: layout` for better performance
+
+### Performance Tests
+
+```typescript
+// Performance test
+describe('Configurator Performance', () => {
+  it('should render many options without performance issues', () => {
+    const startTime = performance.now();
+    
+    cy.visit('/product/acorn-stairlift/configure');
+    cy.get('.configuration-category-item').contains('Warranty').click();
+    
+    cy.get('.option-card').should('have.length.greaterThan', 10);
+    
+    cy.then(() => {
+      const endTime = performance.now();
+      const renderTime = endTime - startTime;
+      expect(renderTime).to.be.lessThan(2000); // Should render in under 2 seconds
+    });
+  });
+});
+```
+
+## Related Issues
+
+- `bug-configurator-option-controls-missing`: May be related to card interaction issues
+- `bug-configurator-sidebar-progress-not-updating`: Progress bar may not account for hidden options
+- `feat-configurator-semantic-section-classes`: Will benefit from proper layout classes
+
+## Rollback Plan
+
+If the fix causes issues:
+
+1. **Immediate**: Revert CSS changes to previous working state
+2. **Alternative**: Implement horizontal scroll as fallback
+3. **Long-term**: Redesign with pagination approach
+
+## Success Metrics
+
+- **User Experience**: No overlapping cards in any scenario
+- **Performance**: Render time < 2 seconds for 20+ options
+- **Accessibility**: All cards accessible via keyboard navigation
+- **Responsive**: Works on all screen sizes (320px to 1920px+)
+- **Browser Support**: Works in Chrome, Firefox, Safari, Edge
+
+## Estimated Effort
+
+- **Investigation**: 30 minutes - 1 hour
+- **CSS Fix**: 1-2 hours
+- **Responsive Design**: 1-2 hours
+- **Testing**: 1-2 hours
+- **Documentation**: 30 minutes
+- **Total**: 4-7.5 hours
+
+## Notes
+
+- This is a critical UX issue that affects core functionality
+- Should be prioritized high due to user impact
+- Consider implementing responsive design best practices
+- May need design review for optimal layout on different screen sizes
+- Test with real data to ensure solution works with actual option counts
+
+---
+
+**Agent Signature: 290925 - frontend-dev - bug-configurator-option-cards-overlap**

@@ -1,0 +1,58 @@
+id: BUG-20241022-4
+project: front-store
+template: Bug Fix
+description: CMS GraphQL catalog queries fail to deliver product lists needed by the storefront
+
+tasks:
+  - name: Audit and fix WooCommerce GraphQL product fetchers
+    description: Investigate why `fetchGraphQLProducts` and related helpers aren’t returning product data for the storefront, and restore working responses.
+    files:
+      - src/lib/woocommerce.ts
+      - src/lib/contentful/contentful.ts
+      - src/pages/index.tsx
+      - src/pages/product/[slug].tsx
+      - src/pages/product/[slug]/options.tsx
+    steps:
+      - Review `fetchGraphQLProducts` / `fetchProductsByDatabaseIds` in `src/lib/woocommerce.ts` to confirm queries, env configuration, and fallback paths are correct.
+      - Trace how `getProducts` and `getProductBySlug` in `src/lib/contentful/contentful.ts` shape the WooCommerce response for React consumers.
+      - Map every consumer: `src/pages/index.tsx` (home catalogue), `src/pages/product/[slug].tsx` (product detail + related grid), `src/pages/product/[slug]/options.tsx` (options editor) and any API fallbacks (e.g. `/api/debug/related-products`).
+      - Reproduce the empty-list failure locally (missing env, 404 queries, schema drift) and implement fixes—updating queries, normalisers, or environment handling as required.
+      - Validate by re-running affected pages and ensuring product lists render with real data, then add regression coverage or Storybook notes.
+    expectations:
+      - `fetchGraphQLProducts` returns a non-empty array of nodes with populated `slug`, pricing, hero image, gallery, and `_related_options/_related_options_products` when configured.
+      - `fetchProductsByDatabaseIds` / `fetchRelatedProductsByIds` resolve requested IDs and expose variation data for the options flow without throwing.
+      - `getProducts` supplies `ProductSchema` objects to SSR consumers (`index`, `product/[slug]`) so the home catalogue renders >0 cards and individual product pages find their hero item.
+      - `getProductBySlug` returns a complete item (or explicit `null`) for the slug handed to `product/[slug]/options`, letting `ProductOptions` load related add-ons without fallback errors.
+      - `/api/debug/related-products` responds with the fetched related products for valid IDs, enabling the client-side fallback in `OptionsClientWrapper`.
+    requirements:
+      environment_priority:
+        primary: WP_GRAPHQL_URL
+        secondary: NEXT_PUBLIC_WP_GRAPHQL_URL (only when server-side var is absent)
+      environment_behaviour:
+        development: keep detailed logging to aid debugging and surface misconfiguration
+        production: log only warnings/errors; avoid noisy console output
+      error_handling:
+        - If the GraphQL client cannot be created or queries fail, show an explicit fallback message to users in the affected views (catalogue, product detail, options) instead of silent empties.
+        - Do not fall back to mock data in production paths; use empty states with messaging.
+      logging_policy: retain debug logging throughout the fix to verify behaviour; once validated, downgrade verbose logs to debug-level guarded by NODE_ENV checks.
+      deployment: no automatic server restart; notify the team after changes so they can redeploy/restart.
+      testing:
+        - Verify in the browser (UI renders product cards, product detail hero, options modal).
+        - Hit the backend via `curl`/Postman (e.g. `/api/debug/related-products`) to confirm data flows.
+    conditions:
+      - follow DRY, KISS
+      - no duplicate functions
+      - no ghost code
+      - no overlaping code
+      - confirm if the bug confused
+      - no unnecessary complexity
+
+    checklist:
+      - [ ] Bug reproducible
+      - [ ] Fix applied
+      - [ ] Tests passed
+      
+
+tracking:
+  document: ../.tracking/bug_tracking.md
+  entry: "BUG-20241022-4 | CMS GraphQL does not return product data | new"

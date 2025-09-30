@@ -1,0 +1,44 @@
+feature:
+  title: Enforce CMS data mapping resilience
+  area: frontend
+  priority: p0
+  status: new
+  requested_by: techlead
+  environment: production
+
+summary:
+  goal: Audit and harden all CMS-driven views so GraphQL gaps no longer surface as runtime errors.
+  scope:
+    - Use findings in `docs/DATA_MODEL_QUICK_REFERENCE.md` and `docs/DATA_MODEL_ANALYSIS.md` to catalogue every field each view expects vs. what GraphQL returns.
+    - Cover homepage showcases (TopProductsStrip, BestSellerSection, ProductHeroCard) and any detail pages pulling `ProductCardView`/`ProductSchema` data.
+    - Normalize missing or inconsistent values (images, pricing, metadata) before data reaches React components.
+  impact: Prevent `undefined`/`null` serialization and formatting crashes, ensure graceful fallbacks for all CMS-backed UI states.
+
+acceptance_criteria:
+  - `ProductCardView` and `ProductSchema` mappings guarantee required fields (`slug`, `title`, `description`, `imageUrl`, `price`) are populated or receive documented fallbacks.
+  - Image, pricing, and metadata gaps called out in the docs have concrete fallback logic with test coverage.
+  - Validation layer or automated check verifies new CMS payloads before rendering, with failures logged/monitored.
+  - Documentation updated in `/docs` to reflect final mapping matrix and fallback rules.
+
+implementation_plan:
+  - Phase 1: Inventory & gap analysis — produce component-to-field matrix using the two data model docs; flag high-risk nulls (images, price, salePrice).
+  - Phase 2: Mapping remediation — encapsulate standardizers (image, price, badge) and retrofit all GraphQL adapters to emit safe defaults (`null` instead of `undefined`, consistent fallback URLs, derived financing copy).
+  - Phase 3: Validation & testing — add schema guards/unit tests for representative GraphQL responses (including missing fields), plus integration test for homepage data flow per analysis recommendations.
+  - Phase 4: Monitoring — document logging/alert strategy for payload anomalies and ensure hand-off to CMS/content stakeholders.
+
+risks:
+  - Over-normalizing may mask true CMS data quality issues; coordinate with content owners to fix upstream where possible.
+  - GraphQL schema changes could invalidate assumptions; adopt versioned docs and regression tests to catch breakage early.
+
+stakeholders:
+  - Frontend team
+  - CMS/Content team
+  - QA
+
+references:
+  - docs/DATA_MODEL_QUICK_REFERENCE.md
+  - docs/DATA_MODEL_ANALYSIS.md
+
+notes:
+  - Consider lint or CI rule to block `toFixed`/formatters on optional values without guards.
+  - Track success metrics from the analysis doc (image availability 95%, price completeness 100%, field validation 100%).

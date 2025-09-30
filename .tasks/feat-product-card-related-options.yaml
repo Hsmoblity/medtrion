@@ -1,0 +1,36 @@
+feature:
+  title: Surface related options in ProductCardView
+  area: frontend
+  priority: p0
+  status: new
+  requested_by: techlead
+  environment: production
+
+summary:
+  goal: Extend `ProductCardView` so each product card exposes the option ids from WooCommerce (`relatedOptions`), enabling downstream components to understand configuration availability.
+  scope:
+    - Update `ProductCardView` interface & mapper to include `relatedOptions: number[]` (normalized).
+    - Ensure WooCommerce GraphQL fetch populates `_related_options` for main products; fallback logic removed.
+    - Adjust consumers (shop page, homepage, product list) to pass the new data as needed.
+  impact: Product surfaces know whether configuration options exist without extra fetches.
+
+acceptance_criteria:
+  - `ProductCardView` has a `relatedOptions` field (array of numeric IDs) populated from WooCommerce data.
+  - Mapping function normalizes WooCommerce `relatedOptions` (string/array) and ensures no `undefined` values (empty array when missing).
+  - Shop page and other card consumers receive the enriched object; TypeScript compiles without errors.
+  - Unit/integration tests confirm data flow from GraphQL mock (or live) through to rendered props.
+
+implementation_plan:
+  - Update `ProductCardView` interface and `mapToProductCardView` in `src/lib/interfaces/homepage.ts` to include `relatedOptions` (pull from `product._related_options`).
+  - Ensure WooCommerce fetch path (`lib/woocommerce.ts`) sets `_related_options` for main products; add missing normalization if necessary.
+  - Modify shop/homepage card components to accept/use the new field (even if just for logic now).
+  - Update tests/mocks to include `relatedOptions` data; add fallback to empty array.
+
+risks:
+  - WooCommerce data may not yet return `relatedOptions`; coordinate with backend to populate field first.
+  - Additional payload size; monitor page weight.
+
+stakeholders:
+  - Frontend team
+  - Backend/WooCommerce team
+  - QA

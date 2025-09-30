@@ -1,0 +1,37 @@
+bug:
+  title: Summary panel crashes when updating totals
+  area: frontend
+  severity: high
+  priority: p0
+  status: new
+  reported_by: techlead
+  environment: production
+
+summary:
+  impact: Checkout summary fails to render and blocks purchase flow when cart updates trigger pricing recalculation.
+  scope: `SummaryPanel` component `onUpdate` handler.
+  regression: unknown
+
+steps_to_reproduce:
+  - Start checkout flow until summary panel displays.
+  - Trigger a cart update (quantity change or line removal).
+  - Watch console error `Cannot read properties of undefined (reading 'toFixed')`.
+
+expected_result: Summary totals recalculate and render without errors.
+actual_result: Promise rejection throws `TypeError` in `SummaryPanel.tsx:23:46`, interrupting UI.
+
+root_cause_hypothesis:
+  - `onUpdate` handler assumes numeric value but receives `undefined` for subtotal or tax before data resolves.
+  - Direct `toFixed` call on undefined triggers runtime exception.
+
+proposed_fix:
+  - Guard calculations in `SummaryPanel.onUpdate` to default missing numeric fields to 0 before calling `toFixed`.
+  - Audit API / state updates to ensure values are present or explicitly null before formatting.
+  - Add unit coverage for update scenario with missing data to prevent regressions.
+
+testing:
+  - Run relevant component/unit tests.
+  - Manual QA: repeat repro steps; confirm totals update smoothly without console errors.
+
+notes:
+  - Similar guards may be needed wherever pricing fields are formatted.

@@ -1,0 +1,44 @@
+id: BUG-20241022-2
+project: front-store
+template: Bug Fix
+description: Legacy <img> usage violates Next.js lint rule and removes image optimization benefits
+
+tasks:
+  - name: Replace raw <img> tags with next/image components
+    description: Audit components and stories still using plain <img> elements and swap them to Next.js Image with appropriate sizing, placeholders, and fallbacks.
+    files:
+      - src/components/PageLayout/Header.tsx
+      - src/components/PageLayout/Footer.tsx
+      - src/components/ProductList/ProductItem.tsx
+      - src/components/banner.tsx
+      - src/components/blog-preview.tsx
+      - src/components/common/LazyImageExample.tsx
+      - src/components/drawer.tsx
+      - src/components/faq.tsx
+      - src/components/hero.tsx
+      - src/components/pictureCarousal.stories.tsx
+      - src/stories/pages/ProductPage.stories.tsx
+      - src/stories/pages/CartPage.stories.tsx
+      - src/components/Cart/CartOptions.stories.tsx
+    steps:
+      - Run `npm run lint` to capture the current list of @next/next/no-img-element warnings.
+      - For each flagged component or story, replace <img> with the Image component, selecting width/height or fill layouts that preserve existing sizing; add meaningful alt text or explicit empty alt when decorative.
+      - Where remote domains are used, ensure they are covered in next.config.js or provide placeholders/fallbacks.
+      - Validate locally (Storybook or dev server) to confirm layout stability and lazy loading behaviour after the migration.
+    conditions:
+      - follow DRY, KISS
+      - no duplicate functions
+      - no ghost code
+      - no overlaping code
+      - confirm if the bug confused
+      - no unnecessary complexity
+
+    checklist:
+      - [ ] Bug reproducible
+      - [ ] Fix applied
+      - [ ] Tests passed
+      
+
+tracking:
+  document: ../.tracking/bug_tracking.md
+  entry: "BUG-20241022-2 | Replace legacy <img> usages with next/image | new"

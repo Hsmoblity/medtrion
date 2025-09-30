@@ -116,8 +116,34 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
 
   // Initialize edit mode configuration - handle client-side cart access
   useEffect(() => {
-    if (isEditMode && cartItemId && isHydrated) {
+    if (isEditMode && cartItemId && isHydrated && categories.length > 0) {
       console.log('Initializing edit mode with cart item ID:', cartItemId);
+      console.log('Available categories:', categories.map(c => ({ 
+        name: c.name, 
+        id: c.id,
+        optionCount: c.options?.length || 0,
+        loadingState: c.loadingState 
+      })));
+      
+      // Check if categories have their options loaded
+      const categoriesWithOptions = categories.filter(cat => cat.options && cat.options.length > 0);
+      if (categoriesWithOptions.length === 0) {
+        console.warn('No categories with options available yet, waiting for options to load...');
+        
+        // Try to trigger option loading for categories that need it
+        if (onFetchCategoryOptions) {
+          console.log('Attempting to load options for categories...');
+          categories.forEach(category => {
+            if (!category.options || category.options.length === 0) {
+              console.log(`Loading options for category: ${category.name}`);
+              onFetchCategoryOptions(category.id).catch(error => {
+                console.error(`Failed to load options for category ${category.name}:`, error);
+              });
+            }
+          });
+        }
+        return;
+      }
       
       // Import cart store dynamically to avoid SSR issues
       import('stores/cartStore').then(({ useCartStore }) => {
@@ -130,13 +156,18 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
           const cartItemOptions = cartItem.options || [];
           console.log('Processing cart item options:', cartItemOptions);
           
+          if (cartItemOptions.length === 0) {
+            console.log('No options to restore from cart item');
+            return;
+          }
+          
           // Process each cart option and try to match it with configurator categories
           cartItemOptions.forEach((option: any) => {
             console.log('Processing cart option:', option);
             
             // Find the category for this option - try multiple matching strategies
             const category = categories.find(cat => {
-              if (!cat.options) return false;
+              if (!cat.options || cat.options.length === 0) return false;
               
               return cat.options.some(opt => {
                 // Strategy 1: Match by databaseId/parentId
@@ -202,8 +233,10 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
       console.log('Edit mode detected but not yet hydrated, waiting...');
     } else if (isEditMode && !cartItemId) {
       console.warn('Edit mode detected but no cartItemId provided');
+    } else if (isEditMode && cartItemId && isHydrated && categories.length === 0) {
+      console.log('Edit mode detected but no categories available yet, waiting...');
     }
-  }, [isEditMode, cartItemId, categories, addOption, isHydrated]);
+  }, [isEditMode, cartItemId, categories.length, addOption, isHydrated, categories, onFetchCategoryOptions]);
 
   // Handle hydration
   useEffect(() => {

@@ -38,7 +38,7 @@ const Success = () => {
             )}
 
             <div className="py-10 text-center">
-              <Link href="/" className="px-12 bg-black rounded-md hover:bg-indigo-500 text-white font-semibold py-3">
+              <Link href="/" className="px-12 bg-blue-600 rounded-md hover:bg-blue-700 text-white font-semibold py-3 transition-colors duration-200">
                 GO BACK
               </Link>
             </div>

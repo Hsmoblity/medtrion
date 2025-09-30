@@ -4,6 +4,8 @@ import { useConfiguratorStore } from 'stores/configuratorStore';
 import { PrimaryButton } from 'components/ui';
 import OptionCardDetailsModal from './OptionCardDetailsModal';
 import OptionVariationPopup from './OptionVariationPopup';
+import OptionImage from './OptionImage';
+import RichContent from '../RichContent';
 import styles from './OptionCard.module.css';
 import { cn } from '../../lib/utils';
 
@@ -112,8 +114,6 @@ const OptionCard: React.FC<OptionCardProps> = ({
     isHovered: false,
     isPressed: false,
     isFocused: false,
-    imageLoaded: false,
-    imageError: false,
     detailsVisible: false,
     variationPopupVisible: false,
     compatibilityChecking: false,
@@ -295,14 +295,6 @@ const OptionCard: React.FC<OptionCardProps> = ({
     }
   }, [handleClick, internalState.detailsVisible, handleViewDetails]);
 
-  const handleImageLoad = useCallback(() => {
-    setInternalState(prev => ({ ...prev, imageLoaded: true, imageError: false }));
-  }, []);
-
-  const handleImageError = useCallback(() => {
-    setInternalState(prev => ({ ...prev, imageError: true, imageLoaded: false }));
-  }, []);
-
   // Mouse event handlers
   const handleMouseEnter = useCallback(() => {
     if (!disabled) {
@@ -366,14 +358,6 @@ const OptionCard: React.FC<OptionCardProps> = ({
     if (!price) return '$0';
     const numPrice = typeof price === 'string' ? parseFloat(price) : price;
     return `$${numPrice.toLocaleString()}`;
-  };
-
-  const getImageSrc = (): string => {
-    return option.image?.sourceUrl || option.featuredImage || '/placeholder-option.webp';
-  };
-
-  const getImageAlt = (): string => {
-    return option.image?.altText || `${option.name || option.title} option`;
   };
 
   // ARIA props for the card container
@@ -451,22 +435,12 @@ const OptionCard: React.FC<OptionCardProps> = ({
           ${variant === 'featured' ? 'h-48' : 'h-32'}
           ${variant === 'compact' ? 'h-24' : ''}
         `}>
-          {!internalState.imageError ? (
-            <img
-              src={getImageSrc()}
-              alt={getImageAlt()}
-              className="w-full h-full object-cover"
-              loading="lazy"
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
-              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-          )}
+          <OptionImage
+            src={option.image?.sourceUrl || option.featuredImage}
+            alt={option.image?.altText || `${option.name || option.title} option`}
+            placeholderType="option"
+            className="w-full h-full object-cover"
+          />
         </div>
 
         {/* Content Section */}
@@ -480,14 +454,12 @@ const OptionCard: React.FC<OptionCardProps> = ({
           </h3>
 
           {/* Description */}
-          <div 
+          <RichContent 
+            content={option.shortDescription || option.description || ''}
             className={`
               text-gray-700 mb-3 leading-relaxed prose prose-sm max-w-none
               ${largeText ? 'text-xl' : 'text-base'}
             `}
-            dangerouslySetInnerHTML={{ 
-              __html: option.shortDescription || option.description || '' 
-            }}
           />
 
           {/* Price */}
@@ -625,28 +597,42 @@ const OptionCard: React.FC<OptionCardProps> = ({
       {/* Variation Popup */}
       <OptionVariationPopup
         option={option}
+        categoryId={categoryId}
         isOpen={internalState.variationPopupVisible}
         onClose={handleCloseVariationPopup}
-        onAddToConfiguration={(option, variations) => {
+        onAddToConfiguration={(option, variations, calculatedTotalPrice) => {
           // Handle adding to configuration with variations
           if (variations && variations.length > 0) {
-            // For VARIABLE options with variations, we need to pass the variations data
-            // Create a modified option object that includes the selected variations
+            // Use the calculated total price from the popup instead of recalculating
             const optionWithVariations = {
               ...option,
               selectedVariations: variations,
-              totalPrice: parseFloat(option.price?.toString() || '0') + variations.reduce((sum, v) => sum + (v.price || 0), 0)
+              totalPrice: calculatedTotalPrice || parseFloat(option.price?.toString() || '0'), // Fallback to option price if no calculated price
+              priceBreakdown: {
+                basePrice: parseFloat(option.price?.toString() || '0'),
+                variationsTotal: calculatedTotalPrice ? calculatedTotalPrice - parseFloat(option.price?.toString() || '0') : 0,
+                combinedTotal: calculatedTotalPrice || parseFloat(option.price?.toString() || '0')
+              }
             };
             
-            // Call onToggle with the option and variations
-            if (onToggle) {
-              onToggle(optionWithVariations, categoryId);
-            }
+            console.log('OptionCard: Adding option with variations to configurator:', {
+              optionId: option.id,
+              optionName: option.name,
+              basePrice: parseFloat(option.price?.toString() || '0'),
+              calculatedTotalFromPopup: calculatedTotalPrice,
+              finalTotalPrice: optionWithVariations.totalPrice,
+              variationsCount: variations.length
+            });
+            
+            // Add directly to the configurator store
+            addOption(optionWithVariations, categoryId);
+            
+            // Call the onToggle prop for any additional handling (if provided)
+            // onToggle?.(optionWithVariations, categoryId);
           } else {
             // For SIMPLE options or VARIABLE options without variations
-            if (onToggle) {
-              onToggle(option, categoryId);
-            }
+            addOption(option, categoryId);
+            // onToggle?.(option, categoryId);
           }
         }}
         isAlreadySelected={isSelected}

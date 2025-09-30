@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { 
   ConfigurableProductSchema, 
   ConfiguratorCategory, 
-  CompatibilityIssue as ConfiguratorCompatibilityIssue,
+  CompatibilityIssue,
   ConfigurationSummaryData,
   FinancingOption,
   InsuranceEstimate,
@@ -13,18 +13,6 @@ import {
 import { parsePrice, formatPrice } from '../../lib/utils/priceUtils';
 import ClientOnly from '../ClientOnly';
 
-// Local interface for CompatibilityAlert component compatibility
-interface CompatibilityAlertIssue {
-  rule: {
-    id: string;
-    name: string;
-    description: string;
-    severity: 'ERROR' | 'WARNING' | 'INFO';
-    message: string;
-  };
-  affectedOptions: number[];
-  autoResolvable: boolean;
-}
 import { useConfiguratorStore } from '../../stores/configuratorStore';
 import ModelHero from './ModelHero';
 import ConfiguratorSidebar from './ConfiguratorSidebar';
@@ -60,7 +48,7 @@ interface ModelConfiguratorProps {
   
   // API functions (for GraphQL or REST calls)
   onFetchCategoryOptions?: (categoryId: string) => Promise<ConfigurableProductSchema[]>;
-  onCheckCompatibility?: (selectedOptions: ConfigurableProductSchema[]) => Promise<ConfiguratorCompatibilityIssue[]>;
+  onCheckCompatibility?: (selectedOptions: ConfigurableProductSchema[]) => Promise<CompatibilityIssue[]>;
   onCalculateFinancing?: (totalPrice: number) => Promise<FinancingOption[]>;
   onEstimateInsurance?: (configuration: ConfigurationSummaryData) => Promise<InsuranceEstimate>;
 }
@@ -94,11 +82,8 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
   // Router for navigation
   const router = useRouter();
   
-  // Local state
-  const [categories, setCategories] = useState<ConfiguratorCategory[]>(initialCategories);
-  const [currentCategoryId, setCurrentCategoryId] = useState<string>(initialCategories[0]?.id || '');
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, ConfigurableProductSchema[]>>({});
-  const [compatibilityIssues, setCompatibilityIssues] = useState<CompatibilityAlertIssue[]>([]);
+  // Local state - ONLY for UI interactions
+  const [currentCategoryId, setCurrentCategoryId] = useState<string>('');
   const [selectedFinancing, setSelectedFinancing] = useState<FinancingOption | undefined>();
   const [showSummary, setShowSummary] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -107,10 +92,18 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
   const [addToCartLoading, setAddToCartLoading] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   
-  // Zustand store
+  // Zustand store - SINGLE SOURCE OF TRUTH for configuration data
   const {
     model,
     setModel,
+    categories, // ✅ Use global store categories
+    setCategories, // ✅ Use global store action
+    selectedOptions, // ✅ Use global store selectedOptions
+    addOption,
+    removeOption,
+    clearCategory,
+    compatibilityIssues, // ✅ Use global store compatibilityIssues
+    setCompatibilityIssues, // ✅ Use global store action
     summary,
     calculateSummary,
     checkCompatibility: storeCheckCompatibility
@@ -121,40 +114,96 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
     setModel(baseModel);
   }, [baseModel, setModel]);
 
-  // Initialize edit mode configuration
+  // Initialize edit mode configuration - handle client-side cart access
   useEffect(() => {
-    if (isEditMode && initialConfiguration && cartItemId) {
-      // Initialize selected options from cart item configuration
-      if (initialConfiguration.selectedOptions && Array.isArray(initialConfiguration.selectedOptions)) {
-        const initializedOptions: Record<string, ConfigurableProductSchema[]> = {};
+    if (isEditMode && cartItemId && isHydrated) {
+      console.log('Initializing edit mode with cart item ID:', cartItemId);
+      
+      // Import cart store dynamically to avoid SSR issues
+      import('stores/cartStore').then(({ useCartStore }) => {
+        const cartStore = useCartStore.getState();
+        const cartItem = cartStore.findCartItem(cartItemId);
         
-        // Group options by category
-        initialConfiguration.selectedOptions.forEach((option: any) => {
-          // Find the category for this option
-          const category = categories.find(cat => 
-            cat.options?.some(opt => opt.databaseId === option.parentId || opt.id === option.value)
-          );
+        if (cartItem) {
+          console.log('Found cart item for edit mode:', cartItem);
           
-          if (category) {
-            if (!initializedOptions[category.id]) {
-              initializedOptions[category.id] = [];
-            }
+          const cartItemOptions = cartItem.options || [];
+          console.log('Processing cart item options:', cartItemOptions);
+          
+          // Process each cart option and try to match it with configurator categories
+          cartItemOptions.forEach((option: any) => {
+            console.log('Processing cart option:', option);
             
-            // Find the actual option in the category
-            const actualOption = category.options?.find(opt => 
-              opt.databaseId === option.parentId || opt.id === option.value
-            );
+            // Find the category for this option - try multiple matching strategies
+            const category = categories.find(cat => {
+              if (!cat.options) return false;
+              
+              return cat.options.some(opt => {
+                // Strategy 1: Match by databaseId/parentId
+                if (option.parentId && opt.databaseId === option.parentId) return true;
+                
+                // Strategy 2: Match by value/id
+                if (option.value && opt.id === option.value) return true;
+                
+                // Strategy 3: Match by name (case insensitive)
+                if (option.name && opt.name && 
+                    option.name.toLowerCase() === opt.name.toLowerCase()) return true;
+                
+                // Strategy 4: Match by slug/value
+                if (option.value && opt.slug === option.value) return true;
+                
+                return false;
+              });
+            });
             
-            if (actualOption) {
-              initializedOptions[category.id].push(actualOption);
+            if (category) {
+              console.log('Found category for option:', category.name);
+              
+              // Find the actual option in the category using the same strategies
+              const actualOption = category.options?.find(opt => {
+                // Strategy 1: Match by databaseId/parentId
+                if (option.parentId && opt.databaseId === option.parentId) return true;
+                
+                // Strategy 2: Match by value/id
+                if (option.value && opt.id === option.value) return true;
+                
+                // Strategy 3: Match by name (case insensitive)
+                if (option.name && opt.name && 
+                    option.name.toLowerCase() === opt.name.toLowerCase()) return true;
+                
+                // Strategy 4: Match by slug/value
+                if (option.value && opt.slug === option.value) return true;
+                
+                return false;
+              });
+              
+              if (actualOption) {
+                console.log('Adding option to configurator:', actualOption.name);
+                addOption(actualOption, category.id);
+              } else {
+                console.warn('Option not found in category despite category match:', option);
+              }
+            } else {
+              console.warn('No category found for cart option:', option);
+              console.log('Available categories:', categories.map(c => ({ 
+                name: c.name, 
+                optionCount: c.options?.length || 0,
+                sampleOptions: c.options?.slice(0, 2).map(o => ({ name: o.name, id: o.id, slug: o.slug, databaseId: o.databaseId }))
+              })));
             }
-          }
-        });
-        
-        setSelectedOptions(initializedOptions);
-      }
+          });
+        } else {
+          console.warn('Cart item not found for edit mode:', cartItemId);
+        }
+      }).catch(error => {
+        console.error('Failed to load cart store for edit mode:', error);
+      });
+    } else if (isEditMode && !isHydrated) {
+      console.log('Edit mode detected but not yet hydrated, waiting...');
+    } else if (isEditMode && !cartItemId) {
+      console.warn('Edit mode detected but no cartItemId provided');
     }
-  }, [isEditMode, initialConfiguration, cartItemId, categories]);
+  }, [isEditMode, cartItemId, categories, addOption, isHydrated]);
 
   // Handle hydration
   useEffect(() => {
@@ -229,7 +278,7 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
       }
 
       try {
-        let issues: ConfiguratorCompatibilityIssue[] = [];
+        let issues: CompatibilityIssue[] = [];
         
         if (onCheckCompatibility) {
           issues = await onCheckCompatibility(allSelectedOptions);
@@ -242,19 +291,7 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
         }
         
                 // Transform issues to match CompatibilityAlert component expectations
-        const transformedIssues = issues.map(issue => ({
-          rule: {
-            id: issue.rule.id,
-            name: issue.rule.name,
-            description: issue.rule.message || 'No description available',
-            severity: issue.rule.severity,
-            message: issue.rule.message || 'No message available'
-          },
-          affectedOptions: issue.affectedOptions,
-          autoResolvable: issue.autoResolvable
-        }));
-        
-        setCompatibilityIssues(transformedIssues);
+        setCompatibilityIssues(issues);
       } catch (error) {
         setCompatibilityIssues([]);
       }
@@ -266,39 +303,29 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
   // Handle option toggle
   const handleOptionToggle = useCallback(async (option: ConfigurableProductSchema, categoryId: string) => {
     const category = categories.find(c => c.id === categoryId);
-    if (!category) return;
+    if (!category || !option.databaseId) return;
 
-    setSelectedOptions(prev => {
-      const categoryOptions = prev[categoryId] || [];
-      const isSelected = categoryOptions.some(selected => selected.databaseId === option.databaseId);
-      
-      if (isSelected) {
-        // Remove option
-        return {
-          ...prev,
-          [categoryId]: categoryOptions.filter(selected => selected.databaseId !== option.databaseId)
-        };
-      } else {
-        // Add option
-        if (category.multiSelect) {
-          // Check max selections
-          if (category.maxSelections && categoryOptions.length >= category.maxSelections) {
-            return prev; // Don't add if at max
-          }
-          return {
-            ...prev,
-            [categoryId]: [...categoryOptions, option]
-          };
-        } else {
-          // Single select - replace existing
-          return {
-            ...prev,
-            [categoryId]: [option]
-          };
+    const categoryOptions = selectedOptions[categoryId] || [];
+    const isSelected = categoryOptions.some(selected => selected.databaseId === option.databaseId);
+    
+    if (isSelected) {
+      // Remove option
+      removeOption(option.databaseId, categoryId);
+    } else {
+      // Add option
+      if (category.multiSelect) {
+        // Check max selections
+        if (category.maxSelections && categoryOptions.length >= category.maxSelections) {
+          return; // Don't add if at max
         }
+        addOption(option, categoryId);
+      } else {
+        // Single select - clear category first, then add
+        clearCategory(categoryId);
+        addOption(option, categoryId);
       }
-    });
-  }, [categories]);
+    }
+  }, [categories, selectedOptions, addOption, removeOption, clearCategory]);
 
   // Handle category loading
   const handleCategorySelect = useCallback(async (categoryId: string) => {
@@ -310,16 +337,17 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
     }
 
     // Update category loading state
-    setCategories(prev => prev.map(c => 
+    const updatedCategories = categories.map(c => 
       c.id === categoryId 
         ? { ...c, loadingState: 'loading' as const }
         : c
-    ));
+    );
+    setCategories(updatedCategories);
 
     try {
       const options = await onFetchCategoryOptions(categoryId);
       
-      setCategories(prev => prev.map(c => 
+      const loadedCategories = categories.map(c => 
         c.id === categoryId 
           ? { 
               ...c, 
@@ -331,13 +359,15 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
               }
             }
           : c
-      ));
+      );
+      setCategories(loadedCategories);
     } catch (error) {      
-      setCategories(prev => prev.map(c => 
+      const errorCategories = categories.map(c => 
         c.id === categoryId 
           ? { ...c, loadingState: 'error' as const }
           : c
-      ));
+      );
+      setCategories(errorCategories);
     }
   }, [categories, selectedOptions, onFetchCategoryOptions]);
 
@@ -382,19 +412,6 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
     const configuration = getConfigurationSummary();
     onShareConfiguration(configuration);
   }, [onShareConfiguration, getConfigurationSummary]);
-
-  // Helper function to convert CompatibilityAlertIssue back to ConfiguratorCompatibilityIssue
-  const convertToConfiguratorIssue = (alertIssue: CompatibilityAlertIssue): ConfiguratorCompatibilityIssue => ({
-    rule: {
-      id: alertIssue.rule.id,
-      name: alertIssue.rule.name,
-      type: 'CONFLICTING' as const, // Default type since we don't have it
-      message: alertIssue.rule.message,
-      severity: alertIssue.rule.severity
-    },
-    affectedOptions: alertIssue.affectedOptions,
-    autoResolvable: alertIssue.autoResolvable
-  });
 
   // Get current category
   const currentCategory = categories.find(c => c.id === currentCategoryId);
@@ -515,7 +532,6 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
                     currentCategoryOptions.some(option => option.databaseId === optionId)
                   )
                 )
-                .map(convertToConfiguratorIssue)
               }
               onToggleOption={(option) => handleOptionToggle(option, currentCategoryId)}
               onViewDetails={(option) => {

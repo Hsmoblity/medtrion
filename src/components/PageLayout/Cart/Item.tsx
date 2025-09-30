@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { CartProduct } from "lib/interfaces";
 import Image from "next/image";
 import { normalizeImageUrl } from '../../../lib/utils/image'
-import { fetchRelatedProductsByIds } from 'lib/woocommerce';
+import { fetchProductsByIds } from 'lib/woocommerce';
 import { useCartStore, useEditStatus } from "stores/cartStore";
 import { useSession } from '../../../contexts/SessionContext';
 import { PrimaryButton } from 'components/ui';
@@ -80,7 +80,7 @@ const Item: React.FC<ItemProps> = ({ product }) => {
           setShowEditModal(true);
           return;
         }
-        const related = await fetchRelatedProductsByIds(relatedIds);
+        const related = await fetchProductsByIds(relatedIds, { format: 'display' });
         const built: OptionItem[] = [];
         const parsePrice = (p: any) => {
           if (typeof p === 'number') return p;

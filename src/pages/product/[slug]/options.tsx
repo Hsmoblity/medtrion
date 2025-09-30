@@ -210,10 +210,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         try {
             const relatedIds = Array.isArray(product._related_options) ? product._related_options.map((x: any) => Number(x)).filter((n: any) => !isNaN(n)) : [];
             if (relatedIds.length > 0 && (!Array.isArray(product._related_options_products) || product._related_options_products.length === 0)) {
-                const { fetchRelatedProductsByIds } = await import('lib/woocommerce');
+                const { fetchProductsByIds } = await import('lib/woocommerce');
                 try {
-                    const related = await fetchRelatedProductsByIds(relatedIds);
-                    // Attach the exact shape produced by fetchRelatedProductsByIds so
+                    const related = await fetchProductsByIds(relatedIds, { format: 'display' });
+                    // Attach the exact shape produced by fetchProductsByIds so
                     // server and client share the same minimal shape.
                     product._related_options_products = Array.isArray(related) ? related : [];
                 } catch (err) {

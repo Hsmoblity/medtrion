@@ -26,7 +26,9 @@ interface ConfiguratorStore {
   // Actions
   setModel: (model: ConfigurableProductSchema) => void;
   setCategories: (categories: ConfiguratorCategory[]) => void;
+  setCompatibilityIssues: (issues: CompatibilityIssue[]) => void;
   addOption: (option: ConfigurableProductSchema, categoryId: string) => void;
+  updateOption: (option: ConfigurableProductSchema, categoryId: string) => void;
   removeOption: (optionId: number, categoryId: string) => void;
   clearCategory: (categoryId: string) => void;
   checkCompatibility: () => void;
@@ -177,16 +179,20 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
         set({ categories });
       },
 
+      setCompatibilityIssues: (issues) => {
+        set({ compatibilityIssues: issues });
+      },
+
       addOption: (option, categoryId) => {
         const state = get();
         const category = state.categories.find(c => c.id === categoryId);
         
         // Debug logging
-        console.log('Adding option to configurator store:', {
+        console.log('Adding/Updating option to configurator store:', {
           optionId: option.id,
           optionName: option.name,
           categoryId,
-          hasVariations: option.selectedVariations?.length > 0,
+          hasVariations: option.selectedVariations ? option.selectedVariations.length > 0 : false,
           selectedVariations: option.selectedVariations?.map(v => ({ id: v.id, name: v.name, price: v.price })),
           totalPrice: option.totalPrice,
           basePrice: option.price
@@ -199,19 +205,87 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
             newSelectedOptions[categoryId] = [];
           }
           
-          // Check if multiSelect is allowed
+          // Find if option already exists
+          const existingIndex = newSelectedOptions[categoryId].findIndex(
+            opt => opt.databaseId === option.databaseId
+          );
+          
+          const exists = existingIndex !== -1;
+          
           if (category?.multiSelect) {
-            // Add to existing selections if not already selected
-            const exists = newSelectedOptions[categoryId].some(
-              opt => opt.databaseId === option.databaseId
-            );
-            if (!exists) {
+            // Multi-select category
+            if (exists) {
+              // ✅ UPDATE existing option (replace with new variation selection)
+              console.log('Updating existing option at index:', existingIndex);
+              newSelectedOptions[categoryId][existingIndex] = option;
+            } else {
+              // ✅ ADD new option
+              console.log('Adding new option to multi-select category');
               newSelectedOptions[categoryId].push(option);
             }
           } else {
-            // Replace existing selection
-            newSelectedOptions[categoryId] = [option];
+            // Single-select category
+            if (exists && newSelectedOptions[categoryId][0].databaseId === option.databaseId) {
+              // ✅ UPDATE same option with new variations
+              console.log('Updating option variations in single-select category');
+              newSelectedOptions[categoryId][0] = option;
+            } else {
+              // ✅ REPLACE with new option
+              console.log('Replacing category selection');
+              newSelectedOptions[categoryId] = [option];
+            }
           }
+          
+          console.log('Updated selectedOptions:', newSelectedOptions[categoryId]);
+          
+          return { selectedOptions: newSelectedOptions };
+        });
+        
+        get().checkCompatibility();
+        get().calculateSummary();
+        get().updateProgressCount();
+      },
+
+      updateOption: (option, categoryId) => {
+        const state = get();
+        
+        console.log('Updating existing option in configurator store:', {
+          optionId: option.id,
+          optionName: option.name,
+          categoryId,
+          hasVariations: option.selectedVariations ? option.selectedVariations.length > 0 : false,
+          selectedVariations: option.selectedVariations?.map(v => ({ id: v.id, name: v.name, price: v.price })),
+          totalPrice: option.totalPrice,
+          basePrice: option.price
+        });
+        
+        set((state) => {
+          const newSelectedOptions = { ...state.selectedOptions };
+          
+          if (!newSelectedOptions[categoryId]) {
+            console.warn('Cannot update option in non-existent category');
+            return state;
+          }
+          
+          // Find and update the specific option
+          const optionIndex = newSelectedOptions[categoryId].findIndex(
+            opt => opt.databaseId === option.databaseId
+          );
+          
+          if (optionIndex === -1) {
+            console.warn('Option not found in category, cannot update');
+            return state;
+          }
+          
+          console.log('Updating option at index:', optionIndex, 'with new data:', {
+            oldVariations: newSelectedOptions[categoryId][optionIndex].selectedVariations,
+            newVariations: option.selectedVariations,
+            oldPrice: newSelectedOptions[categoryId][optionIndex].totalPrice,
+            newPrice: option.totalPrice
+          });
+          
+          // Update the option at the found index
+          newSelectedOptions[categoryId][optionIndex] = option;
           
           return { selectedOptions: newSelectedOptions };
         });

@@ -350,7 +350,8 @@ const ConfigurePage: React.FC<ConfigurePageProps> = ({
             editSessionId={editSessionData?.sessionId}
             cartItemId={editSessionData?.cartItemId}
             isEditMode={isEditMode}
-            initialConfiguration={isEditMode ? cartItemConfiguration : undefined}
+            // initialConfiguration will be loaded client-side for edit mode
+            initialConfiguration={undefined}
             // Event handlers
             onAddToCart={handleAddToCart}
             onSaveConfiguration={handleSaveConfiguration}
@@ -464,7 +465,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       variations: mappedProduct.variations || [],
       options: mappedProduct.options || [],
       _related_options: mappedProduct._related_options || [],
-      _related_options_products: mappedProduct._related_options_products || [],
       productSpecifications: mappedProduct.productSpecifications || ''
     };
 
@@ -476,10 +476,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       if (mappedProduct._related_options && mappedProduct._related_options.length > 0) {
         console.log(`Processing ${mappedProduct._related_options.length} related options for product ${mappedProduct.title}`);
         
-        // Find related option products by their IDs from the already-fetched data
-        const relatedProducts = allProducts.filter((p: any) => 
-          mappedProduct._related_options?.includes(p.databaseId)
-        );
+        // Fetch the actual option products using fetchOptionProductsByIds since they are VARIABLE products
+        // not included in the SIMPLE products from fetchGraphQLProducts
+        const { fetchOptionProductsByIds } = await import('../../../lib/woocommerce');
+        const relatedProducts = await fetchOptionProductsByIds(mappedProduct._related_options);
         
         console.log(`Found ${relatedProducts.length} related products:`, relatedProducts.map((p: any) => p.name));
         
@@ -491,39 +491,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           const nameParts = relatedProduct.name.split(' - ');
           const categoryName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : 'Options';
           
-          // Convert to ConfigurableProductSchema
-          const configurableOption: ConfigurableProductSchema = {
-            // Core ProductSchema fields
-            title: relatedProduct.name,
-            slug: relatedProduct.slug,
-            description: relatedProduct.description || '',
-            shortDescription: relatedProduct.shortDescription || '',
-            featuredImage: relatedProduct.image?.sourceUrl || '',
-            productSpecifications: relatedProduct.productSpecifications || '',
-            productPictures: relatedProduct.galleryImages?.nodes?.map((img: any) => ({ fields: { file: { url: img.sourceUrl } } })) || [],
-            price: parseFloat(relatedProduct.price?.replace(/[^0-9.-]/g, '') || '0'),
-            affiliate: false,
-            
-            // ConfigurableProductSchema fields
-            id: relatedProduct.id,
-            databaseId: relatedProduct.databaseId,
-            name: relatedProduct.name,
-            image: relatedProduct.image,
-            regularPrice: relatedProduct.regularPrice ? String(parseFloat(relatedProduct.regularPrice.replace(/[^0-9.-]/g, '') || '0')) : undefined,
-            salePrice: relatedProduct.salePrice ? String(parseFloat(relatedProduct.salePrice.replace(/[^0-9.-]/g, '') || '0')) : undefined,
-            sku: relatedProduct.sku,
-            
-            // Additional fields
-            options: [],
-            _related_options: relatedProduct.relatedOptions || [],
-            _related_options_products: [],
-            variations: relatedProduct.variations?.nodes || []
-          };
-          
+          // Option products from fetchOptionProductsByIds are already in ConfigurableProductSchema format
           if (!categoryMap.has(categoryName)) {
             categoryMap.set(categoryName, []);
           }
-          categoryMap.get(categoryName)!.push(configurableOption);
+          categoryMap.get(categoryName)!.push(relatedProduct);
         });
         
         // Convert category map to ConfiguratorCategory array
@@ -559,6 +531,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Validate edit session if in edit mode
+    // Note: Cart item lookup must be done client-side due to SSR limitations
+    // The cart uses localStorage which isn't available during server-side rendering
     let cartItemConfiguration = null;
     if (isEditMode) {
       if (!cartItemId || !sessionId) {
@@ -570,31 +544,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         };
       }
       
-      // Get cart item configuration for edit mode
-      try {
-        const { useCartStore } = await import('stores/cartStore');
-        const cartStore = useCartStore.getState();
-        const cartItem = cartStore.findCartItem(cartItemId);
-        
-        if (cartItem) {
-          cartItemConfiguration = {
-            selectedOptions: cartItem.options || [],
-            quantity: cartItem.quantity || 1,
-            variationId: cartItem.variationId,
-            cartItemId: cartItem.cartItemId
-          };
-          
-          console.log('Cart item configuration for edit mode:', {
-            cartItemId,
-            cartItem,
-            configuration: cartItemConfiguration
-          });
-        } else {
-          console.warn('Cart item not found for edit mode:', cartItemId);
-        }
-      } catch (error) {
-        console.error('Failed to get cart item configuration:', error);
-      }
+      // For edit mode, we'll pass the cartItemId to the client and let it handle
+      // the configuration loading after hydration. This avoids SSR cart access issues.
+      console.log('Edit mode detected - cart item configuration will be loaded client-side');
     }
 
     const seoMeta = {
@@ -618,7 +570,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           sessionId,
           isEditMode: true
         } : null,
-        cartItemConfiguration,
         error: null
       })
     };

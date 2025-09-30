@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ConfigurableProductSchema, ConfiguratorCategory } from 'lib/interfaces/configurator';
 import { stripHtml } from 'lib/utils/text';
 import { normalizeImageUrl } from 'lib/utils/image';
+import { useConfiguratorStore } from 'stores/configuratorStore';
 
 // Import components
 import ModelHero from 'components/configurator/ModelHero';
@@ -38,11 +39,29 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, ConfigurableProductSchema[]>>({});
   const [compatibilityIssues, setCompatibilityIssues] = useState<any[]>([]);
   const [currentCategory, setCurrentCategory] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [configuratorCategories, setConfiguratorCategories] = useState<ConfiguratorCategory[]>([]);
+
+  // Use configurator store for state management
+  const {
+    selectedOptions,
+    summary,
+    addOption,
+    removeOption,
+    clearCategory,
+    calculateSummary,
+    setModel
+  } = useConfiguratorStore();
+
+  // Initialize configurator store with product data
+  useEffect(() => {
+    if (product) {
+      console.log('Product page: Setting product as model in configurator store', product.name);
+      setModel(product);
+    }
+  }, [product, setModel]);
 
   // Lazy load option products with performance tracking
   const relatedOptionIds = (product?._related_options || []).map(id => 
@@ -221,33 +240,33 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
   // Removed handleConfigure function since this page is already a configuration interface
 
-  // Handle option selection
-  const handleOptionToggle = (categoryId: string, option: ConfigurableProductSchema) => {
-    setSelectedOptions(prev => {
-      const category = configuratorCategories.find(c => c.id === categoryId);
-      const newOptions = { ...prev };
-      
-      if (!newOptions[categoryId]) {
-        newOptions[categoryId] = [];
-      }
-      
-      const existingIndex = newOptions[categoryId].findIndex(opt => opt.id === option.id);
-      
-      if (existingIndex >= 0) {
-        // Remove option
-        newOptions[categoryId].splice(existingIndex, 1);
-      } else {
-        // Add option
-        if (category?.multiSelect) {
-          newOptions[categoryId].push(option);
-        } else {
-          newOptions[categoryId] = [option];
+  // Handle option selection using configurator store
+  const handleOptionToggle = useCallback((categoryId: string, option: ConfigurableProductSchema) => {
+    console.log('Product page: handleOptionToggle called', { categoryId, optionId: option.id, optionName: option.name });
+    
+    const category = configuratorCategories.find(c => c.id === categoryId);
+    const categoryOptions = selectedOptions[categoryId] || [];
+    const isSelected = categoryOptions.some(selected => selected.databaseId === option.databaseId);
+    
+    if (isSelected) {
+      // Remove option from store
+      removeOption(option.databaseId!, categoryId);
+    } else {
+      // Add option to store
+      if (category?.multiSelect) {
+        // Check max selections
+        if (category.maxSelections && categoryOptions.length >= category.maxSelections) {
+          console.warn(`Cannot add more options to ${categoryId}, max selections reached`);
+          return;
         }
+        addOption(option, categoryId);
+      } else {
+        // Single select - clear category first, then add
+        clearCategory(categoryId);
+        addOption(option, categoryId);
       }
-      
-      return newOptions;
-    });
-  };
+    }
+  }, [configuratorCategories, selectedOptions, addOption, removeOption, clearCategory]);
 
   if (error || !product) {
     return (
@@ -357,7 +376,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             <div className="lg:col-span-1">
               <ConfiguratorSidebar
                 categories={configuratorCategories}
-                currentCategoryId={currentCategory}
+                currentCategoryId={currentCategory || undefined}
                 onCategorySelect={setCurrentCategory}
               />
             </div>
@@ -394,7 +413,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                     <div className="pt-4">
                       <div className="flex justify-between items-center text-xl font-bold">
                         <span>Total</span>
-                        <span className="text-blue-600">${currentPrice.toFixed(2)}</span>
+                        <span className="text-blue-600">${(summary?.grandTotal || parseFloat(product.price?.toString() || '0')).toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -403,7 +422,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                 <CategoryGroup
                   category={configuratorCategories.find(c => c.id === currentCategory)!}
                   selectedOptions={selectedOptions[currentCategory] || []}
-                  onOptionToggle={(option) => handleOptionToggle(currentCategory, option)}
+                  onToggleOption={(option: ConfigurableProductSchema) => handleOptionToggle(currentCategory, option)}
                   compatibilityIssues={compatibilityIssues}
                 />
               ) : (
@@ -425,13 +444,13 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             <div className="lg:col-span-1">
               <SummaryPanel
                 configuration={{
-                  basePrice: parseFloat(product.price?.toString() || '0'),
-                  optionsTotal: Object.values(selectedOptions).flat().reduce((total, option) => total + parseFloat(option.price?.toString() || '0'), 0),
-                  installationCost: 0,
-                  shippingCost: 0,
-                  taxAmount: 0,
-                  grandTotal: currentPrice,
-                  estimatedDelivery: '2-3 weeks'
+                  basePrice: summary?.basePrice || parseFloat(product.price?.toString() || '0'),
+                  optionsTotal: summary?.optionsTotal || 0,
+                  installationCost: summary?.installationCost || 0,
+                  shippingCost: summary?.shippingCost || 0,
+                  taxAmount: summary?.taxAmount || 0,
+                  grandTotal: summary?.grandTotal || parseFloat(product.price?.toString() || '0'),
+                  estimatedDelivery: summary?.estimatedDelivery || '2-3 weeks'
                 }}
                 onAddToCart={handleAddToCart}
                 loading={loading}

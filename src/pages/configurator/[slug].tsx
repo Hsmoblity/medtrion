@@ -59,7 +59,18 @@ const ConfiguratorPage: React.FC<ConfiguratorPageProps> = ({
     try {
       // TODO: Implement save configuration functionality
       console.log('Saving configuration:', { name, notes });
-      return { id: 'temp-id', name, notes };
+      
+      // Return proper SavedConfigurationExtended format
+      return {
+        id: `config_${Date.now()}`,
+        name,
+        notes: notes || '',
+        baseModel: baseModel!,
+        selectedOptions: [], // TODO: Get from configurator state
+        totalPrice: baseModel?.price || 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
     } catch (error) {
       console.error('Failed to save configuration:', error);
       throw error;
@@ -188,8 +199,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     try {
       const graphqlResult = await configuratorAPI.getModelWithCategories(slug);
-      product = graphqlResult.product;
-      categories = product?.configuratorCategories || [];
+      if (graphqlResult && 'data' in graphqlResult && graphqlResult.data) {
+        product = graphqlResult.data.product;
+        categories = product?.configuratorCategories || [];
+      } else {
+        throw new Error('No data returned from GraphQL');
+      }
     } catch (graphqlError) {
       console.warn('GraphQL fetch failed, falling back to Contentful:', graphqlError);
       
@@ -225,7 +240,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       regularPrice: product.regularPrice || product.price?.toString(),
       salePrice: product.salePrice,
       sku: product.sku,
-      type: 'configurable',
       affiliate: product.affiliate || false,
       productId: product.productId || product.databaseId,
       
@@ -242,6 +256,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       
       // Additional fields
       productPictures: product.productPictures || [],
+      productSpecifications: product.productSpecifications || '',
       variations: product.variations || [],
       options: product.options || [],
       _related_options: product._related_options || [],

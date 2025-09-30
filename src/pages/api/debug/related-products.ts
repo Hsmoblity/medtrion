@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { fetchRelatedProductsByIds } from 'lib/woocommerce';
+import { fetchProductsByIds } from 'lib/woocommerce';
 import { shouldEnableDebugEndpoints } from '../../../lib/utils/environment-validation';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        const products = await fetchRelatedProductsByIds(ids);
+        const products = await fetchProductsByIds(ids, { format: 'display' });
         res.status(200).json({ 
             ids, 
             products: products || [],

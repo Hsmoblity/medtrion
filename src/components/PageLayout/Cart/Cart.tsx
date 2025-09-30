@@ -36,7 +36,7 @@ const Cart = () => {
   // Show loading state during hydration
   if (!isHydrated) {
     return (
-      <div className="fixed sm:w-96 w-full h-screen right-0 z-10 bg-[#f5ebdf] top-14 overflow-hidden flex flex-col items-center justify-center">
+      <div className="fixed sm:w-96 w-full h-screen right-0 z-10 bg-white dark:bg-gray-800 top-14 overflow-hidden flex flex-col items-center justify-center">
         <div className="text-black font-poppins text-center font-medium text-lg">
           Loading cart...
         </div>
@@ -49,13 +49,13 @@ const Cart = () => {
       <div
         onClick={() => router.push('/cart')}
         className={classNames(
-          "fixed w-screen h-screen opacity-30 bg-[#f5ebdf] z-10",
+          "fixed w-screen h-screen opacity-30 bg-gray-800 z-10",
           { hidden: !cartVisibility }
         )}
       ></div>
       <div
         className={classNames(
-          "fixed sm:w-96 w-full h-screen right-0 z-10 bg-[#f5ebdf] top-14 overflow-hidden",
+          "fixed sm:w-96 w-full h-screen right-0 z-10 bg-white dark:bg-gray-800 top-14 overflow-hidden",
           { hidden: !cartVisibility },
           { "flex flex-col items-center justify-center": cart.length === 0 }
         )}
@@ -71,27 +71,27 @@ const Cart = () => {
                 <h4 className="text-3xl text-black font-medium mb-8">My Cart</h4>
                 {cart && <ItemList products={cart} />}
               </div>
-              <div className="w-full sticky h-80 bg-black -ml-2.5 border-t border-white p-6 pl-8 bottom-0">
+              <div className="w-full sticky h-80 bg-white dark:bg-gray-800 -ml-2.5 border-t border-gray-200 dark:border-gray-700 p-6 pl-8 bottom-0 shadow-lg">
                 <div className="flex flex-wrap flex-row justify-between mb-4">
-                  <span className="text-white text-sm">Subtotal</span>
-                  <span className="text-white text-sm">${subTotal}</span>
+                  <span className="text-gray-700 dark:text-gray-300 text-sm">Subtotal</span>
+                  <span className="text-gray-900 dark:text-white text-sm">${subTotal}</span>
                 </div>
                 <div className="flex flex-wrap flex-row justify-between mb-4">
-                  <span className="text-white text-sm">Taxes</span>
-                  <span className="text-white text-sm">
+                  <span className="text-gray-700 dark:text-gray-300 text-sm">Taxes</span>
+                  <span className="text-gray-700 dark:text-gray-300 text-sm">
                     Calculated at checkout
                   </span>
                 </div>
-                <div className="w-full h-px bg-gray-800 mb-4"></div>
+                <div className="w-full h-px bg-gray-200 dark:bg-gray-700 mb-4"></div>
                 <div className="flex flex-wrap flex-row justify-between mb-4">
-                  <span className="text-white text-sm font-semibold">Total</span>
-                  <span className="text-white text-sm font-semibold">
+                  <span className="text-gray-900 dark:text-white text-sm font-semibold">Total</span>
+                  <span className="text-gray-900 dark:text-white text-sm font-semibold">
                     ${subTotal}
                   </span>
                 </div>
                 <button
                   disabled={isRedirecting}
-                  className=" outline-none bg-[#f5ebdf] border-0 py-4 w-full text-sm uppercase hover:bg-gray-300 transition duration-500 ease-in-out"
+                  className="outline-none bg-blue-600 hover:bg-blue-700 text-white border-0 py-4 w-full text-sm uppercase font-medium transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
                   onClick={handleCheckout}
                 >
                   {isRedirecting ? `Please wait...` : `Proceed to Checkout`}

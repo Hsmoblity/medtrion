@@ -1,36 +1,42 @@
 Frontend (lazy) load example:
 
-- Call `fetchRelatedProductsByIds` from a client component when opening the add-on modal. Example (React):
+# Related Products Usage Examples
 
-```ts
-import { useState } from 'react';
-import { fetchRelatedProductsByIds } from 'lib/woocommerce';
+- Call `fetchProductsByIds` from a client component when opening the add-on modal. Example (React):
 
-function AddOnModal({ relatedIds }) {
-  const [items, setItems] = useState(null);
+```jsx
+import { fetchProductsByIds } from 'lib/woocommerce';
+
+function SomeComponent() {
+  const [items, setItems] = useState([]);
+  const [mounted, setMounted] = useState(true);
   useEffect(() => {
-    let mounted = true;
-    fetchRelatedProductsByIds(relatedIds).then(data => { if (mounted) setItems(data); }).catch(() => {});
-    return () => { mounted = false; };
+    fetchProductsByIds(relatedIds, { format: 'display' }).then(data => { if (mounted) setItems(data); }).catch(() => {});
+    return () => setMounted(false);
   }, [relatedIds]);
 
-  if (!items) return <div>Loading...</div>;
-  return <AddOnList items={items} />;
+  return (
+    <div>
+      {/* Render items here */}
+    </div>
+  );
 }
 ```
 
-Server-side load example (recommended when you want SEO/SSR):
+Server example (Next.js page or API route):
 
-- In `getServerSideProps` or `getStaticProps` fetch the related products by `databaseId` before rendering the page.
+```javascript
+import { fetchProductsByIds } from 'lib/woocommerce';
 
-```ts
 export async function getServerSideProps(context) {
-  const product = await getProductBySlug(context.params.slug);
-  const relatedIds = product._related_options || [];
-  const relatedProducts = await fetchRelatedProductsByIds(relatedIds);
-  return { props: { product, relatedProducts } };
+  const relatedIds = [/* some ids from your data source */];
+  const relatedProducts = await fetchProductsByIds(relatedIds, { format: 'display' });
+  
+  return { props: { relatedProducts } };
 }
 ```
+
+- `fetchProductsByIds` with `{ format: 'display' }` already normalizes variations and images into a light shape suitable for rendering in the add-on UI.
 
 Notes:
 - `fetchRelatedProductsByIds` already normalizes variations and images into a light shape suitable for rendering in the add-on UI.

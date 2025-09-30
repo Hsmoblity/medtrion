@@ -49,7 +49,7 @@ function Hero() {
                             }}
                             className="relative top-14 left-12 inline-flex text-nowrap h-12 overflow-hidden rounded-full p-0.5 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:ring-offset-gray-50 transition-all duration-200 hover:scale-105"
                         >
-                            <span className="inline-flex text-nowrap h-full w-full cursor-pointer items-center justify-center rounded-full bg-black border-gray-400 border-b-4 border-r-4 px-8 py-1 text-sm uppercase font-medium text-white backdrop-blur-3xl">
+                            <span className="inline-flex text-nowrap h-full w-full cursor-pointer items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 border-gray-400 border-b-4 border-r-4 px-8 py-1 text-sm uppercase font-medium text-white backdrop-blur-3xl transition-colors duration-200">
                                 Learn more
                             </span>
                         </button>

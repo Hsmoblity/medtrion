@@ -1,17 +1,6 @@
 import React from 'react';
 import { PrimaryButton } from 'components/ui';
-
-interface CompatibilityIssue {
-  rule: {
-    id: string;
-    name: string;
-    description: string;
-    severity: 'ERROR' | 'WARNING' | 'INFO';
-    message: string;
-  };
-  affectedOptions: number[];
-  autoResolvable: boolean;
-}
+import { CompatibilityIssue } from '../../lib/interfaces/configurator';
 
 interface CompatibilityAlertProps {
   issues: CompatibilityIssue[];
@@ -106,8 +95,8 @@ const CompatibilityAlert: React.FC<CompatibilityAlertProps> = ({
                 </h3>
                 <div className="mt-1 text-sm">
                   <p>{issue.rule.message}</p>
-                  {issue.rule.description && (
-                    <p className="mt-1 opacity-90">{issue.rule.description}</p>
+                  {issue.rule.message && (
+                    <p className="mt-1 opacity-90">{issue.rule.message}</p>
                   )}
                 </div>
                 {issue.autoResolvable && onResolve && (

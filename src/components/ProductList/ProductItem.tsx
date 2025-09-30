@@ -6,7 +6,7 @@ import { Carousel, CarouselContent, CarouselItem } from "components/pictureCarou
 import { useCartStore } from "stores/cartStore";
 import { PrimaryButton } from 'components/ui';
 import ProductOptions from 'components/ProductOptions';
-import { fetchProductsByDatabaseIds, fetchRelatedProductsByIds } from 'lib/woocommerce';
+import { fetchProductsByDatabaseIds, fetchProductsByIds } from 'lib/woocommerce';
 import Link from "next/link";
 import CartVisibilityContext from "contexts/cartVisibilityContext";
 import { useContext, useState } from "react";
@@ -147,7 +147,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
       if ((!Array.isArray(product._related_options_products) || product._related_options_products.length === 0) && Array.isArray(product._related_options) && product._related_options.length > 0) {
         setLoadingRelatedIds(true);
         try {
-          const fetched = await fetchRelatedProductsByIds(product._related_options || []);
+          const fetched = await fetchProductsByIds(product._related_options || [], { format: 'display' });
           setModalRelatedProducts(fetched || []);
           console.log('Fetched modal related products for', product.productId, fetched);
         } catch (e) {

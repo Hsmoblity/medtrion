@@ -323,10 +323,10 @@
   .connectionLineVertical,
   .connectionLineHorizontal,
   .connectionLineEnd {
-    @apply bg-black;
+    @apply bg-gray-600 dark:bg-gray-400;
   }
   
   .connectionDot {
-    @apply bg-black;
+    @apply bg-gray-600 dark:bg-gray-400;
   }
 }

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "npx kill-port 3002 && next dev -p 3002",
     "dev:env": "node ./scripts/load-env-and-run-dev.js",
+    "prebuild": "node ./scripts/generate-version.js",
     "build": "next build",
     "start": "next start -p 3002",
     "lint": "next lint",

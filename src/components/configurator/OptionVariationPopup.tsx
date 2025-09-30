@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ConfigurableProductSchema } from 'lib/interfaces';
+import { useConfiguratorStore } from '../../stores/configuratorStore';
 import OptionVariationCard, { Variation } from './OptionVariationCard';
+import RichContent from '../RichContent';
+import { parsePrice } from '../../lib/utils/priceUtils';
 
 // Variation interface is now imported from OptionVariationCard
 
@@ -45,7 +48,7 @@ const validateAndMapVariations = (option: ConfigurableProductSchema): Variation[
       id: variation.id,
       databaseId: variation.databaseId,
       name: variation.name || 'Unnamed Variation',
-      price: parseFloat(variation.price || '0'),
+      price: parsePrice(variation.price),
       sku: variation.sku || '',
       image: variation.image ? {
         sourceUrl: variation.image.sourceUrl || '',
@@ -61,8 +64,9 @@ interface OptionVariationPopupProps {
   option: ConfigurableProductSchema;
   isOpen: boolean;
   onClose: () => void;
-  onAddToConfiguration: (option: ConfigurableProductSchema, variations?: Variation[]) => void;
+  onAddToConfiguration: (option: ConfigurableProductSchema, variations?: Variation[], totalPrice?: number) => void;
   isAlreadySelected?: boolean;
+  categoryId?: string; // Add categoryId to detect edit mode
   
   // NEW: Real data validation
   variations?: Variation[];  // Optional override for specific use cases
@@ -75,11 +79,43 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
   onClose,
   onAddToConfiguration,
   isAlreadySelected = false,
+  categoryId,
   variations: overrideVariations,
   onVariationDataError
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  
+  // Get configurator store to check current selections
+  const { selectedOptions, isOptionSelected } = useConfiguratorStore();
+  
+  // Detect if we're in edit mode (option already configured)
+  const isEditMode = useMemo(() => {
+    if (!categoryId || !option.databaseId) return false;
+    return isOptionSelected(option.databaseId, categoryId);
+  }, [categoryId, option.databaseId, isOptionSelected]);
+  
+  // Get current variation selections if in edit mode
+  const currentVariations = useMemo(() => {
+    if (!isEditMode || !categoryId) return [];
+    
+    const categoryOptions = selectedOptions[categoryId] || [];
+    const existingOption = categoryOptions.find(opt => opt.databaseId === option.databaseId);
+    
+    if (!existingOption || !existingOption.selectedVariations) return [];
+    
+    // Convert existing selections to our Variation format
+    return existingOption.selectedVariations.map(v => ({
+      id: v.id,
+      databaseId: v.databaseId || 0,
+      name: v.name,
+      price: parsePrice(v.price),
+      sku: v.sku || '',
+      image: v.image,
+      attributes: v.attributes || [],
+      stockStatus: v.stockStatus || 'instock'
+    })) as Variation[];
+  }, [isEditMode, categoryId, selectedOptions, option.databaseId]);
   
   // Use real variations data instead of mock data
   const realVariations = useMemo(() => {
@@ -105,6 +141,20 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
     retry: null
   });
   
+  // Initialize selected variations when popup opens
+  useEffect(() => {
+    if (isOpen) {
+      if (isEditMode && currentVariations.length > 0) {
+        // In edit mode, pre-select current variations
+        console.log('OptionVariationPopup: Initializing edit mode with current selections:', currentVariations);
+        setSelectedVariations(currentVariations);
+      } else {
+        // In add mode, start with empty selection
+        setSelectedVariations([]);
+      }
+    }
+  }, [isOpen, isEditMode, currentVariations]);
+  
   // Determine selection type from option data
   const selectionType = useMemo(() => {
     return option.variableType?.toLowerCase() === 'checkbox' ? 'checkbox' : 'radio';
@@ -125,14 +175,38 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
     });
   }, []);
 
-  // Calculate total price with real variation data
-  const totalPrice = useMemo(() => {
-    const basePrice = parseFloat(option.price?.toString() || '0');
-    const variationPrice = selectedVariations.reduce((sum, variation) => {
-      return sum + (variation.price || 0);
-    }, 0);
-    return basePrice + variationPrice;
-  }, [option.price, selectedVariations]);
+  // Enhanced price calculation with better handling of variation types
+  const priceCalculation = useMemo(() => {
+    const basePrice = parsePrice(option.price || option.regularPrice);
+    
+    let variationsTotal = 0;
+    
+    // Handle different variation types
+    if (selectionType === 'radio') {
+      // Radio type: Base price + ONE selected variation price
+      const selectedVariation = selectedVariations[0];
+      if (selectedVariation) {
+        variationsTotal = parsePrice(selectedVariation.price);
+      }
+    } else if (selectionType === 'checkbox') {
+      // Checkbox type: Base price + ALL selected variation prices
+      variationsTotal = selectedVariations.reduce((sum, variation) => {
+        return sum + parsePrice(variation.price);
+      }, 0);
+    }
+    
+    const totalPrice = basePrice + variationsTotal;
+    
+    return {
+      basePrice,
+      variationsTotal,
+      totalPrice,
+      hasVariations: selectedVariations.length > 0
+    };
+  }, [option.price, option.regularPrice, selectedVariations, selectionType]);
+  
+  // Extract for easier use
+  const { basePrice, variationsTotal, totalPrice, hasVariations } = priceCalculation;
 
   // Focus management and keyboard handling
   useEffect(() => {
@@ -176,7 +250,23 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
   };
 
   const handleAddToConfiguration = () => {
-    onAddToConfiguration(option, selectedVariations);
+    // Log for debugging
+    console.log('OptionVariationPopup: Adding option with calculated price:', {
+      optionId: option.id,
+      optionName: option.name,
+      basePrice: basePrice,
+      variationsTotal: variationsTotal,
+      totalPrice: totalPrice,
+      selectionType: selectionType,
+      selectedVariations: selectedVariations.map(v => ({
+        id: v.id,
+        name: v.name,
+        price: v.price
+      }))
+    });
+    
+    // Pass the calculated totalPrice along with option and variations
+    onAddToConfiguration(option, selectedVariations, totalPrice);
     onClose();
   };
 
@@ -202,9 +292,16 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {option.name || option.title}
-          </h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {option.name || option.title}
+            </h2>
+            {isEditMode && (
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                Edit Mode
+              </span>
+            )}
+          </div>
           <button
             ref={closeButtonRef}
             onClick={onClose}
@@ -236,15 +333,26 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
-                <div 
+                <RichContent 
+                  content={option.shortDescription || option.description || ''}
                   className="text-gray-700 prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ 
-                    __html: option.shortDescription || option.description || '' 
-                  }}
                 />
               </div>
             </div>
           </div>
+
+          {/* Edit Mode Info */}
+          {isEditMode && currentVariations.length > 0 && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h3 className="font-semibold text-blue-900 mb-2">Current Selection</h3>
+              <p className="text-blue-700 text-sm">
+                Currently selected: {currentVariations.map(v => v.name).join(', ')}
+              </p>
+              <p className="text-blue-600 text-xs mt-1">
+                Make your changes below and click "Update Configuration" to save.
+              </p>
+            </div>
+          )}
 
           {/* Variations Section */}
           {errorState.hasError ? (
@@ -325,20 +433,22 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-700">Base Option Price:</span>
-                <span className="font-medium">${option.price}</span>
+                <span className="font-medium">${basePrice.toFixed(2)}</span>
               </div>
-              {selectedVariations.length > 0 && (
+              {hasVariations && (
                 <div className="flex justify-between">
-                  <span className="text-gray-700">Selected Variations:</span>
+                  <span className="text-gray-700">
+                    Selected Variations {selectionType === 'radio' ? '(1)' : `(${selectedVariations.length})`}:
+                  </span>
                   <span className="font-medium">
-                    +${selectedVariations.reduce((sum, v) => sum + v.price, 0)}
+                    +${variationsTotal.toFixed(2)}
                   </span>
                 </div>
               )}
               <div className="border-t border-gray-300 pt-2">
                 <div className="flex justify-between">
                   <span className="font-semibold text-gray-900">Total Option Price:</span>
-                  <span className="font-bold text-lg text-blue-600">${totalPrice}</span>
+                  <span className="font-bold text-lg text-blue-600">${totalPrice.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -357,7 +467,7 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
             onClick={handleAddToConfiguration}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
-            {isAlreadySelected ? 'Update Configuration' : 'Add to Configuration'}
+            {isEditMode ? 'Update Configuration' : 'Add to Configuration'}
           </button>
         </div>
       </div>

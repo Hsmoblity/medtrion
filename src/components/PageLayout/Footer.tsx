@@ -2,10 +2,12 @@ import Link from "next/link";
 import { FaFacebook } from "react-icons/fa";
 import { useRouter } from 'next/router';
 import { handleAnchorNavigation } from "lib/utils/navigation";
+import { getDevVersion } from "lib/utils/devVersion";
 
 const Footer = () => {
   const d = new Date();
   const router = useRouter();
+  const devVersion = getDevVersion();
 
   return (
     <div className="w-full bg-inherit">
@@ -96,6 +98,7 @@ const Footer = () => {
             <img src="/discover.svg" alt="Discover" className="w-10 h-auto" />
           </div>
           <div className="my-5">© Copyright 2025. All Rights Reserved.</div>
+          <div className="text-xs text-gray-500 mt-2">devVer: {devVersion}</div>
         </div>
       </div>
 

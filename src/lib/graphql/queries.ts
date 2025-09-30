@@ -301,16 +301,6 @@ export const GET_OPTION_PRODUCTS_BY_IDS = gql`
         description
         shortDescription
         productSpecifications
-        globalAttributes { 
-          nodes { 
-            label 
-            terms { 
-              nodes { 
-                name 
-              } 
-            } 
-          } 
-        }
         type
         relatedOptions
         variableType
@@ -320,13 +310,11 @@ export const GET_OPTION_PRODUCTS_BY_IDS = gql`
             sourceUrl 
           } 
         }
-        ... on SimpleProduct { 
+        ... on VariableProduct {
           price 
           regularPrice 
           salePrice 
           sku
-        }
-        ... on ProductWithVariations {
           attributes {
             nodes {
               name

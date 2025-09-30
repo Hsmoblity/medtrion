@@ -127,6 +127,7 @@ export const getRelatedOptions = async (productId: string) => {
 
 // Additional mock functions that are imported by components
 export const fetchRelatedProductsByIds = async (ids: string[]) => {
+  console.warn('fetchRelatedProductsByIds is deprecated. Use fetchProductsByIds(ids, { format: "display" }) instead.');
   console.log('Mock fetchRelatedProductsByIds:', ids);
   return [
     {

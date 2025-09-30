@@ -80,7 +80,7 @@ const Card = ({ product }: { product: ProductSchema }) => {
                 <button className="text-sm leading-8 font-bold text-black underline">
                   Learn More
                 </button>
-                <div className="flex items-center space-x-1.5 rounded-lg bg-black px-4 py-1.5 text-white duration-100 hover:bg-slate-800">
+                <div className="flex items-center space-x-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 px-4 py-1.5 text-white duration-200 transition-colors">
                   <button className="text-sm">Get a Quote</button>
                 </div>
               </>

@@ -36,6 +36,26 @@ export interface ConfigurableProductSchema extends Omit<ProductSchema, 'shortDes
   
   // Override _related_options_products to allow ConfigurableProductSchema array for nested options
   _related_options_products?: Array<ConfigurableProductSchema>;
+  
+  // Variation selection support
+  selectedVariations?: Array<{
+    id: string;
+    databaseId: number;
+    name: string;
+    price: number;
+    sku: string;
+    image?: {
+      sourceUrl: string;
+      altText: string;
+    };
+    attributes: Array<{
+      id: string;
+      name: string;
+      value: string;
+    }>;
+    stockStatus?: 'instock' | 'outofstock' | 'onbackorder';
+  }>;
+  totalPrice?: number; // Total price including selected variations
 }
 
 export interface ConfiguratorCategory {
@@ -61,7 +81,6 @@ export interface ConfiguratorCategory {
 }
 
 export interface CompatibilityRule {
-  [x: string]: string;
   id: string;
   name: string;
   type: 'REQUIRED' | 'CONFLICTING' | 'RECOMMENDED';

@@ -638,9 +638,33 @@ const OptionCard: React.FC<OptionCardProps> = ({
         isOpen={internalState.variationPopupVisible}
         onClose={handleCloseVariationPopup}
         onAddToConfiguration={(option, variations) => {
-          // Handle adding to configuration
-          if (onToggle) {
-            onToggle();
+          // Debug logging
+          console.log('Adding to configuration from OptionCard:', {
+            optionId: option.id,
+            optionName: option.name || option.title,
+            variations: variations?.map(v => ({ id: v.id, name: v.name, price: v.price })),
+            selectedVariationsCount: variations?.length || 0
+          });
+          
+          // Handle adding to configuration with variations
+          if (variations && variations.length > 0) {
+            // For VARIABLE options with variations, we need to pass the variations data
+            // Create a modified option object that includes the selected variations
+            const optionWithVariations = {
+              ...option,
+              selectedVariations: variations,
+              totalPrice: parseFloat(option.price?.toString() || '0') + variations.reduce((sum, v) => sum + (v.price || 0), 0)
+            };
+            
+            // Call onToggle with the option and variations
+            if (onToggle) {
+              onToggle(optionWithVariations, categoryId);
+            }
+          } else {
+            // For SIMPLE options or VARIABLE options without variations
+            if (onToggle) {
+              onToggle(option, categoryId);
+            }
           }
         }}
         isAlreadySelected={isSelected}

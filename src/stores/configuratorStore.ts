@@ -180,6 +180,17 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
         const state = get();
         const category = state.categories.find(c => c.id === categoryId);
         
+        // Debug logging
+        console.log('Adding option to configurator store:', {
+          optionId: option.id,
+          optionName: option.name,
+          categoryId,
+          hasVariations: option.selectedVariations?.length > 0,
+          selectedVariations: option.selectedVariations?.map(v => ({ id: v.id, name: v.name, price: v.price })),
+          totalPrice: option.totalPrice,
+          basePrice: option.price
+        });
+        
         set((state) => {
           const newSelectedOptions = { ...state.selectedOptions };
           
@@ -309,7 +320,18 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
           const basePrice = parseFloat(model?.price?.toString() || '0');
           const optionsTotal = Object.values(selectedOptions)
             .flat()
-            .reduce((total, option) => total + parseFloat(option.price?.toString() || '0'), 0);
+            .reduce((total, option) => {
+              // Use totalPrice if available (includes variations), otherwise use base price
+              const optionPrice = option.totalPrice || parseFloat(option.price?.toString() || '0');
+              console.log('Option price calculation in summary:', {
+                optionId: option.id,
+                optionName: option.name,
+                basePrice: parseFloat(option.price?.toString() || '0'),
+                variationPrice: option.selectedVariations?.reduce((sum, v) => sum + (v.price || 0), 0) || 0,
+                totalPrice: optionPrice
+              });
+              return total + optionPrice;
+            }, 0);
           
           const installationCost = model?.installationRequired ? 300 : 0;
           const shippingCost = 50;

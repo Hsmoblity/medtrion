@@ -185,6 +185,15 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
   };
 
   const handleAddToConfiguration = () => {
+    // Debug logging
+    console.log('Add to Configuration clicked:', {
+      optionId: option.id,
+      optionName: option.name || option.title,
+      selectedVariations: selectedVariations.map(v => ({ id: v.id, name: v.name, price: v.price })),
+      selectedVariationsCount: selectedVariations.length,
+      totalPrice: totalPrice
+    });
+    
     onAddToConfiguration(option, selectedVariations);
     onClose();
   };

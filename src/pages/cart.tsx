@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCartStore, useCartItems, useCartTotal } from 'stores/cartStore';
-import ItemList from 'components/PageLayout/Cart/ItemList';
+import CartPageGroups from 'components/Cart/CartPageGroups';
 import { useRouter } from 'next/router';
 import { PrimaryButton } from '../components/ui';
 import { formatPrice, calculateOrderTotal } from 'lib/utils/priceUtils';
@@ -55,7 +55,7 @@ const CartPage = () => {
 
                 {cart.length > 0 ? (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Cart Items */}
+                        {/* Cart Items with Product Groups */}
                         <div className="lg:col-span-2">
                             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                                 <div className="p-6 border-b border-gray-200">
@@ -64,7 +64,7 @@ const CartPage = () => {
                                     </h2>
                                 </div>
                                 <div className="p-6">
-                                    <ItemList products={cart} />
+                                    <CartPageGroups />
                                 </div>
                             </div>
                         </div>

@@ -102,7 +102,7 @@ export function generateBadges(product: ProductSchema): string[] {
   }
   
   // Options-based badges
-  if (product._related_options?.length > 0) {
+  if (product._related_options && product._related_options.length > 0) {
     badges.push('Customizable');
   }
   

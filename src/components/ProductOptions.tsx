@@ -181,7 +181,7 @@ const ProductOptions: React.FC<Props> = ({
             const selectedPayloads = createSelectedPayloads();
             onSelectionChange(selectedPayloads);
         }
-    }, [selected, addOns, onSelectionChange, createSelectedPayloads]);
+    }, [selected, addOns, onSelectionChange]);
 
     // Helper function to generate unique cart item IDs
     const uuid = React.useCallback(() => 'ci_' + Math.random().toString(36).slice(2, 9), []);

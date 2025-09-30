@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { CartProduct } from "lib/interfaces";
 import Stripe from "stripe";
-import { GraphQLClient } from 'graphql-request';
+import { GraphQLClient, gql } from 'graphql-request';
 import { CREATE_HEADLESS_STRIPE_SESSION } from '../../lib/graphql/queries';
 
 if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.trim() === "") {

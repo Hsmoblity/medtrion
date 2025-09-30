@@ -179,7 +179,7 @@ export const HighValue: Story = {
 
 // Interactive demo with price updates
 export const InteractiveDemo: Story = {
-  render: () => {
+  render: function InteractiveDemoComponent() {
     const [currentConfig, setCurrentConfig] = React.useState(mockConfiguration);
     const [previousConfig, setPreviousConfig] = React.useState(mockPreviousConfiguration);
     

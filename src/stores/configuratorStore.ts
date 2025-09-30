@@ -8,8 +8,8 @@ import {
   SavedConfiguration,
   FinancingOption,
   InsuranceEstimate
-} from 'lib/interfaces/configurator';
-import { configuratorAPI } from 'lib/graphql/configurator';
+} from '../lib/interfaces/configurator';
+import { configuratorAPI } from '../lib/graphql/configurator';
 
 interface ConfiguratorStore {
   // State
@@ -120,7 +120,7 @@ import {
   cartProductToConfiguration,
   Configuration
 } from '../utils/conversionUtils';
-import { CartProduct } from 'lib/interfaces/cart';
+import { CartProduct } from '../lib/interfaces/cart';
 
 // Edit session state interface (aligned with standardized specs)
 interface EditSessionState {
@@ -668,8 +668,8 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
         try {
           const data = await configuratorAPI.getModelWithCategories(slug);
           
-          if (data?.product) {
-            const model = data.product;
+          if ((data as any)?.product) {
+            const model = (data as any).product;
             set({ 
               model: {
                 ...model,
@@ -713,7 +713,7 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
           
           // If category has no options loaded, fetch them from the API
           const data = await configuratorAPI.getConfigurationCategories(model.id || '');
-          const updatedCategory = data?.configuratorCategories?.find((c: any) => c.id === categoryId);
+          const updatedCategory = (data as any)?.configuratorCategories?.find((c: any) => c.id === categoryId);
           
           if (updatedCategory?.options) {
             // Update store with fetched options
@@ -750,9 +750,9 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
 
           const data = await configuratorAPI.checkCompatibility(selectedOptionIds);
           
-          if (data?.checkCompatibility?.issues) {
+          if (data?.data?.checkCompatibility?.issues) {
             // Transform GraphQL response to internal format
-            const issues = data.checkCompatibility.issues.map((issue: any) => ({
+            const issues = data.data.checkCompatibility.issues.map((issue: any) => ({
               rule: issue.rule,
               affectedOptions: issue.affectedOptions,
               autoResolvable: issue.autoResolvable

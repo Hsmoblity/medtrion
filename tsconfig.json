@@ -17,5 +17,5 @@
     "incremental": true
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", "sanity"]
+  "exclude": ["node_modules", "sanity", "**/*.stories.tsx", "**/*.stories.ts", "**/*.stories.js", "src/stories/**/*", "src/__tests__/**/*", "src/components/storybook/**/*"]
 }

@@ -28,7 +28,7 @@ const CartPageGroups: React.FC = () => {
         groups[groupKey] = {
           mainProduct: item,
           options: [],
-          configId: item.cartItemId
+          configId: item.cartItemId ? String(item.cartItemId) : undefined
         };
       } else {
         // If this item has options, add them to the group
@@ -97,7 +97,7 @@ const CartPageGroups: React.FC = () => {
           </div>
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">Your cart is empty</h2>
           <p className="text-gray-600 mb-8">
-            Looks like you haven't added any mobility products to your cart yet.
+            Looks like you haven&apos;t added any mobility products to your cart yet.
           </p>
         </div>
       </div>

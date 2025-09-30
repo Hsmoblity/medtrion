@@ -33,11 +33,20 @@ const OptionsPage = ({ product, editingCartItem, editSessionData, seoMeta, error
     };
 
     // Handle save configuration
-    const handleSaveConfiguration = async (name: string, notes?: string) => {
+    const handleSaveConfiguration = async (name: string, notes?: string): Promise<any> => {
         try {
             // TODO: Implement save configuration functionality
             console.log('Saving configuration:', { name, notes });
-            return { id: 'temp-id', name, notes };
+            return { 
+                id: 'temp-id', 
+                name, 
+                notes,
+                baseModel: {} as any,
+                selectedOptions: [],
+                totalPrice: 0,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
         } catch (error) {
             console.error('Failed to save configuration:', error);
             throw error;
@@ -253,7 +262,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             regularPrice: product.price?.toString(),
             salePrice: undefined,
             sku: undefined,
-            type: 'configurable',
+            type: 'SIMPLE' as const,
             affiliate: product.affiliate || false,
             productId: product.productId,
             
@@ -267,13 +276,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             safetyRating: undefined,
             adaCompliant: false,
             weightCapacity: undefined,
+            productSpecifications: product.productSpecifications || '',
             
             // Additional fields
             productPictures: product.productPictures || [],
             variations: product.variations || [],
             options: product.options || [],
             _related_options: product._related_options || [],
-            _related_options_products: product._related_options_products || []
+            _related_options_products: (product._related_options_products || []) as any
         };
 
         // Generate configuration categories from WooCommerce related options

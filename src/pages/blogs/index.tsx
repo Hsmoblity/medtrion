@@ -11,7 +11,7 @@ const BlogsPage = () => {
         const fetchBlogs = async () => {
             try {
                 // Fetch blog entries from Contentful
-                const res = await client.getEntries({ content_type: 'blog' });
+                const res = await client.getEntries({ content_type: 'blog' }) as any;
 
                 // Map the blog data into the required Blog interface structure
                 const fetchedBlogs: Blog[] = res.items.map((item: any) => {

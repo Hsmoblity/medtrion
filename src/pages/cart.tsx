@@ -4,6 +4,7 @@ import CartPageGroups from 'components/Cart/CartPageGroups';
 import { useRouter } from 'next/router';
 import { PrimaryButton } from '../components/ui';
 import { formatPrice, calculateOrderTotal } from 'lib/utils/priceUtils';
+import Link from 'next/link';
 
 const CartPage = () => {
     const cart = useCartItems();
@@ -47,7 +48,7 @@ const CartPage = () => {
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
                     <nav className="flex text-sm text-gray-500">
-                        <a href="/" className="hover:text-gray-700">Home</a>
+                        <Link href="/" className="hover:text-gray-700">Home</Link>
                         <span className="mx-2">/</span>
                         <span>Cart</span>
                     </nav>
@@ -119,12 +120,12 @@ const CartPage = () => {
 
                                     {/* Continue Shopping */}
                                     <div className="text-center">
-                                        <a
+                                        <Link
                                             href="/#shop"
                                             className="text-blue-600 hover:text-blue-700 text-sm font-medium"
                                         >
                                             Continue Shopping
-                                        </a>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
@@ -153,7 +154,7 @@ const CartPage = () => {
                             </div>
                             <h2 className="text-2xl font-semibold text-gray-900 mb-4">Your cart is empty</h2>
                             <p className="text-gray-600 mb-8">
-                                Looks like you haven't added any mobility products to your cart yet.
+                                Looks like you haven&apos;t added any mobility products to your cart yet.
                             </p>
                             <PrimaryButton href="/#shop">
                                 Start Shopping

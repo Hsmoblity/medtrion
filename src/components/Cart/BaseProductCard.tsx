@@ -34,7 +34,7 @@ const BaseProductCard: React.FC<BaseProductCardProps> = ({
     
     if (options && Array.isArray(options)) {
       for (const option of options) {
-        const optionPrice = parsePrice(option.price || option.priceModifier);
+        const optionPrice = parsePrice((option as any).price || option.priceModifier);
         const optionQuantity = Number(option.quantity || 1) || 1;
         optionsPrice += optionPrice * optionQuantity;
       }
@@ -49,7 +49,7 @@ const BaseProductCard: React.FC<BaseProductCardProps> = ({
     
     if (options && Array.isArray(options)) {
       for (const option of options) {
-        const optionPrice = parsePrice(option.price || option.priceModifier);
+        const optionPrice = parsePrice((option as any).price || option.priceModifier);
         const optionQuantity = Number(option.quantity || 1) || 1;
         optionsPrice += optionPrice * optionQuantity;
       }

@@ -36,6 +36,10 @@ const CartOptions: React.FC<CartOptionsProps> = ({
     cartItemId: 'mock_001',
     slug: 'mock-product',
     title: 'Mock Product',
+    description: 'Mock product description',
+    shortDescription: 'Mock short description',
+    productSpecifications: 'Mock specifications',
+    affiliate: false,
     price: 99.99,
     quantity: 1,
     productId: 'mock_prod',
@@ -52,17 +56,21 @@ const CartOptions: React.FC<CartOptionsProps> = ({
     }
     
     return {
+      ...product,
       cartItemId: product.cartItemId || `fallback_${Date.now()}`,
       slug: product.slug || 'unknown-product',
       title: product.title || 'Unknown Product',
+      description: product.description || 'No description available',
+      shortDescription: product.shortDescription || 'No short description available',
+      productSpecifications: product.productSpecifications || 'No specifications available',
+      affiliate: product.affiliate || false,
       price: typeof product.price === 'number' ? product.price : 0,
       quantity: typeof product.quantity === 'number' ? product.quantity : 1,
       productId: product.productId || 'unknown',
       productPictures: Array.isArray(product.productPictures) ? product.productPictures : [],
       featuredImage: product.featuredImage || '/temp.webp',
       variationId: product.variationId || null,
-      options: Array.isArray(product.options) ? product.options : [],
-      ...product
+      options: Array.isArray(product.options) ? product.options : []
     };
   }, [getMockProduct]);
   

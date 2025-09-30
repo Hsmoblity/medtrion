@@ -349,7 +349,7 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
                 Currently selected: {currentVariations.map(v => v.name).join(', ')}
               </p>
               <p className="text-blue-600 text-xs mt-1">
-                Make your changes below and click "Update Configuration" to save.
+                Make your changes below and click &quot;Update Configuration&quot; to save.
               </p>
             </div>
           )}
@@ -415,7 +415,7 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
                 </svg>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No Variations Available</h3>
                 <p className="text-gray-600">
-                  This option doesn't have any variations to choose from.
+                  This option doesn&apos;t have any variations to choose from.
                 </p>
               </div>
               <button

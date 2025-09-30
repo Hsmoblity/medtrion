@@ -3,12 +3,12 @@
  * Implements the standardized conversion specifications from PRDs
  */
 
-import { CartProduct } from 'lib/interfaces/cart';
+import { CartProduct } from '../lib/interfaces/cart';
 import { 
   ConfigurableProductSchema, 
   ConfigurationSummary,
   CompatibilityIssue
-} from 'lib/interfaces/configurator';
+} from '../lib/interfaces/configurator';
 
 /**
  * Configuration interface aligned with standardized specifications

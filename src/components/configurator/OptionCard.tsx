@@ -203,9 +203,24 @@ const OptionCard: React.FC<OptionCardProps> = ({
     
     if (disabled || loading) return;
     
+    // Debug logging
+    console.log('OptionCard clicked:', {
+      optionId: option.id,
+      optionType: option.type,
+      hasVariations: option.variations?.length > 0,
+      variations: option.variations
+    });
+    
     // Haptic feedback for mobile
     if ('vibrate' in navigator) {
       navigator.vibrate(50);
+    }
+    
+    // Check if option has variations (VARIABLE type)
+    if (option.type === 'VARIABLE' && option.variations && option.variations.length > 0) {
+      console.log('Should show variation popup for VARIABLE option');
+      setInternalState(prev => ({ ...prev, variationPopupVisible: true }));
+      return;
     }
     
     try {
@@ -220,7 +235,8 @@ const OptionCard: React.FC<OptionCardProps> = ({
         }
       }
       
-      // Toggle selection
+      // Toggle selection for SIMPLE options
+      console.log('Proceeding with normal toggle for SIMPLE option');
       if (isSelected) {
         removeOption(option.databaseId || 0, categoryId);
         onDeselect?.(option, categoryId);
@@ -397,7 +413,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
         onMouseUp={handleMouseUp}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        onClick={handleViewVariations}
+        onClick={handleClick}
         role="article"
         {...cardAriaProps}
       >

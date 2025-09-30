@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ConfiguratorCategory } from '../../lib/interfaces/configurator';
 
 interface ConfiguratorSidebarProps {
@@ -8,6 +8,7 @@ interface ConfiguratorSidebarProps {
   className?: string;
   onCategorySelect?: (categoryId: string) => void;
   onCategoryToggle?: (categoryId: string, collapsed: boolean) => void;
+  selectedOptions?: Record<string, any[]>; // Add selectedOptions prop for total count calculation
 }
 
 const ConfiguratorSidebar: React.FC<ConfiguratorSidebarProps> = ({
@@ -16,9 +17,26 @@ const ConfiguratorSidebar: React.FC<ConfiguratorSidebarProps> = ({
   loading = false,
   className = '',
   onCategorySelect,
-  onCategoryToggle
+  onCategoryToggle,
+  selectedOptions = {}
 }) => {
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+
+  // Calculate total selected options across all categories
+  const totalSelectedOptions = useMemo(() => {
+    return Object.values(selectedOptions).flat().length;
+  }, [selectedOptions]);
+
+  // Calculate total available options across all categories
+  const totalAvailableOptions = useMemo(() => {
+    return categories.reduce((sum, category) => sum + (category.options?.length || 0), 0);
+  }, [categories]);
+
+  // Calculate progress percentage
+  const progressPercentage = useMemo(() => {
+    if (totalAvailableOptions === 0) return 0;
+    return Math.round((totalSelectedOptions / totalAvailableOptions) * 100);
+  }, [totalSelectedOptions, totalAvailableOptions]);
 
   const toggleCategory = (categoryId: string) => {
     const newCollapsed = new Set(collapsedCategories);
@@ -273,22 +291,19 @@ const ConfiguratorSidebar: React.FC<ConfiguratorSidebarProps> = ({
           <div className="flex justify-between items-center">
             <span className="configuration-progress-label">Configuration Progress</span>
             <span className="configuration-progress-text font-medium">
-              {categories.length > 0 ? (
-                `${categories.filter(c => c.progressCount && c.progressCount.selected > 0).length}/${categories.length}`
-              ) : (
-                '0/0'
-              )}
+              {totalSelectedOptions} of {totalAvailableOptions} options selected
             </span>
           </div>
           <div className="mt-2 bg-gray-200 rounded-full h-2">
             <div 
               className="configuration-progress-fill bg-blue-500 h-2 rounded-full transition-all duration-300"
               style={{
-                width: categories.length > 0 
-                  ? `${(categories.filter(c => c.progressCount && c.progressCount.selected > 0).length / categories.length) * 100}%`
-                  : '0%'
+                width: `${progressPercentage}%`
               }}
             />
+          </div>
+          <div className="mt-1 text-xs text-gray-500 text-center">
+            {progressPercentage}% complete
           </div>
         </div>
       </div>

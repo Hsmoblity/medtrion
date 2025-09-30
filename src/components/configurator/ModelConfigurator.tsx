@@ -472,6 +472,7 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
             }))}
             currentCategoryId={currentCategoryId}
             onCategorySelect={handleCategorySelect}
+            selectedOptions={isHydrated ? selectedOptions : {}}
           />
         </aside>
 

@@ -203,14 +203,6 @@ const OptionCard: React.FC<OptionCardProps> = ({
     
     if (disabled || loading) return;
     
-    // Debug logging
-    console.log('OptionCard clicked:', {
-      optionId: option.id,
-      optionType: option.type,
-      hasVariations: option.variations?.length > 0,
-      variations: option.variations
-    });
-    
     // Haptic feedback for mobile
     if ('vibrate' in navigator) {
       navigator.vibrate(50);
@@ -218,7 +210,6 @@ const OptionCard: React.FC<OptionCardProps> = ({
     
     // Check if option has variations (VARIABLE type)
     if (option.type === 'VARIABLE' && option.variations && option.variations.length > 0) {
-      console.log('Should show variation popup for VARIABLE option');
       setInternalState(prev => ({ ...prev, variationPopupVisible: true }));
       return;
     }
@@ -236,7 +227,6 @@ const OptionCard: React.FC<OptionCardProps> = ({
       }
       
       // Toggle selection for SIMPLE options
-      console.log('Proceeding with normal toggle for SIMPLE option');
       if (isSelected) {
         removeOption(option.databaseId || 0, categoryId);
         onDeselect?.(option, categoryId);
@@ -638,14 +628,6 @@ const OptionCard: React.FC<OptionCardProps> = ({
         isOpen={internalState.variationPopupVisible}
         onClose={handleCloseVariationPopup}
         onAddToConfiguration={(option, variations) => {
-          // Debug logging
-          console.log('Adding to configuration from OptionCard:', {
-            optionId: option.id,
-            optionName: option.name || option.title,
-            variations: variations?.map(v => ({ id: v.id, name: v.name, price: v.price })),
-            selectedVariationsCount: variations?.length || 0
-          });
-          
           // Handle adding to configuration with variations
           if (variations && variations.length > 0) {
             // For VARIABLE options with variations, we need to pass the variations data

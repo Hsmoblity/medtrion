@@ -16,6 +16,10 @@ export interface ConfigurableProductSchema extends Omit<ProductSchema, 'shortDes
   installationTime?: number; // in hours
   warrantyPeriod?: number; // in months
   
+  // Type and variation fields for option selection
+  type?: 'SIMPLE' | 'VARIABLE' | 'GROUP';
+  variableType?: 'radio' | 'checkbox';
+  
   // Additional HSM-specific fields
   safetyRating?: string;
   adaCompliant?: boolean;

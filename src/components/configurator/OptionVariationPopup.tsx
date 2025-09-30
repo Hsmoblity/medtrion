@@ -81,15 +81,6 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   
-  // Debug logging
-  console.log('OptionVariationPopup render:', {
-    optionId: option.id,
-    optionType: option.type,
-    isOpen,
-    hasVariations: option.variations?.length > 0,
-    variations: option.variations
-  });
-  
   // Use real variations data instead of mock data
   const realVariations = useMemo(() => {
     try {
@@ -185,15 +176,6 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
   };
 
   const handleAddToConfiguration = () => {
-    // Debug logging
-    console.log('Add to Configuration clicked:', {
-      optionId: option.id,
-      optionName: option.name || option.title,
-      selectedVariations: selectedVariations.map(v => ({ id: v.id, name: v.name, price: v.price })),
-      selectedVariationsCount: selectedVariations.length,
-      totalPrice: totalPrice
-    });
-    
     onAddToConfiguration(option, selectedVariations);
     onClose();
   };
@@ -204,7 +186,6 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
   };
 
   if (!isOpen) {
-    console.log('Popup not open, returning null');
     return null;
   }
 

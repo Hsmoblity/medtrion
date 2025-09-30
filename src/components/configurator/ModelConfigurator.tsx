@@ -124,12 +124,6 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
   // Initialize edit mode configuration
   useEffect(() => {
     if (isEditMode && initialConfiguration && cartItemId) {
-      console.log('Initializing edit mode configuration:', {
-        cartItemId,
-        initialConfiguration,
-        categories: categories.length
-      });
-      
       // Initialize selected options from cart item configuration
       if (initialConfiguration.selectedOptions && Array.isArray(initialConfiguration.selectedOptions)) {
         const initializedOptions: Record<string, ConfigurableProductSchema[]> = {};
@@ -157,7 +151,6 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
           }
         });
         
-        console.log('Initialized options by category:', initializedOptions);
         setSelectedOptions(initializedOptions);
       }
     }
@@ -210,6 +203,20 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
     calculateSummary();
     onConfigurationChange?.(summary);
   }, [selectedOptions, selectedFinancing, getConfigurationSummary, calculateSummary, onConfigurationChange]);
+
+  // Convert ConfigurationSummaryData to ConfigurationSummary format for SummaryPanel
+  const getConfigurationSummaryForPanel = useCallback(() => {
+    const data = getConfigurationSummary();
+    return {
+      basePrice: data.basePrice,
+      optionsTotal: data.optionsPrice,
+      installationCost: data.installationPrice,
+      shippingCost: data.shippingPrice,
+      taxAmount: data.taxAmount,
+      grandTotal: data.totalPrice,
+      estimatedDelivery: '3-4 weeks'
+    };
+  }, [getConfigurationSummary]);
 
   // Check compatibility when selections change
   useEffect(() => {
@@ -483,7 +490,6 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
           {showSummary ? (
             isHydrated ? (
               <ConfigurationSummary
-                configuration={getConfigurationSummary()}
                 onEditConfiguration={() => setShowSummary(false)}
                 onSaveConfiguration={() => setShowSaveModal(true)}
                 onShareConfiguration={handleShareConfiguration}
@@ -543,13 +549,8 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
             </div>
           }>
             <SummaryPanel
-              configuration={getConfigurationSummary()}
-              selectedFinancing={selectedFinancing}
-              sticky={true}
-              onFinancingChange={setSelectedFinancing}
+              configuration={getConfigurationSummaryForPanel()}
               onAddToCart={handleAddToCart}
-              onSaveConfiguration={() => setShowSaveModal(true)}
-              onShareConfiguration={handleShareConfiguration}
             />
           </ClientOnly>
           

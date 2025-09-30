@@ -1,5 +1,6 @@
 import React from 'react';
 import { CartProduct } from '../../lib/interfaces';
+import { parsePrice, formatPrice } from '../../lib/utils/priceUtils';
 import BaseProductCard from './BaseProductCard';
 import ProductOptionsList from './ProductOptionsList';
 import styles from './CartLayout.module.css';
@@ -28,13 +29,13 @@ const ProductGroup: React.FC<ProductGroupProps> = ({
   const { mainProduct, options = [], configId } = group;
   
   const calculateGroupTotal = () => {
-    const basePrice = typeof mainProduct.price === 'number' ? mainProduct.price : Number(mainProduct.price || 0);
+    const basePrice = parsePrice(mainProduct.price);
     const quantity = mainProduct.quantity || 1;
     let optionsPrice = 0;
     
     if (options && Array.isArray(options)) {
       for (const option of options) {
-        const optionPrice = Number(option.price || option.priceModifier || 0) || 0;
+        const optionPrice = parsePrice(option.price || option.priceModifier);
         const optionQuantity = Number(option.quantity || 1) || 1;
         optionsPrice += optionPrice * optionQuantity;
       }
@@ -68,7 +69,7 @@ const ProductGroup: React.FC<ProductGroupProps> = ({
           </div>
           {showGroupTotal && (
             <div className={styles.groupTotal}>
-              <div className={styles.totalPrice}>${groupTotal.toFixed(2)}</div>
+              <div className={styles.totalPrice}>{formatPrice(groupTotal)}</div>
               <div className={styles.totalLabel}>Group Total</div>
             </div>
           )}

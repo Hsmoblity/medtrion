@@ -1,5 +1,6 @@
 import React from 'react';
 import { CartProduct } from '../../lib/interfaces';
+import { formatPrice } from '../../lib/utils/priceUtils';
 import styles from './CartLayout.module.css';
 
 interface ProductOption {
@@ -28,10 +29,10 @@ const ProductOptionsList: React.FC<ProductOptionsListProps> = ({
     return null;
   }
 
-  const formatPrice = (price: number | string | undefined): string => {
+  const formatOptionPrice = (price: number | string | undefined): string => {
     if (!price) return 'Included';
-    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-    return `+$${numPrice.toFixed(2)}`;
+    const formattedPrice = formatPrice(price, { showCurrency: false });
+    return `+$${formattedPrice}`;
   };
 
   return (
@@ -94,7 +95,7 @@ const ProductOptionsList: React.FC<ProductOptionsListProps> = ({
                   {option.name || option.title || option.value}
                 </h4>
                 <span className={styles.optionPrice}>
-                  {formatPrice(option.price || option.priceModifier)}
+                  {formatOptionPrice(option.price || option.priceModifier)}
                 </span>
               </div>
               <div className={styles.optionMeta}>

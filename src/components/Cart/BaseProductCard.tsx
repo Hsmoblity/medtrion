@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { CartProduct } from '../../lib/interfaces';
 import { normalizeImageUrl } from '../../lib/utils/image';
+import { parsePrice, formatPrice } from '../../lib/utils/priceUtils';
 import styles from './CartLayout.module.css';
 
 interface BaseProductCardProps {
@@ -28,12 +29,12 @@ const BaseProductCard: React.FC<BaseProductCardProps> = ({
   const getSafeImage = () => normalizeImageUrl(productPictures?.[0]?.fields?.file?.url || featuredImage);
   
   const calculateTotalPrice = () => {
-    const basePrice = typeof price === 'number' ? price : Number(price || 0);
+    const basePrice = parsePrice(price);
     let optionsPrice = 0;
     
     if (options && Array.isArray(options)) {
       for (const option of options) {
-        const optionPrice = Number(option.price || option.priceModifier || 0) || 0;
+        const optionPrice = parsePrice(option.price || option.priceModifier);
         const optionQuantity = Number(option.quantity || 1) || 1;
         optionsPrice += optionPrice * optionQuantity;
       }
@@ -43,12 +44,12 @@ const BaseProductCard: React.FC<BaseProductCardProps> = ({
   };
 
   const calculatePerUnitPrice = () => {
-    const basePrice = typeof price === 'number' ? price : Number(price || 0);
+    const basePrice = parsePrice(price);
     let optionsPrice = 0;
     
     if (options && Array.isArray(options)) {
       for (const option of options) {
-        const optionPrice = Number(option.price || option.priceModifier || 0) || 0;
+        const optionPrice = parsePrice(option.price || option.priceModifier);
         const optionQuantity = Number(option.quantity || 1) || 1;
         optionsPrice += optionPrice * optionQuantity;
       }
@@ -158,7 +159,7 @@ const BaseProductCard: React.FC<BaseProductCardProps> = ({
           
           {/* Price Display */}
           <div className={styles.priceDisplay}>
-            <span className={styles.priceAmount}>${calculatePerUnitPrice().toFixed(2)}</span>
+            <span className={styles.priceAmount}>{formatPrice(calculatePerUnitPrice())}</span>
             <span className={styles.priceLabel}>Base Price</span>
           </div>
           

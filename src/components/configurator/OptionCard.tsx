@@ -628,6 +628,13 @@ const OptionCard: React.FC<OptionCardProps> = ({
           }
         }}
         isAlreadySelected={isSelected}
+        onVariationDataError={(error) => {
+          console.error('Variation data error in popup:', error);
+          // Handle error appropriately - could show toast notification
+          if (onError) {
+            onError(option, error);
+          }
+        }}
       />
     </>
   );

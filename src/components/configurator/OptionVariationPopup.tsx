@@ -1,8 +1,61 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ConfigurableProductSchema } from 'lib/interfaces';
 import OptionVariationCard, { Variation } from './OptionVariationCard';
 
 // Variation interface is now imported from OptionVariationCard
+
+// Data validation and mapping functions
+const validateVariationData = (variation: any): boolean => {
+  return !!(
+    variation &&
+    variation.id &&
+    variation.databaseId &&
+    typeof variation.name === 'string' &&
+    typeof variation.price === 'number'
+  );
+};
+
+const determineStockStatus = (variation: any): 'instock' | 'outofstock' | 'onbackorder' => {
+  if (variation.stockStatus) {
+    return variation.stockStatus;
+  }
+  
+  // Fallback logic based on other fields
+  if (variation.stockQuantity !== undefined) {
+    return variation.stockQuantity > 0 ? 'instock' : 'outofstock';
+  }
+  
+  return 'instock'; // Default assumption
+};
+
+const validateAndMapVariations = (option: ConfigurableProductSchema): Variation[] => {
+  if (!option.variations || !Array.isArray(option.variations)) {
+    console.warn('OptionVariationPopup: No variations data found for option:', option.id);
+    return [];
+  }
+
+  return option.variations.map((variation: any) => {
+    // Validate required fields
+    if (!variation.id || !variation.databaseId) {
+      console.error('Invalid variation data:', variation);
+      return null;
+    }
+
+    return {
+      id: variation.id,
+      databaseId: variation.databaseId,
+      name: variation.name || 'Unnamed Variation',
+      price: parseFloat(variation.price || '0'),
+      sku: variation.sku || '',
+      image: variation.image ? {
+        sourceUrl: variation.image.sourceUrl || '',
+        altText: variation.image.altText || variation.name || 'Variation image'
+      } : undefined,
+      attributes: variation.attributes || [],
+      stockStatus: determineStockStatus(variation)
+    };
+  }).filter(Boolean) as Variation[]; // Remove null entries
+};
 
 interface OptionVariationPopupProps {
   option: ConfigurableProductSchema;
@@ -10,6 +63,10 @@ interface OptionVariationPopupProps {
   onClose: () => void;
   onAddToConfiguration: (option: ConfigurableProductSchema, variations?: Variation[]) => void;
   isAlreadySelected?: boolean;
+  
+  // NEW: Real data validation
+  variations?: Variation[];  // Optional override for specific use cases
+  onVariationDataError?: (error: Error) => void;  // Error handling
 }
 
 const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
@@ -17,56 +74,65 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
   isOpen,
   onClose,
   onAddToConfiguration,
-  isAlreadySelected = false
+  isAlreadySelected = false,
+  variations: overrideVariations,
+  onVariationDataError
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   
-  // Mock variations data - in real implementation, this would come from the option data
-  const [variations] = useState<Variation[]>([
-    {
-      id: 'var-1',
-      databaseId: 101,
-      name: 'Red Leather',
-      price: 0,
-      sku: 'SEAT-RED-001',
-      attributes: [
-        { id: 'color', name: 'Color', value: 'Red' },
-        { id: 'material', name: 'Material', value: 'Leather' }
-      ],
-      stockStatus: 'instock'
-    },
-    {
-      id: 'var-2',
-      databaseId: 102,
-      name: 'Blue Leather',
-      price: 0,
-      sku: 'SEAT-BLUE-001',
-      attributes: [
-        { id: 'color', name: 'Color', value: 'Blue' },
-        { id: 'material', name: 'Material', value: 'Leather' }
-      ],
-      stockStatus: 'instock'
-    },
-    {
-      id: 'var-3',
-      databaseId: 103,
-      name: 'Premium Black',
-      price: 50,
-      sku: 'SEAT-PREMIUM-001',
-      attributes: [
-        { id: 'color', name: 'Color', value: 'Black' },
-        { id: 'material', name: 'Material', value: 'Premium Leather' }
-      ],
-      stockStatus: 'instock'
+  // Use real variations data instead of mock data
+  const realVariations = useMemo(() => {
+    try {
+      // Use override variations if provided, otherwise use option variations
+      const sourceVariations = overrideVariations || option.variations || [];
+      return validateAndMapVariations({ ...option, variations: sourceVariations });
+    } catch (error) {
+      console.error('Error processing variation data:', error);
+      onVariationDataError?.(error as Error);
+      return [];
     }
-  ]);
+  }, [option, overrideVariations, onVariationDataError]);
 
   const [selectedVariations, setSelectedVariations] = useState<Variation[]>([]);
-  const [selectionType] = useState<'radio' | 'checkbox'>('radio'); // Default to radio for simplicity
+  const [errorState, setErrorState] = useState<{
+    hasError: boolean;
+    message: string;
+    retry: (() => void) | null;
+  }>({
+    hasError: false,
+    message: '',
+    retry: null
+  });
+  
+  // Determine selection type from option data
+  const selectionType = useMemo(() => {
+    return option.variableType?.toLowerCase() === 'checkbox' ? 'checkbox' : 'radio';
+  }, [option.variableType]);
 
-  // Calculate total price
-  const totalPrice = option.price + selectedVariations.reduce((sum, variation) => sum + variation.price, 0);
+  // Handle variation data errors
+  const handleVariationDataError = useCallback((error: Error) => {
+    console.error('Variation data error:', error);
+    
+    // Show user-friendly error message
+    setErrorState({
+      hasError: true,
+      message: 'Unable to load variation options. Please try again.',
+      retry: () => {
+        // Retry loading variation data
+        setErrorState({ hasError: false, message: '', retry: null });
+      }
+    });
+  }, []);
+
+  // Calculate total price with real variation data
+  const totalPrice = useMemo(() => {
+    const basePrice = parseFloat(option.price?.toString() || '0');
+    const variationPrice = selectedVariations.reduce((sum, variation) => {
+      return sum + (variation.price || 0);
+    }, 0);
+    return basePrice + variationPrice;
+  }, [option.price, selectedVariations]);
 
   // Focus management and keyboard handling
   useEffect(() => {
@@ -179,11 +245,37 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
           </div>
 
           {/* Variations Section */}
-          {variations.length > 0 && (
+          {errorState.hasError ? (
+            <div className="mb-6 p-6 text-center bg-red-50 border border-red-200 rounded-lg">
+              <div className="text-red-600 mb-4">
+                <svg className="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <h3 className="text-lg font-medium text-red-900 mb-2">Error Loading Variations</h3>
+                <p className="text-red-700 mb-4">{errorState.message}</p>
+                <div className="space-x-3">
+                  {errorState.retry && (
+                    <button
+                      onClick={errorState.retry}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      Try Again
+                    </button>
+                  )}
+                  <button
+                    onClick={onClose}
+                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : realVariations.length > 0 ? (
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Available Variations</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {variations.map((variation) => {
+                {realVariations.map((variation) => {
                   const isSelected = selectedVariations.some(v => v.id === variation.id);
                   
                   return (
@@ -204,6 +296,24 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
                   );
                 })}
               </div>
+            </div>
+          ) : (
+            <div className="mb-6 p-6 text-center bg-gray-50 rounded-lg">
+              <div className="text-gray-500 mb-4">
+                <svg className="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Variations Available</h3>
+                <p className="text-gray-600">
+                  This option doesn't have any variations to choose from.
+                </p>
+              </div>
+              <button
+                onClick={onClose}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Close
+              </button>
             </div>
           )}
 

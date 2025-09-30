@@ -82,6 +82,84 @@ const ConfiguratorPage: React.FC<ConfiguratorPageProps> = ({
     console.log('Sharing configuration:', configuration);
   };
 
+  // Handle fetching category options - this was missing!
+  const handleFetchCategoryOptions = async (categoryId: string): Promise<ConfigurableProductSchema[]> => {
+    try {
+      console.log('Fetching options for category:', categoryId);
+      
+      // Find the category to get its options
+      const category = categories.find(c => c.id === categoryId);
+      if (!category) {
+        console.warn('Category not found:', categoryId);
+        return [];
+      }
+
+      // If options are already loaded from GraphQL, return them
+      if (category.options && category.options.length > 0) {
+        console.log(`Using pre-loaded options for category ${categoryId}:`, category.options.length);
+        return category.options;
+      }
+
+      // Fallback: if no options are pre-loaded, try to fetch using related option IDs
+      // This handles cases where we have product IDs but need to fetch the full product data
+      if (category.options && category.options.length === 0) {
+        console.log('No options found for category:', categoryId);
+        return [];
+      }
+
+      // If we have partial data (just IDs), fetch full product details
+      const optionIds = category.options?.map(opt => opt.databaseId).filter((id): id is number => typeof id === 'number') || [];
+      if (optionIds.length > 0) {
+        console.log(`Fetching full product details for ${optionIds.length} options`);
+        const products = await fetchProductsByDatabaseIds(optionIds);
+        
+        // Convert to ConfigurableProductSchema format
+        const options: ConfigurableProductSchema[] = products.map(product => ({
+          id: product.id || product.productId || product.slug,
+          databaseId: product.databaseId || (product.productId ? parseInt(product.productId) : undefined),
+          name: product.name || product.title,
+          slug: product.slug,
+          title: product.title || product.name,
+          description: product.description || '',
+          shortDescription: product.shortDescription || '',
+          featuredImage: product.featuredImage || product.image?.sourceUrl,
+          image: product.image || (product.featuredImage ? {
+            sourceUrl: product.featuredImage,
+            altText: `${product.title || product.name} image`
+          } : undefined),
+          price: typeof product.price === 'number' ? product.price : parseFloat(product.price || '0'),
+          regularPrice: product.regularPrice || product.price?.toString(),
+          salePrice: product.salePrice,
+          sku: product.sku,
+          affiliate: product.affiliate || false,
+          productId: product.productId || product.databaseId,
+          
+          // Option-specific fields
+          baseModel: false,
+          configuratorCategories: [],
+          compatibilityRules: product.compatibilityRules || [],
+          
+          // Additional fields
+          productPictures: product.productPictures || [],
+          productSpecifications: product.productSpecifications || '',
+          variations: product.variations || [],
+          options: product.options || [],
+          _related_options: product._related_options || [],
+          _related_options_products: product._related_options_products || []
+        }));
+
+        console.log(`Fetched ${options.length} option products for category ${categoryId}`);
+        return options;
+      }
+
+      console.log('No option data found for category:', categoryId);
+      return [];
+    } catch (error) {
+      console.error('Failed to fetch category options:', error);
+      throw error;
+    }
+  };
+
   if (error || !baseModel) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -170,6 +248,7 @@ const ConfiguratorPage: React.FC<ConfiguratorPageProps> = ({
             onAddToCart={handleAddToCart}
             onSaveConfiguration={handleSaveConfiguration}
             onShareConfiguration={handleShareConfiguration}
+            onFetchCategoryOptions={handleFetchCategoryOptions}
             onConfigurationChange={(config) => {
               // TODO: Track configuration changes for analytics
               console.log('Configuration changed:', config);

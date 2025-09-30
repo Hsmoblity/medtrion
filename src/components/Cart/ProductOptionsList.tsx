@@ -1,6 +1,6 @@
 import React from 'react';
 import { CartProduct } from '../../lib/interfaces';
-import { formatPrice } from '../../lib/utils/priceUtils';
+import { parsePrice, formatPrice } from '../../lib/utils/priceUtils';
 import styles from './CartLayout.module.css';
 
 interface ProductOption {
@@ -30,8 +30,20 @@ const ProductOptionsList: React.FC<ProductOptionsListProps> = ({
   }
 
   const formatOptionPrice = (price: number | string | undefined): string => {
-    if (!price) return 'Included';
-    const formattedPrice = formatPrice(price, { showCurrency: false });
+    if (!price && price !== 0) return 'Included';
+    
+    // Use parsePrice to ensure we have a valid number
+    const parsedPrice = parsePrice(price);
+    
+    // Handle 0 price explicitly
+    if (parsedPrice === 0) return 'Included';
+    
+    // Format as currency with fallback protection
+    const formattedPrice = formatPrice(parsedPrice, { 
+      showCurrency: false,
+      fallback: '0.00'
+    });
+    
     return `+$${formattedPrice}`;
   };
 

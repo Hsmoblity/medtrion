@@ -64,8 +64,10 @@ const ModelHero: React.FC<ModelHeroProps> = ({
     }).format(parsedPrice);
   };
 
-  const currentPrice = totalPrice || parsePrice(model.regularPrice || model.price);
-  const displayBasePrice = basePrice || parsePrice(model.regularPrice || model.price);
+  // Fix: Use proper null checking instead of truthy check for totalPrice
+  // totalPrice could be 0 which is a valid price, so don't fallback in that case
+  const currentPrice = totalPrice !== undefined ? totalPrice : parsePrice(model.regularPrice || model.price);
+  const displayBasePrice = basePrice !== undefined ? basePrice : parsePrice(model.regularPrice || model.price);
 
   if (loading) {
     return (

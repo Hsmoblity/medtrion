@@ -113,11 +113,15 @@ export function useOptionProducts(
     // Check cache first
     const cachedData = getCachedData();
     if (cachedData) {
-      console.log('useOptionProducts: Using cached data for', effectiveCacheKey);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('useOptionProducts: Using cached data for', effectiveCacheKey);
+      }
       return cachedData;
     }
 
-    console.log('useOptionProducts: Fetching option products for IDs:', relatedOptionIds);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('useOptionProducts: Fetching option products for IDs:', relatedOptionIds);
+    }
 
     try {
       // Import the new specialized function for option products
@@ -155,7 +159,9 @@ export function useOptionProducts(
         });
       }
 
-      console.log('useOptionProducts: Successfully fetched and cached', mappedProducts.length, 'option products with full specifications');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('useOptionProducts: Successfully fetched and cached', mappedProducts.length, 'option products with full specifications');
+      }
       return mappedProducts;
 
     } catch (error) {
@@ -211,7 +217,9 @@ export function useOptionProducts(
       // Retry logic
       if (retry && retryCountRef.current < maxRetries) {
         retryCountRef.current++;
-        console.warn(`useOptionProducts: Retry attempt ${retryCountRef.current}/${maxRetries} for error:`, errorMessage);
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`useOptionProducts: Retry attempt ${retryCountRef.current}/${maxRetries} for error:`, errorMessage);
+        }
         
         // Exponential backoff
         const delay = Math.pow(2, retryCountRef.current) * 1000;
@@ -222,7 +230,9 @@ export function useOptionProducts(
         return;
       }
 
-      console.error('useOptionProducts: Failed to fetch option products:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('useOptionProducts: Failed to fetch option products:', error);
+      }
       
       const finalDuration = Date.now() - loadingStartTimeRef.current;
       

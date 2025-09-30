@@ -19,7 +19,6 @@ const OptionsPage = ({ product, editingCartItem, editSessionData, seoMeta, error
         setLoading(true);
         try {
             // TODO: Implement GraphQL mutation to add configuration to cart
-            console.log('Adding configuration to cart:', configuration);
             
             // For now, simulate success and redirect to cart
             await new Promise(resolve => setTimeout(resolve, 1000));
@@ -74,7 +73,6 @@ const OptionsPage = ({ product, editingCartItem, editSessionData, seoMeta, error
 
     // Handle edit session completion
     const handleEditSessionComplete = (cartItemId: string, updatedConfig: any) => {
-        console.log('Edit session completed:', { cartItemId, updatedConfig });
         // TODO: Update cart item and return to cart
         router.push('/cart');
     };
@@ -212,7 +210,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             // For server-side validation, we can't access localStorage
             // but we can validate the basic parameters and let client-side
             // handle the full session validation
-            console.log('Edit session requested:', { cartItemId, sessionId, productSlug: slug });
+            if (process.env.NODE_ENV === 'development') {
+                console.log('Edit session requested:', { cartItemId, sessionId, productSlug: slug });
+            }
         }
 
         // If server did not attach the related product objects, fetch them here

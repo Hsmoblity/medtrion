@@ -224,21 +224,24 @@ export function logValidationResults(component: string, results: ValidationResul
   const errorCount = results.reduce((sum, r) => sum + r.errors.length, 0);
   const warningCount = results.reduce((sum, r) => sum + r.warnings.length, 0);
   
-  console.group(`📊 Data Validation Report: ${component}`);
-  console.log(`Total Products: ${totalProducts}`);
-  console.log(`Valid Products: ${validProducts} (${Math.round(validProducts/totalProducts*100)}%)`);
-  console.log(`Errors: ${errorCount}`);
-  console.log(`Warnings: ${warningCount}`);
+  // Data validation metrics - only log in development
+  if (process.env.NODE_ENV === 'development') {
+    console.group(`📊 Data Validation Report: ${component}`);
+    console.log(`Total Products: ${totalProducts}`);
+    console.log(`Valid Products: ${validProducts} (${Math.round(validProducts/totalProducts*100)}%)`);
+    console.log(`Errors: ${errorCount}`);
+    console.log(`Warnings: ${warningCount}`);
+    
+    if (errorCount > 0) {
+      console.warn('🚨 Validation Errors:', results.filter(r => r.errors.length > 0));
+    }
   
-  if (errorCount > 0) {
-    console.warn('🚨 Validation Errors:', results.filter(r => r.errors.length > 0));
+    if (warningCount > 0) {
+      console.info('⚠️ Validation Warnings:', results.filter(r => r.warnings.length > 0));
+    }
+    
+    console.groupEnd();
   }
-  
-  if (warningCount > 0) {
-    console.info('⚠️ Validation Warnings:', results.filter(r => r.warnings.length > 0));
-  }
-  
-  console.groupEnd();
 }
 
 /**

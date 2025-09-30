@@ -145,7 +145,6 @@ const CartOptions: React.FC<CartOptionsProps> = ({
       // Track interaction in session
       addToRecentlyViewed(product.slug);
       // Could navigate to edit page or open modal
-      console.log('Edit product:', product.cartItemId);
     } else if (onEdit && product.cartItemId) {
       // Use callback if provided
       onEdit(String(product.cartItemId));

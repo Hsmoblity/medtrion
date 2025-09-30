@@ -35,6 +35,10 @@ export class ConfiguratorGraphQLClient {
 
   async query(query: string, variables?: Record<string, any>) {
     try {
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch(this.endpoint, {
         method: 'POST',
         headers: this.headers,
@@ -42,7 +46,10 @@ export class ConfiguratorGraphQLClient {
           query,
           variables,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`GraphQL request failed: ${response.status} ${response.statusText}`);
@@ -56,6 +63,9 @@ export class ConfiguratorGraphQLClient {
 
       return result.data;
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('GraphQL request timeout');
+      }
       console.error('GraphQL query failed:', error);
       throw error;
     }

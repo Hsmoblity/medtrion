@@ -546,7 +546,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       
       // For edit mode, we'll pass the cartItemId to the client and let it handle
       // the configuration loading after hydration. This avoids SSR cart access issues.
-      console.log('Edit mode detected - cart item configuration will be loaded client-side');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Edit mode detected - cart item configuration will be loaded client-side');
+      }
     }
 
     const seoMeta = {

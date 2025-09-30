@@ -43,7 +43,6 @@ const ConfiguratorPage: React.FC<ConfiguratorPageProps> = ({
         throw new Error(result.addConfigurationToCart.errors[0].message);
       }
 
-      console.log('Configuration added to cart:', result);
       router.push('/cart');
     } catch (error) {
       console.error('Failed to add configuration to cart:', error);

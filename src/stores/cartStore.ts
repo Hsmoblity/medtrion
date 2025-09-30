@@ -194,22 +194,8 @@ export const useCartStore = create<CartStore>()(
       getCartTotal: () => {
         const { cart } = get()
         
-        // Debug logging for price parsing issues
-        if (cart.length > 0) {
-          console.log('Calculating cart total for items:', cart.length);
-          cart.forEach((item, index) => {
-            debugPriceParsing(item.price, `Cart item ${index} (${item.title})`);
-          });
-        }
-        
+        // Calculate order total efficiently without debug logging
         const orderTotal = calculateOrderTotal(cart);
-        
-        console.log('Cart total calculation result:', {
-          subtotal: orderTotal.subtotal,
-          tax: orderTotal.tax,
-          total: orderTotal.total,
-          itemCount: orderTotal.itemCount
-        });
         
         return orderTotal.total;
       },
@@ -222,20 +208,8 @@ export const useCartStore = create<CartStore>()(
       getCartSubtotal: () => {
         const { cart } = get()
         
-        // Debug logging for price parsing issues
-        if (cart.length > 0) {
-          console.log('Calculating cart subtotal for items:', cart.length);
-          cart.forEach((item, index) => {
-            debugPriceParsing(item.price, `Cart subtotal item ${index} (${item.title})`);
-          });
-        }
-        
+        // Calculate order total efficiently without debug logging
         const orderTotal = calculateOrderTotal(cart);
-        
-        console.log('Cart subtotal calculation result:', {
-          subtotal: orderTotal.subtotal,
-          itemCount: orderTotal.itemCount
-        });
         
         return orderTotal.subtotal;
       },

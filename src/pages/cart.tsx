@@ -17,17 +17,6 @@ const CartPage = () => {
     const subTotal = formatPrice(orderTotal.subtotal);
     const tax = formatPrice(orderTotal.tax);
     const total = formatPrice(orderTotal.total);
-    
-    // Debug logging for price issues
-    console.log('Cart page order summary:', {
-      cartItems: cart.length,
-      subtotal: orderTotal.subtotal,
-      tax: orderTotal.tax,
-      total: orderTotal.total,
-      formattedSubtotal: subTotal,
-      formattedTax: tax,
-      formattedTotal: total
-    });
 
     const handleCheckout = async () => {
         // Do not create the order here. Navigate to the payment page and

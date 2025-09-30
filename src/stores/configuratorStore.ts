@@ -401,13 +401,6 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
             .reduce((total, option) => {
               // Use totalPrice if available (includes variations), otherwise use base price
               const optionPrice = option.totalPrice || parseFloat(option.price?.toString() || '0');
-              console.log('Option price calculation in summary:', {
-                optionId: option.id,
-                optionName: option.name,
-                basePrice: parseFloat(option.price?.toString() || '0'),
-                variationPrice: option.selectedVariations?.reduce((sum, v) => sum + (v.price || 0), 0) || 0,
-                totalPrice: optionPrice
-              });
               return total + optionPrice;
             }, 0);
           
@@ -639,7 +632,6 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
           
           // Update cart via cart store (would need to integrate with cart store)
           // This is a placeholder - actual implementation would use cart store
-          console.log('Updating cart item:', cartItemId, cartProductUpdates);
           
           get().stopEditSession();
           return { success: true };

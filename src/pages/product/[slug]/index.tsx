@@ -58,7 +58,6 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   // Initialize configurator store with product data
   useEffect(() => {
     if (product) {
-      console.log('Product page: Setting product as model in configurator store', product.name);
       setModel(product);
     }
   }, [product, setModel]);
@@ -83,7 +82,9 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   const generateConfigurationCategories = useCallback((optionProducts: ConfigurableProductSchema[]) => {
     if (!optionProducts || optionProducts.length === 0) return;
 
-    console.log(`Creating configuration categories from ${optionProducts.length} option products`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Creating configuration categories from ${optionProducts.length} option products`);
+    }
     
     // Group related products into categories based on product name patterns
     const categoryMap = new Map<string, ConfigurableProductSchema[]>();
@@ -584,7 +585,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const slugResult = await configuratorAPI.getProductBySlug(slug);
     
     if (slugResult.error || !slugResult.data) {
-      console.error(`Product with slug "${slug}" not found via slug query`);
+      // Product not found via slug query
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`Product with slug "${slug}" not found via slug query`);
+      }
       return {
         props: {
           product: null,
@@ -598,7 +602,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     product = normalizeSlugQueryResponse(slugResult.data);
     
     if (!product) {
-      console.error(`Failed to normalize product data for slug "${slug}"`);
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`Failed to normalize product data for slug "${slug}"`);
+      }
       return {
         props: {
           product: null,
@@ -608,11 +614,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
     
-    console.log(`Found product via slug query:`, product.title, `ID: ${product.databaseId}`, `Related options: ${product._related_options?.length || 0}`);
-
-    // Note: Related option products are now loaded lazily on the client side
-    // This improves initial page load performance by deferring option data fetching
-    console.log(`Product "${product.title}" has ${product._related_options?.length || 0} related options (will be loaded client-side)`);
+    // Log product info only in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Found product via slug query:`, product.title, `ID: ${product.databaseId}`, `Related options: ${product._related_options?.length || 0}`);
+      console.log(`Product "${product.title}" has ${product._related_options?.length || 0} related options (will be loaded client-side)`);
+    }
 
     // Note: Configuration categories are now generated client-side after option products are loaded
     // This improves initial page load performance
@@ -665,12 +671,25 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
 
   } catch (error) {
-    console.error('Error loading product detail page:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error loading product detail page:', error);
+    }
+    
+    // Provide more specific error messages
+    let userFriendlyError = 'Failed to load product details';
+    if (errorMessage.includes('timeout')) {
+      userFriendlyError = 'Request timed out. Please try again.';
+    } else if (errorMessage.includes('network')) {
+      userFriendlyError = 'Network error. Please check your connection.';
+    }
+    
     return {
       props: {
         product: null,
         categories: [],
-        error: 'Failed to load product details'
+        error: userFriendlyError
       }
     };
   }

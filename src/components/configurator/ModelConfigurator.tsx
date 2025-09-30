@@ -72,8 +72,16 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
   loading = false,
   error,
   className = '',
+  // Edit mode props
+  editSessionId,
+  cartItemId,
+  isEditMode = false,
+  initialConfiguration,
+  // Event handlers
   onAddToCart,
   onSaveConfiguration,
+  onConfigurationSave,
+  onEditSessionComplete,
   onShareConfiguration,
   onLoadConfiguration,
   onConfigurationChange,
@@ -111,6 +119,48 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
   useEffect(() => {
     setModel(baseModel);
   }, [baseModel, setModel]);
+
+  // Initialize edit mode configuration
+  useEffect(() => {
+    if (isEditMode && initialConfiguration && cartItemId) {
+      console.log('Initializing edit mode configuration:', {
+        cartItemId,
+        initialConfiguration,
+        categories: categories.length
+      });
+      
+      // Initialize selected options from cart item configuration
+      if (initialConfiguration.selectedOptions && Array.isArray(initialConfiguration.selectedOptions)) {
+        const initializedOptions: Record<string, ConfigurableProductSchema[]> = {};
+        
+        // Group options by category
+        initialConfiguration.selectedOptions.forEach((option: any) => {
+          // Find the category for this option
+          const category = categories.find(cat => 
+            cat.options?.some(opt => opt.databaseId === option.parentId || opt.id === option.value)
+          );
+          
+          if (category) {
+            if (!initializedOptions[category.id]) {
+              initializedOptions[category.id] = [];
+            }
+            
+            // Find the actual option in the category
+            const actualOption = category.options?.find(opt => 
+              opt.databaseId === option.parentId || opt.id === option.value
+            );
+            
+            if (actualOption) {
+              initializedOptions[category.id].push(actualOption);
+            }
+          }
+        });
+        
+        console.log('Initialized options by category:', initializedOptions);
+        setSelectedOptions(initializedOptions);
+      }
+    }
+  }, [isEditMode, initialConfiguration, cartItemId, categories]);
 
   // Handle hydration
   useEffect(() => {

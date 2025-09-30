@@ -350,7 +350,7 @@ const ConfigurePage: React.FC<ConfigurePageProps> = ({
             editSessionId={editSessionData?.sessionId}
             cartItemId={editSessionData?.cartItemId}
             isEditMode={isEditMode}
-            initialConfiguration={isEditMode ? baseModel : undefined}
+            initialConfiguration={isEditMode ? cartItemConfiguration : undefined}
             // Event handlers
             onAddToCart={handleAddToCart}
             onSaveConfiguration={handleSaveConfiguration}
@@ -559,6 +559,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Validate edit session if in edit mode
+    let cartItemConfiguration = null;
     if (isEditMode) {
       if (!cartItemId || !sessionId) {
         return {
@@ -567,6 +568,32 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             permanent: false,
           }
         };
+      }
+      
+      // Get cart item configuration for edit mode
+      try {
+        const { useCartStore } = await import('stores/cartStore');
+        const cartStore = useCartStore.getState();
+        const cartItem = cartStore.findCartItem(cartItemId);
+        
+        if (cartItem) {
+          cartItemConfiguration = {
+            selectedOptions: cartItem.options || [],
+            quantity: cartItem.quantity || 1,
+            variationId: cartItem.variationId,
+            cartItemId: cartItem.cartItemId
+          };
+          
+          console.log('Cart item configuration for edit mode:', {
+            cartItemId,
+            cartItem,
+            configuration: cartItemConfiguration
+          });
+        } else {
+          console.warn('Cart item not found for edit mode:', cartItemId);
+        }
+      } catch (error) {
+        console.error('Failed to get cart item configuration:', error);
       }
     }
 
@@ -591,6 +618,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           sessionId,
           isEditMode: true
         } : null,
+        cartItemConfiguration,
         error: null
       })
     };

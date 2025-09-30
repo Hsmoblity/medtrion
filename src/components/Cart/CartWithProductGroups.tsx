@@ -57,8 +57,34 @@ const CartWithProductGroups: React.FC = () => {
   };
 
   const handleEditConfiguration = (product: CartProduct) => {
-    // Navigate to product configuration page
-    router.push(`/product/${product.slug}/configure`);
+    // Debug logging for edit config
+    console.log('Edit configuration clicked for product:', {
+      productId: product.productId,
+      slug: product.slug,
+      cartItemId: product.cartItemId,
+      title: product.title,
+      hasOptions: product.options && product.options.length > 0,
+      options: product.options
+    });
+
+    if (!product.cartItemId) {
+      console.error('Cannot edit configuration: missing cartItemId');
+      return;
+    }
+
+    // Generate a unique session ID for this edit session
+    const sessionId = `edit_${product.cartItemId}_${Date.now()}`;
+    
+    // Navigate to product configuration page with edit mode parameters
+    const editUrl = `/product/${product.slug}/configure?edit=true&cartItemId=${product.cartItemId}&sessionId=${sessionId}`;
+    
+    console.log('Navigating to edit configuration:', {
+      url: editUrl,
+      sessionId,
+      cartItemId: product.cartItemId
+    });
+    
+    router.push(editUrl);
   };
 
   const handleRemoveProduct = (product: CartProduct) => {

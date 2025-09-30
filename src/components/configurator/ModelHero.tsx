@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { ConfigurableProductSchema, FinancingOption } from '../../lib/interfaces/configurator';
+import { parsePrice, formatPrice } from '../../lib/utils/priceUtils';
 
 interface ModelHeroProps {
   model: ConfigurableProductSchema;
@@ -53,19 +54,18 @@ const ModelHero: React.FC<ModelHeroProps> = ({
     }
   };
 
-  const formatPrice = (price: number | string | undefined) => {
-    if (!price) return '$0';
-    const numPrice = typeof price === 'string' ? parseFloat(price.replace(/[^0-9.-]+/g, '')) : price;
+  const formatPriceDisplay = (price: number | string | undefined) => {
+    const parsedPrice = parsePrice(price);
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(numPrice);
+    }).format(parsedPrice);
   };
 
-  const currentPrice = totalPrice || parseFloat(model.regularPrice || '0');
-  const displayBasePrice = basePrice || parseFloat(model.regularPrice || '0');
+  const currentPrice = totalPrice || parsePrice(model.regularPrice || model.price);
+  const displayBasePrice = basePrice || parsePrice(model.regularPrice || model.price);
 
   if (loading) {
     return (
@@ -239,11 +239,11 @@ const ModelHero: React.FC<ModelHeroProps> = ({
                 <div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-bold text-gray-900">
-                      {formatPrice(currentPrice)}
+                      {formatPriceDisplay(currentPrice)}
                     </span>
                     {selectedOptionsCount > 0 && totalPrice && totalPrice > displayBasePrice && (
                       <span className="text-sm text-gray-500">
-                        (Base: {formatPrice(displayBasePrice)})
+                        (Base: {formatPriceDisplay(displayBasePrice)})
                       </span>
                     )}
                   </div>
@@ -276,14 +276,14 @@ const ModelHero: React.FC<ModelHeroProps> = ({
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Base Product</span>
                     <span className="text-sm font-semibold text-gray-900">
-                      {formatPrice(displayBasePrice)}
+                      {formatPriceDisplay(displayBasePrice)}
                     </span>
                   </div>
                   {selectedOptionsCount > 0 && totalPrice && totalPrice > displayBasePrice && (
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">Selected Options</span>
                       <span className="text-sm font-semibold text-gray-900">
-                        {formatPrice(totalPrice - displayBasePrice)}
+                        {formatPriceDisplay(totalPrice - displayBasePrice)}
                       </span>
                     </div>
                   )}
@@ -291,7 +291,7 @@ const ModelHero: React.FC<ModelHeroProps> = ({
                     <div className="flex justify-between items-center">
                       <span className="text-base font-medium text-gray-900">Total</span>
                       <span className="text-lg font-bold text-blue-600">
-                        {formatPrice(currentPrice)}
+                        {formatPriceDisplay(currentPrice)}
                       </span>
                     </div>
                   </div>

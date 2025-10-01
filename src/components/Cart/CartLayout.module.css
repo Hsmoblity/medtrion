@@ -168,8 +168,39 @@
   @apply text-sm font-medium text-gray-800;
 }
 
+.optionActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .optionPrice {
   @apply text-sm font-semibold text-green-600;
+}
+
+.removeOptionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  color: #9CA3AF;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.removeOptionButton:hover {
+  color: #EF4444;
+  background-color: #FEF2F2;
+  transform: scale(1.05);
+}
+
+.removeOptionButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #FCA5A5, 0 0 0 4px rgba(252, 165, 165, 0.3);
 }
 
 .optionMeta {

@@ -18,12 +18,14 @@ interface ProductOptionsListProps {
   options: ProductOption[];
   mainProduct: CartProduct;
   showConnections?: boolean;
+  onRemoveOption?: (optionIndex: number) => void;
 }
 
 const ProductOptionsList: React.FC<ProductOptionsListProps> = ({
   options,
   mainProduct,
-  showConnections = true
+  showConnections = true,
+  onRemoveOption
 }) => {
   if (!options || options.length === 0) {
     return null;
@@ -106,9 +108,60 @@ const ProductOptionsList: React.FC<ProductOptionsListProps> = ({
                 <h4 className={styles.optionTitle}>
                   {option.name || option.title || option.value}
                 </h4>
-                <span className={styles.optionPrice}>
-                  {formatOptionPrice(option.price || option.priceModifier)}
-                </span>
+                <div 
+                  className={styles.optionActions}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  <span className={styles.optionPrice}>
+                    {formatOptionPrice(option.price || option.priceModifier)}
+                  </span>
+                  {onRemoveOption && (
+                    <button
+                      onClick={() => onRemoveOption(index)}
+                      className={styles.removeOptionButton}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        border: 'none',
+                        backgroundColor: 'transparent',
+                        color: '#9CA3AF',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease-in-out'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#EF4444';
+                        e.currentTarget.style.backgroundColor = '#FEF2F2';
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#9CA3AF';
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }}
+                      aria-label={`Remove ${option.name || option.title || option.value} option`}
+                      title="Remove this option"
+                    >
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        width="16" 
+                        height="16" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      >
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  )}
+                </div>
               </div>
               <div className={styles.optionMeta}>
                 {option.sku && (

@@ -1,6 +1,7 @@
 import React from 'react';
 import { CartProduct } from '../../lib/interfaces';
 import { parsePrice, formatPrice } from '../../lib/utils/priceUtils';
+import { useCartStore } from 'stores/cartStore';
 import BaseProductCard from './BaseProductCard';
 import ProductOptionsList from './ProductOptionsList';
 import styles from './CartLayout.module.css';
@@ -27,6 +28,13 @@ const ProductGroup: React.FC<ProductGroupProps> = ({
   onUpdateQuantity
 }) => {
   const { mainProduct, options = [], configId } = group;
+  const removeOption = useCartStore(state => state.removeOption);
+
+  const handleRemoveOption = (optionIndex: number) => {
+    if (mainProduct.cartItemId) {
+      removeOption(mainProduct.cartItemId, optionIndex);
+    }
+  };
   
   const calculateGroupTotal = () => {
     const basePrice = parsePrice(mainProduct.price);
@@ -97,6 +105,7 @@ const ProductGroup: React.FC<ProductGroupProps> = ({
               options={options} 
               mainProduct={mainProduct}
               showConnections={true}
+              onRemoveOption={handleRemoveOption}
             />
           </div>
         )}

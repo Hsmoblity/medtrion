@@ -21,6 +21,7 @@ interface CartStore {
   addToCart: (product: Omit<CartProduct, 'cartItemId'>) => void
   removeFromCart: (cartItemId: string | number | null) => void
   removeSingleItem: (cartItemId: string | number | null) => void
+  removeOption: (cartItemId: string | number | null, optionIndex: number) => void
   updateCartItem: (cartItemId: string | number | null, updates: Partial<CartProduct>) => void
   updateQuantity: (cartItemId: string | number | null, quantity: number) => void
   clearCart: () => void
@@ -119,6 +120,17 @@ export const useCartStore = create<CartStore>()(
           }
           return item
         }).filter(Boolean) as CartProduct[]
+      })),
+
+      removeOption: (cartItemId, optionIndex) => set((state) => ({
+        cart: state.cart.map(item => {
+          if (String(item.cartItemId) === String(cartItemId)) {
+            const currentOptions = item.options || [];
+            const newOptions = currentOptions.filter((_, index) => index !== optionIndex);
+            return { ...item, options: newOptions };
+          }
+          return item;
+        })
       })),
       
       updateCartItem: (cartItemId, updates) => set((state) => ({

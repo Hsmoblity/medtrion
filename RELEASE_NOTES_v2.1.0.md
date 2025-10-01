@@ -1,4 +1,4 @@
-# HS Mobility - Release Notes v2.1.0
+y# HS Mobility - Release Notes v2.1.0
 
 **Release Date**: September 30, 2025  
 **Branch**: `feat-graphQL-polish-ui`  

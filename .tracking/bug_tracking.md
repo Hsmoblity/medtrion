@@ -13,7 +13,7 @@
 | bug-configurator-variation-selection-not-updating-summary | OptionVariationPopup selection not updating configuration summary | 🔴 OPEN | CRITICAL | frontend-dev |
 | bug-configurator-progress-not-updating | Configuration progress does not update after option selection | ✅ COMPLETED | HIGH | frontend-dev |
 | bug-cart-order-summary-nan-price | Cart order summary shows $NaN when products have 0 price | ✅ COMPLETED | HIGH | frontend-dev |
-| bug-cart-edit-config-options-not-loading | Cart edit config opens configurator but options don't load | ✅ COMPLETED | HIGH | frontend-dev |
+| bug-cart-edit-config-options-not-loading | Cart edit config opens configurator but options don't load | 🔴 REOPENED | CRITICAL | frontend-dev |
 | bug-configurator-start-configuration-wrong-page | Start Configuration shows product detail instead of options | ✅ COMPLETED | HIGH | frontend-dev |
 | bug-configurator-product-price-missing | Model Configurator displays product without price when main product has price | ✅ COMPLETED | HIGH | frontend-dev |
 | bug-cart-product-group-options-price-nan | Cart Page: Product Group Options Container Shows NaN Instead of Correct Product Price | ✅ COMPLETED | HIGH | frontend-dev |
@@ -27,6 +27,47 @@
 | bug-configurator-variation-change-not-updating-summary | Model Configurator: Changing Selected Variation Option Product Does Not Update Configuration Summary | ✅ COMPLETED | CRITICAL | frontend-dev |
 | bug-inconsistent-theme-across-pages | Design Consistency: Inconsistent Styles and Colors Across Pages - Payment Page Has Black Theme | ✅ COMPLETED | HIGH | frontend-dev |
 | bug-payment-order-summary-missing-options | Payment Page: Order Summary Does Not Show Option Item List Under Main Product | 🔴 OPEN | CRITICAL | frontend-dev |
+
+## 🔴 REOPENED BUGS (Latest Session)
+
+### 🎯 Session Focus: Cart Edit Configuration Flow Issues
+**Date**: January 16, 2025  
+**Priority**: CRITICAL  
+**Total Reopened**: 1 critical bug
+
+#### 🔴 Cart Edit Config Options Not Loading (REOPENED)
+**Bug ID**: bug-cart-edit-config-options-not-loading  
+**Status**: 🔴 REOPENED  
+**Priority**: CRITICAL  
+**Agent**: frontend-dev  
+**Reopened Date**: 2025-01-16  
+
+**Problem**: Cart edit configuration flow is broken. When clicking "Edit Config" on cart page:
+- Configurator opens correctly
+- Main product loads
+- BUT option products do not load/display
+- User cannot edit their configuration
+- Edit session may not initialize properly
+
+**Technical Analysis**: 
+- Related to edit session state management in configuratorStore
+- Option product data loading during edit mode
+- Cart-to-configurator data flow issues
+- Possible state hydration problems
+- Option product fetching logic in edit mode
+
+**Files to Investigate**:
+- `src/stores/configuratorStore.ts`
+- `src/stores/cartStore.ts` 
+- `src/components/Cart/ProductGroup.tsx`
+- `src/components/Cart/BaseProductCard.tsx`
+- `src/components/configurator/`
+- `src/pages/configurator/[slug].tsx`
+
+**Previous Status**: Completed on 2025-09-30  
+**Reopened Reason**: Cart edit config flow still not working properly - option products not loading
+
+---
 
 ## ✅ RECENT FIXES COMPLETED (Latest Session)
 

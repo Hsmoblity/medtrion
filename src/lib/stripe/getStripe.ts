@@ -2,29 +2,82 @@ import { loadStripe, Stripe } from "@stripe/stripe-js";
 
 const cache: Map<string, Promise<Stripe | null>> = new Map();
 
-const getStripe = (publishableKey?: string) => {
-  const key = (publishableKey && publishableKey.trim().length > 0)
-    ? publishableKey
-    : process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
+export interface StripeConfig {
+  publishableKey?: string;
+  environment?: 'test' | 'live';
+}
 
-  if (!key || key.trim().length === 0) {
+/**
+ * Get Stripe instance with dynamic configuration support
+ */
+const getStripe = async (config?: StripeConfig): Promise<Stripe | null> => {
+  let publishableKey = config?.publishableKey;
+
+  // If no key provided, try to fetch from HSM plugin
+  if (!publishableKey) {
+    try {
+      const apiUrl = '/wp-json/hsm/v1/stripe/config';
+      const params = new URLSearchParams();
+      
+      if (config?.environment) {
+        params.append('environment', config.environment);
+      }
+      
+      const url = `${apiUrl}${params.toString() ? `?${params.toString()}` : ''}`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.publishable_key) {
+          publishableKey = data.data.publishable_key;
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to fetch Stripe config from HSM plugin:', err);
+    }
+  }
+
+  // Fallback to environment variable
+  if (!publishableKey) {
+    publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
+  }
+
+  if (!publishableKey || publishableKey.trim().length === 0) {
     console.warn(
-      'Stripe publishable key is missing. Provide a key or set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.'
+      'Stripe publishable key is missing. Provide a key, configure HSM plugin, or set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.'
     );
     return Promise.resolve<Stripe | null>(null);
   }
 
-  if (cache.has(key)) {
-    return cache.get(key)!;
+  // Check cache
+  if (cache.has(publishableKey)) {
+    return cache.get(publishableKey)!;
   }
 
-  const promise = loadStripe(key).catch((err) => {
+  // Load Stripe
+  const promise = loadStripe(publishableKey).catch((err) => {
     console.error('loadStripe failed:', err);
     return null;
   });
 
-  cache.set(key, promise);
+  cache.set(publishableKey, promise);
   return promise;
 };
 
+/**
+ * Legacy function for backward compatibility
+ */
+const getStripeLegacy = (publishableKey?: string) => {
+  return getStripe({ publishableKey });
+};
+
+// Export both new and legacy functions
 export default getStripe;
+export { getStripeLegacy };

@@ -55,6 +55,7 @@ interface ConfiguratorStore {
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearConfiguration: () => void;
+  clearAllState: () => void;
   saveConfiguration: (name: string, notes?: string) => void;
   loadConfiguration: (configId: string) => void;
   deleteConfiguration: (configId: string) => void;
@@ -74,7 +75,7 @@ interface ConfiguratorStore {
   closeOptionPopup: () => void;
   selectVariation: (variation: Variation) => void;
   deselectVariation: (variation: Variation) => void;
-  addToConfiguration: (option: ConfigurableProductSchema, variations: Variation[]) => void;
+  addToConfiguration: (option: ConfigurableProductSchema, variations: Variation[], calculatedPrice?: number) => void;
   removeFromConfiguration: (optionId: string) => void;
   updateConfigurationSummary: () => void;
   calculateTotalPrice: () => number;
@@ -226,12 +227,90 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
 
       // Actions
       setModel: (model) => {
-        set({ model });
+        // Clear categories and selected options when switching products
+        // to prevent wrong options from appearing
+        console.log(`🔧 DEBUG: Setting new model: ${model.name} (${model.slug}) - clearing all state`);
+        set({ 
+          model,
+          categories: [],
+          selectedOptions: {},
+          compatibilityIssues: [],
+          optionProducts: [],
+          selectedOptionsWithVariations: [],
+          configurationSummary: {
+            basePrice: 0,
+            optionsPrice: 0,
+            installationPrice: 0,
+            shippingPrice: 0,
+            taxAmount: 0,
+            totalPrice: 0,
+            deliveryEstimate: '2-3 weeks',
+            financingOption: undefined,
+            insuranceEstimate: undefined
+          }
+        });
         get().calculateSummary();
       },
 
       setCategories: (categories) => {
-        set({ categories });
+        // Validate categories to ensure they belong to the current model
+        const { model } = get();
+        if (!model) {
+          console.warn('🔧 Cannot set categories without a model');
+          return;
+        }
+        
+        console.log(`🔧 DEBUG: Setting categories for model "${model.name}" (${model.slug}):`, categories.map(cat => ({
+          id: cat.id,
+          name: cat.name,
+          slug: cat.slug,
+          optionsCount: cat.options?.length || 0,
+          options: cat.options?.map(opt => ({ 
+            name: opt.name, 
+            id: opt.id,
+            productId: opt.productId,
+            _related_options: opt._related_options
+          })) || []
+        })));
+        
+        // Filter out invalid categories
+        const validCategories = categories.filter(category => {
+          // Ensure category has valid options
+          if (!category.options || category.options.length === 0) {
+            console.warn(`🔧 Category "${category.name}" has no options`);
+            return false;
+          }
+          
+          // Validate that options belong to the current model
+          const validOptions = category.options.filter(option => {
+            const belongsToModel = option._related_options?.includes(model.databaseId) || 
+                                 option.compatibleBaseModels?.includes(model.databaseId) ||
+                                 option.productId === model.databaseId?.toString();
+            
+            if (!belongsToModel) {
+              console.warn(`🔧 Option "${option.name}" does not belong to model "${model.name}" (${model.databaseId})`);
+              console.warn(`🔧 Option details:`, {
+                name: option.name,
+                productId: option.productId,
+                _related_options: option._related_options,
+                compatibleBaseModels: option.compatibleBaseModels
+              });
+              return false;
+            }
+            
+            return true;
+          });
+          
+          if (validOptions.length === 0) {
+            console.warn(`🔧 Category "${category.name}" has no valid options for model "${model.name}"`);
+            return false;
+          }
+          
+          return true;
+        });
+        
+        console.log(`🔧 Setting ${validCategories.length} valid categories for model "${model.name}"`);
+        set({ categories: validCategories });
       },
 
       setCompatibilityIssues: (issues) => {
@@ -450,12 +529,24 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
         set((state) => {
           const { model, selectedOptions } = state;
           
+          // Debug logging for store price calculation
+          console.log('🔧 Store Price Calculation Debug:', {
+            selectedOptionsKeys: Object.keys(selectedOptions),
+            selectedOptionsCount: Object.values(selectedOptions).flat().length,
+            selectedOptionsByCategory: Object.keys(selectedOptions).map(categoryId => ({
+              categoryId,
+              count: selectedOptions[categoryId]?.length || 0,
+              options: selectedOptions[categoryId]?.map(opt => ({ id: opt.id, name: opt.name, price: opt.price, totalPrice: opt.totalPrice }))
+            }))
+          });
+          
           const basePrice = parseFloat(model?.price?.toString() || '0');
           const optionsTotal = Object.values(selectedOptions)
             .flat()
             .reduce((total, option) => {
               // Use totalPrice if available (includes variations), otherwise use base price
               const optionPrice = option.totalPrice || parseFloat(option.price?.toString() || '0');
+              console.log(`🔧 Adding option price: ${option.name} = ${optionPrice}`);
               return total + optionPrice;
             }, 0);
           
@@ -525,13 +616,51 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
       setError: (error) => set({ error }),
 
       clearConfiguration: () => {
+        console.log(`🔧 DEBUG: Clearing configuration completely`);
         set({
           selectedOptions: {},
           compatibilityIssues: [],
-          summary: defaultSummary
+          summary: defaultSummary,
+          selectedOptionsWithVariations: [],
+          configurationSummary: {
+            basePrice: 0,
+            optionsPrice: 0,
+            installationPrice: 0,
+            shippingPrice: 0,
+            taxAmount: 0,
+            totalPrice: 0,
+            deliveryEstimate: '2-3 weeks',
+            financingOption: undefined,
+            insuranceEstimate: undefined
+          }
         });
         
         get().updateProgressCount();
+      },
+      
+      // Clear all configurator state (including model and categories)
+      clearAllState: () => {
+        console.log(`🔧 DEBUG: Clearing ALL configurator state`);
+        set({
+          model: null,
+          categories: [],
+          selectedOptions: {},
+          compatibilityIssues: [],
+          summary: defaultSummary,
+          selectedOptionsWithVariations: [],
+          optionProducts: [],
+          configurationSummary: {
+            basePrice: 0,
+            optionsPrice: 0,
+            installationPrice: 0,
+            shippingPrice: 0,
+            taxAmount: 0,
+            totalPrice: 0,
+            deliveryEstimate: '2-3 weeks',
+            financingOption: undefined,
+            insuranceEstimate: undefined
+          }
+        });
       },
 
       saveConfiguration: (name, notes) => {
@@ -1051,16 +1180,31 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
         });
       },
 
-      addToConfiguration: (option: ConfigurableProductSchema, variations: Variation[]) => {
+      addToConfiguration: (option: ConfigurableProductSchema, variations: Variation[], calculatedPrice?: number) => {
         const { optionPopup } = get();
+        
+        console.log(`🔧 DEBUG: addToConfiguration called for option "${option.name}" with ${variations.length} variations`, {
+          calculatedPriceProvided: calculatedPrice !== undefined,
+          calculatedPrice: calculatedPrice
+        });
         
         // Remove existing option if it's already in configuration
         if (optionPopup.isAlreadyInConfiguration) {
           const filteredOptions = get().selectedOptionsWithVariations.filter(so => so.option.id !== option.id);
           set({ selectedOptionsWithVariations: filteredOptions });
+          console.log(`🔧 DEBUG: Removed existing option "${option.name}" from configuration`);
         }
         
-        const totalPrice = calculateOptionPrice(option, variations);
+        // Use pre-calculated price if provided, otherwise calculate it
+        const totalPrice = calculatedPrice !== undefined ? calculatedPrice : calculateOptionPrice(option, variations);
+        
+        console.log(`🔧 DEBUG: Price calculation:`, {
+          calculatedPriceProvided: calculatedPrice !== undefined,
+          calculatedPrice: calculatedPrice,
+          recalculatedPrice: calculateOptionPrice(option, variations),
+          finalTotalPrice: totalPrice
+        });
+        
         const selectedOption: SelectedOption = {
           id: `${option.id}-${Date.now()}`,
           option,
@@ -1071,12 +1215,24 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
           category: option.optionType || 'General'
         };
 
+        console.log(`🔧 DEBUG: Adding option to configuration:`, {
+          optionId: option.id,
+          optionName: option.name,
+          totalPrice,
+          variationsCount: variations.length,
+          category: selectedOption.category
+        });
+
         set(state => ({
           selectedOptionsWithVariations: [...state.selectedOptionsWithVariations, selectedOption]
         }));
 
+        console.log(`🔧 DEBUG: Option added. Total options in configuration: ${get().selectedOptionsWithVariations.length}`);
+
         // Update configuration summary
+        console.log(`🔧 DEBUG: Calling updateConfigurationSummary...`);
         get().updateConfigurationSummary();
+        console.log(`🔧 DEBUG: updateConfigurationSummary completed`);
       },
 
       removeFromConfiguration: (optionId: string) => {
@@ -1091,9 +1247,29 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
       updateConfigurationSummary: () => {
         const { model, selectedOptionsWithVariations } = get();
         
-        if (!model) return;
+        console.log(`🔧 DEBUG: updateConfigurationSummary called with ${selectedOptionsWithVariations.length} options`);
+        
+        if (!model) {
+          console.warn(`🔧 DEBUG: updateConfigurationSummary - no model found`);
+          return;
+        }
+
+        console.log(`🔧 DEBUG: Calculating summary for model "${model.name}" with options:`, selectedOptionsWithVariations.map(so => ({
+          optionName: so.option.name,
+          totalPrice: so.totalPrice,
+          variationsCount: so.selectedVariations.length
+        })));
 
         const calculation = calculateConfigurationTotal(model, selectedOptionsWithVariations);
+        
+        console.log(`🔧 DEBUG: Price calculation result:`, {
+          basePrice: calculation.basePrice,
+          optionsPrice: calculation.optionsPrice,
+          installationPrice: calculation.installationPrice,
+          shippingPrice: calculation.shippingPrice,
+          taxAmount: calculation.taxAmount,
+          totalPrice: calculation.totalPrice
+        });
         
         const summary: ConfigurationSummaryData = {
           baseModel: model,
@@ -1109,7 +1285,9 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
           insuranceEstimate: calculateInsuranceEstimate(calculation.totalPrice)
         };
 
+        console.log(`🔧 DEBUG: Setting configurationSummary:`, summary);
         set({ configurationSummary: summary });
+        console.log(`🔧 DEBUG: configurationSummary updated successfully`);
       },
 
       calculateTotalPrice: () => {

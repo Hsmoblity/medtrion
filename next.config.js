@@ -3,7 +3,28 @@ const nextConfig = {
   reactStrictMode: true,
 
   images: {
-    domains: ["images.ctfassets.net", "hsmobility.local", "localhost", "127.0.0.1", "cms.hsmobility.ca"]
+    domains: [
+      "images.ctfassets.net", 
+      "hsmobility.local", 
+      "localhost", 
+      "127.0.0.1", 
+      "cms.hsmobility.ca", 
+      "images.unsplash.com",
+      "hsmobility.ca",
+      "www.hsmobility.ca",
+      "staging.hsmobility.ca",
+      "dev.hsmobility.ca"
+    ],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: '**',
+      }
+    ]
   },
 
   // Fix workspace root warning by explicitly setting the output file tracing root

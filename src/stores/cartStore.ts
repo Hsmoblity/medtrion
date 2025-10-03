@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { CartProduct } from 'lib/interfaces'
 import { parsePrice, calculateOrderTotal, debugPriceParsing } from 'lib/utils/priceUtils'
+import React from 'react'
 
 // Generate unique cart item ID
 const generateCartItemId = (): string => 
@@ -25,6 +26,8 @@ interface CartStore {
   updateCartItem: (cartItemId: string | number | null, updates: Partial<CartProduct>) => void
   updateQuantity: (cartItemId: string | number | null, quantity: number) => void
   clearCart: () => void
+  cleanupDuplicates: () => void
+  cleanupWrongOptions: () => void
   bulkAddToCart: (products: Omit<CartProduct, 'cartItemId'>[]) => void
   
   // UI Actions
@@ -57,6 +60,12 @@ export const useCartStore = create<CartStore>()(
       
       // Cart Actions
       addToCart: (product) => set((state) => {
+        // Validate product data before adding
+        if (!product.slug || !product.title) {
+          console.error('🔧 Invalid product data: missing slug or title');
+          return state;
+        }
+        
         // Check if an identical item already exists in cart
         const existingItem = state.cart.find(item => {
           // Check if it's the same product
@@ -85,6 +94,7 @@ export const useCartStore = create<CartStore>()(
         
         if (existingItem) {
           // Update quantity of existing item instead of adding duplicate
+          console.log(`🔧 Updating quantity for existing cart item: ${existingItem.title}`);
           return {
             cart: state.cart.map(item => 
               item.cartItemId === existingItem.cartItemId
@@ -101,6 +111,9 @@ export const useCartStore = create<CartStore>()(
           cartItemId,
           quantity: product.quantity || 1
         }
+        
+        console.log(`🔧 Added new cart item: ${newItem.title} (${newItem.cartItemId}) with ${newItem.options?.length || 0} options`);
+        
         return {
           cart: [...state.cart, newItem]
         }
@@ -157,6 +170,71 @@ export const useCartStore = create<CartStore>()(
       }),
       
       clearCart: () => set({ cart: [] }),
+      
+      // Clean up duplicate cart items
+      cleanupDuplicates: () => set((state) => {
+        const seenItems = new Set<string>();
+        const cleanedCart = state.cart.filter(item => {
+          const itemKey = `${item.slug}-${item.productId}-${JSON.stringify(item.options || [])}`;
+          
+          if (seenItems.has(itemKey)) {
+            console.warn(`🔧 Removing duplicate cart item: ${item.title} (${item.cartItemId})`);
+            return false;
+          }
+          
+          seenItems.add(itemKey);
+          return true;
+        });
+        
+        if (cleanedCart.length !== state.cart.length) {
+          console.log(`🔧 Cleaned up ${state.cart.length - cleanedCart.length} duplicate cart items`);
+        }
+        
+        return { cart: cleanedCart };
+      }),
+      
+      // Clean up cart items with wrong/generic options
+      cleanupWrongOptions: () => set((state) => {
+        const genericOptionNames = [
+          'Extended Warranty', 'Warranty', 'Fabric Color', 'Color Upgrade', 
+          'Factory Options', 'Delivery', 'Installation', 'Service', 'Maintenance'
+        ];
+        
+        const cleanedCart = state.cart.map(item => {
+          if (item.options && item.options.length > 0) {
+            // Filter out generic options
+            const validOptions = item.options.filter(option => {
+              const isGeneric = genericOptionNames.some(genericName => 
+                option.name?.toLowerCase().includes(genericName.toLowerCase())
+              );
+              
+              if (isGeneric) {
+                console.warn(`🔧 Removing generic option "${option.name}" from cart item "${item.title}"`);
+                return false;
+              }
+              
+              return true;
+            });
+            
+            if (validOptions.length !== item.options.length) {
+              console.log(`🔧 Cleaned ${item.options.length - validOptions.length} generic options from cart item "${item.title}"`);
+              return { ...item, options: validOptions };
+            }
+          }
+          
+          return item;
+        });
+        
+        const hasChanges = cleanedCart.some((item, index) => 
+          JSON.stringify(item.options) !== JSON.stringify(state.cart[index].options)
+        );
+        
+        if (hasChanges) {
+          console.log(`🔧 Cleaned up generic options from cart items`);
+        }
+        
+        return { cart: cleanedCart };
+      }),
       
       bulkAddToCart: (products) => set((state) => {
         const newItems = products.map(product => ({
@@ -313,6 +391,35 @@ export const useCartVisibility = () => useCartStore(state => state.cartVisibilit
 export const useCartItems = () => {
   const items = useCartStore(state => state.cart)
   const isHydrated = useCartStore(state => state.isHydrated)
+  
+  // Debug logging for cart hydration
+  if (typeof window !== 'undefined' && !isHydrated) {
+    console.log('🔧 useCartItems: Store not hydrated yet, returning empty array')
+    
+    // Fallback: Try to hydrate manually if not hydrated after a delay
+    setTimeout(() => {
+      const store = useCartStore.getState()
+      if (!store.isHydrated) {
+        console.log('🔧 useCartItems: Fallback hydration attempt')
+        const storedData = localStorage.getItem('hsm-cart-storage')
+        if (storedData) {
+          try {
+            const parsedData = JSON.parse(storedData)
+            if (parsedData.state && parsedData.state.cart) {
+              console.log('🔧 useCartItems: Fallback - Found stored cart data:', parsedData.state.cart.length, 'items')
+              useCartStore.setState({ 
+                cart: parsedData.state.cart,
+                isHydrated: true 
+              })
+            }
+          } catch (parseError) {
+            console.error('🔧 useCartItems: Fallback hydration failed:', parseError)
+          }
+        }
+      }
+    }, 100) // Small delay to allow other hydration attempts
+  }
+  
   return isHydrated ? items : []
 }
 
@@ -320,13 +427,99 @@ export const useEditStatus = (cartItemId: string) => useCartStore(state => state
 
 export const useIsHydrated = () => useCartStore(state => state.isHydrated)
 
+// Custom hook for immediate hydration
+export const useCartHydration = () => {
+  const isHydrated = useCartStore(state => state.isHydrated)
+  const cleanupDuplicates = useCartStore(state => state.cleanupDuplicates)
+  
+  React.useEffect(() => {
+    if (!isHydrated && typeof window !== 'undefined') {
+      console.log('🔧 useCartHydration: Triggering immediate hydration')
+      
+      // Immediate hydration attempt
+      const storedData = localStorage.getItem('hsm-cart-storage')
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData)
+          if (parsedData.state && parsedData.state.cart) {
+            console.log('🔧 useCartHydration: Immediate - Found stored cart data:', parsedData.state.cart.length, 'items')
+            useCartStore.setState({ 
+              cart: parsedData.state.cart,
+              isHydrated: true 
+            })
+            
+            // Clean up any duplicates after hydration
+            setTimeout(() => {
+              console.log('🔧 Running cleanupDuplicates after hydration...');
+              cleanupDuplicates()
+            }, 100)
+          } else {
+            console.log('🔧 useCartHydration: Immediate - No stored cart data found')
+            useCartStore.setState({ isHydrated: true })
+          }
+        } catch (parseError) {
+          console.error('🔧 useCartHydration: Immediate hydration failed:', parseError)
+          useCartStore.setState({ isHydrated: true })
+        }
+      } else {
+        console.log('🔧 useCartHydration: Immediate - No localStorage data found')
+        useCartStore.setState({ isHydrated: true })
+      }
+    }
+  }, [isHydrated, cleanupDuplicates])
+  
+  return isHydrated
+}
+
 // Hydration effect - ensure store is hydrated on client
 if (typeof window !== 'undefined') {
   // Trigger hydration after component mount
   const hydrateStore = () => {
-    const store = useCartStore.getState()
-    if (!store.isHydrated) {
-      store.setHydrated()
+    try {
+      const store = useCartStore.getState()
+      if (!store.isHydrated) {
+        console.log('🔧 Cart Store: Hydrating from localStorage...')
+        
+        // Manually trigger Zustand persist rehydration
+        const persist = useCartStore.persist
+        if (persist && persist.rehydrate) {
+          persist.rehydrate()
+        }
+        
+        // Check if data was loaded from localStorage
+        const storedData = localStorage.getItem('hsm-cart-storage')
+        if (storedData) {
+          try {
+            const parsedData = JSON.parse(storedData)
+            if (parsedData.state && parsedData.state.cart) {
+              console.log('🔧 Cart Store: Found stored cart data:', parsedData.state.cart.length, 'items')
+              // Update the store with the stored cart data
+              useCartStore.setState({ 
+                cart: parsedData.state.cart,
+                isHydrated: true 
+              })
+            } else {
+              console.log('🔧 Cart Store: No stored cart data found')
+              store.setHydrated()
+            }
+          } catch (parseError) {
+            console.error('🔧 Cart Store: Failed to parse stored data:', parseError)
+            store.setHydrated()
+          }
+        } else {
+          console.log('🔧 Cart Store: No localStorage data found')
+          store.setHydrated()
+        }
+        
+        console.log('🔧 Cart Store: Hydration complete')
+      }
+    } catch (error) {
+      console.error('🔧 Cart Store: Hydration failed:', error)
+      // Set hydrated anyway to prevent infinite loading
+      const store = useCartStore.getState()
+      if (!store.isHydrated) {
+        store.setHydrated()
+      }
     }
   }
   
@@ -336,6 +529,9 @@ if (typeof window !== 'undefined') {
   } else {
     window.addEventListener('load', hydrateStore)
   }
+  
+  // Also hydrate on DOMContentLoaded as a fallback
+  document.addEventListener('DOMContentLoaded', hydrateStore)
 }
 
 // Cross-tab synchronization

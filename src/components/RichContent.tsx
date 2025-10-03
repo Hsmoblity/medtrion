@@ -16,7 +16,14 @@ export default function RichContent({ content, options, className }: Props) {
     // Contentful rich text Document
     if (typeof content === 'object' && Array.isArray(content?.content)) {
         try {
-            return <div className={className}>{documentToReactComponents(content as Document, options)}</div>;
+            return (
+                <div 
+                    className={className}
+                    suppressHydrationWarning={true}
+                >
+                    {documentToReactComponents(content as Document, options)}
+                </div>
+            );
         } catch (e) {
             return null;
         }
@@ -24,7 +31,13 @@ export default function RichContent({ content, options, className }: Props) {
 
     // HTML string
     if (typeof content === 'string') {
-        return <div className={className} dangerouslySetInnerHTML={{ __html: content }} />;
+        return (
+            <div 
+                className={className} 
+                dangerouslySetInnerHTML={{ __html: content }}
+                suppressHydrationWarning={true}
+            />
+        );
     }
 
     return null;

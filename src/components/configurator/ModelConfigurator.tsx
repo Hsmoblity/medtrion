@@ -153,9 +153,35 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
   // Initialize with Enhanced User Flow - Step 1: Load Main Product
   useEffect(() => {
     if (baseModel) {
+      console.log(`🔧 DEBUG: Loading main product: ${baseModel.name} (${baseModel.slug})`);
       loadMainProduct(baseModel);
     }
   }, [baseModel, loadMainProduct]);
+
+  // Initialize categories from props - CRITICAL FIX for auto-add bug
+  useEffect(() => {
+    if (initialCategories && initialCategories.length > 0) {
+      console.log(`🔧 DEBUG: Initializing store categories from props:`, initialCategories.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        slug: cat.slug,
+        optionsCount: cat.options?.length || 0,
+        options: cat.options?.map(opt => ({ name: opt.name, id: opt.id })) || []
+      })));
+      setCategories(initialCategories);
+    }
+  }, [initialCategories, setCategories]);
+
+  // Debug categories prop
+  useEffect(() => {
+    console.log(`🔧 DEBUG: Categories prop received:`, categories.map(cat => ({
+      id: cat.id,
+      name: cat.name,
+      slug: cat.slug,
+      optionsCount: cat.options?.length || 0,
+      options: cat.options?.map(opt => ({ name: opt.name, id: opt.id })) || []
+    })));
+  }, [categories]);
 
   // Initialize with Enhanced User Flow - Step 2: Load Option Products (if available)
   useEffect(() => {
@@ -181,28 +207,69 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
 
   // Initialize edit mode configuration - handle client-side cart access
   useEffect(() => {
-    if (isEditMode && cartItemId && isHydrated && categories.length > 0) {
-      console.log('Initializing edit mode with cart item ID:', cartItemId);
-      console.log('Available categories:', categories.map(c => ({ 
+    if (isEditMode && cartItemId && isHydrated) {
+      console.log('🔧 Initializing edit mode with cart item ID:', cartItemId);
+      console.log('🔧 Available categories:', categories.map(c => ({ 
         name: c.name, 
         id: c.id,
         optionCount: c.options?.length || 0,
         loadingState: c.loadingState 
       })));
       
+      // Enhanced: First try to load options for categories that don't have them yet
+      if (onFetchCategoryOptions && categories.length > 0) {
+        console.log('🔧 Checking categories for missing options...');
+        
+        const categoriesNeedingOptions = categories.filter(cat => !cat.options || cat.options.length === 0);
+        if (categoriesNeedingOptions.length > 0) {
+          console.log(`🔧 Loading options for ${categoriesNeedingOptions.length} categories...`, categoriesNeedingOptions.map(c => c.name));
+          
+          // Load options for all categories that need them
+          Promise.all(
+            categoriesNeedingOptions.map(category => 
+              onFetchCategoryOptions(category.id).catch(error => {
+                console.error(`Failed to load options for category ${category.name}:`, error);
+                return [];
+              })
+            )
+          ).then(() => {
+            console.log('🔧 Finished loading category options, proceeding with cart item restoration...');
+            // After loading options, try to restore cart configuration
+            setTimeout(() => restoreCartConfiguration(), 100);
+          });
+          
+          // If we're loading options, don't proceed yet
+          return;
+        }
+      }
+      
+      // If categories already have options or we can't load them, proceed immediately
+      restoreCartConfiguration();
+    } else if (isEditMode && !isHydrated) {
+      console.log('🔧 Edit mode detected but not yet hydrated, waiting...');
+    } else if (isEditMode && !cartItemId) {
+      console.warn('🔧 Edit mode detected but no cartItemId provided');
+    } else if (isEditMode && cartItemId && !isHydrated) {
+      console.log('🔧 Edit mode with cartItemId but not hydrated yet, waiting...');
+    }
+
+    // Function to restore cart configuration
+    function restoreCartConfiguration() {
+      console.log('🔧 Starting cart configuration restoration...');
+      
       // Check if categories have their options loaded
       const categoriesWithOptions = categories.filter(cat => cat.options && cat.options.length > 0);
       if (categoriesWithOptions.length === 0) {
-        console.warn('No categories with options available yet, waiting for options to load...');
+        console.warn('🔧 No categories with options available for restoration');
         
-        // Try to trigger option loading for categories that need it
-        if (onFetchCategoryOptions) {
-          console.log('Attempting to load options for categories...');
+        // If still no options and we have onFetchCategoryOptions, try one more time
+        if (onFetchCategoryOptions && categories.length > 0) {
+          console.log('🔧 Final attempt to load category options...');
           categories.forEach(category => {
             if (!category.options || category.options.length === 0) {
-              console.log(`Loading options for category: ${category.name}`);
+              console.log(`🔧 Final loading attempt for category: ${category.name}`);
               onFetchCategoryOptions(category.id).catch(error => {
-                console.error(`Failed to load options for category ${category.name}:`, error);
+                console.error(`Failed final load for category ${category.name}:`, error);
               });
             }
           });
@@ -213,22 +280,24 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
       // Import cart store dynamically to avoid SSR issues
       import('stores/cartStore').then(({ useCartStore }) => {
         const cartStore = useCartStore.getState();
-        const cartItem = cartStore.findCartItem(cartItemId);
+        const cartItem = cartStore.findCartItem(cartItemId!);
         
         if (cartItem) {
-          console.log('Found cart item for edit mode:', cartItem);
+          console.log('🔧 Found cart item for edit mode:', cartItem);
           
           const cartItemOptions = cartItem.options || [];
-          console.log('Processing cart item options:', cartItemOptions);
+          console.log('🔧 Processing cart item options:', cartItemOptions);
           
           if (cartItemOptions.length === 0) {
-            console.log('No options to restore from cart item');
+            console.log('🔧 No options to restore from cart item');
             return;
           }
           
+          let optionsRestored = 0;
+          
           // Process each cart option and try to match it with configurator categories
-          cartItemOptions.forEach((option: any) => {
-            console.log('Processing cart option:', option);
+          cartItemOptions.forEach((option: any, index: number) => {
+            console.log(`🔧 Processing cart option ${index + 1}/${cartItemOptions.length}:`, option);
             
             // Find the category for this option - try multiple matching strategies
             const category = categories.find(cat => {
@@ -248,12 +317,19 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
                 // Strategy 4: Match by slug/value
                 if (option.value && opt.slug === option.value) return true;
                 
+                // Strategy 5: Match by partial name (for cases where cart has simplified names)
+                if (option.name && opt.name) {
+                  const cartName = option.name.toLowerCase().trim();
+                  const optName = opt.name.toLowerCase().trim();
+                  if (cartName.includes(optName) || optName.includes(cartName)) return true;
+                }
+                
                 return false;
               });
             });
             
             if (category) {
-              console.log('Found category for option:', category.name);
+              console.log(`🔧 Found category "${category.name}" for option "${option.name}"`);
               
               // Find the actual option in the category using the same strategies
               const actualOption = category.options?.find(opt => {
@@ -270,36 +346,48 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
                 // Strategy 4: Match by slug/value
                 if (option.value && opt.slug === option.value) return true;
                 
+                // Strategy 5: Match by partial name
+                if (option.name && opt.name) {
+                  const cartName = option.name.toLowerCase().trim();
+                  const optName = opt.name.toLowerCase().trim();
+                  if (cartName.includes(optName) || optName.includes(cartName)) return true;
+                }
+                
                 return false;
               });
               
               if (actualOption) {
-                console.log('Adding option to configurator:', actualOption.name);
+                console.log(`🔧 ✅ Restoring option: "${actualOption.name}" to category "${category.name}"`);
                 addOption(actualOption, category.id);
+                optionsRestored++;
               } else {
-                console.warn('Option not found in category despite category match:', option);
+                console.warn(`🔧 ❌ Option not found in category "${category.name}" despite category match:`, option);
+                console.log('🔧 Available options in category:', category.options?.map(o => ({ 
+                  name: o.name, id: o.id, slug: o.slug, databaseId: o.databaseId 
+                })));
               }
             } else {
-              console.warn('No category found for cart option:', option);
-              console.log('Available categories:', categories.map(c => ({ 
+              console.warn(`🔧 ❌ No category found for cart option: "${option.name}"`);
+              console.log('🔧 Available categories:', categories.map(c => ({ 
                 name: c.name, 
                 optionCount: c.options?.length || 0,
                 sampleOptions: c.options?.slice(0, 2).map(o => ({ name: o.name, id: o.id, slug: o.slug, databaseId: o.databaseId }))
               })));
             }
           });
+          
+          console.log(`🔧 ✅ Cart configuration restoration complete: ${optionsRestored}/${cartItemOptions.length} options restored`);
+          
+          if (optionsRestored === 0 && cartItemOptions.length > 0) {
+            console.error('🔧 ❌ No options were restored despite having cart options. This indicates a data matching issue.');
+          }
+          
         } else {
-          console.warn('Cart item not found for edit mode:', cartItemId);
+          console.warn('🔧 ❌ Cart item not found for edit mode:', cartItemId);
         }
       }).catch(error => {
-        console.error('Failed to load cart store for edit mode:', error);
+        console.error('🔧 ❌ Failed to load cart store for edit mode:', error);
       });
-    } else if (isEditMode && !isHydrated) {
-      console.log('Edit mode detected but not yet hydrated, waiting...');
-    } else if (isEditMode && !cartItemId) {
-      console.warn('Edit mode detected but no cartItemId provided');
-    } else if (isEditMode && cartItemId && isHydrated && categories.length === 0) {
-      console.log('Edit mode detected but no categories available yet, waiting...');
     }
   }, [isEditMode, cartItemId, categories.length, addOption, isHydrated, categories, onFetchCategoryOptions]);
 
@@ -311,8 +399,35 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
   // Calculate configuration summary
   const getConfigurationSummary = useCallback((): ConfigurationSummaryData => {
     const allSelectedOptions = isHydrated ? Object.values(selectedOptions).flat() : [];
-    // Use robust price parsing for base price
-    const basePrice = parsePrice(baseModel.regularPrice || baseModel.price);
+    
+    // Debug logging for price calculation bug
+    console.log('🔧 Price Calculation Debug:', {
+      isHydrated,
+      selectedOptionsKeys: Object.keys(selectedOptions),
+      selectedOptionsCount: Object.values(selectedOptions).flat().length,
+      selectedOptionsByCategory: Object.keys(selectedOptions).map(categoryId => ({
+        categoryId,
+        count: selectedOptions[categoryId]?.length || 0,
+        options: selectedOptions[categoryId]?.map(opt => ({ id: opt.id, name: opt.name, price: opt.price }))
+      })),
+      allSelectedOptions: allSelectedOptions.map(opt => ({ id: opt.id, name: opt.name, price: opt.price }))
+    });
+    
+    // Use robust price parsing for base price with enhanced variable product support
+    let basePrice = parsePrice(baseModel.regularPrice || baseModel.price);
+    
+    // For variable products or products with $0 price, try to extract from description or use minimum variation price
+    if (basePrice === 0 && baseModel.variations && baseModel.variations.length > 0) {
+      const variationPrices = baseModel.variations
+        .map((v: any) => parsePrice(v.price))
+        .filter((p: number) => p > 0);
+      
+      if (variationPrices.length > 0) {
+        basePrice = Math.min(...variationPrices);
+        console.log(`🔧 Using minimum variation price ${basePrice} for base product ${baseModel.name}`);
+      }
+    }
+    
     const optionsPrice = allSelectedOptions.reduce((sum, option) => {
       // Use getOptionPrice utility to ensure consistent price calculation
       return sum + getOptionPrice(option);
@@ -354,6 +469,14 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
 
   // Real-time state synchronization for enhanced user flow
   useEffect(() => {
+    console.log(`🔧 DEBUG: ModelConfigurator useEffect triggered - selectedOptionsWithVariations changed:`, {
+      count: selectedOptionsWithVariations.length,
+      options: selectedOptionsWithVariations.map(so => ({
+        optionName: so.option.name,
+        totalPrice: so.totalPrice,
+        variationsCount: so.selectedVariations.length
+      }))
+    });
     updateConfigurationSummary();
   }, [selectedOptionsWithVariations, updateConfigurationSummary]);
 
@@ -559,7 +682,7 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
 
   // Get current category
   const currentCategory = categories.find(c => c.id === currentCategoryId);
-  const currentCategoryOptions = selectedOptions[currentCategoryId] || [];
+  const currentCategorySelectedOptions = selectedOptions[currentCategoryId] || [];
 
   if (loading) {
     return (
@@ -605,7 +728,7 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
   return (
     <ConfiguratorErrorBoundary>
       <div 
-        className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${className}`}
+        className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-20 pb-8 ${className}`}
         // Phase 3: Enhanced accessibility
         data-reduced-motion={reducedMotion}
         data-high-contrast={highContrast}
@@ -706,14 +829,15 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
           ) : currentCategory ? (
             <CategoryGroup
               category={currentCategory}
-              selectedOptions={currentCategoryOptions}
+              selectedOptions={currentCategorySelectedOptions}
               compatibilityIssues={compatibilityIssues
                 .filter(issue => 
                   issue.affectedOptions.some(optionId => 
-                    currentCategoryOptions.some(option => option.databaseId === optionId)
+                    currentCategorySelectedOptions.some(option => option.databaseId === optionId)
                   )
                 )
               }
+              isEditMode={isEditMode}
               onToggleOption={(option) => handleOptionToggle(option, currentCategoryId)}
               onViewDetails={(option) => {
                 // Navigate to product detail page for the option

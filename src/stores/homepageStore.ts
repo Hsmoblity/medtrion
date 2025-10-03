@@ -26,7 +26,21 @@ export const useHomepageStore = create<HomepageState>((set) => ({
       // Map raw GraphQL data to ProductSchema first
       const productSchemas = data.products.nodes
         .map(product => {
+          console.log('Homepage Store - Raw WooCommerce product:', {
+            name: product.name,
+            slug: product.slug,
+            image: product.image,
+            featuredImage: product.featuredImage,
+            galleryImages: product.galleryImages
+          });
+          
           const mappedProduct = mapWooToProductSchema(product);
+          console.log('Homepage Store - Mapped product:', {
+            title: mappedProduct.title,
+            slug: mappedProduct.slug,
+            featuredImage: mappedProduct.featuredImage
+          });
+          
           const validation = validateProductSchema(mappedProduct);
           if (!validation.isValid) {
             console.warn('Invalid product data:', validation.errors);

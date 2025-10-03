@@ -89,6 +89,14 @@ const OptionCard: React.FC<OptionCardProps> = ({
   disabled = false,
   loading = false,
   className = '',
+  
+  // Edit Session Props
+  editSessionId,
+  isEditMode = false,
+  originallySelected = false,
+  hasChanged = false,
+  cartItemId,
+  
   variant = 'default',
   size = 'medium',
   showDetails = true,
@@ -294,30 +302,10 @@ const OptionCard: React.FC<OptionCardProps> = ({
       return;
     }
     
-    await executeWithRetry(async () => {
-      // Check compatibility before selection
-      if (onCheckCompatibility && !isSelected) {
-        setInternalState(prev => ({ ...prev, compatibilityChecking: true }));
-        const issues = await onCheckCompatibility(option);
-        
-        if (issues.some(issue => issue.rule.severity === 'ERROR')) {
-          throw new Error('Compatibility conflict detected');
-        }
-      }
-      
-      // Toggle selection for SIMPLE options
-      if (isSelected) {
-        removeOption(option.databaseId || 0, categoryId);
-        onDeselect?.(option, categoryId);
-        accessibility.announceToScreenReader(`${option.name} deselected`, 'polite');
-      } else {
-        addOption(option, categoryId);
-        onSelect?.(option, categoryId);
-        accessibility.announceToScreenReader(`${option.name} selected`, 'polite');
-      }
-      
-      // Emit toggle event
-      onToggle?.(option, categoryId);
+    // Use external toggle handler if provided, otherwise use internal logic
+    if (onToggle) {
+      // Use external toggle handler (preferred approach)
+      onToggle(option, categoryId);
       
       // Analytics tracking
       if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -328,7 +316,41 @@ const OptionCard: React.FC<OptionCardProps> = ({
           is_selected: !isSelected
         });
       }
-    });
+    } else {
+      // Fallback to internal toggle logic
+      await executeWithRetry(async () => {
+        // Check compatibility before selection
+        if (onCheckCompatibility && !isSelected) {
+          setInternalState(prev => ({ ...prev, compatibilityChecking: true }));
+          const issues = await onCheckCompatibility(option);
+          
+          if (issues.some(issue => issue.rule.severity === 'ERROR')) {
+            throw new Error('Compatibility conflict detected');
+          }
+        }
+        
+        // Toggle selection for SIMPLE options
+        if (isSelected) {
+          removeOption(option.databaseId || 0, categoryId);
+          onDeselect?.(option, categoryId);
+          accessibility.announceToScreenReader(`${option.name} deselected`, 'polite');
+        } else {
+          addOption(option, categoryId);
+          onSelect?.(option, categoryId);
+          accessibility.announceToScreenReader(`${option.name} selected`, 'polite');
+        }
+        
+        // Analytics tracking
+        if (typeof window !== 'undefined' && (window as any).gtag) {
+          (window as any).gtag('event', 'option_toggle', {
+            option_id: option.databaseId,
+            option_name: option.name || option.title,
+            category_id: categoryId,
+            is_selected: !isSelected
+          });
+        }
+      });
+    }
 
   }, [
     disabled, loading, isSelected, option, categoryId, 
@@ -520,16 +542,42 @@ const OptionCard: React.FC<OptionCardProps> = ({
         {/* Phase 2: Enhanced Selection Status Indicator with improved animations */}
         <div className="absolute top-4 right-4 z-10">
           {isSelected ? (
-            <div className={`
-              w-8 h-8 bg-green-600 rounded-full 
-              flex items-center justify-center text-white transform 
-              transition-all duration-300 ease-out shadow-lg ring-2 ring-green-200
-              ${reducedMotion ? 'transition-none' : 'scale-110 animate-[bounce_0.6s_ease-out]'}
-              hover:scale-125 hover:shadow-xl hover:ring-4 hover:ring-green-300
-            `}>
-              <svg className={`w-5 h-5 transition-transform duration-200 ${!reducedMotion ? 'animate-[scale_0.3s_ease-out]' : ''}`} fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
+            <div className="flex items-center space-x-2">
+              {/* Edit Mode Remove Button */}
+              {(isEditMode || variant === 'edit-mode') && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleClick(e);
+                  }}
+                  className={`
+                    w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full 
+                    flex items-center justify-center text-white transform 
+                    transition-all duration-300 ease-out shadow-lg ring-2 ring-red-200
+                    hover:scale-110 hover:shadow-xl hover:ring-4 hover:ring-red-300
+                    ${reducedMotion ? 'transition-none' : 'animate-[fadeIn_0.3s_ease-out]'}
+                  `}
+                  aria-label={`Remove ${option.name || option.title} from configuration`}
+                  title="Click to remove this option"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                  </svg>
+                </button>
+              )}
+              
+              {/* Selected Indicator */}
+              <div className={`
+                w-8 h-8 bg-green-600 rounded-full 
+                flex items-center justify-center text-white transform 
+                transition-all duration-300 ease-out shadow-lg ring-2 ring-green-200
+                ${reducedMotion ? 'transition-none' : 'scale-110 animate-[bounce_0.6s_ease-out]'}
+                hover:scale-125 hover:shadow-xl hover:ring-4 hover:ring-green-300
+              `}>
+                <svg className={`w-5 h-5 transition-transform duration-200 ${!reducedMotion ? 'animate-[scale_0.3s_ease-out]' : ''}`} fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
             </div>
           ) : (
             <div className={`
@@ -733,21 +781,27 @@ const OptionCard: React.FC<OptionCardProps> = ({
               }
               ${reducedMotion ? 'transition-none' : ''}
             `}
-            aria-label={isSelected ? `Remove ${option.name || option.title} from configuration` : `Add ${option.name || option.title} to configuration`}
+            aria-label={
+              isSelected 
+                ? (isEditMode || variant === 'edit-mode') 
+                  ? `Remove ${option.name || option.title} from configuration` 
+                  : `Remove ${option.name || option.title} from configuration`
+                : `Add ${option.name || option.title} to configuration`
+            }
           >
             {isSelected ? (
               <>
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
-                Selected
+                {(isEditMode || variant === 'edit-mode') ? 'Remove from Configuration' : 'Selected'}
               </>
             ) : (
               <>
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
                 </svg>
-                Select
+                {(isEditMode || variant === 'edit-mode') ? 'Add to Configuration' : 'Select'}
               </>
             )}
           </button>
@@ -805,24 +859,29 @@ const OptionCard: React.FC<OptionCardProps> = ({
               }
             };
             
-            console.log('OptionCard: Adding option with variations to configurator:', {
+            console.log('🔧 DEBUG: OptionCard adding option with variations to configurator:', {
               optionId: option.id,
               optionName: option.name,
               basePrice: parseFloat(option.price?.toString() || '0'),
               calculatedTotalFromPopup: calculatedTotalPrice,
               finalTotalPrice: optionWithVariations.totalPrice,
-              variationsCount: variations.length
+              variationsCount: variations.length,
+              priceBreakdown: optionWithVariations.priceBreakdown
             });
             
-            // Add directly to the configurator store
-            addOption(optionWithVariations, categoryId);
-            
-            // Call the onToggle prop for any additional handling (if provided)
-            // onToggle?.(optionWithVariations, categoryId);
+            // Use external toggle handler if provided, otherwise use internal logic
+            if (onToggle) {
+              onToggle(optionWithVariations, categoryId);
+            } else {
+              addOption(optionWithVariations, categoryId);
+            }
           } else {
             // For SIMPLE options or VARIABLE options without variations
-            addOption(option, categoryId);
-            // onToggle?.(option, categoryId);
+            if (onToggle) {
+              onToggle(option, categoryId);
+            } else {
+              addOption(option, categoryId);
+            }
           }
         }}
         isAlreadySelected={isSelected}

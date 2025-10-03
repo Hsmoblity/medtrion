@@ -1,19 +1,46 @@
 import React, { useState } from 'react';
+import { useCartStore } from '../../stores/cartStore';
+import StripeElements from './StripeElements';
+import { CartProduct } from '../../lib/interfaces';
 
 interface PaymentMethodPanelProps {
   onPaymentMethodChange?: (method: 'card' | 'stripe') => void;
+  onPaymentSuccess?: (paymentIntent: any) => void;
+  onPaymentError?: (error: any) => void;
 }
 
 const PaymentMethodPanel: React.FC<PaymentMethodPanelProps> = ({
-  onPaymentMethodChange
+  onPaymentMethodChange,
+  onPaymentSuccess,
+  onPaymentError
 }) => {
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'stripe'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'stripe'>('stripe');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const cartItems = useCartStore(state => state.cart);
 
   const handlePaymentMethodChange = (method: 'card' | 'stripe') => {
     setPaymentMethod(method);
     if (onPaymentMethodChange) {
       onPaymentMethodChange(method);
     }
+  };
+
+  const handlePaymentSuccess = (paymentIntent: any) => {
+    console.log('Payment successful:', paymentIntent);
+    if (onPaymentSuccess) {
+      onPaymentSuccess(paymentIntent);
+    }
+  };
+
+  const handlePaymentError = (error: any) => {
+    console.error('Payment error:', error);
+    if (onPaymentError) {
+      onPaymentError(error);
+    }
+  };
+
+  const handlePaymentProcessing = (processing: boolean) => {
+    setIsProcessing(processing);
   };
 
   return (
@@ -172,28 +199,28 @@ const PaymentMethodPanel: React.FC<PaymentMethodPanelProps> = ({
       )}
 
       {paymentMethod === 'stripe' && (
-        <div className="stripe-elements">
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-              <div className="text-sm text-blue-800 dark:text-blue-200">
-                <p className="font-medium">Stripe Integration</p>
-                <p>Advanced payment processing would be integrated here.</p>
+        <div className="stripe-form">
+          {cartItems.length > 0 ? (
+            <StripeElements
+              cartItems={cartItems}
+              onPaymentSuccess={handlePaymentSuccess}
+              onPaymentError={handlePaymentError}
+              onPaymentProcessing={handlePaymentProcessing}
+            />
+          ) : (
+            <div className="text-center py-8">
+              <div className="text-gray-500 dark:text-gray-400">
+                <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+                </svg>
+                <p className="text-lg font-medium">Your cart is empty</p>
+                <p className="text-sm">Add some items to your cart to proceed with payment</p>
               </div>
             </div>
-          </div>
-          
-          {/* Placeholder for Stripe Elements */}
-          <div className="mt-4 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 text-center text-gray-500 dark:text-gray-400">
-            <svg className="mx-auto h-12 w-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-            </svg>
-            <p>Stripe Elements would be loaded here</p>
-          </div>
+          )}
         </div>
       )}
+
 
       {/* Security Information */}
       <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">

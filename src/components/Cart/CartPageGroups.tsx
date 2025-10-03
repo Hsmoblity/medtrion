@@ -20,26 +20,43 @@ const CartPageGroups: React.FC = () => {
   const groupCartItems = (cartItems: CartProduct[]): ProductGroup[] => {
     const groups: { [key: string]: ProductGroup } = {};
     
+    console.log(`🔧 DEBUG: Cart items with options:`, cartItems.map(item => ({
+      title: item.title,
+      cartItemId: item.cartItemId,
+      slug: item.slug,
+      productId: item.productId,
+      optionsCount: item.options?.length || 0,
+      options: item.options?.map(opt => ({ 
+        name: opt.name, 
+        value: opt.value, 
+        priceModifier: opt.priceModifier,
+        type: opt.type 
+      })) || []
+    })));
+    
     cartItems.forEach((item, index) => {
-      // Use product slug or productId as the group key to group by actual product
-      // This ensures that products with the same slug/productId are grouped together
-      const groupKey = item.slug || item.productId?.toString() || `item-${index}`;
+      // Use cartItemId as the unique group key to prevent duplicates
+      // Each cart item should be its own group since it represents a unique configuration
+      const groupKey = item.cartItemId || `item-${index}`;
       
+      // Only create a group if it doesn't already exist
       if (!groups[groupKey]) {
         groups[groupKey] = {
           mainProduct: item,
           options: item.options || [], // Initialize with the item's options
           configId: item.cartItemId ? String(item.cartItemId) : undefined
         };
+        
+        console.log(`🔧 Created group for cart item: ${item.title} (${item.cartItemId}) with ${item.options?.length || 0} options`);
       } else {
-        // If this item has options, add them to the group
-        if (item.options && Array.isArray(item.options) && item.options.length > 0) {
-          groups[groupKey].options.push(...item.options);
-        }
+        console.warn(`🔧 Duplicate cart item detected: ${item.title} (${item.cartItemId})`);
       }
     });
     
-    return Object.values(groups);
+    const groupedItems = Object.values(groups);
+    console.log(`🔧 Grouped ${cartItems.length} cart items into ${groupedItems.length} groups`);
+    
+    return groupedItems;
   };
 
   const handleEditConfiguration = (product: CartProduct) => {

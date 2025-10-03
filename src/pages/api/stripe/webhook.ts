@@ -1,7 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
-import { GraphQLClient, gql } from 'graphql-request';
 import { buffer } from 'micro';
+import {
+  processCheckoutSessionCompleted,
+  processPaymentIntentSucceeded,
+  processPaymentIntentFailed,
+  processChargeDisputeCreated,
+  processInvoicePaymentSucceeded,
+} from '../../../lib/stripe/webhookProcessors';
+import { logWebhookEvent } from '../../../lib/stripe/dataSync';
 
 // Disable Next.js body parsing to get raw body for signature verification
 export const config = {
@@ -15,52 +22,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: "2024-04-10",
 });
 
-// Initialize WordPress GraphQL client
-const WP_GRAPHQL_URL = process.env.WP_GRAPHQL_URL || '';
-let wpClient: GraphQLClient | null = null;
-if (WP_GRAPHQL_URL) {
-  try {
-    new URL(WP_GRAPHQL_URL);
-    wpClient = new GraphQLClient(WP_GRAPHQL_URL);
-  } catch (e) {
-    console.warn('Invalid WP_GRAPHQL_URL in webhook:', WP_GRAPHQL_URL, e);
-    wpClient = null;
-  }
-} else {
-  console.warn('WP_GRAPHQL_URL not set in webhook.');
-}
-
-// GraphQL mutation to update order status
-const UPDATE_ORDER_STATUS = gql`
-  mutation UpdateOrderStatus($input: UpdateOrderStatusInput!) {
-    updateOrderStatus(input: $input) {
-      success
-      message
-      order {
-        id
-        orderNumber
-        status
-        paymentStatus
-      }
-      errors
-    }
-  }
-`;
-
-// Type definitions for GraphQL responses
-interface UpdateOrderStatusResponse {
-  updateOrderStatus: {
-    success: boolean;
-    message?: string;
-    order?: {
-      id: string;
-      orderNumber: string;
-      status: string;
-      paymentStatus: string;
-    };
-    errors?: string[];
-  };
-}
 
 export default async function webhookHandler(
   req: NextApiRequest,
@@ -122,28 +83,54 @@ export default async function webhookHandler(
   console.log(`Received Stripe webhook event: ${event.type} [${event.id}]`);
 
   try {
+    // Log webhook event start
+    await logWebhookEvent({
+      eventType: event.type,
+      eventId: event.id,
+      status: 'processing',
+      metadata: {
+        source: 'stripe_webhook_handler',
+        timestamp: new Date().toISOString(),
+      }
+    });
+
     // Handle different event types
     switch (event.type) {
       case 'checkout.session.completed':
-        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+        await processCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
         break;
       
       case 'payment_intent.succeeded':
-        await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
+        await processPaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
         break;
       
       case 'payment_intent.payment_failed':
-        await handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent);
+        await processPaymentIntentFailed(event.data.object as Stripe.PaymentIntent);
+        break;
+      
+      case 'charge.dispute.created':
+        await processChargeDisputeCreated(event.data.object as Stripe.Dispute);
         break;
       
       case 'invoice.payment_succeeded':
-        await handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice);
+        await processInvoicePaymentSucceeded(event.data.object as Stripe.Invoice);
         break;
       
       default:
         console.log(`Unhandled event type: ${event.type}`);
         break;
     }
+
+    // Log successful processing
+    await logWebhookEvent({
+      eventType: event.type,
+      eventId: event.id,
+      status: 'success',
+      metadata: {
+        source: 'stripe_webhook_handler',
+        processedAt: new Date().toISOString(),
+      }
+    });
 
     // Return success response
     res.status(200).json({ 
@@ -155,190 +142,23 @@ export default async function webhookHandler(
   } catch (error: any) {
     console.error('Error processing webhook:', error);
     
+    // Log failed processing
+    await logWebhookEvent({
+      eventType: event.type,
+      eventId: event.id,
+      status: 'failed',
+      errorMessage: error.message,
+      metadata: {
+        source: 'stripe_webhook_handler',
+        failedAt: new Date().toISOString(),
+      }
+    });
+    
     // Return 500 for retries by Stripe
     res.status(500).json({ 
       error: 'Webhook processing failed',
       message: error.message,
       received: false 
     });
-  }
-}
-
-/**
- * Handle successful checkout session completion
- */
-async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
-  console.log('Processing checkout.session.completed:', session.id);
-
-  try {
-    // Extract order information from session metadata or payment intent
-    const paymentIntentId = session.payment_intent as string;
-    const customerEmail = session.customer_details?.email;
-    const amountTotal = session.amount_total || 0;
-    const currency = session.currency;
-
-    // Get WordPress order ID from session metadata
-    let wpOrderId: string | null = null;
-    
-    // Try to get order ID from session metadata
-    if (session.metadata?.wpOrderId) {
-      wpOrderId = session.metadata.wpOrderId;
-    }
-    
-    // If no order ID in metadata, try to find order by payment intent
-    if (!wpOrderId && paymentIntentId) {
-      // You might need to implement a function to find order by payment intent
-      console.log('No wpOrderId in session metadata, payment_intent:', paymentIntentId);
-    }
-
-    if (wpOrderId && wpClient) {
-      // Update WordPress order status
-      const updateInput = {
-        orderId: parseInt(wpOrderId, 10),
-        status: 'processing', // or 'completed' based on your business logic
-        paymentStatus: 'paid',
-        paymentIntentId: paymentIntentId,
-        stripeSessionId: session.id,
-        amountPaid: amountTotal,
-        currency: currency,
-        customerEmail: customerEmail,
-        metadata: {
-          stripeWebhookProcessed: true,
-          stripeEventId: session.id,
-          processedAt: new Date().toISOString(),
-        }
-      };
-
-      const result = await wpClient.request<UpdateOrderStatusResponse>(UPDATE_ORDER_STATUS, { input: updateInput });
-      
-      if (result.updateOrderStatus?.success) {
-        console.log('Successfully updated WordPress order:', wpOrderId);
-      } else {
-        console.error('Failed to update WordPress order:', result.updateOrderStatus?.errors);
-      }
-    } else {
-      console.warn('Cannot update order: missing wpOrderId or wpClient not configured');
-    }
-
-    // Additional processing can be added here:
-    // - Send confirmation emails
-    // - Update inventory
-    // - Trigger fulfillment processes
-    // - Analytics tracking
-
-  } catch (error: any) {
-    console.error('Error handling checkout.session.completed:', error);
-    throw error; // Re-throw to trigger webhook retry
-  }
-}
-
-/**
- * Handle successful payment intent
- */
-async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-  console.log('Processing payment_intent.succeeded:', paymentIntent.id);
-
-  try {
-    // Extract order information from payment intent metadata
-    const wpOrderId = paymentIntent.metadata?.wpOrderId;
-    const amountReceived = paymentIntent.amount_received;
-    const currency = paymentIntent.currency;
-
-    if (wpOrderId && wpClient) {
-      // Update payment status in WordPress
-      const updateInput = {
-        orderId: parseInt(wpOrderId, 10),
-        paymentStatus: 'paid',
-        paymentIntentId: paymentIntent.id,
-        amountPaid: amountReceived,
-        currency: currency,
-        metadata: {
-          stripeWebhookProcessed: true,
-          stripeEventId: paymentIntent.id,
-          processedAt: new Date().toISOString(),
-        }
-      };
-
-      const result = await wpClient.request<UpdateOrderStatusResponse>(UPDATE_ORDER_STATUS, { input: updateInput });
-      
-      if (result.updateOrderStatus?.success) {
-        console.log('Successfully updated payment status for order:', wpOrderId);
-      } else {
-        console.error('Failed to update payment status:', result.updateOrderStatus?.errors);
-      }
-    }
-
-  } catch (error: any) {
-    console.error('Error handling payment_intent.succeeded:', error);
-    throw error;
-  }
-}
-
-/**
- * Handle failed payment intent
- */
-async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
-  console.log('Processing payment_intent.payment_failed:', paymentIntent.id);
-
-  try {
-    const wpOrderId = paymentIntent.metadata?.wpOrderId;
-    const failureReason = paymentIntent.last_payment_error?.message || 'Payment failed';
-
-    if (wpOrderId && wpClient) {
-      // Update order status to failed
-      const updateInput = {
-        orderId: parseInt(wpOrderId, 10),
-        status: 'failed',
-        paymentStatus: 'failed',
-        paymentIntentId: paymentIntent.id,
-        metadata: {
-          stripeWebhookProcessed: true,
-          stripeEventId: paymentIntent.id,
-          failureReason: failureReason,
-          processedAt: new Date().toISOString(),
-        }
-      };
-
-      const result = await wpClient.request<UpdateOrderStatusResponse>(UPDATE_ORDER_STATUS, { input: updateInput });
-      
-      if (result.updateOrderStatus?.success) {
-        console.log('Successfully updated failed payment for order:', wpOrderId);
-      } else {
-        console.error('Failed to update failed payment status:', result.updateOrderStatus?.errors);
-      }
-    }
-
-  } catch (error: any) {
-    console.error('Error handling payment_intent.payment_failed:', error);
-    throw error;
-  }
-}
-
-/**
- * Handle successful invoice payment (for subscription scenarios)
- */
-async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-  console.log('Processing invoice.payment_succeeded:', invoice.id);
-
-  try {
-    // Handle subscription or recurring payment success
-    // This might be used for future subscription features
-    
-    const subscriptionId = invoice.subscription as string;
-    const customerId = invoice.customer as string;
-    const amountPaid = invoice.amount_paid;
-
-    console.log('Invoice payment succeeded:', {
-      invoiceId: invoice.id,
-      subscriptionId,
-      customerId,
-      amountPaid
-    });
-
-    // Add subscription-specific logic here when needed
-
-  } catch (error: any) {
-    console.error('Error handling invoice.payment_succeeded:', error);
-    throw error;
   }
 }

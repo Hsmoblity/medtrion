@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useHomepageStore } from '../../stores/homepageStore';
-import ProductHeroCard from './ProductHeroCard';
-import EnhancedProductCard from './EnhancedProductCard';
+import ProductCard from '../ui/ProductCard';
 import { useProductFilters } from '../../lib/hooks/useProductFilters';
 import { getFeatureFlag } from '../../lib/featureFlags';
+import { mapToProductCardView } from '../../lib/interfaces/homepage';
 
 interface TopProductsStripProps {
   enableShowcase?: boolean; // Feature flag support
@@ -235,13 +235,17 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
             }`}
           >
             {filteredProducts.slice(0, 8).map((product, index) => (
-              <EnhancedProductCard
+              <ProductCard
                 key={product.databaseId || product.slug || index}
                 product={product}
+                variant="enhanced"
                 index={index}
                 priority={index === 0}
                 onHeroClick={handleHeroProductClick}
                 position={index}
+                showConfigureButton={false}
+                showAddToCartButton={false}
+                cardClickBehavior="configurator"
               />
             ))}
           </motion.div>
@@ -250,12 +254,16 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
             {/* Desktop: Grid layout, Mobile: Horizontal scroll */}
             <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {featuredProducts.slice(0, 4).map((product, index) => (
-                <ProductHeroCard 
+                <ProductCard 
                   key={product.databaseId || product.slug || index} 
                   product={product} 
+                  variant="hero"
                   priority={index === 0}
                   onHeroClick={handleHeroProductClick}
                   position={index}
+                  showConfigureButton={false}
+                  showAddToCartButton={false}
+                  cardClickBehavior="configurator"
                 />
               ))}
             </div>
@@ -265,11 +273,15 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
               <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
                 {featuredProducts.slice(0, 4).map((product, index) => (
                   <div key={product.databaseId || product.slug || index} className="flex-none w-72">
-                    <ProductHeroCard 
+                    <ProductCard 
                       product={product} 
+                      variant="hero"
                       priority={index === 0}
                       onHeroClick={handleHeroProductClick}
                       position={index}
+                      showConfigureButton={false}
+                      showAddToCartButton={false}
+                      cardClickBehavior="configurator"
                     />
                   </div>
                 ))}

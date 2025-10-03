@@ -63,23 +63,22 @@ const Header = () => {
           <img
             src="/Logo.png"
             alt="Logo"
-            className="md:h-10 h-8 object-contain"
+            className="md:h-10 h-12 object-contain"
           />
         </Link>
-        <div className="md:hidden absolute top-5 right-5 flex flex-row ">
-          <button onClick={() => router.push('/cart')} className="relative z-50 outline-0 text-white items-start mt-2 mr-3 rounded-md border-1  flex flex-row" >
+        <div className="md:hidden absolute top-5 right-5 flex flex-row items-center gap-2">
+          <button onClick={() => router.push('/cart')} className="relative z-50 outline-0 text-white items-center rounded-md border-1 flex flex-row" >
             <MdShoppingCart
               color="black"
-              className="ml-2"
               size={32}
             />
             <ClientOnly fallback={
-              <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 -left-1 -bottom-1 bg-white opacity-0">
+              <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 -right-1 -top-1 bg-white opacity-0">
                 0
               </span>
             }>
               {isHydrated && cartLength > 0 && (
-                <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 -left-1 -bottom-1 bg-white">
+                <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 -right-1 -top-1 bg-white">
                   {cartLength}
                 </span>
               )}

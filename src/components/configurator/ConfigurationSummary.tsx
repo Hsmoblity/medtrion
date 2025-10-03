@@ -51,6 +51,19 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
   const enhancedSelectedOptions = propSelectedOptions || selectedOptionsWithVariations;
   const legacySelectedOptions = Object.values(selectedOptionsMap).flat();
   
+  // Debug logging for price update issue
+  console.log(`🔧 DEBUG: ConfigurationSummary render - enhancedSummary:`, {
+    basePrice: enhancedSummary?.basePrice,
+    optionsPrice: enhancedSummary?.optionsPrice,
+    totalPrice: enhancedSummary?.totalPrice,
+    selectedOptionsCount: enhancedSummary?.selectedOptions?.length || 0
+  });
+  console.log(`🔧 DEBUG: ConfigurationSummary render - enhancedSelectedOptions:`, enhancedSelectedOptions.map(so => ({
+    optionName: so.option.name,
+    totalPrice: so.totalPrice,
+    variationsCount: so.selectedVariations.length
+  })));
+  
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const formatCurrency = (amount: number) => {

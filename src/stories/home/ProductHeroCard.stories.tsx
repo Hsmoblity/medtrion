@@ -1,11 +1,11 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import ProductHeroCard from '../../components/Home/ProductHeroCard';
+import ProductCard from '../../components/ui/ProductCard';
 import { ProductCardView } from '../../lib/interfaces/homepage';
 
-const meta: Meta<typeof ProductHeroCard> = {
-  title: 'Home/ProductHeroCard',
-  component: ProductHeroCard,
+const meta: Meta<typeof ProductCard> = {
+  title: 'UI/ProductCard',
+  component: ProductCard,
   parameters: {
     layout: 'centered',
   },
@@ -49,9 +49,13 @@ const mockHeroClick = (slug: string, badge: string, position: number) => {
 export const Default: Story = {
   args: {
     product: baseMockProduct,
+    variant: 'hero',
     priority: false,
     position: 0,
     onHeroClick: mockHeroClick,
+    showConfigureButton: false,
+    showAddToCartButton: false,
+    cardClickBehavior: 'configurator',
   },
 };
 
@@ -61,9 +65,13 @@ export const WithBadges: Story = {
       ...baseMockProduct,
       badges: ['Top Seller', 'Premium'],
     },
+    variant: 'hero',
     priority: false,
     position: 0,
     onHeroClick: mockHeroClick,
+    showConfigureButton: false,
+    showAddToCartButton: false,
+    cardClickBehavior: 'configurator',
   },
 };
 
@@ -73,9 +81,13 @@ export const WithFinancing: Story = {
       ...baseMockProduct,
       financingCopy: 'from $99/mo',
     },
+    variant: 'hero',
     priority: false,
     position: 0,
     onHeroClick: mockHeroClick,
+    showConfigureButton: false,
+    showAddToCartButton: false,
+    cardClickBehavior: 'configurator',
   },
 };
 
@@ -85,9 +97,13 @@ export const WithRating: Story = {
       ...baseMockProduct,
       rating: 4.8,
     },
+    variant: 'hero',
     priority: false,
     position: 0,
     onHeroClick: mockHeroClick,
+    showConfigureButton: false,
+    showAddToCartButton: false,
+    cardClickBehavior: 'configurator',
   },
 };
 
@@ -98,9 +114,13 @@ export const WithOptions: Story = {
       optionsSummary: '12 options available',
       relatedOptions: [301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312],
     },
+    variant: 'hero',
     priority: false,
     position: 0,
     onHeroClick: mockHeroClick,
+    showConfigureButton: false,
+    showAddToCartButton: false,
+    cardClickBehavior: 'configurator',
   },
 };
 
@@ -114,9 +134,13 @@ export const FullyLoaded: Story = {
       optionsSummary: '12 options available',
       relatedOptions: [301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312],
     },
+    variant: 'hero',
     priority: true,
     position: 0,
     onHeroClick: mockHeroClick,
+    showConfigureButton: false,
+    showAddToCartButton: false,
+    cardClickBehavior: 'configurator',
   },
 };
 
@@ -127,9 +151,13 @@ export const LongTitle: Story = {
       title: 'Acorn 180 Premium Curved Stairlift with Advanced Safety Features and Custom Rail Configuration',
       badges: ['Premium'],
     },
+    variant: 'hero',
     priority: false,
     position: 0,
     onHeroClick: mockHeroClick,
+    showConfigureButton: false,
+    showAddToCartButton: false,
+    cardClickBehavior: 'configurator',
   },
 };
 
@@ -140,9 +168,13 @@ export const NoPrice: Story = {
       price: null,
       badges: ['Contact for Quote'],
     },
+    variant: 'hero',
     priority: false,
     position: 0,
     onHeroClick: mockHeroClick,
+    showConfigureButton: false,
+    showAddToCartButton: false,
+    cardClickBehavior: 'configurator',
   },
 };
 
@@ -152,8 +184,12 @@ export const MissingImage: Story = {
       ...baseMockProduct,
       imageUrl: '/placeholder.svg',
     },
+    variant: 'hero',
     priority: false,
     position: 0,
     onHeroClick: mockHeroClick,
+    showConfigureButton: false,
+    showAddToCartButton: false,
+    cardClickBehavior: 'configurator',
   },
 };

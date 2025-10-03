@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# AI Agent Commit Message Validation Hook
+# Rule R47: Documentation Standards - Comprehensive documentation
+
+echo "📝 AI Agent Commit Message Validation..."
+
+# Check commit message format
+commit_regex='^(feat|fix|docs|style|refactor|test|chore|ai): .{10,}'
+
+if ! grep -qE "$commit_regex" "$1"; then
+  echo "❌ Commit message format is invalid."
+  echo "💡 Use format: 'type: description' (e.g., 'feat: add user authentication')"
+  echo "📋 Valid types: feat, fix, docs, style, refactor, test, chore, ai"
+  exit 1
+fi
+
+echo "✅ Commit message format is valid."

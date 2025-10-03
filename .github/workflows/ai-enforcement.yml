@@ -1,0 +1,125 @@
+name: AI Agent Enforcement Pipeline
+
+on:
+  push:
+    branches: [ main, develop, feat-graphQL-polish-ui ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  ai-rule-validation:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: AI Rule Validation
+      run: node scripts/enforcement/rule-validator.js
+      
+    - name: AI Pre-Commit Validation
+      run: npm run ai:pre-commit
+      
+    - name: AI CI/CD Validation
+      run: npm run ai:ci-validation
+      
+    - name: AI Compliance Monitoring
+      run: npm run ai:compliance
+      
+    - name: Upload validation reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ai-enforcement-reports
+        path: .artifacts/*.json
+        
+    - name: Comment PR with enforcement results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          try {
+            const reportPath = path.join('.artifacts', 'rule-validation-report.json');
+            if (fs.existsSync(reportPath)) {
+              const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+              
+              const comment = `## 🤖 AI Agent Enforcement Results
+              
+              ### Rule Compliance Status
+              - **Compliance Score**: ${report.compliance_score.toFixed(1)}% (Threshold: ${report.threshold}%)
+              - **Status**: ${report.status}
+              - **Rules Passed**: ${report.passed_rules}/${report.total_rules}
+              
+              ### Violations Detected
+              ${report.violations.length > 0 ? 
+                report.violations.map(v => `- **${v.rule}**: ${v.message} (${v.severity})`).join('\n') :
+                '✅ No violations detected'
+              }
+              
+              ### Quality Gates Status
+              All AI agent development rules have been validated according to the project's enforcement configuration.
+              
+              **Enforcement Report**: [View Details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+          } catch (error) {
+            console.error('Error creating PR comment:', error);
+          }
+
+  quality-gates:
+    runs-on: ubuntu-latest
+    needs: ai-rule-validation
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Quality Gate - Build Verification
+      run: npm run build
+      
+    - name: Quality Gate - Test Suite
+      run: npm run test
+      
+    - name: Quality Gate - Security Audit
+      run: npm audit --audit-level=moderate
+      
+    - name: Quality Gate - TypeScript Check
+      run: npx tsc --noEmit
+      
+    - name: Quality Gate - ESLint Check
+      run: npm run lint
+      
+    - name: Quality Gate - E2E Tests
+      run: npm run test:e2e
+      
+    - name: Quality Gate Status
+      run: |
+        echo "✅ All quality gates passed"
+        echo "🚀 Ready for deployment"

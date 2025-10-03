@@ -201,9 +201,9 @@ const getElementType = (variant: TypographyVariant, as?: keyof JSX.IntrinsicElem
     large: 'p',
     base: 'p',
     small: 'p',
-    caption: 'span',
+    caption: 'p', // Changed from 'span' to 'p' to prevent hydration issues
     link: 'a',
-    button: 'span',
+    button: 'div', // Changed from 'span' to 'div' to prevent hydration issues
     label: 'label',
     code: 'code',
     quote: 'blockquote',

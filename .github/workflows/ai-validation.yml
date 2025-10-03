@@ -1,0 +1,78 @@
+name: AI Agent Validation Pipeline
+
+on:
+  push:
+    branches: [ main, develop, feat-graphQL-polish-ui ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  ai-validation:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: AI Pre-Commit Validation
+      run: npm run ai:pre-commit
+      
+    - name: AI CI/CD Validation
+      run: npm run ai:ci-validation
+      
+    - name: AI Compliance Monitoring
+      run: npm run ai:compliance
+      
+    - name: Upload validation reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ai-validation-reports
+        path: .artifacts/*.json
+        
+    - name: Comment PR with validation results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          try {
+            const reportPath = path.join('.artifacts', 'ci-validation-report.json');
+            if (fs.existsSync(reportPath)) {
+              const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+              
+              const comment = `## 🤖 AI Agent Validation Results
+              
+              ### Quality Gates Status
+              - **Build**: ${report.results.build.success ? '✅ Passed' : '❌ Failed'}
+              - **Tests**: ${report.results.tests.failed === 0 ? '✅ Passed' : '❌ Failed'}
+              - **Coverage**: ${report.results.coverage.percentage}% (Threshold: ${report.results.coverage.threshold}%)
+              - **Security**: ${report.results.security.vulnerabilities} vulnerabilities (Threshold: ${report.results.security.threshold})
+              - **Performance**: ${report.results.performance.score}/100 (Threshold: ${report.results.performance.threshold})
+              
+              ### Compliance Status
+              All AI agent development rules have been validated according to the project's validation configuration.
+              
+              **Validation Report**: [View Details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+          } catch (error) {
+            console.error('Error creating PR comment:', error);
+          }

@@ -30,27 +30,34 @@ export interface ValidationResult {
  * Standardize image data from various CMS sources
  */
 export function standardizeImage(image: any): string {
+  console.log('standardizeImage - Input:', image);
+  
   // Handle string URLs
   if (typeof image === 'string' && image.trim().length > 0) {
+    console.log('standardizeImage - Returning string URL:', image);
     return image;
   }
   
   // Handle GraphQL image objects
   if (image?.sourceUrl) {
+    console.log('standardizeImage - Returning sourceUrl:', image.sourceUrl);
     return image.sourceUrl;
   }
   
   // Handle Contentful image objects
   if (image?.fields?.file?.url) {
+    console.log('standardizeImage - Returning Contentful URL:', image.fields.file.url);
     return image.fields.file.url;
   }
   
   // Handle nested image objects
   if (image?.url) {
+    console.log('standardizeImage - Returning nested URL:', image.url);
     return image.url;
   }
   
   // Ultimate fallback
+  console.log('standardizeImage - Using fallback placeholder');
   return '/placeholder.svg';
 }
 

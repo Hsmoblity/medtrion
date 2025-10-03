@@ -5,7 +5,7 @@ export interface ProductSchema {
   slug: string;
   description: string;
   shortDescription: string;
-  featuredImage: any,
+  featuredImage: string | { sourceUrl?: string };
   productSpecifications: string | Document;
   productPictures: any;
   price: number;

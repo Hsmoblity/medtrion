@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export interface Blog {
     date: string;
@@ -15,6 +16,75 @@ export interface Blog {
 export interface BlogsPreProps {
     blogs: Blog[];
 }
+
+// Blog Image Component with fallback handling
+const BlogImage: React.FC<{ 
+    src: string; 
+    alt: string; 
+    index: number;
+    className?: string;
+}> = ({ src, alt, index, className = "" }) => {
+    const [imgSrc, setImgSrc] = useState(src);
+    const [isLoading, setIsLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
+
+    // Fallback images for different types of content
+    const fallbackImages = [
+        'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop&q=80', // Home accessibility
+        'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&h=300&fit=crop&q=80', // Senior mobility
+        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop&q=80', // Home safety/stairs
+        'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&q=80', // Equipment/tools
+        'https://images.unsplash.com/photo-1581578731548-c6a0c3f2f6c5?w=400&h=300&fit=crop&q=80', // Maintenance
+        'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=300&fit=crop&q=80'  // Modern home interior
+    ];
+
+    const handleError = () => {
+        setHasError(true);
+        setIsLoading(false);
+        // Use a different fallback image based on index
+        const fallbackIndex = index % fallbackImages.length;
+        const fallbackSrc = fallbackImages[fallbackIndex];
+        
+        if (imgSrc !== fallbackSrc) {
+            setImgSrc(fallbackSrc);
+            setHasError(false);
+            setIsLoading(true);
+        }
+    };
+
+    const handleLoad = () => {
+        setIsLoading(false);
+        setHasError(false);
+    };
+
+    return (
+        <div className="relative w-full h-full">
+            {isLoading && (
+                <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+                    <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            )}
+            
+            <Image
+                className={`transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'} ${className}`}
+                src={imgSrc}
+                alt={alt}
+                width={400}
+                height={300}
+                style={{ objectFit: 'cover' }}
+                priority={index < 3}
+                onLoad={handleLoad}
+                onError={handleError}
+            />
+            
+            {hasError && (
+                <div className="absolute bottom-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                    Image unavailable
+                </div>
+            )}
+        </div>
+    );
+};
 
 // Coming Soon Modal Component
 const ComingSoonModal: React.FC<{ isOpen: boolean; onClose: () => void; blogTitle: string }> = ({ 
@@ -217,12 +287,11 @@ export function BlogsPre({ blogs }: BlogsPreProps) {
                         >
                             {/* Image Container */}
                             <div className="h-[300px] overflow-hidden rounded-t-xl relative">
-                                <img
-                                    className="h-full w-full object-fill" // Ensures the image fills the container
-                                    src={blog.image} // Directly use the image URL
+                                <BlogImage
+                                    src={blog.image}
                                     alt={blog.alt || "Blog image"}
-                                    loading='lazy'
-                                    height={300}
+                                    index={index}
+                                    className="h-full w-full object-cover"
                                 />
                                 {/* Coming Soon Badge */}
                                 <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium">

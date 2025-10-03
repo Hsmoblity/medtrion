@@ -8,6 +8,17 @@ import {
   GET_CART
 } from './graphql/queries';
 import { parsePrice } from './utils/priceUtils';
+import {
+  validateGraphQLEndpoint,
+  createTimeoutFetch,
+  calculateRetryDelay,
+  logGraphQLError,
+  categorizeGraphQLError,
+  GraphQLTimeoutError,
+  GraphQLNetworkError,
+  GraphQLValidationError,
+  DEFAULT_GRAPHQL_OPTIONS
+} from './utils/graphql-error-handler';
 
 // Load environment variables in Node.js environment
 if (typeof window === 'undefined') {
@@ -82,12 +93,20 @@ if (WP_GRAPHQL_URL) {
 
 // Helper wrapper around client.request to add retry logic and better logging
 export async function runClientRequest(query: any, variables?: Record<string, any>) {
-    if (!client) throw new Error('GraphQL client not configured');
+    // Validate GraphQL endpoint configuration
+    const validation = validateGraphQLEndpoint(WP_GRAPHQL_URL);
+    if (!validation.isValid) {
+        throw new GraphQLValidationError(validation.error!, WP_GRAPHQL_URL);
+    }
 
-    // console.log('GraphQL query:', query);
+    if (!client) {
+        throw new GraphQLValidationError('GraphQL client not configured', WP_GRAPHQL_URL);
+    }
 
-    // Hard limit of 3 attempts to prevent infinite loops
-    const maxAttempts = 3;
+    const { timeout, maxAttempts, retryDelay } = DEFAULT_GRAPHQL_OPTIONS;
+    const timeoutFetch = createTimeoutFetch(timeout);
+
+    // Hard limit of attempts to prevent infinite loops
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
             const body = JSON.stringify({ query, variables });
@@ -103,7 +122,7 @@ export async function runClientRequest(query: any, variables?: Record<string, an
                 // This is already handled by the environment variable
             }
 
-            const response = await fetch(WP_GRAPHQL_URL, fetchOptions);
+            const response = await timeoutFetch(WP_GRAPHQL_URL, fetchOptions);
 
             if (!response.ok) {
                 const errorBody = await response.text();
@@ -118,21 +137,56 @@ export async function runClientRequest(query: any, variables?: Record<string, an
 
             return json.data;
         } catch (err: any) {
-            // Provide detailed log to help diagnose fetch failures (DNS, TLS, CORS, network)
-            console.error(`GraphQL request failed (attempt ${attempt}/${maxAttempts})`, {
+            const { errorCategory, errorContext } = logGraphQLError(err, {
                 url: WP_GRAPHQL_URL,
                 attempt,
-                message: err && err.message ? err.message : String(err),
-                stack: err && err.stack ? err.stack : undefined,
+                maxAttempts,
             });
-            if (attempt === maxAttempts) throw err;
-            // backoff before retrying
-            await new Promise(res => setTimeout(res, attempt * 300));
+
+            // Don't retry on validation errors or final attempt
+            if (errorCategory === 'graphql' || attempt === maxAttempts) {
+                // Throw appropriate error type based on category
+                switch (errorCategory) {
+                    case 'timeout':
+                        throw new GraphQLTimeoutError(
+                            `GraphQL request timed out after ${timeout}ms`,
+                            errorContext
+                        );
+                    case 'network':
+                        throw new GraphQLNetworkError(
+                            `GraphQL network error: ${err.message}`,
+                            errorContext
+                        );
+                    default:
+                        throw err;
+                }
+            }
+
+            // Calculate exponential backoff delay for retry
+            const delay = calculateRetryDelay(attempt, retryDelay);
+            await new Promise(res => setTimeout(res, delay));
         }
     }
 }
 
 export async function fetchGraphQLProducts() {
+    // Validate GraphQL endpoint configuration first
+    const validation = validateGraphQLEndpoint(WP_GRAPHQL_URL);
+    if (!validation.isValid) {
+        if (process.env.NODE_ENV === 'development') {
+            console.error('fetchGraphQLProducts: Invalid GraphQL configuration:', validation.error);
+            console.error('Available environment variables:', {
+                WP_GRAPHQL_URL: process.env.WP_GRAPHQL_URL,
+                NEXT_PUBLIC_WP_GRAPHQL_URL: process.env.NEXT_PUBLIC_WP_GRAPHQL_URL,
+                NODE_ENV: process.env.NODE_ENV
+            });
+        } else {
+            console.warn('fetchGraphQLProducts: GraphQL endpoint not properly configured');
+        }
+        // Return empty array for graceful fallback
+        return [];
+    }
+
     if (!client) {
         const errorMsg = 'GraphQL client not configured - products temporarily unavailable';
         if (process.env.NODE_ENV === 'development') {
@@ -145,8 +199,10 @@ export async function fetchGraphQLProducts() {
         } else {
             console.warn('fetchGraphQLProducts: GraphQL client not configured');
         }
-        throw new Error(errorMsg);
+        // Return empty array for graceful fallback instead of throwing
+        return [];
     }
+
     const query = GET_ALL_PRODUCTS;
     try {
         const data = await runClientRequest(query) as { products: { nodes: any[] } };
@@ -299,8 +355,25 @@ export async function fetchGraphQLProducts() {
         }
 
         return nodes;
-    } catch (error) {
-        console.error('Error fetching products from WPGraphQL:', error);
+    } catch (error: any) {
+        const { errorCategory } = logGraphQLError(error, {
+            url: WP_GRAPHQL_URL,
+            attempt: 1,
+            maxAttempts: 1,
+        });
+
+        // Log appropriate message based on error type
+        if (errorCategory === 'timeout') {
+            console.warn('fetchGraphQLProducts: Request timed out, returning empty products array for graceful fallback');
+        } else if (errorCategory === 'network') {
+            console.warn('fetchGraphQLProducts: Network error occurred, returning empty products array for graceful fallback');
+        } else if (errorCategory === 'graphql') {
+            console.warn('fetchGraphQLProducts: GraphQL error occurred, returning empty products array for graceful fallback');
+        } else {
+            console.error('fetchGraphQLProducts: Unexpected error occurred:', error?.message || 'Unknown error');
+        }
+
+        // Always return empty array for graceful fallback
         return [];
     }
 }
@@ -644,10 +717,24 @@ function mapNodesToConfiguratorFormat(nodes: any[]): any[] {
         const globalAttrs = node.globalAttributes?.nodes || [];
         const localAttrs = node.attributes?.nodes || [];
         
-        // Extract price information using safe price parsing
-        const price = parsePrice(node.price);
-        const regularPrice = parsePrice(node.regularPrice || node.price);
+        // Extract price information using safe price parsing with variable product support
+        let price = parsePrice(node.price);
+        let regularPrice = parsePrice(node.regularPrice || node.price);
         const salePrice = node.salePrice ? parsePrice(node.salePrice) : null;
+
+        // For variable products with $0 base price, try to get price from cheapest variation
+        if (price === 0 && node.variations && node.variations.nodes && node.variations.nodes.length > 0) {
+            const variationPrices = node.variations.nodes
+                .map((v: any) => parsePrice(v.price))
+                .filter((p: number) => p > 0);
+            
+            if (variationPrices.length > 0) {
+                const minPrice = Math.min(...variationPrices);
+                price = minPrice;
+                if (regularPrice === 0) regularPrice = minPrice;
+                console.log(`🔧 Variable product ${node.name} (ID: ${node.databaseId}): Using minimum variation price ${minPrice} instead of base price 0`);
+            }
+        }
 
         // Normalize related options for nested option products
         let normalizedRelatedOptions: number[] = [];

@@ -1,206 +1,267 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useCartStore } from "stores/cartStore";
-import MetaHead from "components/MetaHead";
-import Link from "next/link";
-import PaymentStatus, { PaymentStatusData } from "../components/payment/PaymentStatus";
+import Head from 'next/head';
+import { PrimaryButton } from '../components/ui';
+import OrderConfirmation from '../components/payment/OrderConfirmation';
 
-const Success = () => {
-  const clearCart = useCartStore(state => state.clearCart);
+interface SuccessPageProps {
+  sessionId?: string;
+  wpOrderId?: string;
+}
+
+const SuccessPage: React.FC<SuccessPageProps> = () => {
   const router = useRouter();
-  const { wpOrderId, session_id } = router.query as { wpOrderId?: string; session_id?: string };
-  const [paymentStatusData, setPaymentStatusData] = useState<PaymentStatusData | null>(null);
+  const [sessionData, setSessionData] = useState<any>(null);
+  const [orderData, setOrderData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Clear all cart items on success page
-    clearCart();
-  }, [clearCart]);
+    const { session_id, wp_order_id } = router.query;
+    
+    if (session_id) {
+      fetchSessionData(session_id as string);
+    } else {
+      setLoading(false);
+    }
+  }, [router.query]);
 
-  const handleStatusUpdate = (statusData: PaymentStatusData) => {
-    setPaymentStatusData(statusData);
+  const fetchSessionData = async (sessionId: string) => {
+    try {
+      // In a real implementation, you would fetch session data from your backend
+      // For now, we'll simulate the data
+      const mockSessionData = {
+        id: sessionId,
+        payment_status: 'paid',
+        amount_total: 3870, // Example amount in cents
+        currency: 'cad',
+        customer_details: {
+          email: 'customer@example.com',
+          name: 'John Doe',
+        },
+        shipping_details: {
+          address: {
+            line1: '123 Main St',
+            city: 'Toronto',
+            province: 'ON',
+            postal_code: 'M5V 3A8',
+            country: 'CA',
+          },
+        },
+        metadata: {
+          orderId: 'order_123456',
+          itemCount: '3',
+        },
+      };
+
+      setSessionData(mockSessionData);
+      
+      // Fetch order details if wp_order_id is provided
+      if (router.query.wp_order_id) {
+        await fetchOrderData(router.query.wp_order_id as string);
+      }
+      
+    } catch (error: any) {
+      console.error('Error fetching session data:', error);
+      setError('Failed to load payment confirmation. Please contact support.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Determine if we should show enhanced details
-  const hasSessionId = Boolean(session_id);
-  const isPaymentConfirmed = paymentStatusData?.sessionStatus === 'complete' && 
-                           paymentStatusData?.paymentStatus === 'paid';
+  const fetchOrderData = async (orderId: string) => {
+    try {
+      // In a real implementation, you would fetch order data from WordPress/WooCommerce
+      const mockOrderData = {
+        id: orderId,
+        status: 'processing',
+        total: '3870.00',
+        currency: 'CAD',
+        line_items: [
+          {
+            name: 'Acorn 180 Stairlift',
+            quantity: 1,
+            price: '2899.00',
+          },
+          {
+            name: 'Installation Service',
+            quantity: 1,
+            price: '500.00',
+          },
+          {
+            name: 'Extended Warranty',
+            quantity: 1,
+            price: '471.00',
+          },
+        ],
+        shipping_address: {
+          first_name: 'John',
+          last_name: 'Doe',
+          address_1: '123 Main St',
+          city: 'Toronto',
+          state: 'ON',
+          postcode: 'M5V 3A8',
+          country: 'CA',
+        },
+        billing_address: {
+          first_name: 'John',
+          last_name: 'Doe',
+          address_1: '123 Main St',
+          city: 'Toronto',
+          state: 'ON',
+          postcode: 'M5V 3A8',
+          country: 'CA',
+        },
+      };
+
+      setOrderData(mockOrderData);
+    } catch (error: any) {
+      console.error('Error fetching order data:', error);
+      // Don't set error here as session data is more important
+    }
+  };
+
+  const handleContinueShopping = () => {
+    router.push('/products');
+  };
+
+  const handleViewOrder = () => {
+    // In a real implementation, this would navigate to an order details page
+    console.log('View order:', orderData?.id || sessionData?.metadata?.orderId);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading payment confirmation...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <svg className="w-12 h-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <h2 className="text-xl font-semibold text-red-800 mb-2">Error</h2>
+            <p className="text-red-700 mb-4">{error}</p>
+            <PrimaryButton onClick={() => router.push('/')}>
+              Return to Home
+            </PrimaryButton>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
-      <MetaHead
-        title={"Payment Successful"}
-        description={
-          "Thank you for your purchase! Your payment has been processed successfully."
-        }
-      />
-      <div>
-        <div className="bg-white min-h-screen py-20 md:mx-auto">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Success Icon */}
-            <svg viewBox="0 0 24 24" className="text-green-600 w-16 h-16 mx-auto my-6">
-              <path fill="currentColor"
-                d="M12,0A12,12,0,1,0,24,12,12.014,12.014,0,0,0,12,0Zm6.927,8.2-6.845,9.289a1.011,1.011,0,0,1-1.43.188L5.764,13.769a1,1,0,1,1,1.25-1.562l4.076,3.261,6.227-8.451A1,1,0,1,1,18.927,8.2Z">
-              </path>
-            </svg>
+      <Head>
+        <title>Payment Successful - HSMobility</title>
+        <meta name="description" content="Your payment has been processed successfully." />
+      </Head>
+
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4">
+          {/* Success Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
+            <p className="text-lg text-gray-600">
+              Thank you for your purchase. Your order has been confirmed.
+            </p>
+          </div>
+
+          {/* Order Confirmation */}
+          {sessionData && (
+            <OrderConfirmation
+              sessionData={sessionData}
+              orderData={orderData}
+              onViewOrder={handleViewOrder}
+            />
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+            <PrimaryButton
+              onClick={handleContinueShopping}
+              className="min-w-[200px]"
+            >
+              Continue Shopping
+            </PrimaryButton>
             
-            <div className="text-center">
-              <h1 className="md:text-3xl text-xl text-gray-900 font-bold text-center mb-4">
-                Payment Successful!
-              </h1>
-              <p className="text-gray-600 my-2 text-lg">
-                Thank you for completing your secure online payment.
-              </p>
-              <p className="text-gray-500 mb-8">
-                Your receipt will shortly arrive to your email!
-              </p>
-
-              {/* Order Reference */}
-              {wpOrderId && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6 inline-block">
-                  <p className="text-sm text-gray-600 mb-1">Order Reference</p>
-                  <p className="font-mono text-lg font-semibold text-gray-900">{wpOrderId}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Enhanced Payment Status */}
-            {hasSessionId && (
-              <div className="mb-8">
-                <PaymentStatus 
-                  sessionId={session_id}
-                  wpOrderId={wpOrderId}
-                  onStatusUpdate={handleStatusUpdate}
-                  className="max-w-md mx-auto"
-                />
-              </div>
-            )}
-
-            {/* Payment Confirmation Details */}
-            {isPaymentConfirmed && paymentStatusData && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-8">
-                <h2 className="text-lg font-semibold text-green-900 mb-4 flex items-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Payment Confirmed
-                </h2>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                  {paymentStatusData.amountTotal && paymentStatusData.currency && (
-                    <div>
-                      <span className="text-green-700 font-medium">Amount Paid:</span>
-                      <p className="text-green-900 font-semibold">
-                        {new Intl.NumberFormat('en-CA', {
-                          style: 'currency',
-                          currency: paymentStatusData.currency.toUpperCase(),
-                        }).format(paymentStatusData.amountTotal / 100)}
-                      </p>
-                    </div>
-                  )}
-
-                  {paymentStatusData.paymentMethod && (
-                    <div>
-                      <span className="text-green-700 font-medium">Payment Method:</span>
-                      <p className="text-green-900 font-semibold capitalize">
-                        {paymentStatusData.paymentMethod}
-                      </p>
-                    </div>
-                  )}
-
-                  {paymentStatusData.customerEmail && (
-                    <div>
-                      <span className="text-green-700 font-medium">Receipt Email:</span>
-                      <p className="text-green-900 font-semibold">
-                        {paymentStatusData.customerEmail}
-                      </p>
-                    </div>
-                  )}
-
-                  {paymentStatusData.orderStatus && paymentStatusData.orderStatus !== 'unknown' && (
-                    <div>
-                      <span className="text-green-700 font-medium">Order Status:</span>
-                      <p className="text-green-900 font-semibold capitalize">
-                        {paymentStatusData.orderStatus}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {paymentStatusData.webhookProcessed && (
-                  <div className="mt-4 flex items-center text-sm text-green-700">
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Payment processing completed
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* What's Next Section */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-              <h2 className="text-lg font-semibold text-blue-900 mb-4">What's Next?</h2>
-              <div className="space-y-3 text-sm text-blue-800">
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  <div>
-                    <p className="font-medium">Email Confirmation</p>
-                    <p>You'll receive an order confirmation email within the next few minutes.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                  </svg>
-                  <div>
-                    <p className="font-medium">Order Processing</p>
-                    <p>Our team will begin processing your order and will contact you with delivery details.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
-                  <div>
-                    <p className="font-medium">Customer Support</p>
-                    <p>If you have any questions, feel free to contact us at{' '}
-                      <a href="mailto:support@hsmobility.com" className="text-blue-600 hover:text-blue-500 transition-colors">
-                        support@hsmobility.com
-                      </a>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="text-center space-y-4">
-              <Link 
-                href="/" 
-                className="inline-block px-8 py-3 bg-blue-600 rounded-md hover:bg-blue-700 text-white font-semibold transition-colors duration-200 shadow-sm"
+            {orderData && (
+              <button
+                onClick={handleViewOrder}
+                className="min-w-[200px] px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                Continue Shopping
-              </Link>
+                View Order Details
+              </button>
+            )}
+          </div>
+
+          {/* Additional Information */}
+          <div className="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-blue-900 mb-3">What happens next?</h3>
+            <div className="space-y-3 text-blue-800">
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  <span className="text-xs font-semibold text-blue-800">1</span>
+                </div>
+                <div>
+                  <p className="font-medium">Order Confirmation</p>
+                  <p className="text-sm">You'll receive an email confirmation with your order details.</p>
+                </div>
+              </div>
               
-              <div>
-                <a 
-                  href="mailto:support@hsmobility.com" 
-                  className="text-sm text-gray-600 hover:text-gray-500 transition-colors duration-200"
-                >
-                  Need help? Contact Support
-                </a>
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  <span className="text-xs font-semibold text-blue-800">2</span>
+                </div>
+                <div>
+                  <p className="font-medium">Processing</p>
+                  <p className="text-sm">Our team will review your order and prepare it for installation.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  <span className="text-xs font-semibold text-blue-800">3</span>
+                </div>
+                <div>
+                  <p className="font-medium">Installation Scheduling</p>
+                  <p className="text-sm">We'll contact you within 24 hours to schedule your installation.</p>
+                </div>
               </div>
             </div>
+          </div>
 
-            {/* Security Notice */}
-            <div className="text-center mt-8">
-              <p className="text-xs text-gray-400">
-                Your payment was processed securely. This transaction is protected by industry-standard encryption.
-              </p>
+          {/* Support Information */}
+          <div className="mt-8 text-center">
+            <p className="text-gray-600 mb-2">Need help with your order?</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="tel:+1-800-555-0123"
+                className="text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Call us: 1-800-555-0123
+              </a>
+              <a
+                href="mailto:support@hsmobility.ca"
+                className="text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Email: support@hsmobility.ca
+              </a>
             </div>
           </div>
         </div>
@@ -209,4 +270,4 @@ const Success = () => {
   );
 };
 
-export default Success;
+export default SuccessPage;

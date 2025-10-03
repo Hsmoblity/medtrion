@@ -14,6 +14,10 @@ interface CategoryGroupProps {
   error?: string;
   collapsed?: boolean;
   className?: string;
+  
+  // Edit mode prop
+  isEditMode?: boolean;
+  
   onToggleOption?: (option: ConfigurableProductSchema) => void;
   onViewDetails?: (option: ConfigurableProductSchema) => void;
   onToggleCollapse?: (collapsed: boolean) => void;
@@ -34,6 +38,10 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
   error,
   collapsed = false,
   className = '',
+  
+  // Edit mode prop
+  isEditMode = false,
+  
   onToggleOption,
   onViewDetails,
   onToggleCollapse,
@@ -63,7 +71,14 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
   };
 
   const isOptionSelected = (optionId: string): boolean => {
-    return selectedOptionsWithVariations.some(selected => selected.option.id === optionId);
+    // Check both legacy selectedOptions and enhanced selectedOptionsWithVariations
+    const isInLegacyOptions = selectedOptions.some(option => 
+      option.id === optionId || option.databaseId?.toString() === optionId
+    );
+    const isInEnhancedOptions = selectedOptionsWithVariations.some(selected => 
+      selected.option.id === optionId || selected.option.databaseId?.toString() === optionId
+    );
+    return isInLegacyOptions || isInEnhancedOptions;
   };
 
   const getOptionPrice = (option: ConfigurableProductSchema): number => {
@@ -356,7 +371,8 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
                       categoryId={category.id}
                       isSelected={isSelected}
                       disabled={isDisabled}
-                      variant="default"
+                      variant={isEditMode ? "edit-mode" : "default"}
+                      isEditMode={isEditMode}
                       size="medium"
                       showPrice={true}
                       showCompatibility={optionIssues.length > 0}

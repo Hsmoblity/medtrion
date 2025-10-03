@@ -30,6 +30,17 @@ const ProductGroup: React.FC<ProductGroupProps> = ({
   const { mainProduct, options = [], configId } = group;
   const removeOption = useCartStore(state => state.removeOption);
 
+  console.log(`🔧 DEBUG: Rendering ProductGroup for "${mainProduct.title}" (${mainProduct.cartItemId}) with ${options.length} options:`, {
+    mainProduct: {
+      title: mainProduct.title,
+      cartItemId: mainProduct.cartItemId,
+      slug: mainProduct.slug,
+      productId: mainProduct.productId,
+      price: mainProduct.price
+    },
+    options: options.map(opt => ({ name: opt.name, value: opt.value, priceModifier: opt.priceModifier }))
+  });
+
   const handleRemoveOption = (optionIndex: number) => {
     if (mainProduct.cartItemId) {
       removeOption(mainProduct.cartItemId, optionIndex);
@@ -54,7 +65,7 @@ const ProductGroup: React.FC<ProductGroupProps> = ({
 
   const getMainProduct = () => mainProduct;
   const groupTotal = calculateGroupTotal();
-  const totalItems = 1 + (options?.length || 0); // Base product + options
+  const totalItems = 1; // Only count the main product, options are part of it
 
   return (
     <div 

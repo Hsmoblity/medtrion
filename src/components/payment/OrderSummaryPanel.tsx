@@ -101,10 +101,33 @@ const OrderSummaryPanel: React.FC<OrderSummaryPanelProps> = ({
                     {item.title || 'Product'}
                   </h4>
                   
-                  {/* Configuration Options */}
+                  {/* Configuration Options - Enhanced Display */}
                   {optionLines.length > 0 && (
-                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                      {optionLines.length} option{optionLines.length > 1 ? 's' : ''} configured
+                    <div className="mt-2">
+                      <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Configuration Options:
+                      </div>
+                      <div className="space-y-1 pl-2 border-l-2 border-gray-200 dark:border-gray-600">
+                        {optionLines.map((option, idx) => (
+                          <div key={idx} className="flex justify-between items-center text-xs">
+                            <span className="text-gray-600 dark:text-gray-400">
+                              • {option.name}
+                              {option.quantity > 1 && <span className="ml-1 text-gray-500">x{option.quantity}</span>}
+                            </span>
+                            <span className="text-gray-900 dark:text-gray-100 font-medium">
+                              {formatPrice(option.price * option.quantity)}
+                            </span>
+                          </div>
+                        ))}
+                        <div className="border-t border-gray-200 dark:border-gray-600 pt-1 mt-1">
+                          <div className="flex justify-between items-center text-xs font-medium">
+                            <span className="text-gray-700 dark:text-gray-300">Options Total:</span>
+                            <span className="text-gray-900 dark:text-gray-100">
+                              {formatPrice(optionsPrice)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                   

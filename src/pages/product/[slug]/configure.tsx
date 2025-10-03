@@ -1,12 +1,13 @@
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ModelConfigurator from 'components/configurator/ModelConfigurator';
 import { ConfigurableProductSchema, ConfiguratorCategory, SavedConfigurationExtended } from 'lib/interfaces/configurator';
 import { getProductBySlug } from 'lib/contentful/contentful';
 import { sanitizeConfigurableProduct, sanitizeSSRProps } from 'lib/utils/product-sanitizer';
 import { LoadingOverlay } from 'components/ui';
+import { useConfiguratorStore } from 'stores/configuratorStore';
 
 interface ConfigurePageProps {
   baseModel: ConfigurableProductSchema | null;
@@ -34,6 +35,37 @@ const ConfigurePage: React.FC<ConfigurePageProps> = ({
 }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const clearAllState = useConfiguratorStore(state => state.clearAllState);
+
+  // Load edit session data on mount if in edit mode
+  useEffect(() => {
+    if (isEditMode && editSessionData?.sessionId) {
+      console.log('🔧 Loading edit session data for session:', editSessionData.sessionId);
+      
+      try {
+        const storedSessionData = localStorage.getItem(`hsm_edit_session_${editSessionData.sessionId}`);
+        if (storedSessionData) {
+          const parsedSessionData = JSON.parse(storedSessionData);
+          console.log('🔧 Loaded edit session data from localStorage:', parsedSessionData);
+          
+          // Validate session data matches current context
+          if (parsedSessionData.cartItemId === editSessionData.cartItemId &&
+              parsedSessionData.productSlug === router.query.slug) {
+            console.log('🔧 Edit session data validated successfully');
+          } else {
+            console.warn('🔧 Edit session data mismatch:', {
+              stored: parsedSessionData,
+              current: editSessionData
+            });
+          }
+        } else {
+          console.warn('🔧 No edit session data found in localStorage for session:', editSessionData.sessionId);
+        }
+      } catch (error) {
+        console.error('🔧 Error loading edit session data:', error);
+      }
+    }
+  }, [isEditMode, editSessionData?.sessionId, editSessionData?.cartItemId, router.query.slug]);
 
   // Handle add to cart - use WooCommerce data directly
   const handleAddToCart = async (configuration: any) => {
@@ -164,16 +196,47 @@ const ConfigurePage: React.FC<ConfigurePageProps> = ({
 
   // Handle category options loading - use the same WooCommerce data source
   const handleFetchCategoryOptions = async (categoryId: string): Promise<ConfigurableProductSchema[]> => {
+    console.log(`🔧 Fetching options for category: ${categoryId}`);
+    
     // Find the category in the already-loaded categories from WooCommerce
     const category = categories.find(cat => cat.id === categoryId);
     
-    if (category && category.options) {
+    if (category && category.options && category.options.length > 0) {
+      console.log(`🔧 Found ${category.options.length} options for category ${categoryId}`);
       // Return the options that were already fetched from WooCommerce in getServerSideProps
       return category.options;
     }
     
+    // If category exists but has no options, try to reload the related options
+    if (category && (!category.options || category.options.length === 0)) {
+      console.log(`🔧 Category ${categoryId} found but has no options, attempting to reload...`);
+      
+      try {
+        // Re-fetch related products if they exist
+        if (baseModel && baseModel._related_options && baseModel._related_options.length > 0) {
+          const { fetchOptionProductsByIds } = await import('../../../lib/woocommerce');
+          const relatedProducts = await fetchOptionProductsByIds(baseModel._related_options);
+          
+          console.log(`🔧 Re-fetched ${relatedProducts.length} related products`);
+          
+          // Filter products that would belong to this category
+          const categoryProducts = relatedProducts.filter((product: any) => {
+            const nameParts = product.name.split(' - ');
+            const productCategoryName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : 'Options';
+            const productCategoryId = productCategoryName.toLowerCase().replace(/\s+/g, '-');
+            return productCategoryId === categoryId;
+          });
+          
+          console.log(`🔧 Found ${categoryProducts.length} products for category ${categoryId}`);
+          return categoryProducts;
+        }
+      } catch (error) {
+        console.error(`🔧 Error re-fetching options for category ${categoryId}:`, error);
+      }
+    }
+    
     // If category not found, return empty array
-    console.warn(`Category ${categoryId} not found in pre-loaded WooCommerce data`);
+    console.warn(`🔧 Category ${categoryId} not found in pre-loaded WooCommerce data`);
     return [];
   };
 
@@ -349,6 +412,19 @@ const ConfigurePage: React.FC<ConfigurePageProps> = ({
             )}
           </div>
 
+          {/* Debug Clear Button */}
+          <div className="mb-4">
+            <button
+              onClick={() => {
+                console.log('🔧 Manual configurator state clear triggered');
+                clearAllState();
+              }}
+              className="text-sm text-red-600 hover:text-red-800 underline"
+            >
+              Clear Configurator State
+            </button>
+          </div>
+
           {/* ModelConfigurator Component */}
           <ModelConfigurator
             baseModel={baseModel}
@@ -495,35 +571,104 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         const categoryMap = new Map<string, ConfigurableProductSchema[]>();
         
         relatedProducts.forEach((relatedProduct: any) => {
-          // Extract category from product name (e.g., "Product Name - Category")
+          // Only extract category from explicit "Product Name - Category" pattern
           const nameParts = relatedProduct.name.split(' - ');
-          const categoryName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : 'Options';
+          let categoryName = '';
           
-          // Option products from fetchOptionProductsByIds are already in ConfigurableProductSchema format
-          if (!categoryMap.has(categoryName)) {
-            categoryMap.set(categoryName, []);
+          if (nameParts.length > 1) {
+            // Use the last part as category name only if it's explicit
+            categoryName = nameParts[nameParts.length - 1].trim();
+            console.log(`🔧 Found explicit category "${categoryName}" for product "${relatedProduct.name}"`);
+          } else {
+            // Skip products that don't have explicit category indicators
+            // This prevents generic categories like "Warranty", "Fabric Color", etc. from being created
+            console.warn(`🔧 Skipping product "${relatedProduct.name}" - no explicit category pattern (Product Name - Category)`);
+            return;
           }
-          categoryMap.get(categoryName)!.push(relatedProduct);
+          
+          // Validate that this is a legitimate category (not generic)
+          if (categoryName && categoryName !== 'Options' && categoryName.length > 0) {
+            // Additional validation to prevent generic categories
+            const genericCategories = ['warranty', 'delivery', 'installation', 'customization', 'service', 'fabric', 'color', 'factory', 'options'];
+            if (genericCategories.includes(categoryName.toLowerCase())) {
+              console.warn(`🔧 Skipping generic category "${categoryName}" for product "${relatedProduct.name}"`);
+              return;
+            }
+            
+            // Option products from fetchOptionProductsByIds are already in ConfigurableProductSchema format
+            if (!categoryMap.has(categoryName)) {
+              categoryMap.set(categoryName, []);
+            }
+            categoryMap.get(categoryName)!.push(relatedProduct);
+            console.log(`🔧 Added "${relatedProduct.name}" to category "${categoryName}"`);
+          } else {
+            console.warn(`🔧 Skipping product "${relatedProduct.name}" - invalid category name: "${categoryName}"`);
+          }
         });
         
-        // Convert category map to ConfiguratorCategory array
+        // Convert category map to ConfiguratorCategory array with validation
         let displayOrder = 0;
-        categories = Array.from(categoryMap.entries()).map(([categoryName, options]) => ({
-          id: categoryName.toLowerCase().replace(/\s+/g, '-'),
-          name: categoryName,
-          slug: categoryName.toLowerCase().replace(/\s+/g, '-'),
-          description: `${categoryName} for ${mappedProduct.title}`,
-          displayOrder: displayOrder++,
-          required: false,
-          multiSelect: false,
-          options,
-          maxSelections: 1,
-          minSelections: 0,
-          loadingState: 'loaded' as const,
-          icon: '',
-          helpText: `Choose from available ${categoryName.toLowerCase()} options`,
-          collapsed: false
-        }));
+        categories = Array.from(categoryMap.entries())
+          .filter(([categoryName, options]) => {
+            // Validate that category has legitimate options
+            const validOptions = options.filter(option => {
+              // Ensure option belongs to this product
+              const belongsToProduct = option._related_options?.includes(mappedProduct.databaseId) || 
+                                     option.compatibleBaseModels?.includes(mappedProduct.databaseId) ||
+                                     option.productId === mappedProduct.databaseId?.toString();
+              
+              if (!belongsToProduct) {
+                console.warn(`🔧 Option "${option.name}" does not belong to product "${mappedProduct.title}"`);
+                return false;
+              }
+              
+              // Ensure option has valid data
+              const hasValidData = option.name && option.name.trim().length > 0 && 
+                                  option.price !== undefined && option.price !== null;
+              
+              if (!hasValidData) {
+                console.warn(`🔧 Option "${option.name}" has invalid data`);
+                return false;
+              }
+              
+              return true;
+            });
+            
+            if (validOptions.length === 0) {
+              console.warn(`🔧 Category "${categoryName}" has no valid options for product "${mappedProduct.title}"`);
+              return false;
+            }
+            
+            return true;
+          })
+          .map(([categoryName, options]) => {
+            // Filter options to only include valid ones
+            const validOptions = options.filter(option => {
+              const belongsToProduct = option._related_options?.includes(mappedProduct.databaseId) || 
+                                     option.compatibleBaseModels?.includes(mappedProduct.databaseId) ||
+                                     option.productId === mappedProduct.databaseId?.toString();
+              const hasValidData = option.name && option.name.trim().length > 0 && 
+                                option.price !== undefined && option.price !== null;
+              return belongsToProduct && hasValidData;
+            });
+            
+            return {
+              id: categoryName.toLowerCase().replace(/\s+/g, '-'),
+              name: categoryName,
+              slug: categoryName.toLowerCase().replace(/\s+/g, '-'),
+              description: `${categoryName} for ${mappedProduct.title}`,
+              displayOrder: displayOrder++,
+              required: false,
+              multiSelect: false,
+              options: validOptions,
+              maxSelections: 1,
+              minSelections: 0,
+              loadingState: 'loaded' as const,
+              icon: '',
+              helpText: `Choose from available ${categoryName.toLowerCase()} options`,
+              collapsed: false
+            };
+          });
         
         console.log(`Found ${categories.length} configuration categories from WooCommerce data:`, categories.map(c => c.name));
       } else {

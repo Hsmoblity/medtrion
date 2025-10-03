@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
-import PageLayout from '../../components/PageLayout/PageLayout';
 import MetaHead from '../../components/MetaHead';
 import BlogsList from '../../components/blog-list';
 import { Blog } from '../../components/blog-preview';
@@ -12,7 +11,7 @@ const TEMPORARY_BLOGS: Blog[] = [
     title: 'Understanding Mobility Solutions for Seniors',
     description: 'Learn about the latest mobility solutions designed to help seniors maintain independence and improve quality of life.',
     link: '/blogs/mobility-solutions-seniors',
-    image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&h=300&fit=crop&q=80',
     alt: 'Senior using mobility device'
   },
   {
@@ -20,7 +19,7 @@ const TEMPORARY_BLOGS: Blog[] = [
     title: 'Stairlift Installation: What to Expect',
     description: 'A comprehensive guide to stairlift installation process, timeline, and what homeowners should expect.',
     link: '/blogs/stairlift-installation-guide',
-    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop&q=80',
     alt: 'Stairlift installation process'
   },
   {
@@ -28,7 +27,7 @@ const TEMPORARY_BLOGS: Blog[] = [
     title: 'Home Safety Tips for Mobility Challenges',
     description: 'Essential home safety modifications and tips for individuals with mobility challenges.',
     link: '/blogs/home-safety-tips',
-    image: 'https://images.unsplash.com/photo-1581578731548-c6a0c3f2f6c5?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1581578731548-c6a0c3f2f6c5?w=400&h=300&fit=crop&q=80',
     alt: 'Home safety modifications'
   },
   {
@@ -36,7 +35,7 @@ const TEMPORARY_BLOGS: Blog[] = [
     title: 'Choosing the Right Mobility Equipment',
     description: 'A guide to selecting the best mobility equipment based on individual needs and home environment.',
     link: '/blogs/choosing-mobility-equipment',
-    image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&q=80',
     alt: 'Various mobility equipment options'
   },
   {
@@ -44,7 +43,7 @@ const TEMPORARY_BLOGS: Blog[] = [
     title: 'Maintaining Your Stairlift: A Complete Guide',
     description: 'Learn how to properly maintain your stairlift to ensure optimal performance and longevity.',
     link: '/blogs/stairlift-maintenance-guide',
-    image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1581578731548-c6a0c3f2f6c5?w=400&h=300&fit=crop&q=80',
     alt: 'Stairlift maintenance'
   },
   {
@@ -52,7 +51,7 @@ const TEMPORARY_BLOGS: Blog[] = [
     title: 'Creating an Accessible Home Environment',
     description: 'Transform your home into a more accessible space with these practical tips and modifications.',
     link: '/blogs/accessible-home-environment',
-    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop&q=80',
     alt: 'Accessible home modifications'
   }
 ];
@@ -94,7 +93,7 @@ const BlogsPage: React.FC<BlogsPageProps> = ({ blogs: propBlogs, error: propErro
   }, [propBlogs]);
 
   return (
-    <PageLayout>
+    <>
       <MetaHead 
         title="Blog - HS Mobility" 
         description="Stay informed with the latest insights on mobility solutions, home safety, and independent living tips."
@@ -125,7 +124,7 @@ const BlogsPage: React.FC<BlogsPageProps> = ({ blogs: propBlogs, error: propErro
           <BlogsList blogs={blogs} />
         )}
       </div>
-    </PageLayout>
+    </>
   );
 };
 

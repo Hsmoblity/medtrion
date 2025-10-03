@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# AI Agent Pre-Commit Enforcement Hook
+# Rule R58: Pre-Commit Validation - All code changes must pass validation before commit
+
+echo "🤖 AI Agent Pre-Commit Enforcement Starting..."
+
+# Run AI validation checks
+npm run ai:pre-commit
+
+if [ $? -ne 0 ]; then
+  echo "❌ Pre-commit validation failed. Please fix the issues before committing."
+  echo "💡 Run 'npm run ai:pre-commit' to see detailed error information."
+  exit 1
+fi
+
+echo "✅ Pre-commit validation passed. Proceeding with commit."

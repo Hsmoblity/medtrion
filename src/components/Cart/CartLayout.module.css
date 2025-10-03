@@ -15,6 +15,8 @@
 
 .productInfoSection {
   @apply flex-1 min-w-0 mb-4 lg:mb-0 lg:mr-6;
+  /* Ensure adequate width for button content */
+  min-width: 200px;
 }
 
 .productHeader {
@@ -39,6 +41,9 @@
 
 .configurationStatus {
   @apply flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-200;
+  /* Prevent overflow and ensure proper spacing */
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .configIndicator {
@@ -52,6 +57,10 @@
 .btnEditConfig {
   @apply text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center space-x-1;
   @apply transition-colors duration-200 px-3 py-1 bg-white border border-blue-300 rounded-md hover:bg-blue-50;
+  /* Ensure button fits within container */
+  flex-shrink: 0;
+  white-space: nowrap;
+  min-width: fit-content;
 }
 
 .productControlsSection {
@@ -285,10 +294,25 @@
   
   .productInfoSection {
     @apply w-full mb-4;
+    /* Ensure adequate width on mobile */
+    min-width: 250px;
   }
   
   .productControlsSection {
     @apply w-full items-stretch;
+  }
+  
+  .configurationStatus {
+    /* Stack elements vertically on mobile if needed */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .btnEditConfig {
+    /* Make button full width on mobile for better touch target */
+    width: 100%;
+    justify-content: center;
   }
   
   .optionsSection {
@@ -311,6 +335,13 @@
   
   .productInfoSection {
     @apply flex-1 mr-5;
+    /* Ensure adequate width on tablet */
+    min-width: 220px;
+  }
+  
+  .configurationStatus {
+    /* Allow wrapping on tablet if needed */
+    flex-wrap: wrap;
   }
   
   .optionsSection {

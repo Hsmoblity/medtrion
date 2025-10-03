@@ -5,7 +5,6 @@ import Link from "next/link";
 import { FaGithub, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 // import client from "lib/contentful/contentful";
 import TableOfContents from "components/toc";
-import PageLayout from "components/PageLayout/PageLayout";
 import { BLOCKS, INLINES, MARKS } from "@contentful/rich-text-types";
 import FAQ from "components/faq";
 import Banner from "components/banner";
@@ -21,7 +20,7 @@ export async function getServerSideProps(context: any) {
             title: 'Understanding Mobility Solutions for Seniors',
             description: 'Learn about the latest mobility solutions designed to help seniors maintain independence and improve quality of life.',
             content: 'This comprehensive guide covers various mobility solutions available for seniors, including stairlifts, lift chairs, and home modifications.',
-            image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=400&fit=crop',
+            image: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=800&h=400&fit=crop',
             date: '2024-01-15'
         },
         'stairlift-installation-guide': {
@@ -55,13 +54,18 @@ export async function getServerSideProps(context: any) {
                     title: blogData.title,
                     description: blogData.description,
                     body: {
+                        nodeType: 'document',
+                        data: {},
                         content: [
                             {
                                 nodeType: 'paragraph',
+                                data: {},
                                 content: [
                                     {
                                         nodeType: 'text',
-                                        value: blogData.content
+                                        value: blogData.content,
+                                        marks: [],
+                                        data: {}
                                     }
                                 ]
                             }
@@ -71,7 +75,13 @@ export async function getServerSideProps(context: any) {
                     mainImage: {
                         fields: {
                             file: {
-                                url: blogData.image
+                                url: blogData.image,
+                                details: {
+                                    image: {
+                                        width: 800,
+                                        height: 400
+                                    }
+                                }
                             },
                             title: blogData.title
                         }
@@ -88,7 +98,9 @@ export async function getServerSideProps(context: any) {
 const BlogDetailPage = ({ blogDetailData }: any) => {
     const title = blogDetailData.fields.title || "Blog Post | Health & Supply Mobility";
     const description = blogDetailData.fields.excerpt || "Discover our latest blog post at Health & Supply Mobility.";
-    const imageUrl = `https:${blogDetailData.fields.mainImage.fields.file.url}`;
+    const imageUrl = blogDetailData.fields.mainImage.fields.file.url.startsWith('http') 
+        ? blogDetailData.fields.mainImage.fields.file.url 
+        : `https:${blogDetailData.fields.mainImage.fields.file.url}`;
     const publishedTime = new Date(blogDetailData.sys.createdAt).toISOString();
     const renderOptions = {
         renderNode: {
@@ -192,7 +204,7 @@ const BlogDetailPage = ({ blogDetailData }: any) => {
     });
 
     return (
-        <PageLayout>
+        <>
             <Head>
                 <title>{title}</title>
                 <meta name="description" content={description} />
@@ -255,7 +267,9 @@ const BlogDetailPage = ({ blogDetailData }: any) => {
 
                     <div className="border-b-2 pb-10 border-slate-800 border-dashed">
                         <Image
-                            src={`https:${blogDetailData.fields.mainImage.fields.file.url}`}
+                            src={blogDetailData.fields.mainImage.fields.file.url.startsWith('http') 
+                                ? blogDetailData.fields.mainImage.fields.file.url 
+                                : `https:${blogDetailData.fields.mainImage.fields.file.url}`}
                             width={blogDetailData.fields.mainImage.fields.file.details.image.width}
                             height={blogDetailData.fields.mainImage.fields.file.details.image.height}
                             alt={blogDetailData.fields.mainImage.fields.title || "Blog Image"}
@@ -275,16 +289,22 @@ const BlogDetailPage = ({ blogDetailData }: any) => {
                     </div>
                 </div>
 
-                <Banner />
-                <div className="py-8">
-
-                    <Form />
+                {/* Call-to-action section */}
+                <div className="bg-gray-100 py-12">
+                    <div className="max-w-4xl mx-auto px-5 text-center">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                            Need Help Choosing the Right Solution?
+                        </h2>
+                        <p className="text-lg text-gray-600 mb-8">
+                            Our mobility experts are here to help you find the perfect solution for your needs.
+                        </p>
+                        <div className="max-w-md mx-auto">
+                            <Form />
+                        </div>
+                    </div>
                 </div>
-
-                {/* <Specs /> */}
-
             </section>
-        </PageLayout>
+        </>
     );
 };
 

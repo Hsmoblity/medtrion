@@ -4,7 +4,7 @@ import { ProductSchema } from '../../lib/interfaces/schema';
 import { ProductCardView, mapToProductCardView } from '../../lib/interfaces/homepage';
 import { getProducts } from '../../lib/contentful/contentful';
 import { sanitizeForSSR, filterConfigurableProducts, handleInsufficientConfigurableProducts } from '../../lib/utils/data-validation';
-import { ProductHeroCard } from '../../components/Home';
+import ProductCard from '../../components/ui/ProductCard';
 import MetaHead from '../../components/MetaHead';
 import { PrimaryButton } from '../../components/ui';
 
@@ -171,11 +171,15 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
           {/* Products Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {products.map((product, index) => (
-              <ProductHeroCard
+              <ProductCard
                 key={product.slug}
                 product={product}
+                variant="hero"
                 priority={index < 3} // Prioritize first three images
                 position={index}
+                showConfigureButton={false}
+                showAddToCartButton={false}
+                cardClickBehavior="configurator"
               />
             ))}
           </div>

@@ -181,7 +181,6 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
 
   // Unified state management for selected variations
   const [tempSelections, setTempSelections] = useState<Variation[]>([]);
-  const [pricePreview, setPricePreview] = useState(0);
   
   const [errorState, setErrorState] = useState<{
     hasError: boolean;
@@ -260,6 +259,17 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
     
     const totalPrice = basePrice + variationsTotal;
     
+    // Debug logging for price calculation
+    console.log(`🔧 DEBUG: OptionVariationPopup price calculation:`, {
+      optionName: currentOption.name,
+      basePrice,
+      variationsTotal,
+      totalPrice,
+      selectionType,
+      variationsCount: tempSelections.length,
+      variations: tempSelections.map(v => ({ name: v.name, price: v.price }))
+    });
+    
     return {
       basePrice,
       variationsTotal,
@@ -270,14 +280,6 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
   
   // Extract for easier use
   const { basePrice, variationsTotal, totalPrice, hasVariations } = priceCalculation;
-  
-  // Update price preview for store mode
-  useEffect(() => {
-    if (isStoreMode && currentOption) {
-      const preview = calculatePricePreview(currentOption, tempSelections);
-      setPricePreview(preview.totalPrice);
-    }
-  }, [isStoreMode, currentOption, tempSelections, calculatePricePreview]);
 
   // Focus management and keyboard handling
   useEffect(() => {
@@ -344,13 +346,14 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
     }
     
     // Log for debugging
-    console.log('OptionVariationPopup: Adding option with calculated price:', {
+    console.log('🔧 DEBUG: OptionVariationPopup adding option with calculated price:', {
       optionId: currentOption.id,
       optionName: currentOption.name,
       basePrice: basePrice,
       variationsTotal: variationsTotal,
       totalPrice: totalPrice,
       selectionType: selectionType,
+      isStoreMode: isStoreMode,
       selectedVariations: tempSelections.map(v => ({
         id: v.id,
         name: v.name,
@@ -360,8 +363,8 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
     });
     
     if (isStoreMode) {
-      // Store mode: use store action
-      addToConfiguration(currentOption, tempSelections);
+      // Store mode: use store action with pre-calculated price
+      addToConfiguration(currentOption, tempSelections, totalPrice);
     } else {
       // Legacy mode: use callback
       if (onAddToConfiguration) {
@@ -590,7 +593,7 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
                 <div className="flex justify-between">
                   <span className="font-semibold text-gray-900">Total Option Price:</span>
                   <span className="font-bold text-lg text-blue-600">
-                    ${isStoreMode ? pricePreview.toFixed(2) : totalPrice.toFixed(2)}
+                    ${totalPrice.toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -612,7 +615,7 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
             disabled={tempSelections.length === 0}
           >
             {isEditMode ? 'Update Configuration' : 'Add to Configuration'}
-            {isStoreMode && ` ($${pricePreview.toFixed(2)})`}
+            {isStoreMode && ` ($${totalPrice.toFixed(2)})`}
           </button>
         </div>
       </div>

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { ProductSchema } from '../../lib/interfaces';
 import { getProducts } from '../../lib/contentful/contentful';
 import { PrimaryButton, LoadingOverlay } from 'components/ui';
-import ProductHeroCard from './ProductHeroCard';
+import ProductCard from '../ui/ProductCard';
+import { mapToProductCardView } from '../../lib/interfaces/homepage';
 import Link from 'next/link';
 
 interface BestSellerSectionProps {
@@ -101,37 +102,24 @@ const BestSellerSection: React.FC<BestSellerSectionProps> = ({ initialProducts =
         {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {products.map((product, index) => {
-            // Convert ProductSchema to ProductCardView format for ProductHeroCard
-            const productCardView = {
-              slug: product.slug,
-              title: product.title,
-              description: typeof product.shortDescription === 'string' 
-                ? product.shortDescription 
-                : product.description || '',
-              price: product.price || null,
-              financingCopy: null, // Can be enhanced with financing data
-              badges: index < 2 ? ['Best Seller'] : [], // Add badge to first 2 products
-              imageUrl: product.featuredImage?.fields?.file?.url || 
-                        (typeof product.featuredImage === 'string' ? product.featuredImage : '/temp.webp'),
-              rating: null, // Can be enhanced with review data
-              isFeatured: true,
-              optionsSummary: product._related_options?.length 
-                ? `${product._related_options.length} options available`
-                : null,
-              relatedOptions: product._related_options?.map((option: any) => 
-                typeof option === 'number' ? option : parseInt(String(option), 10)
-              ).filter((option: number) => !isNaN(option)) || [],
-              productId: product.productId,
-              databaseId: typeof product.productId === 'string' ? 
-                parseInt(product.productId) : undefined
-            };
+            // Convert ProductSchema to ProductCardView format
+            const productCardView = mapToProductCardView(product);
+            
+            // Add Best Seller badge to first 2 products
+            if (index < 2) {
+              productCardView.badges = ['Best Seller'];
+            }
 
             return (
-              <ProductHeroCard 
+              <ProductCard 
                 key={product.slug || index}
                 product={productCardView}
+                variant="hero"
                 priority={index < 3} // Priority loading for first 3 images
                 position={index}
+                showConfigureButton={false}
+                showAddToCartButton={false}
+                cardClickBehavior="configurator"
                 onHeroClick={(slug, badge, position) => {
                   // Analytics tracking
                   if (typeof window !== 'undefined') {

@@ -30,26 +30,38 @@ const CartWithProductGroups: React.FC = () => {
   const groupCartItems = (cartItems: CartProduct[]): ProductGroup[] => {
     const groups: { [key: string]: ProductGroup } = {};
     
+    console.log(`🔧 DEBUG: Starting to group ${cartItems.length} cart items:`, cartItems.map(item => ({
+      title: item.title,
+      cartItemId: item.cartItemId,
+      slug: item.slug,
+      productId: item.productId,
+      optionsCount: item.options?.length || 0,
+      options: item.options?.map(opt => ({ name: opt.name, value: opt.value })) || []
+    })));
+    
     cartItems.forEach(item => {
-      // Use product slug or productId as the group key to group by actual product
-      // This ensures that products with the same slug/productId are grouped together
-      const groupKey = item.slug || item.productId?.toString() || `item-${item.cartItemId}`;
+      // Use cartItemId as the unique group key to prevent duplicates
+      // Each cart item should be its own group since it represents a unique configuration
+      const groupKey = item.cartItemId || `item-${Math.random()}`;
       
+      // Only create a group if it doesn't already exist
       if (!groups[groupKey]) {
         groups[groupKey] = {
           mainProduct: item,
           options: item.options || [], // Initialize with the item's options
           configId: item.cartItemId ? String(item.cartItemId) : undefined
         };
+        
+        console.log(`🔧 Created group for cart item: ${item.title} (${item.cartItemId}) with ${item.options?.length || 0} options`);
       } else {
-        // If this item has options, add them to the group
-        if (item.options && Array.isArray(item.options) && item.options.length > 0) {
-          groups[groupKey].options.push(...item.options);
-        }
+        console.warn(`🔧 Duplicate cart item detected: ${item.title} (${item.cartItemId})`);
       }
     });
     
-    return Object.values(groups);
+    const groupedItems = Object.values(groups);
+    console.log(`🔧 Grouped ${cartItems.length} cart items into ${groupedItems.length} groups`);
+    
+    return groupedItems;
   };
 
   const handleCheckout = async () => {
@@ -63,7 +75,7 @@ const CartWithProductGroups: React.FC = () => {
 
   const handleEditConfiguration = (product: CartProduct) => {
     // Debug logging for edit config
-    console.log('Edit configuration clicked for product:', {
+    console.log('🔧 Edit configuration clicked for product:', {
       productId: product.productId,
       slug: product.slug,
       cartItemId: product.cartItemId,
@@ -73,20 +85,42 @@ const CartWithProductGroups: React.FC = () => {
     });
 
     if (!product.cartItemId) {
-      console.error('Cannot edit configuration: missing cartItemId');
+      console.error('🔧 Cannot edit configuration: missing cartItemId');
+      return;
+    }
+
+    if (!product.slug) {
+      console.error('🔧 Cannot edit configuration: missing product slug');
       return;
     }
 
     // Generate a unique session ID for this edit session
     const sessionId = `edit_${product.cartItemId}_${Date.now()}`;
     
-    // Navigate to product configuration page with edit mode parameters
-    const editUrl = `/product/${product.slug}/configure?edit=true&cartItemId=${product.cartItemId}&sessionId=${sessionId}`;
+    // Store edit session data in localStorage for persistence across page navigation
+    const editSessionData = {
+      sessionId,
+      cartItemId: product.cartItemId,
+      productSlug: product.slug,
+      startTime: new Date().toISOString(),
+      originalOptions: product.options || []
+    };
     
-    console.log('Navigating to edit configuration:', {
+    try {
+      localStorage.setItem(`hsm_edit_session_${sessionId}`, JSON.stringify(editSessionData));
+      console.log('🔧 Stored edit session data:', editSessionData);
+    } catch (error) {
+      console.warn('🔧 Could not store edit session data:', error);
+    }
+    
+    // Navigate to product configuration page with edit mode parameters
+    const editUrl = `/product/${product.slug}/configure?edit=true&cartItemId=${encodeURIComponent(product.cartItemId)}&sessionId=${encodeURIComponent(sessionId)}`;
+    
+    console.log('🔧 Navigating to edit configuration:', {
       url: editUrl,
       sessionId,
-      cartItemId: product.cartItemId
+      cartItemId: product.cartItemId,
+      editSessionData
     });
     
     router.push(editUrl);

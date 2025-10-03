@@ -20,6 +20,7 @@ import { Reviews } from "components/reviews";
 import { ProductSchema } from 'lib/interfaces';
 import React from 'react';
 import Image from "next/image";
+import HydrationErrorBoundary from '../HydrationErrorBoundary';
 
 
 interface ProductItemProps {
@@ -278,7 +279,9 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
             {selectedTab === 'Overview' && (
               <div className="prose max-w-none text-gray-700">
                 {/* Render shortDescription client-side to avoid hydration mismatch */}
-                <RichContent content={(product as any).shortDescription || product.description} options={options} className="prose max-w-none text-gray-700" />
+                <HydrationErrorBoundary>
+                  <RichContent content={(product as any).shortDescription || product.description} options={options} className="prose max-w-none text-gray-700" />
+                </HydrationErrorBoundary>
               </div>
             )}
 
@@ -292,7 +295,13 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
 
             {selectedTab === 'Specifications' && (
               <div className="text-gray-700">
-                {spec ? <RichContent content={spec} options={options} /> : <div>No specifications available.</div>}
+                {spec ? (
+                  <HydrationErrorBoundary>
+                    <RichContent content={spec} options={options} />
+                  </HydrationErrorBoundary>
+                ) : (
+                  <div>No specifications available.</div>
+                )}
               </div>
             )}
           </div>

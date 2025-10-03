@@ -191,10 +191,17 @@ export function normalizeSlugQueryResponse(wooProduct: any): any {
   if (!wooProduct) return null;
 
   // Helper function to safely parse price strings like "$10.00" to numbers
+  // Enhanced to handle variable product price ranges like "$54.00 - $285.00"
   const safeParsePriceForConfigurator = (priceValue: any): number => {
     if (priceValue === null || priceValue === undefined) return 0;
     if (typeof priceValue === 'number') return isNaN(priceValue) ? 0 : priceValue;
     if (typeof priceValue === 'string') {
+      // Handle price ranges (e.g., "$54.00 - $285.00") by taking the first price
+      if (priceValue.includes(' - ')) {
+        const firstPrice = priceValue.split(' - ')[0];
+        const parsed = parsePrice(firstPrice);
+        return parsed;
+      }
       // Use the parsePrice utility for consistent parsing
       const parsed = parsePrice(priceValue);
       return parsed;

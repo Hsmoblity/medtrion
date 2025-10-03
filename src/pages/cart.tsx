@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useCartStore, useCartItems, useCartTotal } from 'stores/cartStore';
+import { useCartStore, useCartItems, useCartTotal, useCartHydration } from 'stores/cartStore';
 import CartPageGroups from 'components/Cart/CartPageGroups';
 import { useRouter } from 'next/router';
 import { PrimaryButton } from '../components/ui';
@@ -9,8 +9,21 @@ import { formatPrice, calculateOrderTotal } from 'lib/utils/priceUtils';
 const CartPage = () => {
     const cart = useCartItems();
     const cartTotal = useCartTotal();
+    const isHydrated = useCartHydration(); // Use the new hydration hook
+    const cleanupDuplicates = useCartStore(state => state.cleanupDuplicates);
+    const cleanupWrongOptions = useCartStore(state => state.cleanupWrongOptions);
     const router = useRouter();
     const [isRedirecting, setRedirecting] = useState(false);
+
+    // Clean up duplicates and wrong options when cart is hydrated
+    useEffect(() => {
+        if (isHydrated && cart.length > 0) {
+            console.log('🔧 Cart page: Running cleanupDuplicates...');
+            cleanupDuplicates();
+            console.log('🔧 Cart page: Running cleanupWrongOptions...');
+            cleanupWrongOptions();
+        }
+    }, [isHydrated, cart.length, cleanupDuplicates, cleanupWrongOptions]);
 
     // Use the robust cart total calculation with proper price handling
     const orderTotal = calculateOrderTotal(cart);
@@ -30,6 +43,28 @@ const CartPage = () => {
         }
     };
 
+    // Show loading state while cart is hydrating
+    if (!isHydrated) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    {/* Header */}
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
+                    </div>
+                    
+                    {/* Loading State */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                        <div className="flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            <span className="ml-3 text-gray-600">Loading cart...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -44,9 +79,20 @@ const CartPage = () => {
                         <div className="lg:col-span-2">
                             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                                 <div className="p-6 border-b border-gray-200">
-                                    <h2 className="text-lg font-semibold text-gray-900">
-                                        Cart Items ({cart.length})
-                                    </h2>
+                                    <div className="flex justify-between items-center">
+                                        <h2 className="text-lg font-semibold text-gray-900">
+                                            Cart Items ({cart.length})
+                                        </h2>
+                                        <button
+                                            onClick={() => {
+                                                console.log('🔧 Manual cleanup triggered');
+                                                cleanupWrongOptions();
+                                            }}
+                                            className="text-sm text-blue-600 hover:text-blue-800 underline"
+                                        >
+                                            Clean Up Options
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="p-6">
                                     <CartPageGroups />

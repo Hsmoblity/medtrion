@@ -71,7 +71,7 @@ export const useMobilePerformance = () => {
           if (fidEntry) {
             setPerformanceMetrics(prev => ({
               ...prev,
-              firstInputDelay: fidEntry.processingStart - fidEntry.startTime,
+              firstInputDelay: (fidEntry as any).processingStart - fidEntry.startTime,
             }));
           }
         });

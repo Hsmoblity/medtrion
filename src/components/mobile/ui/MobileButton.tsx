@@ -33,7 +33,7 @@ const MobileButton: React.FC<MobileButtonProps> = ({
   const { isMobile, isTouchDevice } = useMobileOptimization();
 
   // Mobile-specific button styles
-  const getButtonStyles = () => {
+  const getButtonStyles = (): React.CSSProperties => {
     const baseStyles = {
       display: 'flex',
       alignItems: 'center',
@@ -46,8 +46,8 @@ const MobileButton: React.FC<MobileButtonProps> = ({
       transition: 'all 0.2s ease',
       touchAction: 'manipulation',
       WebkitTapHighlightColor: 'transparent',
-      position: 'relative' as const,
-      overflow: 'hidden' as const,
+      position: 'relative',
+      overflow: 'hidden',
     };
 
     // Size-specific styles
@@ -124,7 +124,7 @@ const MobileButton: React.FC<MobileButtonProps> = ({
       WebkitTouchCallout: 'none',
       WebkitAppearance: 'none',
       MozAppearance: 'none',
-      appearance: 'none',
+      appearance: 'none' as any,
     };
 
     return {
@@ -134,7 +134,7 @@ const MobileButton: React.FC<MobileButtonProps> = ({
       ...disabledStyles,
       ...fullWidthStyles,
       ...mobileStyles,
-    };
+    } as React.CSSProperties;
   };
 
   // Handle click with mobile optimizations

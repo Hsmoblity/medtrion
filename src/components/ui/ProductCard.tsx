@@ -68,7 +68,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         title: product.title,
         description: product.shortDescription || product.description,
         price: typeof product.price === 'number' ? product.price : 0,
-        imageUrl: normalizeImageUrl(product.productPictures?.[0]?.fields?.file?.url || product.featuredImage),
+        imageUrl: normalizeImageUrl(product.productPictures?.[0]?.fields?.file?.url || product.featuredImage) || '/placeholder.svg',
         badges: [],
         rating: null,
         affiliate: product.affiliate || false,

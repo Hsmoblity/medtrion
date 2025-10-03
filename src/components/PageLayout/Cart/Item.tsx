@@ -147,7 +147,7 @@ const Item: React.FC<ItemProps> = ({ product }) => {
   };
 
   const getSafeImage = () =>
-    normalizeImageUrl(productPictures?.[0]?.fields?.file?.url || product.featuredImage)
+    normalizeImageUrl(productPictures?.[0]?.fields?.file?.url || product.featuredImage) || '/placeholder.svg'
 
   // build attribute groups from product variations for use in modal and validation
   const attributeGroups: { [k: string]: Set<string> } = {};

@@ -39,11 +39,13 @@
 | bug-mobile-cart-counter-position-20250102 | Mobile UI: Sticky menu cart counter appears in wrong position (middle of view instead of on cart icon) | 🔄 IN PROGRESS | HIGH | implementation-agent |
 | bug-mobile-sticky-menu-logo-size-20250102 | Mobile UI: Sticky menu logo appears too small on mobile devices | 🔄 IN PROGRESS | MEDIUM | implementation-agent |
 | bug-cart-edit-config-button-spillout-20250102 | Cart Page: Edit configuration button spills out of main product container due to CSS layout constraints | 🔄 IN PROGRESS | MEDIUM | implementation-agent |
+| bug-optioncard-typescript-build-error-20250102 | OptionCard: TypeScript build error due to image source type mismatch (string vs object) | 🔄 IN PROGRESS | HIGH | implementation-agent |
 
 ## ✅ CURRENT SESSION FEATURES IN PROGRESS (Latest)
 
 | feat-hsm-plugin-admin-dashboard-20250102 | HSM Plugin: Enhanced admin dashboard with ASCII map for clear and friendly UI | 🔄 IN PROGRESS | MEDIUM | implementation-agent |
 | feat-hsm-stripe-key-configuration-20250102 | HSM Plugin: Add Stripe key configuration to admin settings with API endpoint for frontend hooks | 🔄 IN PROGRESS | MEDIUM | implementation-agent |
+| feat-hsm-plugin-api-webhook-check-pages-20250102 | HSM Plugin: Add dedicated API and webhook check pages to admin dashboard for monitoring and testing | 🔄 IN PROGRESS | MEDIUM | implementation-agent |
 | feat-mobile-optimization-audit-20250102 | Mobile Optimization: Comprehensive audit of all pages/views with mobile-specific components and smart optimization | 🔄 IN PROGRESS | MEDIUM | implementation-agent |
 
 ## ✅ CURRENT SESSION FIXES COMPLETED (Latest)

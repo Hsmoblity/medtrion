@@ -27,11 +27,9 @@ export const useHomepageStore = create<HomepageState>((set) => ({
       const productSchemas = data.products.nodes
         .map(product => {
           console.log('Homepage Store - Raw WooCommerce product:', {
-            name: product.name,
+            name: product.title,
             slug: product.slug,
-            image: product.image,
-            featuredImage: product.featuredImage,
-            galleryImages: product.galleryImages
+            featuredImage: product.featuredImage
           });
           
           const mappedProduct = mapWooToProductSchema(product);

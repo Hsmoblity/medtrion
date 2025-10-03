@@ -179,7 +179,7 @@ const LazyImage: React.FC<LazyImageProps> = ({
         priority={priority}
         quality={quality}
         placeholder={blurDataURL ? 'blur' : undefined}
-        blurDataURL={blurDataURL}
+        blurDataURL={blurDataURL || undefined}
       />
 
       {/* Loading indicator */}

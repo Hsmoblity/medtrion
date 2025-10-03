@@ -49,13 +49,11 @@ export const withHydrationSafety = <P extends object>(
       }
     }, []);
 
-    return (
-      <Component
-        {...props}
-        ref={ref}
-        data-hydration-safe={componentName}
-      />
-    );
+    return React.createElement(Component, {
+      ...props,
+      ref,
+      'data-hydration-safe': componentName
+    });
   });
 };
 
@@ -79,11 +77,11 @@ export const HydrationSafeConditional = ({
 
   // On server, always render fallback to ensure consistency
   if (!isClient) {
-    return <>{fallback}</>;
+    return React.createElement(React.Fragment, null, fallback);
   }
 
   // On client, render based on condition
-  return condition ? <>{children}</> : <>{fallback}</>;
+  return condition ? React.createElement(React.Fragment, null, children) : React.createElement(React.Fragment, null, fallback);
 };
 
 export default {

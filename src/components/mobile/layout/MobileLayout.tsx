@@ -49,7 +49,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
   };
 
   // Mobile-specific optimizations
-  const mobileOptimizations = {
+  const mobileOptimizations: React.CSSProperties = {
     // Disable animations on low-end devices
     animation: optimizations.enableAnimations ? 'auto' : 'none',
     

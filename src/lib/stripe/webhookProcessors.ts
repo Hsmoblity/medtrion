@@ -139,8 +139,8 @@ export async function processCheckoutSessionCompleted(session: Stripe.Checkout.S
     // If no existing order, create one
     if (!wpOrderId && wpClient) {
       const orderData = await createOrderFromSession(session);
-      if (orderData?.order?.id) {
-        wpOrderId = orderData.order.id;
+      if (orderData?.createOrder?.order?.id) {
+        wpOrderId = orderData.createOrder.order.id;
       }
     }
 
@@ -242,7 +242,7 @@ export async function processPaymentIntentSucceeded(paymentIntent: Stripe.Paymen
           paymentIntentId: paymentIntent.id,
           status: 'processing',
           paymentStatus: 'paid',
-          customerEmail: paymentIntent.receipt_email,
+          customerEmail: paymentIntent.receipt_email || undefined,
           amount: amountReceived,
           currency: currency,
           lineItems: parseLineItemsFromMetadata(paymentIntent.metadata),
@@ -410,7 +410,7 @@ export async function processInvoicePaymentSucceeded(invoice: Stripe.Invoice): P
 
     // Update customer payment history
     if (wpClient) {
-      await updateCustomerPaymentHistory(customerId, {
+      await updateCustomerPaymentHistoryLocal(customerId, {
         invoiceId: invoice.id,
         subscriptionId,
         amountPaid,
@@ -480,7 +480,7 @@ async function findOrderByChargeId(chargeId: string): Promise<string | null> {
 /**
  * Update customer payment history
  */
-async function updateCustomerPaymentHistory(customerId: string, paymentData: any): Promise<void> {
+async function updateCustomerPaymentHistoryLocal(customerId: string, paymentData: any): Promise<void> {
   if (!wpClient) return;
 
   try {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useMobileOptimization, useMobilePerformance } from './useMobileOptimization';
+import { useMobileOptimization } from './useMobileOptimization';
+import { useMobilePerformance } from './useMobilePerformance';
 
 /**
  * Hook for smart mobile UI features

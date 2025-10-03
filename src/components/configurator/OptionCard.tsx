@@ -8,6 +8,7 @@ import OptionImage from './OptionImage';
 import RichContent from '../RichContent';
 import styles from './OptionCard.module.css';
 import { cn } from '../../lib/utils';
+import { extractImageUrlWithFallback, getImageAltText } from '../../lib/utils/image';
 // Phase 3: Advanced Features imports
 import { useAccessibility } from '../../hooks/useAccessibility';
 import { usePerformanceOptimization, useImageLoadingOptimization } from '../../hooks/usePerformanceOptimization';
@@ -633,8 +634,8 @@ const OptionCard: React.FC<OptionCardProps> = ({
           ${variant === 'compact' ? 'h-24' : ''}
         `}>
           <OptionImage
-            src={option.image?.sourceUrl || option.featuredImage}
-            alt={option.image?.altText || `${option.name || option.title} option`}
+            src={extractImageUrlWithFallback(option.image?.sourceUrl, option.featuredImage)}
+            alt={getImageAltText(option.image?.altText, `${option.name || option.title} option`)}
             placeholderType="option"
             className="w-full h-full object-cover"
           />

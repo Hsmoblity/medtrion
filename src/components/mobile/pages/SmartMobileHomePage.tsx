@@ -242,7 +242,7 @@ const SmartMobileHomePage: React.FC<SmartMobileHomePageProps> = ({
               }}
               context={{
                 timeOfDay: context?.timeOfDay,
-                userActivity: context?.userActivity,
+                userActivity: context?.userActivity === 'returning' ? 'configuring' : context?.userActivity,
                 sessionDuration: context?.sessionDuration,
                 previousInteractions: smartState.interactionCount,
               }}
@@ -269,7 +269,7 @@ const SmartMobileHomePage: React.FC<SmartMobileHomePageProps> = ({
                 }}
                 context={{
                   timeOfDay: context?.timeOfDay,
-                  userActivity: context?.userActivity,
+                  userActivity: context?.userActivity === 'returning' ? 'configuring' : context?.userActivity,
                   sessionDuration: context?.sessionDuration,
                   previousInteractions: smartState.interactionCount,
                 }}
@@ -404,7 +404,7 @@ const SmartMobileHomePage: React.FC<SmartMobileHomePageProps> = ({
                 }}
                 context={{
                   viewportPosition: index < 2 ? 'visible' : 'below',
-                  userActivity: context?.userActivity,
+                  userActivity: context?.userActivity === 'shopping' ? 'interacting' : context?.userActivity === 'returning' ? 'interacting' : context?.userActivity,
                   networkCondition: 'fast',
                   timeOfDay: context?.timeOfDay,
                 }}
@@ -473,7 +473,7 @@ const SmartMobileHomePage: React.FC<SmartMobileHomePageProps> = ({
                     }}
                     context={{
                       timeOfDay: context?.timeOfDay,
-                      userActivity: context?.userActivity,
+                      userActivity: context?.userActivity === 'returning' ? 'configuring' : context?.userActivity,
                       sessionDuration: context?.sessionDuration,
                       previousInteractions: smartState.interactionCount,
                     }}
@@ -522,7 +522,7 @@ const SmartMobileHomePage: React.FC<SmartMobileHomePageProps> = ({
       }}
       context={{
         pageType: 'home',
-        userActivity: context?.userActivity,
+        userActivity: context?.userActivity === 'returning' ? 'configuring' : context?.userActivity,
         sessionDuration: context?.sessionDuration,
         timeOfDay: context?.timeOfDay,
         networkCondition: 'fast',

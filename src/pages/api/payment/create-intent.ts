@@ -179,10 +179,5 @@ export default async function handler(
     res.status(500).json({ 
       error: error.message || 'An unexpected error occurred while creating payment intent' 
     });
-  } catch (initError: any) {
-    console.error('🔧 Payment API: Initialization error:', initError);
-    res.status(500).json({ 
-      error: initError.message || 'Payment service initialization failed. Please contact support.' 
-    });
   }
 }

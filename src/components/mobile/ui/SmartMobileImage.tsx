@@ -287,7 +287,7 @@ const SmartMobileImage: React.FC<SmartMobileImageProps> = ({
     if (!imgRef.current || !smartFeatures.gestureSupport) return;
 
     const cleanup = createSmartGestureHandler(imgRef.current, {
-      onSwipe: (gesture) => {
+      onSwipe: (gesture: any) => {
         if (gesture.direction === 'left' || gesture.direction === 'right') {
           // Handle horizontal swipe for image navigation
           console.log(`Swipe ${gesture.direction} detected`);
@@ -337,7 +337,7 @@ const SmartMobileImage: React.FC<SmartMobileImageProps> = ({
     img.addEventListener('touchend', handleTouchEnd);
 
     return () => {
-      cleanup();
+      cleanup?.();
       img.removeEventListener('touchstart', handleTouchStart);
       img.removeEventListener('touchmove', handleTouchMove);
       img.removeEventListener('touchend', handleTouchEnd);
@@ -367,7 +367,7 @@ const SmartMobileImage: React.FC<SmartMobileImageProps> = ({
   }, [isInView, imageLoaded, imageError]);
 
   // Smart image styles
-  const getSmartImageStyles = () => {
+  const getSmartImageStyles = (): React.CSSProperties => {
     const baseStyles = {
       maxWidth: '100%',
       height: 'auto',
@@ -393,7 +393,7 @@ const SmartMobileImage: React.FC<SmartMobileImageProps> = ({
       ...baseStyles,
       ...optimizationStyles,
       ...aspectRatioStyles,
-    };
+    } as React.CSSProperties;
   };
 
   // Smart placeholder styles

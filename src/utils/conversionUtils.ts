@@ -99,13 +99,13 @@ export const cartProductToConfiguration = (item: CartProduct): Configuration => 
         slug: relatedProduct.slug || '',
         description: relatedProduct.description || '',
         shortDescription: relatedProduct.description || '',
-        featuredImage: null,
+        featuredImage: undefined,
         productSpecifications: '',
         productPictures: [],
         price: 0,
         affiliate: false,
         optionType: (relatedProduct.type as any) || 'ACCESSORY'
-      } as ConfigurableProductSchema);
+      } as unknown as ConfigurableProductSchema);
     });
   } else if (item.options) {
     // Fallback: convert from simple options array
@@ -122,13 +122,13 @@ export const cartProductToConfiguration = (item: CartProduct): Configuration => 
         slug: option.value || option.name.toLowerCase().replace(/\s+/g, '-'),
         description: '',
         shortDescription: '',
-        featuredImage: null,
+        featuredImage: undefined,
         productSpecifications: '',
         productPictures: [],
         price: option.priceModifier || 0,
         affiliate: false,
         optionType: (option.type as any) || 'ACCESSORY'
-      } as ConfigurableProductSchema);
+      } as unknown as ConfigurableProductSchema);
     });
   }
   

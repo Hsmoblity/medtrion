@@ -6,6 +6,7 @@ import ModelConfigurator from 'components/configurator/ModelConfigurator';
 import { ConfigurableProductSchema, ConfiguratorCategory, SavedConfigurationExtended } from 'lib/interfaces/configurator';
 import { getProductBySlug } from 'lib/contentful/contentful';
 import { sanitizeConfigurableProduct, sanitizeSSRProps } from 'lib/utils/product-sanitizer';
+import { extractImageUrl } from 'lib/utils/image';
 import { LoadingOverlay } from 'components/ui';
 import { useConfiguratorStore } from 'stores/configuratorStore';
 
@@ -523,7 +524,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       shortDescription: mappedProduct.shortDescription || '',
       featuredImage: mappedProduct.featuredImage,
       image: mappedProduct.featuredImage ? {
-        sourceUrl: mappedProduct.featuredImage,
+        sourceUrl: extractImageUrl(mappedProduct.featuredImage) || '',
         altText: `${mappedProduct.title} image`
       } : undefined,
       price: typeof mappedProduct.price === 'number' ? mappedProduct.price : parseFloat(String(mappedProduct.price || '0')),
@@ -613,9 +614,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             // Validate that category has legitimate options
             const validOptions = options.filter(option => {
               // Ensure option belongs to this product
-              const belongsToProduct = option._related_options?.includes(mappedProduct.databaseId) || 
-                                     option.compatibleBaseModels?.includes(mappedProduct.databaseId) ||
-                                     option.productId === mappedProduct.databaseId?.toString();
+              const belongsToProduct = (mappedProduct.productId && option._related_options?.includes(mappedProduct.productId)) || 
+                                     (mappedProduct.productId && option.compatibleBaseModels?.includes(parseInt(mappedProduct.productId))) ||
+                                     option.productId === mappedProduct.productId?.toString();
               
               if (!belongsToProduct) {
                 console.warn(`🔧 Option "${option.name}" does not belong to product "${mappedProduct.title}"`);
@@ -644,9 +645,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           .map(([categoryName, options]) => {
             // Filter options to only include valid ones
             const validOptions = options.filter(option => {
-              const belongsToProduct = option._related_options?.includes(mappedProduct.databaseId) || 
-                                     option.compatibleBaseModels?.includes(mappedProduct.databaseId) ||
-                                     option.productId === mappedProduct.databaseId?.toString();
+              const belongsToProduct = (mappedProduct.productId && option._related_options?.includes(mappedProduct.productId)) || 
+                                     (mappedProduct.productId && option.compatibleBaseModels?.includes(parseInt(mappedProduct.productId))) ||
+                                     option.productId === mappedProduct.productId?.toString();
               const hasValidData = option.name && option.name.trim().length > 0 && 
                                 option.price !== undefined && option.price !== null;
               return belongsToProduct && hasValidData;

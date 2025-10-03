@@ -342,7 +342,7 @@ export async function updateOrderMeta(
       }
     });
 
-    return result.updateOrderMeta?.success || false;
+    return (result as any).updateOrderMeta?.success || false;
   } catch (error: any) {
     console.error('Error updating order meta:', error);
     return false;
@@ -374,7 +374,7 @@ export async function updateCustomerMeta(
       }
     });
 
-    return result.updateCustomerMeta?.success || false;
+    return (result as any).updateCustomerMeta?.success || false;
   } catch (error: any) {
     console.error('Error updating customer meta:', error);
     return false;
@@ -403,7 +403,7 @@ export async function updateProductStock(
       }
     });
 
-    return result.updateProductStock?.success || false;
+    return (result as any).updateProductStock?.success || false;
   } catch (error: any) {
     console.error('Error updating product stock:', error);
     return false;
@@ -425,11 +425,11 @@ export async function addStripeOrderMetadata(
     paymentStatus: string;
   }
 ): Promise<boolean> {
-  const metaData = {
+  const metaData: Record<string, string> = {
     stripe_payment_intent_id: stripeData.paymentIntentId,
-    stripe_customer_id: stripeData.customerId,
-    stripe_session_id: stripeData.sessionId,
-    stripe_charge_id: stripeData.chargeId,
+    stripe_customer_id: stripeData.customerId || '',
+    stripe_session_id: stripeData.sessionId || '',
+    stripe_charge_id: stripeData.chargeId || '',
     stripe_amount_paid: stripeData.amountPaid.toString(),
     stripe_currency: stripeData.currency,
     stripe_payment_status: stripeData.paymentStatus,
@@ -451,10 +451,10 @@ export async function addStripeCustomerMetadata(
     defaultPaymentMethod?: string;
   }
 ): Promise<boolean> {
-  const metaData = {
+  const metaData: Record<string, string> = {
     stripe_customer_id: stripeData.stripeCustomerId,
-    stripe_payment_methods_count: stripeData.paymentMethodsCount?.toString(),
-    stripe_default_payment_method: stripeData.defaultPaymentMethod,
+    stripe_payment_methods_count: stripeData.paymentMethodsCount?.toString() || '0',
+    stripe_default_payment_method: stripeData.defaultPaymentMethod || '',
     stripe_customer_synced: 'true',
     stripe_customer_synced_at: new Date().toISOString(),
   };

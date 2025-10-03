@@ -5,6 +5,8 @@
  * including performance metrics, user behavior tracking, and mobile-specific events.
  */
 
+import React from 'react';
+
 // Mobile analytics event types
 export type MobileAnalyticsEvent = 
   | 'mobile_page_view'
@@ -167,8 +169,8 @@ export const getMobilePerformanceMetrics = (): MobilePerformanceMetrics => {
       const fidObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         entries.forEach(entry => {
-          if (entry.processingStart && entry.startTime) {
-            metrics.firstInputDelay = entry.processingStart - entry.startTime;
+          if ((entry as any).processingStart && entry.startTime) {
+            metrics.firstInputDelay = (entry as any).processingStart - entry.startTime;
           }
         });
       });

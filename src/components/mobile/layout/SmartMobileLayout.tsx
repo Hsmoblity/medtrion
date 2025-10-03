@@ -168,7 +168,7 @@ const SmartMobileLayout: React.FC<SmartMobileLayoutProps> = ({
   const calculatePerformanceOptimizations = useCallback(() => {
     const isLowPerformance = isLowEndDevice || smartUIState.performanceMode;
     const isSlowNetwork = connectionType === 'slow-2g' || connectionType === '2g';
-    const isMemoryConstrained = smartUIState.memoryUsage > 50;
+    const isMemoryConstrained = false; // Memory usage not available in current implementation
 
     let optimizationLevel = 'standard';
     if (isLowPerformance || isSlowNetwork || isMemoryConstrained) {
@@ -186,8 +186,7 @@ const SmartMobileLayout: React.FC<SmartMobileLayoutProps> = ({
   }, [
     isLowEndDevice, 
     smartUIState.performanceMode, 
-    connectionType, 
-    smartUIState.memoryUsage
+    connectionType
   ]);
 
   // Smart accessibility adaptations
@@ -197,9 +196,9 @@ const SmartMobileLayout: React.FC<SmartMobileLayoutProps> = ({
     setLayoutState(prev => ({
       ...prev,
       isNightMode: userPrefs.darkMode || context?.timeOfDay === 'night',
-      isHighContrast: userPrefs.highContrast,
-      isLargeText: userPrefs.largeText,
-      isReducedMotion: userPrefs.reducedMotion,
+      isHighContrast: userPrefs.highContrast || false,
+      isLargeText: userPrefs.largeText || false,
+      isReducedMotion: userPrefs.reducedMotion || false,
     }));
   }, [context, smartUIState.userPreferences]);
 
@@ -272,25 +271,25 @@ const SmartMobileLayout: React.FC<SmartMobileLayoutProps> = ({
   };
 
   // Smart content area styles
-  const getSmartContentStyles = () => {
-    const baseStyles = {
+  const getSmartContentStyles = (): React.CSSProperties => {
+    const baseStyles: React.CSSProperties = {
       flex: 1,
       display: 'flex',
-      flexDirection: 'column' as const,
+      flexDirection: 'column',
       paddingTop: showHeader ? (layoutState.isCompact ? '50px' : isMobile ? '60px' : '80px') : '0',
       paddingBottom: showFooter ? (layoutState.isCompact ? '50px' : isMobile ? '60px' : '80px') : '0',
       minHeight: `calc(100vh - ${showHeader ? (layoutState.isCompact ? '100px' : '120px') : '0px'} - ${showFooter ? (layoutState.isCompact ? '100px' : '120px') : '0px'})`,
     };
 
     // Performance-based content optimizations
-    const performanceStyles = performanceState.optimizationLevel === 'aggressive' ? {
+    const performanceStyles: React.CSSProperties = performanceState.optimizationLevel === 'aggressive' ? {
       // Disable expensive layout features
       transform: 'none',
       willChange: 'auto',
     } : {
       // Enable smooth scrolling and transforms
-      WebkitOverflowScrolling: 'touch',
-      overscrollBehavior: 'contain',
+      WebkitOverflowScrolling: 'touch' as any,
+      overscrollBehavior: 'contain' as any,
     };
 
     return {
@@ -375,7 +374,7 @@ const SmartMobileLayout: React.FC<SmartMobileLayoutProps> = ({
           <div>Layout: {layoutState.currentLayout}</div>
           <div>Performance: {performanceState.optimizationLevel}</div>
           <div>Network: {connectionType}</div>
-          <div>Memory: {smartUIState.memoryUsage?.toFixed(1)}MB</div>
+          <div>Memory: N/A</div>
         </div>
       )}
 

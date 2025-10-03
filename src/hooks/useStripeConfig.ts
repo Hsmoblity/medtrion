@@ -133,7 +133,11 @@ export const useStripeConfig = (options: UseStripeConfigOptions = {}): UseStripe
           'Content-Type': 'application/json',
         },
         // Add timeout
-        signal: AbortSignal.timeout(10000) // 10 second timeout
+        signal: (() => {
+          const controller = new AbortController();
+          setTimeout(() => controller.abort(), 10000);
+          return controller.signal;
+        })()
       });
 
       if (!response.ok) {

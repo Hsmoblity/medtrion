@@ -92,7 +92,7 @@ const CartOptions: React.FC<CartOptionsProps> = ({
       product.productPictures?.[0]?.fields?.file?.url || 
       product.featuredImage || 
       '/temp.webp'
-    );
+    ) || '/temp.webp';
   };
 
   const formatPrice = (price: any) => {

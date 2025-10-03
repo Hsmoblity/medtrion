@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useMobileOptimization, useMobilePerformance } from '../hooks/useMobileOptimization';
+import { useMobileOptimization } from '../hooks/useMobileOptimization';
 import { useMobilePerformance as useMobilePerf } from '../hooks/useMobilePerformance';
 
 interface MobileImageProps {
@@ -112,7 +112,7 @@ const MobileImage: React.FC<MobileImageProps> = ({
   }, [priority, loading]);
 
   // Mobile-specific image styles
-  const getImageStyles = () => {
+  const getImageStyles = (): React.CSSProperties => {
     const baseStyles = {
       maxWidth: '100%',
       height: 'auto',
@@ -137,7 +137,7 @@ const MobileImage: React.FC<MobileImageProps> = ({
     return {
       ...baseStyles,
       ...mobileStyles,
-    };
+    } as React.CSSProperties;
   };
 
   // Placeholder styles

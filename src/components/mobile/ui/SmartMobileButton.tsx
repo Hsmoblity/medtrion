@@ -291,7 +291,7 @@ const SmartMobileButton: React.FC<SmartMobileButtonProps> = ({
     if (!buttonRef.current || !smartFeatures.gestureSupport) return;
 
     const cleanupGesture = createSmartGestureHandler(buttonRef.current, {
-      onSwipe: (gesture) => {
+      onSwipe: (gesture: any) => {
         // Handle swipe gestures
         if (gesture.direction === 'left' && gesture.velocity > 0.5) {
           // Swipe left action
@@ -312,8 +312,8 @@ const SmartMobileButton: React.FC<SmartMobileButtonProps> = ({
     });
 
     return () => {
-      cleanupGesture();
-      cleanupTap();
+      cleanupGesture?.();
+      cleanupTap?.();
     };
   }, [smartFeatures.gestureSupport, createSmartGestureHandler, createSmartTapHandler, onDoubleClick]);
 

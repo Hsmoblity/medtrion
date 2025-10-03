@@ -238,6 +238,8 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
           optionProducts: [],
           selectedOptionsWithVariations: [],
           configurationSummary: {
+            baseModel: null as any,
+            selectedOptions: [],
             basePrice: 0,
             optionsPrice: 0,
             installationPrice: 0,
@@ -283,9 +285,9 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
           
           // Validate that options belong to the current model
           const validOptions = category.options.filter(option => {
-            const belongsToModel = option._related_options?.includes(model.databaseId) || 
-                                 option.compatibleBaseModels?.includes(model.databaseId) ||
-                                 option.productId === model.databaseId?.toString();
+            const belongsToModel = (model.databaseId && option._related_options?.includes(model.databaseId)) || 
+                                  (model.databaseId && option.compatibleBaseModels?.includes(model.databaseId)) ||
+                                  option.productId === model.databaseId?.toString();
             
             if (!belongsToModel) {
               console.warn(`🔧 Option "${option.name}" does not belong to model "${model.name}" (${model.databaseId})`);
@@ -623,6 +625,8 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
           summary: defaultSummary,
           selectedOptionsWithVariations: [],
           configurationSummary: {
+            baseModel: null as any,
+            selectedOptions: [],
             basePrice: 0,
             optionsPrice: 0,
             installationPrice: 0,
@@ -650,6 +654,8 @@ export const useConfiguratorStore = create<EnhancedConfiguratorStore>()(
           selectedOptionsWithVariations: [],
           optionProducts: [],
           configurationSummary: {
+            baseModel: null as any,
+            selectedOptions: [],
             basePrice: 0,
             optionsPrice: 0,
             installationPrice: 0,

@@ -30,7 +30,11 @@ const getStripe = async (config?: StripeConfig): Promise<Stripe | null> => {
         headers: {
           'Content-Type': 'application/json',
         },
-        signal: AbortSignal.timeout(5000) // 5 second timeout
+        signal: (() => {
+          const controller = new AbortController();
+          setTimeout(() => controller.abort(), 5000);
+          return controller.signal;
+        })()
       });
 
       if (response.ok) {

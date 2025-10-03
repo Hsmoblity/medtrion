@@ -7,6 +7,7 @@ import { useCartItems, useCartStore, useEditStatus } from 'stores/cartStore';
 import { useSession } from '../contexts/SessionContext';
 import { loadSessionStorage, isSessionExpired } from '../utils/sessionStorage';
 import { PrimaryButton } from 'components/ui';
+import { extractImageUrl } from '../lib/utils/image';
 
 interface Props {
     product: any;
@@ -360,7 +361,7 @@ export default function OptionsClientWrapper({ product, editSessionData }: Props
                     <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                         <div className="flex-shrink-0">
                             <img 
-                                src={cartItem.featuredImage || '/placeholder.svg'} 
+                                src={extractImageUrl(cartItem.featuredImage) || '/placeholder.svg'} 
                                 alt={cartItem.title}
                                 className="w-16 h-16 object-cover rounded"
                             />

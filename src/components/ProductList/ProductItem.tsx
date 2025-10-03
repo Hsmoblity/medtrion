@@ -177,9 +177,9 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
   };
 
   const IMAGE_URLS: string[] = product.productPictures && product.productPictures.length > 0
-    ? (product.productPictures as any[]).map((pic: any) => normalizeImageUrl(pic?.fields?.file?.url))
+    ? (product.productPictures as any[]).map((pic: any) => normalizeImageUrl(pic?.fields?.file?.url)).filter((url): url is string => url !== null)
     : product.featuredImage
-      ? [normalizeImageUrl(product.featuredImage as any)]
+      ? [normalizeImageUrl(product.featuredImage as any)].filter((url): url is string => url !== null)
       : ['/temp.webp'];
   const [selectedTab, setSelectedTab] = useState<'Overview' | 'Documentation' | 'Reviews' | 'Specifications'>('Overview');
 

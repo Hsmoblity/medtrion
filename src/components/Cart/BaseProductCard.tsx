@@ -26,7 +26,7 @@ const BaseProductCard: React.FC<BaseProductCardProps> = ({
   const router = useRouter();
   const { title, slug, price, quantity = 1, productPictures, featuredImage, options = [] } = product;
   
-  const getSafeImage = () => normalizeImageUrl(productPictures?.[0]?.fields?.file?.url || featuredImage);
+  const getSafeImage = () => normalizeImageUrl(productPictures?.[0]?.fields?.file?.url || featuredImage) || '/placeholder-image.jpg';
   
   const calculateTotalPrice = () => {
     const basePrice = parsePrice(price);

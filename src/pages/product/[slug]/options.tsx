@@ -8,7 +8,7 @@ import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
 const OptionsClientWrapper = dynamic(() => import('components/OptionsClientWrapper'), { ssr: false });
 import { fetchProductsByDatabaseIds } from 'lib/woocommerce';
-import { normalizeImageUrl } from 'lib/utils/image';
+import { normalizeImageUrl, extractImageUrl } from 'lib/utils/image';
 
 const OptionsPage = ({ product, editingCartItem, editSessionData, seoMeta, error, baseModel, categories }: any) => {
     const router = useRouter();
@@ -255,7 +255,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             shortDescription: product.shortDescription || '',
             featuredImage: product.featuredImage,
             image: product.featuredImage ? {
-                sourceUrl: product.featuredImage,
+                sourceUrl: extractImageUrl(product.featuredImage) || '',
                 altText: `${product.title} image`
             } : undefined,
             price: typeof product.price === 'number' ? product.price : parseFloat(product.price || '0'),

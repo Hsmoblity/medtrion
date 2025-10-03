@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { ConfigurableProductSchema, FinancingOption, InsuranceEstimate } from 'lib/interfaces';
 import RichContent from '../RichContent';
+import { extractImageUrlWithFallback, getImageAltText } from '../../lib/utils/image';
 
 interface OptionCardDetailsModalProps {
   option: ConfigurableProductSchema;
@@ -126,11 +127,11 @@ const OptionCardDetailsModal: React.FC<OptionCardDetailsModalProps> = ({
           {/* Content */}
           <div className="p-6 space-y-6">
             {/* Image */}
-            {(option.image?.sourceUrl || option.featuredImage) && (
+            {extractImageUrlWithFallback(option.image?.sourceUrl, option.featuredImage) && (
               <div className="w-full h-64 bg-gray-100 rounded-lg overflow-hidden">
                 <img
-                  src={option.image?.sourceUrl || option.featuredImage}
-                  alt={option.image?.altText || `${option.name || option.title} option`}
+                  src={extractImageUrlWithFallback(option.image?.sourceUrl, option.featuredImage) || ''}
+                  alt={getImageAltText(option.image?.altText, `${option.name || option.title} option`)}
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />

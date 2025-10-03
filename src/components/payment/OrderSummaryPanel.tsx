@@ -2,6 +2,7 @@ import React from 'react';
 import { useCartStore } from '../../stores/cartStore';
 import { formatPrice } from '../../lib/utils/priceUtils';
 import { CartProduct } from '../../lib/interfaces';
+import { extractImageUrl } from '../../lib/utils/image';
 
 interface OrderSummaryPanelProps {
   showEditButton?: boolean;
@@ -86,7 +87,7 @@ const OrderSummaryPanel: React.FC<OrderSummaryPanelProps> = ({
                 {/* Item Image */}
                 <div className="item-image w-16 h-16 rounded-md overflow-hidden flex-shrink-0">
                   <img 
-                    src={item.featuredImage || '/placeholder.svg'} 
+                    src={extractImageUrl(item.featuredImage) || '/placeholder.svg'} 
                     alt={item.title || 'Product'}
                     className="w-full h-full object-cover"
                     onError={(e) => {

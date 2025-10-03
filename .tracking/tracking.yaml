@@ -36,7 +36,8 @@ bugs: [
   "bug-option-variation-popup-double-price-20250102",
   "bug-mobile-cart-counter-position-20250102",
   "bug-mobile-sticky-menu-logo-size-20250102",
-  "bug-cart-edit-config-button-spillout-20250102"
+  "bug-cart-edit-config-button-spillout-20250102",
+  "bug-optioncard-typescript-build-error-20250102"
 ]
 
 features: [
@@ -47,6 +48,7 @@ features: [
   "feat-hsm-stripe-key-configuration-20250102",
   "feat-mobile-optimization-audit-20250102",
   "task-hsm-plugin-development-setup-20250102",
+  "feat-hsm-plugin-api-webhook-check-pages-20250102",
   "FEAT-20250926-4",
   "FEAT-20250926-5",
   "FEAT-20250926-6",
@@ -72,9 +74,9 @@ completed_count:
   total: 40
 
 in_progress_count:
-  bugs: 17
-  features: 6
-  total: 23
+  bugs: 18
+  features: 7
+  total: 25
 
 planned_count:
   bugs: 0

@@ -42,11 +42,28 @@ storybook-static
 .storybook-out
 
 # documentation and task management (development only)
-.docs
-.vscode
-.tasks
-.tracking
+.docs/
+.vscode/
+.tasks/
+.tracking/
+.artifacts/
+.audit/
+.ai_rulebook/
+.ai_colony/
 docs/
+
+# plugin development folders
+cms-plugin-simplified/
+wp-expose-related-options-plugin.php
+
+# AI and development artifacts
+*.md
+!README.md
+ARTIFACTS_CLEANUP_SUMMARY.md
+CMS_PLUGIN_INTEGRATION_SUMMARY.md
+WORDPRESS_PLUGIN_TASKS_BREAKDOWN.md
+graph_response*.json
+payload.json
 
 # IDE and editor files
 *.swp
@@ -76,6 +93,15 @@ temp/
 dev.log
 debug.log
 error.log
+
+# Composer files (PHP dependencies for plugins)
+composer.json
+composer.lock
+
+# Development scripts and utilities
+bin/
+scripts/dev/
+scripts/build/
 
 # Package manager lock files (choose one)
 # yarn.lock

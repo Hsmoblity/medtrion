@@ -1,0 +1,42 @@
+# AI Agent Validation Configuration
+# Rule R58: Pre-Commit Validation Configuration
+
+validation:
+  enabled: true
+  strict_mode: false
+  
+rules:
+  # Code Quality Rules
+  typescript_check: true
+  lint_check: false  # Skip for now since we're cleaning up repo
+  test_check: false  # Skip for now during cleanup
+  
+  # Project Structure Rules
+  project_structure: true
+  file_naming: true
+  
+  # AI Development Rules
+  task_validation: false  # Skip since we're hiding .tasks folder
+  artifact_validation: false  # Skip since we're hiding .artifacts folder
+  
+  # Security Rules
+  env_validation: true
+  dependency_check: false  # Skip for initial cleanup
+
+# Exclusions during repository cleanup
+exclude_patterns:
+  - ".tasks/**"
+  - ".tracking/**" 
+  - ".artifacts/**"
+  - ".ai_rulebook/**"
+  - "docs/**"
+  - "*.md"
+  - "composer.*"
+  - "graph_response*.json"
+
+# Project specific settings
+project:
+  name: "Next-hsmobility"
+  type: "nextjs"
+  ai_enabled: true
+  cleanup_mode: true

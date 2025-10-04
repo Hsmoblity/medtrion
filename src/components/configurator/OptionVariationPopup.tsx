@@ -57,6 +57,14 @@ const validateAndMapVariations = (option: ConfigurableProductSchema): Variation[
       return null;
     }
 
+    // Debug logging for variation image data
+    console.log('validateAndMapVariations: Processing variation', variation.id, ':', {
+      hasImage: !!variation.image,
+      imageData: variation.image,
+      sourceUrl: variation.image?.sourceUrl,
+      altText: variation.image?.altText
+    });
+
     return {
       id: variation.id,
       databaseId: variation.databaseId,
@@ -191,13 +199,16 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
     message: '',
     retry: null
   });
-  
+
+  // Get current temp selections - use store state in store mode, local state in legacy mode
+  const currentTempSelections = isStoreMode ? (optionPopup.tempSelections || []) : tempSelections;
+
   // Initialize selected variations when popup opens
   useEffect(() => {
     if (isOpen && currentOption) {
       if (isStoreMode) {
-        // Store mode: use temp selections from store
-        setTempSelections(optionPopup.tempSelections || []);
+        // Store mode: tempSelections are managed by store, no need to set local state
+        console.log('OptionVariationPopup: Store mode - using store tempSelections:', optionPopup.tempSelections);
       } else if (isEditMode && currentVariations.length > 0) {
         // Legacy edit mode: pre-select current variations
         console.log('OptionVariationPopup: Initializing edit mode with current selections:', currentVariations);
@@ -232,7 +243,7 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
     });
   }, []);
 
-  // Unified price calculation with bug fix for $54 base price issue
+  // Unified price calculation with bug fix for price calculation logic
   const priceCalculation = useMemo(() => {
     if (!currentOption) {
       return { basePrice: 0, variationsTotal: 0, totalPrice: 0, hasVariations: false };
@@ -242,41 +253,43 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
     const basePrice = parsePrice(currentOption.price || currentOption.regularPrice || currentOption.salePrice || 0);
     
     let variationsTotal = 0;
+    let totalPrice = basePrice; // Default to base price
     
     // Handle different variation types
     if (selectionType === 'radio') {
-      // Radio type: Base price + ONE selected variation price
-      const selectedVariation = tempSelections[0];
+      // Radio type: Use variation price as total (not base + variation)
+      const selectedVariation = currentTempSelections[0];
       if (selectedVariation) {
         variationsTotal = parsePrice(selectedVariation.price);
+        totalPrice = variationsTotal; // Use variation price as total
       }
     } else if (selectionType === 'checkbox') {
-      // Checkbox type: Base price + ALL selected variation prices
-      variationsTotal = tempSelections.reduce((sum, variation) => {
+      // Checkbox type: Sum of all selected variation prices as total
+      variationsTotal = currentTempSelections.reduce((sum, variation) => {
         return sum + parsePrice(variation.price);
       }, 0);
+      totalPrice = variationsTotal; // Use sum of variations as total
     }
     
-    const totalPrice = basePrice + variationsTotal;
-    
     // Debug logging for price calculation
-    console.log(`🔧 DEBUG: OptionVariationPopup price calculation:`, {
+    console.log(`🔧 DEBUG: OptionVariationPopup price calculation (FIXED):`, {
       optionName: currentOption.name,
       basePrice,
       variationsTotal,
       totalPrice,
       selectionType,
-      variationsCount: tempSelections.length,
-      variations: tempSelections.map(v => ({ name: v.name, price: v.price }))
+      calculationMethod: selectionType === 'radio' ? 'variation_price_as_total' : 'sum_of_variations_as_total',
+      variationsCount: currentTempSelections.length,
+      variations: currentTempSelections.map(v => ({ name: v.name, price: v.price }))
     });
     
     return {
       basePrice,
       variationsTotal,
       totalPrice,
-      hasVariations: tempSelections.length > 0
+      hasVariations: currentTempSelections.length > 0
     };
-  }, [currentOption, tempSelections, selectionType]);
+  }, [currentOption, currentTempSelections, selectionType]);
   
   // Extract for easier use
   const { basePrice, variationsTotal, totalPrice, hasVariations } = priceCalculation;
@@ -309,7 +322,7 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
   const handleVariationSelect = (variation: Variation) => {
     if (isStoreMode) {
       // Store mode: use store actions
-      const isSelected = tempSelections.some(v => v.id === variation.id);
+      const isSelected = currentTempSelections.some(v => v.id === variation.id);
       if (isSelected) {
         deselectVariation(variation);
       } else {
@@ -339,7 +352,7 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
     if (!currentOption) return;
     
     // Validate price calculation consistency
-    const validation = validatePriceCalculation(currentOption, tempSelections, totalPrice);
+    const validation = validatePriceCalculation(currentOption, currentTempSelections, totalPrice);
     if (!validation.isValid) {
       console.warn('Price calculation validation warnings:', validation.warnings);
       // Log warnings but continue - this helps catch calculation bugs in development
@@ -354,7 +367,7 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
       totalPrice: totalPrice,
       selectionType: selectionType,
       isStoreMode: isStoreMode,
-      selectedVariations: tempSelections.map(v => ({
+      selectedVariations: currentTempSelections.map(v => ({
         id: v.id,
         name: v.name,
         price: v.price
@@ -364,13 +377,13 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
     
     if (isStoreMode) {
       // Store mode: use store action with pre-calculated price
-      addToConfiguration(currentOption, tempSelections, totalPrice);
+      addToConfiguration(currentOption, currentTempSelections, totalPrice);
     } else {
       // Legacy mode: use callback
       if (onAddToConfiguration) {
         (onAddToConfiguration as (option: ConfigurableProductSchema, variations?: Variation[], totalPrice?: number) => void)(
           currentOption, 
-          tempSelections, 
+          currentTempSelections, 
           totalPrice
         );
       }
@@ -514,7 +527,7 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Available Variations</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {realVariations.map((variation) => {
-                  const isSelected = tempSelections.some(v => v.id === variation.id);
+                  const isSelected = currentTempSelections.some(v => v.id === variation.id);
                   
                   return (
                     <OptionVariationCard
@@ -563,7 +576,7 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
               {currentOption.type === 'VARIABLE' && hasVariations ? (
                 <div className="flex justify-between">
                   <span className="text-gray-700">
-                    Selected Variations {selectionType === 'radio' ? '(1)' : `(${tempSelections.length})`}:
+                    Selected Variations {selectionType === 'radio' ? '(1)' : `(${currentTempSelections.length})`}:
                   </span>
                   <span className="font-medium">${variationsTotal.toFixed(2)}</span>
                 </div>
@@ -582,7 +595,7 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
               {currentOption.type !== 'VARIABLE' && hasVariations && (
                 <div className="flex justify-between">
                   <span className="text-gray-700">
-                    Selected Variations {selectionType === 'radio' ? '(1)' : `(${tempSelections.length})`}:
+                    Selected Variations {selectionType === 'radio' ? '(1)' : `(${currentTempSelections.length})`}:
                   </span>
                   <span className="font-medium">
                     +${variationsTotal.toFixed(2)}
@@ -612,7 +625,7 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
           <button
             onClick={handleAddToConfiguration}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            disabled={tempSelections.length === 0}
+            disabled={currentTempSelections.length === 0}
           >
             {isEditMode ? 'Update Configuration' : 'Add to Configuration'}
             {isStoreMode && ` ($${totalPrice.toFixed(2)})`}

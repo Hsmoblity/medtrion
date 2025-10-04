@@ -801,7 +801,10 @@ function mapNodesToConfiguratorFormat(nodes: any[]): any[] {
                     price: variationPrice,
                     regularPrice: variationRegularPrice.toString(),
                     salePrice: variationSalePrice?.toString() || null,
-                    image: variation.image?.sourceUrl || '',
+                    image: variation.image?.sourceUrl ? {
+                        sourceUrl: variation.image.sourceUrl,
+                        altText: variation.image.altText || variation.name || 'Product variation image'
+                    } : undefined,
                     attributes: variation.attributes?.nodes || []
                 };
             }),

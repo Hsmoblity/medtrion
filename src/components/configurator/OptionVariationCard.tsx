@@ -103,6 +103,36 @@ const OptionVariationCard: React.FC<OptionVariationCardProps> = ({
     return optionPrice + variationPrice;
   }, []);
 
+  // Image validation and fallback
+  const imageProps = useMemo(() => {
+    // Debug logging for image data
+    console.log('OptionVariationCard: Image data for variation', variation.id, ':', {
+      hasImage: !!variation.image,
+      imageData: variation.image,
+      sourceUrl: variation.image?.sourceUrl,
+      altText: variation.image?.altText,
+      optionImage: option.image?.sourceUrl
+    });
+    
+    // Try variation image first, then fall back to option image
+    const imageSource = variation.image?.sourceUrl || option.image?.sourceUrl;
+    const imageAlt = variation.image?.altText || option.image?.altText || variation.name || 'Product variation';
+    
+    if (!imageSource) {
+      console.warn('OptionVariationCard: No image source URL for variation', variation.id, variation.name, 'or option', option.id);
+      return {
+        src: null,
+        alt: variation.name || 'Product variation'
+      };
+    }
+    
+    console.log('OptionVariationCard: Using image for variation', variation.id, ':', imageSource);
+    return {
+      src: imageSource,
+      alt: imageAlt
+    };
+  }, [variation.image, variation.name, variation.id, option.image, option.id]);
+
   // Event handlers
   const handleMouseEnter = useCallback(() => {
     if (!disabled && !reducedMotion) {
@@ -305,8 +335,8 @@ const OptionVariationCard: React.FC<OptionVariationCardProps> = ({
           ${variant === 'compact' ? 'h-16' : ''}
         `}>
           <OptionImage
-            src={variation.image?.sourceUrl}
-            alt={variation.image?.altText || variation.name}
+            src={imageProps.src}
+            alt={imageProps.alt}
             placeholderType="option"
             fill
             className="w-full h-full"

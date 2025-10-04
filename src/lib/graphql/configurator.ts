@@ -246,7 +246,10 @@ export function normalizeSlugQueryResponse(wooProduct: any): any {
     regularPrice: variation.regularPrice ? String(safeParsePriceForConfigurator(variation.regularPrice)) : undefined,
     salePrice: variation.salePrice ? String(safeParsePriceForConfigurator(variation.salePrice)) : undefined,
     sku: variation.sku || undefined,
-    image: variation.image?.sourceUrl || '',
+    image: variation.image?.sourceUrl ? {
+      sourceUrl: variation.image.sourceUrl,
+      altText: variation.image.altText || variation.name || 'Product variation image'
+    } : undefined,
     attributes: variation.attributes?.nodes || []
   })) || [];
 

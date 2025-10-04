@@ -3,6 +3,7 @@
 import React from 'react';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { Document } from '@contentful/rich-text-types';
+import { sanitizeContent } from '../lib/utils/html-sanitizer';
 
 interface Props {
     content?: any;
@@ -29,15 +30,30 @@ export default function RichContent({ content, options, className }: Props) {
         }
     }
 
-    // HTML string
+    // HTML string - sanitize to prevent HTML tags from showing literally
     if (typeof content === 'string') {
-        return (
-            <div 
-                className={className} 
-                dangerouslySetInnerHTML={{ __html: content }}
-                suppressHydrationWarning={true}
-            />
-        );
+        try {
+            const sanitizedContent = sanitizeContent(content);
+            return (
+                <div 
+                    className={className}
+                    suppressHydrationWarning={true}
+                >
+                    {sanitizedContent}
+                </div>
+            );
+        } catch (error) {
+            console.warn('RichContent: Error sanitizing HTML content:', error);
+            // Fallback to plain text if sanitization fails
+            return (
+                <div 
+                    className={className}
+                    suppressHydrationWarning={true}
+                >
+                    {content}
+                </div>
+            );
+        }
     }
 
     return null;

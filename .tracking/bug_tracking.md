@@ -40,12 +40,16 @@
 | bug-mobile-sticky-menu-logo-size-20250102 | Mobile UI: Sticky menu logo appears too small on mobile devices | 🔄 IN PROGRESS | MEDIUM | implementation-agent |
 | bug-cart-edit-config-button-spillout-20250102 | Cart Page: Edit configuration button spills out of main product container due to CSS layout constraints | 🔄 IN PROGRESS | MEDIUM | implementation-agent |
 | bug-optioncard-typescript-build-error-20250102 | OptionCard: TypeScript build error due to image source type mismatch (string vs object) | 🔄 IN PROGRESS | HIGH | implementation-agent |
+| bug-cms-plugin-wp-crash-activation-20250102 | CMS Plugin: WordPress crashes when plugin is activated due to plugin conflicts and initialization issues | 🔄 IN PROGRESS | CRITICAL | implementation-agent |
 
 ## ✅ CURRENT SESSION FEATURES IN PROGRESS (Latest)
 
 | feat-hsm-plugin-admin-dashboard-20250102 | HSM Plugin: Enhanced admin dashboard with ASCII map for clear and friendly UI | 🔄 IN PROGRESS | MEDIUM | implementation-agent |
 | feat-hsm-stripe-key-configuration-20250102 | HSM Plugin: Add Stripe key configuration to admin settings with API endpoint for frontend hooks | 🔄 IN PROGRESS | MEDIUM | implementation-agent |
 | feat-hsm-plugin-api-webhook-check-pages-20250102 | HSM Plugin: Add dedicated API and webhook check pages to admin dashboard for monitoring and testing | 🔄 IN PROGRESS | MEDIUM | implementation-agent |
+| feat-cms-plugin-rename-hsm-stripe-20250102 | CMS Plugin: Rename plugin from "HSM" to "hsm-stripe" for better clarity and Stripe integration focus | 🔄 IN PROGRESS | MEDIUM | implementation-agent |
+| feat-email-confirm-order-template-mvp-20250102 | Email System: Override WooCommerce email template with custom order confirmation template using WordPress hooks | 🔄 IN PROGRESS | MEDIUM | implementation-agent |
+| feat-hsm-plugin-optimize-wp-standards-20250102 | HSM Plugin: Optimize plugin by breaking down large single file (3,039 lines) into smaller, organized files following WordPress standards | 🔄 IN PROGRESS | MEDIUM | implementation-agent |
 | feat-mobile-optimization-audit-20250102 | Mobile Optimization: Comprehensive audit of all pages/views with mobile-specific components and smart optimization | 🔄 IN PROGRESS | MEDIUM | implementation-agent |
 
 ## ✅ CURRENT SESSION FIXES COMPLETED (Latest)

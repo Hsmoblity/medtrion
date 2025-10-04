@@ -49,6 +49,8 @@ features: [
   "feat-mobile-optimization-audit-20250102",
   "task-hsm-plugin-development-setup-20250102",
   "feat-hsm-plugin-api-webhook-check-pages-20250102",
+  "feat-cms-plugin-rename-hsm-stripe-20250102",
+  "feat-email-confirm-order-template-mvp-20250102",
   "FEAT-20250926-4",
   "FEAT-20250926-5",
   "FEAT-20250926-6",
@@ -74,9 +76,9 @@ completed_count:
   total: 40
 
 in_progress_count:
-  bugs: 18
-  features: 7
-  total: 25
+  bugs: 19
+  features: 10
+  total: 29
 
 planned_count:
   bugs: 0

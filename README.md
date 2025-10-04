@@ -5,15 +5,46 @@ This is a sample E‑commerce application built with Next.js, Contentful and Str
 **📊 Project Status**: [View Dashboard](docs/PROJECT_STATUS_DASHBOARD.md) | [Detailed Summary](docs/PROJECT_STATUS_SUMMARY.md)  
 **📋 Data Analysis**: [Data Model Analysis](docs/DATA_MODEL_ANALYSIS.md) | [Quick Reference](docs/DATA_MODEL_QUICK_REFERENCE.md)
 
-Purpose: This README explains how to set up the development environment, create the environment file, and run the app on Windows (PowerShell).
+## 📝 Story Management System
 
-Prerequisites
+A comprehensive user story management system integrated into the HSMobility platform for agile development workflow.
+
+### Features
+- **Story Creation & Management**: Create, edit, and organize user stories with rich text descriptions
+- **Acceptance Criteria**: Define clear, testable acceptance criteria for each story
+- **Priority & Status Tracking**: Manage story priorities and track progress through workflow stages
+- **Team Collaboration**: Comments, mentions, and activity tracking for team coordination
+- **Epic Organization**: Group related stories into epics for better project organization
+- **Advanced Filtering**: Multi-criteria filtering and saved filter sets
+- **Responsive Design**: Optimized for desktop and mobile workflows
+
+### Getting Started with Story Management
+1. Navigate to `/stories` to access the Story Management Dashboard
+2. Click "Create Story" to add your first user story
+3. Fill in title, description, and acceptance criteria
+4. Assign priority, story points, and team members
+5. Use filters and search to find stories quickly
+
+### Documentation
+- **[User Guide](docs/user-guides/story-management-user-guide.md)**: Complete guide for using the story management interface
+- **[Technical Documentation](docs/technical/story-management-system.md)**: Architecture and implementation details
+- **[API Documentation](docs/api/story-management-api.md)**: REST API endpoints and usage
+- **[Component Documentation](docs/technical/story-management-components.md)**: React component library reference
+
+### Story Management Pages
+- **Story Dashboard**: `/stories` - Main dashboard with list/grid/kanban views
+- **Story Detail**: `/stories/[id]` - Individual story details and editing
+- **Create Story**: Quick access via "Create Story" button throughout the interface
+
+## � Development Setup
+
+### Prerequisites
 - Node.js >= 16 (or match `engines` in `package.json`)
 - npm (or yarn)
 - Contentful account (Space ID + Delivery API token) if you use Contentful
 - Stripe account if you use payments / webhooks
 
-Environment configuration
+### Environment Configuration
 - Copy `./.env.example` to `./.env.local` and fill in real values. DO NOT commit `.env.local` containing secrets.
 
 Quick example (PowerShell):
@@ -24,7 +55,8 @@ cp .env.example .env.local
 code .env.local
 ```
 
-Main environment variables you may need to set in `.env.local`:
+### Main Environment Variables
+Set these in `.env.local`:
 - `NEXT_PUBLIC_SITE_URL` — site URL (e.g. `http://localhost:3000`)
 - `CONTENTFUL_SPACE_ID` — Contentful Space ID
 - `CONTENTFUL_ENVIRONMENT` — Contentful environment, typically `master`
@@ -33,10 +65,10 @@ Main environment variables you may need to set in `.env.local`:
 - `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` — Stripe keys and webhook secret
 - `GOOGLE_ANALYTICS_ID` — (optional) Google Analytics ID
 
-Install & run (development)
-1. Open PowerShell and change to the `basecode` folder:
+### Install & Run (Development)
+1. Open PowerShell and change to the project folder:
 ```powershell
-cd D:\Works\hsmobility.ca\basecode
+cd path/to/Next-hsmobility
 ```
 2. Install dependencies:
 ```powershell
@@ -48,7 +80,7 @@ npm run dev
 ```
 4. Open your browser at `http://localhost:3000`
 
-## 🛒 Cart Experience & Configuration Flow
+## �🛒 Cart Experience & Configuration Flow
 
 ### Overview
 The application features a comprehensive cart experience with product configuration and edit capabilities:

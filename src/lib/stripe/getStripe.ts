@@ -16,7 +16,7 @@ const getStripe = async (config?: StripeConfig): Promise<Stripe | null> => {
   // If no key provided, try to fetch from HSM plugin
   if (!publishableKey) {
     try {
-      const apiUrl = '/wp-json/hsm/v1/stripe/config';
+      const apiUrl = '/wp-json/hsm-stripe/v1/stripe/config';
       const params = new URLSearchParams();
       
       if (config?.environment) {

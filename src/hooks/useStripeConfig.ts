@@ -118,7 +118,7 @@ export const useStripeConfig = (options: UseStripeConfigOptions = {}): UseStripe
   const fetchConfig = useCallback(async (attempt = 1): Promise<StripeConfig | null> => {
     try {
       // Build API URL
-      const apiUrl = '/wp-json/hsm/v1/stripe/config';
+      const apiUrl = '/wp-json/hsm-stripe/v1/stripe/config';
       const params = new URLSearchParams();
       
       if (environment) {

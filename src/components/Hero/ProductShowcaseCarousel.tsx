@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PrimaryButton } from '../ui';
 import { ProductCardView } from '../../lib/interfaces/homepage';
 import { useHomepageStore } from '../../stores/homepageStore';
+import { sanitizeHtml } from '../../lib/utils/html-sanitizer';
 
 interface ProductShowcaseCarouselProps {
   products: string[]; // Product slugs
@@ -220,7 +221,7 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
                 {currentProduct.title}
               </h3>
               <p className="text-gray-600 mb-4 md:mb-6 line-clamp-2 text-sm md:text-base">
-                {currentProduct.description}
+                {sanitizeHtml(currentProduct.description || '', { maxLength: 150 })}
               </p>
               <div className="flex items-center justify-between mb-4 md:mb-6">
                 <span className="text-2xl md:text-3xl font-bold text-gray-900">
@@ -228,8 +229,10 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
                 </span>
               </div>
               <PrimaryButton 
-                href={`/product/${currentProduct.slug}`}
-                className="w-full text-sm md:text-base py-3 md:py-4"
+                disabled
+                className="w-full text-sm md:text-base py-3 md:py-4 opacity-50 cursor-not-allowed"
+                aria-disabled="true"
+                title="View Details is temporarily disabled"
               >
                 View Details
               </PrimaryButton>

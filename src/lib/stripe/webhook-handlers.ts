@@ -8,10 +8,22 @@ import { GraphQLClient } from 'graphql-request';
  * and updating WordPress orders via GraphQL.
  */
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: "2024-04-10",
-});
+// Lazy initialization of Stripe
+let stripe: Stripe | null = null;
+
+function getStripeInstance(): Stripe {
+  if (stripe) return stripe;
+  
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY is not set');
+  }
+
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2024-04-10",
+  });
+  
+  return stripe;
+}
 
 // Type definitions
 export interface WebhookHandlerContext {
@@ -40,6 +52,7 @@ export function verifyWebhookSignature(
   webhookSecret: string
 ): Stripe.Event {
   try {
+    const stripe = getStripeInstance();
     return stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: any) {
     throw new Error(`Webhook signature verification failed: ${err.message}`);

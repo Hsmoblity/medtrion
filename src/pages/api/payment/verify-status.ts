@@ -2,10 +2,16 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { GraphQLClient, gql } from 'graphql-request';
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: "2024-04-10",
-});
+// Initialize Stripe lazily inside the handler
+function getStripeInstance(): Stripe {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY is not set');
+  }
+  
+  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2024-04-10",
+  });
+}
 
 // Initialize WordPress GraphQL client
 const WP_GRAPHQL_URL = process.env.WP_GRAPHQL_URL || '';
@@ -74,26 +80,30 @@ export default async function verifyStatusHandler(
   req: NextApiRequest,
   res: NextApiResponse<VerificationResponse>
 ) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).json({ 
-      success: false, 
-      error: 'Method Not Allowed' 
-    });
-  }
-
-  const { sessionId, wpOrderId } = req.body;
-
-  if (!sessionId) {
-    return res.status(400).json({
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    res.setHeader('Allow', ['GET', 'POST']);
+    return res.status(405).json({
       success: false,
-      error: 'Session ID is required'
+      error: 'Method not allowed'
     });
   }
 
   try {
+    // Initialize Stripe inside the handler
+    const stripe = getStripeInstance();
+    
+    // Extract parameters from request
+    const { sessionId, wpOrderId } = req.method === 'GET' ? req.query : req.body;
+    
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Session ID is required'
+      });
+    }
+    
     // Verify session with Stripe
-    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+    const session = await stripe.checkout.sessions.retrieve(sessionId as string, {
       expand: ['payment_intent']
     });
 

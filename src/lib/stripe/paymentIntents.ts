@@ -1,13 +1,22 @@
 import Stripe from 'stripe';
 import { CartProduct } from '../interfaces';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set');
-}
+// Lazy initialization of Stripe
+let stripe: Stripe | null = null;
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-04-10',
-});
+function getStripeInstance(): Stripe {
+  if (stripe) return stripe;
+  
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY is not set');
+  }
+
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2024-04-10',
+  });
+  
+  return stripe;
+}
 
 export interface PaymentIntentOptions {
   amount: number;
@@ -30,6 +39,7 @@ export interface PaymentIntentResult {
  */
 export async function createPaymentIntent(options: PaymentIntentOptions): Promise<PaymentIntentResult> {
   try {
+    const stripe = getStripeInstance();
     const {
       amount,
       currency = 'cad',
@@ -116,6 +126,7 @@ export async function createPaymentIntent(options: PaymentIntentOptions): Promis
  */
 export async function getPaymentIntent(paymentIntentId: string): Promise<PaymentIntentResult> {
   try {
+    const stripe = getStripeInstance();
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
     return {
@@ -145,6 +156,7 @@ export async function confirmPaymentIntent(
   paymentMethodId?: string
 ): Promise<PaymentIntentResult> {
   try {
+    const stripe = getStripeInstance();
     const confirmParams: Stripe.PaymentIntentConfirmParams = {};
     
     if (paymentMethodId) {
@@ -179,6 +191,7 @@ export async function confirmPaymentIntent(
  */
 export async function cancelPaymentIntent(paymentIntentId: string): Promise<PaymentIntentResult> {
   try {
+    const stripe = getStripeInstance();
     const paymentIntent = await stripe.paymentIntents.cancel(paymentIntentId);
 
     return {

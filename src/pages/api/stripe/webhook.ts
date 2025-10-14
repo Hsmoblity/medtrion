@@ -17,10 +17,15 @@ export const config = {
   },
 };
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: "2024-04-10",
-});
+// Lazy initialization of Stripe
+function getStripeInstance(): Stripe {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY is not set');
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2024-04-10",
+  });
+}
 
 
 export default async function webhookHandler(
@@ -67,6 +72,7 @@ export default async function webhookHandler(
   // Verify webhook signature
   let event: Stripe.Event;
   try {
+    const stripe = getStripeInstance();
     event = stripe.webhooks.constructEvent(
       body,
       signature as string,

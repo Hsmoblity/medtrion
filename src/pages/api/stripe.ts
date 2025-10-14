@@ -4,15 +4,22 @@ import Stripe from "stripe";
 import { GraphQLClient, gql } from 'graphql-request';
 import { CREATE_HEADLESS_STRIPE_SESSION } from '../../lib/graphql/queries';
 
-if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.trim() === "") {
-  console.warn('STRIPE_SECRET_KEY is not set. /api/stripe will attempt to delegate session creation to WP if supported.');
-}
-
+// Lazy initialization of Stripe
 let stripe: Stripe | null = null;
-if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY.trim() !== "") {
+
+function getStripeInstance(): Stripe | null {
+  if (stripe) return stripe;
+  
+  if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.trim() === "") {
+    console.warn('STRIPE_SECRET_KEY is not set. /api/stripe will attempt to delegate session creation to WP if supported.');
+    return null;
+  }
+
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: "2024-04-10",
   });
+  
+  return stripe;
 }
 
 const WP_GRAPHQL_URL = process.env.WP_GRAPHQL_URL || '';
@@ -40,7 +47,7 @@ export default async function handler(
       const wpOrderId = req.body.wpOrderId || null;
 
       // If a WP order id is provided, ask WP to create a session for that order
-      if (!stripe && wpOrderId) {
+      if (!getStripeInstance() && wpOrderId) {
         const orderMutation = gql`
           mutation CreateSessionForOrder($input: CreateSessionForOrderInput!) {
             createStripeSessionForOrder(input: $input) {
@@ -86,7 +93,8 @@ export default async function handler(
       }
 
       // If server has a Stripe secret key configured, use it directly (existing flow)
-      if (stripe) {
+      const stripeInstance = getStripeInstance();
+      if (stripeInstance) {
         const line_items = items.map((item: any) => {
           const imgUrl = item.productPictures?.[0]?.url || "";
 
@@ -105,11 +113,11 @@ export default async function handler(
         });
 
         // Fetch shipping rates and create a session
-        const shippingRates = await stripe.shippingRates.list({ limit: 5 });
+        const shippingRates = await stripeInstance.shippingRates.list({ limit: 5 });
         const shippingOptions = shippingRates.data.map(rate => ({ shipping_rate: rate.id }));
 
         // Enhanced session creation with webhook metadata
-        const session = await stripe.checkout.sessions.create({
+        const session = await stripeInstance.checkout.sessions.create({
           submit_type: "pay",
           payment_method_types: ["card"],
           billing_address_collection: "auto",

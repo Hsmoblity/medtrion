@@ -1,13 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set');
+// Initialize Stripe lazily inside the handler
+function getStripeInstance(): Stripe {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY is not set');
+  }
+  
+  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2024-04-10',
+  });
 }
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-04-10',
-});
 
 interface ConfirmPaymentRequest {
   paymentIntentId: string;
@@ -31,6 +34,9 @@ export default async function handler(
   }
 
   try {
+    // Initialize Stripe inside the handler
+    const stripe = getStripeInstance();
+    
     const { paymentIntentId, metadata = {} }: ConfirmPaymentRequest = req.body;
 
     if (!paymentIntentId) {

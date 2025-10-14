@@ -2,25 +2,6 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
 import { CartProduct } from '../../../lib/interfaces';
 
-// Check for Stripe configuration
-if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('placeholder')) {
-  console.error('🔧 Payment API: STRIPE_SECRET_KEY is not properly configured');
-  console.error('🔧 Payment API: Please set STRIPE_SECRET_KEY in .env.local with a real Stripe secret key');
-  throw new Error('Payment service is not configured. Please contact support.');
-}
-
-if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.includes('placeholder')) {
-  console.error('🔧 Payment API: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not properly configured');
-  console.error('🔧 Payment API: Please set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY in .env.local with a real Stripe publishable key');
-  throw new Error('Payment service is not configured. Please contact support.');
-}
-
-console.log('🔧 Payment API: Initializing Stripe...');
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-04-10',
-});
-console.log('🔧 Payment API: Stripe initialized successfully');
-
 interface CreateIntentRequest {
   items: CartProduct[];
   currency?: string;
@@ -34,11 +15,31 @@ interface CreateIntentResponse {
   error?: string;
 }
 
+// Initialize Stripe lazily inside the handler
+function getStripeInstance(): Stripe {
+  // Check for Stripe configuration
+  if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('placeholder')) {
+    console.error('🔧 Payment API: STRIPE_SECRET_KEY is not properly configured');
+    throw new Error('Payment service is not configured. Please contact support.');
+  }
+
+  if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.includes('placeholder')) {
+    console.error('🔧 Payment API: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not properly configured');
+    throw new Error('Payment service is not configured. Please contact support.');
+  }
+
+  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2024-04-10',
+  });
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<CreateIntentResponse | { error: string }>
 ) {
   try {
+    // Initialize Stripe inside the handler
+    const stripe = getStripeInstance();
     console.log('🔧 Payment API: Request received', {
       method: req.method,
       url: req.url,

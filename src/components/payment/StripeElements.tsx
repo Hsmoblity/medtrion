@@ -8,6 +8,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { PrimaryButton } from '../ui';
 import { CartProduct } from '../../lib/interfaces';
 import PaymentConfigurationNotice from './PaymentConfigurationNotice';
+import { calculateCartTotal } from '../../lib/utils/cartCalculations';
 
 // Dynamically import the entire payment form to isolate Stripe hooks from Fast Refresh
 const DynamicStripePaymentForm = dynamic(() => import('./StripePaymentForm'), {
@@ -59,7 +60,7 @@ const StripeElements: React.FC<StripeElementsProps> = ({
 
   // Memoize cart total to prevent unnecessary re-renders
   const cartTotal = useMemo(() => {
-    return calculateTotal(cartItems);
+    return calculateCartTotal(cartItems);
   }, [cartItems]);
 
   const createPaymentIntent = useCallback(async () => {
@@ -180,24 +181,6 @@ const StripeElements: React.FC<StripeElementsProps> = ({
       />
     </div>
   );
-};
-
-// Helper function to calculate total
-const calculateTotal = (cartItems: CartProduct[]): number => {
-  return cartItems.reduce((total, item) => {
-    const basePrice = typeof item.price === 'number' ? item.price : Number(item.price || 0);
-    let optionsPrice = 0;
-    
-    if (item.options && Array.isArray(item.options)) {
-      optionsPrice = item.options.reduce((optSum: number, option: any) => {
-        const optPrice = Number(option.priceModifier || 0) || 0;
-        const optQuantity = Number(option.quantity || 1) || 1;
-        return optSum + (optPrice * optQuantity);
-      }, 0);
-    }
-    
-    return total + (basePrice + optionsPrice) * (Number(item.quantity) || 1);
-  }, 0);
 };
 
 export default StripeElements;

@@ -3,6 +3,7 @@ import { useCartStore } from '../../stores/cartStore';
 import { formatPrice } from '../../lib/utils/priceUtils';
 import { CartProduct } from '../../lib/interfaces';
 import { extractImageUrl } from '../../lib/utils/image';
+import { calculateCartSubtotal, calculateTax, getShippingCost, calculateCartTotal } from '../../lib/utils/cartCalculations';
 
 interface OrderSummaryPanelProps {
   showEditButton?: boolean;
@@ -15,27 +16,11 @@ const OrderSummaryPanel: React.FC<OrderSummaryPanelProps> = ({
 }) => {
   const { cart } = useCartStore();
 
-  // Calculate totals
-  const subtotal = cart.reduce((sum: number, item: CartProduct) => {
-    const basePrice = typeof item.price === 'number' ? item.price : Number(item.price || 0) || 0;
-    let optionsPrice = 0;
-    
-    if (item.options && Array.isArray(item.options)) {
-      optionsPrice = item.options.reduce((optSum: number, option: any) => {
-        const optPrice = Number(option.priceModifier || 0) || 0;
-        const optQuantity = Number(option.quantity || 1) || 1;
-        return optSum + (optPrice * optQuantity);
-      }, 0);
-    }
-    
-    const itemTotal = (basePrice + optionsPrice) * (Number(item.quantity) || 1);
-    return sum + itemTotal;
-  }, 0);
-
-  const shipping = 0; // Free shipping for now
-  const taxRate = 0.13; // 13% tax rate
-  const tax = Math.round((subtotal * taxRate) * 100) / 100;
-  const total = Math.round((subtotal + shipping + tax) * 100) / 100;
+  // Calculate totals using shared utilities
+  const subtotal = calculateCartSubtotal(cart);
+  const shipping = getShippingCost();
+  const tax = calculateTax(subtotal);
+  const total = calculateCartTotal(cart);
 
   return (
     <div className="order-summary-panel bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 sticky top-4">

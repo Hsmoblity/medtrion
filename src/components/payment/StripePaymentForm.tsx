@@ -11,6 +11,7 @@ import {
 import { loadStripe } from '@stripe/stripe-js';
 import { PrimaryButton } from '../ui';
 import { CartProduct } from '../../lib/interfaces';
+import { calculateCartTotal } from '../../lib/utils/cartCalculations';
 
 // Initialize Stripe
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -80,23 +81,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     }
   };
 
-  const calculateTotal = (cartItems: CartProduct[]): number => {
-    return cartItems.reduce((total, item) => {
-      const basePrice = typeof item.price === 'number' ? item.price : Number(item.price || 0);
-      let optionsPrice = 0;
-      
-      if (item.options && Array.isArray(item.options)) {
-        optionsPrice = item.options.reduce((optSum: number, option: any) => {
-          const optPrice = Number(option.priceModifier || 0) || 0;
-          const optQuantity = Number(option.quantity || 1) || 1;
-          return optSum + (optPrice * optQuantity);
-        }, 0);
-      }
-      
-      return total + (basePrice + optionsPrice) * (Number(item.quantity) || 1);
-    }, 0);
-  };
-
   return (
     <form onSubmit={handleSubmit} className="stripe-payment-form space-y-6">
       {/* Payment Element */}
@@ -154,7 +138,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           loading={isProcessing}
           className="min-w-[200px]"
         >
-          {isProcessing ? 'Processing...' : `Pay $${calculateTotal(cartItems).toFixed(2)}`}
+          {isProcessing ? 'Processing...' : `Pay $${calculateCartTotal(cartItems).toFixed(2)}`}
         </PrimaryButton>
       </div>
     </form>

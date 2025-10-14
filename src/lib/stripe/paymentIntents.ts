@@ -64,9 +64,7 @@ export async function createPaymentIntent(options: PaymentIntentOptions): Promis
       amount: Math.round(amount * 100), // Convert to cents
       currency: currency.toLowerCase(),
       customer: stripeCustomerId,
-      automatic_payment_methods: {
-        enabled: true,
-      },
+      payment_method_types: ['card'], // Only allow card payments
       metadata: {
         ...metadata,
         source: 'payment-intents',

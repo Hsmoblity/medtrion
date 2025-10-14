@@ -120,9 +120,7 @@ export default async function handler(
       amount: amountInCents,
       currency: currency.toLowerCase(),
       customer: stripeCustomerId,
-      automatic_payment_methods: {
-        enabled: true,
-      },
+      payment_method_types: ['card'], // Only allow card payments
       metadata: {
         ...metadata,
         source: 'stripe-elements',

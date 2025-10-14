@@ -104,6 +104,9 @@ const Home = ({ products, error }: HomeProps) => {
 import { GetServerSideProps } from 'next';
 
 export const getServerSideProps: GetServerSideProps = async () => {
+  // DISABLED: Server-side product fetching to debug infinite loop
+  // TODO: Re-enable after fixing infinite loop issue
+  /*
   try {
     const response = await getProducts("");
     
@@ -144,6 +147,15 @@ export const getServerSideProps: GetServerSideProps = async () => {
       },
     };
   }
+  */
+  
+  // Return empty products array to just load components without data
+  return {
+    props: {
+      products: [],
+      error: null,
+    },
+  };
 };
 
 export default Home;

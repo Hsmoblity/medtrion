@@ -1,6 +1,43 @@
-// GraphQL integration for ModelConfigurator
-// This file contains GraphQL client and API functions for the configurator functionality
-// All GraphQL queries are now centralized in ./queries.ts
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * PRODUCT CONFIGURATOR MODULE - Specialized GraphQL Operations
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * PURPOSE:
+ * This module provides CONFIGURATOR-SPECIFIC GraphQL operations for the
+ * ModelConfigurator component. For general product/order/customer operations,
+ * use src/lib/woocommerce.ts instead.
+ * 
+ * OPERATIONS SUPPORTED:
+ * • Configuration Categories (get categories for a model)
+ * • Compatibility Checking (validate option selections)
+ * • Financing Calculations (calculate financing options)
+ * • Insurance Estimation (estimate insurance costs)
+ * • Configuration Management (save, load, update configurations)
+ * • Cart Integration (add configured products to cart)
+ * 
+ * USAGE:
+ * ```typescript
+ * import { createDefaultClient, getConfigurationCategories } from '@/lib/graphql/configurator';
+ * 
+ * // Get configuration categories for a model
+ * const categories = await getConfigurationCategories('acorn-130');
+ * 
+ * // Check if selections are compatible
+ * const isCompatible = await checkCompatibility(selectedOptions);
+ * ```
+ * 
+ * RELATED FILES:
+ * • src/lib/woocommerce.ts - Primary data fetching (use for general operations)
+ * • src/lib/graphql/queries.ts - GraphQL query definitions
+ * • src/components/configurator/* - Configurator UI components
+ * 
+ * NOTE:
+ * For product fetching (getProductBySlug, getProducts), use woocommerce.ts instead.
+ * This file focuses ONLY on configurator-specific operations.
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
 
 import { 
   GET_PRODUCT_BY_SLUG,

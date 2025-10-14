@@ -53,11 +53,14 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
     console.log('Hero product clicked:', { productSlug, badge, position });
   };
 
+  // Re-enabled: Product fetching with proper dependency to prevent infinite loop
   useEffect(() => {
-    if (enableShowcase) {
+    if (enableShowcase && featuredProducts.length === 0 && !loading && !error) {
+      console.log('TopProductsStrip: Fetching featured products...');
       fetchFeaturedProducts();
     }
-  }, [fetchFeaturedProducts, enableShowcase]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enableShowcase]); // ✅ Only depend on enableShowcase to prevent infinite loop
 
   useEffect(() => {
     if (featuredProducts.length > 0) {
@@ -88,9 +91,18 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
   if (error) {
     return (
       <div className="py-12">
-        <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Top Products</h2>
-          <p className="text-red-500">{error}</p>
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Top Products</h2>
+          <p className="text-red-500 mb-4">{error}</p>
+          <button
+            onClick={() => {
+              console.log('TopProductsStrip: Retrying fetch...');
+              fetchFeaturedProducts();
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );

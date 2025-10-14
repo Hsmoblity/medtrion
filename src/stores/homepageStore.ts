@@ -1,10 +1,9 @@
 import { create } from 'zustand';
 import { ProductSchema } from '../lib/interfaces/schema';
 import { ProductCardView, mapToProductCardView, validateProductCardViews } from '../lib/interfaces/homepage';
-import { runClientRequest } from '../lib/woocommerce';
+import { getFeaturedProducts } from '../lib/woocommerce'; // Using consolidated function
 import { validateProductSchema, sanitizeForSSR, filterConfigurableProducts, handleInsufficientConfigurableProducts } from '../lib/utils/data-validation';
 import { mapWooToProductSchema } from '../lib/contentful/contentful';
-import { GET_FEATURED_PRODUCTS } from '../lib/graphql/queries';
 
 interface HomepageState {
   featuredProducts: ProductCardView[];
@@ -21,7 +20,8 @@ export const useHomepageStore = create<HomepageState>((set) => ({
   fetchFeaturedProducts: async () => {
     set({ loading: true, error: null });
     try {
-      const data = await runClientRequest(GET_FEATURED_PRODUCTS) as { products: { nodes: ProductSchema[] } };
+      // Use consolidated getFeaturedProducts function from woocommerce.ts
+      const data = await getFeaturedProducts(4) as { products: { nodes: ProductSchema[] } };
       
       // Map raw GraphQL data to ProductSchema first
       const productSchemas = data.products.nodes
@@ -64,7 +64,48 @@ export const useHomepageStore = create<HomepageState>((set) => ({
       set({ featuredProducts: finalProducts, loading: false });
     } catch (error) {
       console.error('Homepage Store: Failed to fetch featured products:', error);
-      // Fallback: try to get products from the main contentful function
+      
+      // Check if it's a 404 error or configuration issue - don't retry endlessly
+      const errorMessage = error instanceof Error ? error.message : '';
+      const is404OrConfigError = errorMessage.includes('404') || 
+                                 errorMessage.includes('GraphQL request failed with status 404') ||
+                                 errorMessage.includes('Invalid URL') ||
+                                 errorMessage.includes('GraphQL client not configured') ||
+                                 errorMessage.includes('GraphQL endpoint not properly configured');
+      
+      if (is404OrConfigError) {
+        console.warn('Homepage Store: GraphQL endpoint configuration issue detected, attempting fallback to prevent infinite loops');
+        
+        // Try fallback to Contentful instead of complete failure
+        try {
+          const { getProducts } = await import('../lib/contentful/contentful');
+          const response = await getProducts("");
+          if (response.items && response.items.length > 0) {
+            const validatedFallback = response.items
+              .map(product => sanitizeForSSR(product));
+            
+            const configurableFallback = filterConfigurableProducts(validatedFallback);
+            const fallbackProducts = configurableFallback.slice(0, 4).map(mapToProductCardView);
+            const validatedFallbackProducts = validateProductCardViews(fallbackProducts, 'TopProductsStrip-ConfigFallback');
+            
+            console.log('Homepage Store: Using Contentful fallback for config error');
+            set({ featuredProducts: validatedFallbackProducts, loading: false, error: null });
+            return;
+          }
+        } catch (fallbackError) {
+          console.error('Homepage Store: Config error fallback also failed:', fallbackError);
+        }
+        
+        // If fallback fails, then show error with retry capability
+        set({ 
+          error: 'Products temporarily unavailable. Please try again.', 
+          loading: false,
+          featuredProducts: [] // Clear any existing products
+        });
+        return; // Exit early after attempting fallback
+      }
+      
+      // Fallback: try to get products from the main contentful function (only for non-404 errors)
       try {
         const { getProducts } = await import('../lib/contentful/contentful');
         const response = await getProducts("");

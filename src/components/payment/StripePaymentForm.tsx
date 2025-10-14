@@ -47,13 +47,17 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     event.preventDefault();
 
     if (!stripe || !elements) {
+      console.error('Stripe not loaded yet');
       return;
     }
 
     setIsProcessing(true);
     onPaymentProcessing(true);
+    setMessage('');
 
     try {
+      console.log('Starting payment confirmation...');
+      
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
@@ -62,14 +66,58 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         redirect: 'if_required',
       });
 
+      console.log('Payment confirmation result:', { error, paymentIntent });
+
       if (error) {
         console.error('Payment error:', error);
         setMessage(error.message || 'An error occurred during payment.');
         onPaymentError(error);
       } else if (paymentIntent) {
-        console.log('Payment succeeded:', paymentIntent);
-        onPaymentSuccess(paymentIntent);
-        setMessage('Payment successful! Redirecting...');
+        console.log('Payment Intent Status:', paymentIntent.status);
+        console.log('Payment Intent ID:', paymentIntent.id);
+        console.log('Full Payment Intent:', paymentIntent);
+        
+        // Check payment intent status
+        if (paymentIntent.status === 'succeeded') {
+          console.log('✅ Payment succeeded! Calling onPaymentSuccess...');
+          setMessage('Payment successful! Processing your order...');
+          
+          // Call the success handler with the payment intent
+          await onPaymentSuccess(paymentIntent);
+          
+        } else if (paymentIntent.status === 'processing') {
+          console.log('⏳ Payment is processing...');
+          setMessage('Payment is being processed. This may take a few moments...');
+          
+          // For processing payments, we still call success but with different messaging
+          await onPaymentSuccess(paymentIntent);
+          
+        } else if (paymentIntent.status === 'requires_action') {
+          console.log('🔐 Payment requires additional action');
+          setMessage('Additional authentication required. Please complete the verification and try again.');
+          
+          // Don't call onPaymentSuccess yet - wait for user to complete action
+          
+        } else if (paymentIntent.status === 'requires_payment_method') {
+          console.log('💳 Payment requires a different payment method');
+          setMessage('Payment failed. Please try a different payment method.');
+          onPaymentError(new Error('Payment method declined'));
+          
+        } else if (paymentIntent.status === 'canceled') {
+          console.log('❌ Payment was canceled');
+          setMessage('Payment was canceled. Please try again.');
+          onPaymentError(new Error('Payment canceled'));
+          
+        } else {
+          console.warn('⚠️ Unexpected payment intent status:', paymentIntent.status);
+          setMessage(`Payment status: ${paymentIntent.status}. Please contact support if you have questions.`);
+          
+          // For unknown statuses, let's still try to process it
+          await onPaymentSuccess(paymentIntent);
+        }
+      } else {
+        console.error('No payment intent returned from Stripe');
+        setMessage('Payment confirmation failed. Please try again.');
       }
     } catch (error: any) {
       console.error('Payment error:', error);

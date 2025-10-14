@@ -6,44 +6,19 @@ import OrderSummaryPanel from './OrderSummaryPanel';
 import EditCartButton from './EditCartButton';
 
 interface PaymentPageProps {
-  onCompletePayment?: (formData: any) => Promise<void>;
+  onPaymentSuccess?: (paymentIntent: any) => Promise<void>;
+  onCompletePayment?: (formData: any) => Promise<void>; // Legacy support
 }
 
-const PaymentPage: React.FC<PaymentPageProps> = ({ onCompletePayment }) => {
+const PaymentPage: React.FC<PaymentPageProps> = ({ onPaymentSuccess, onCompletePayment }) => {
   const router = useRouter();
   const [personalInfoValid, setPersonalInfoValid] = useState(false);
   const [personalInfoData, setPersonalInfoData] = useState<any>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'stripe'>('card');
-  const [isProcessing, setIsProcessing] = useState(false);
+  // Always use Stripe payment method - no dummy payment option
+  const [paymentMethod] = useState<'stripe'>('stripe');
 
   const handleEditCart = () => {
     router.push('/cart');
-  };
-
-  const handleCompletePayment = async () => {
-    if (!personalInfoValid || isProcessing) return;
-    
-    setIsProcessing(true);
-    try {
-      const paymentData = {
-        personalInfo: personalInfoData,
-        paymentMethod,
-        // Add other payment details here
-      };
-
-      if (onCompletePayment) {
-        await onCompletePayment(paymentData);
-      } else {
-        // Default behavior - simulate payment processing
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        router.push('/success');
-      }
-    } catch (error) {
-      console.error('Payment error:', error);
-      alert('Payment failed. Please try again.');
-    } finally {
-      setIsProcessing(false);
-    }
   };
 
   return (
@@ -84,58 +59,20 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onCompletePayment }) => {
             />
             
             <PaymentMethodPanel 
-              onPaymentMethodChange={setPaymentMethod}
+              onPaymentSuccess={onPaymentSuccess || ((paymentIntent) => {
+                // Default: redirect to success page
+                router.push('/success');
+              })}
+              onPaymentError={(error) => {
+                console.error('Payment error:', error);
+                alert('Payment failed. Please try again.');
+              }}
             />
             
             {/* Mobile Edit Cart Button */}
             <div className="lg:hidden">
               <EditCartButton onEditCart={handleEditCart} />
             </div>
-            
-            {/* Complete Payment Button */}
-            <button
-              onClick={handleCompletePayment}
-              disabled={!personalInfoValid || isProcessing}
-              className={`
-                w-full px-8 py-4 rounded-lg font-semibold text-lg
-                transition-all duration-200 shadow-lg hover:shadow-xl
-                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                ${personalInfoValid && !isProcessing
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                }
-              `}
-            >
-              {isProcessing ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle 
-                      className="opacity-25" 
-                      cx="12" 
-                      cy="12" 
-                      r="10" 
-                      stroke="currentColor" 
-                      strokeWidth="4" 
-                      fill="none" 
-                    />
-                    <path 
-                      className="opacity-75" 
-                      fill="currentColor" 
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" 
-                    />
-                  </svg>
-                  Processing Payment...
-                </span>
-              ) : (
-                'Complete Payment'
-              )}
-            </button>
-
-            {!personalInfoValid && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-                Please fill in all required personal information to continue
-              </p>
-            )}
           </div>
 
           {/* Right Column: Order Summary (1/3 width) */}

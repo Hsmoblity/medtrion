@@ -6,9 +6,12 @@ export default function Payment() {
     const router = useRouter();
     const { cart } = useCartStore();
 
-    const handleCompletePayment = async (paymentData: any) => {
+    // Handle successful Stripe payment by creating order record
+    const handlePaymentSuccess = async (paymentIntent: any) => {
         try {
-            // Calculate order totals
+            console.log('Payment successful, creating order record...', paymentIntent);
+            
+            // Calculate order totals using the same logic as payment intent
             const subtotal = cart.reduce((s: number, item: any) => {
                 const base = typeof item.price === 'number' ? item.price : Number(item.price || 0) || 0;
                 let opts = 0;
@@ -37,20 +40,14 @@ export default function Payment() {
                     options: item.options ?? undefined 
                 })),
                 customer: {
-                    shipping: {
-                        first_name: paymentData.personalInfo?.firstName,
-                        last_name: paymentData.personalInfo?.lastName,
-                        address_1: paymentData.personalInfo?.address,
-                        city: paymentData.personalInfo?.city,
-                        postcode: paymentData.personalInfo?.zipCode,
-                        country: paymentData.personalInfo?.country || 'US',
-                        phone: paymentData.personalInfo?.phone,
-                    },
-                    billing: paymentData.personalInfo?.email ? { email: paymentData.personalInfo.email } : null
+                    // Get customer info from Stripe payment intent if available
+                    shipping: paymentIntent.shipping || {},
+                    billing: { email: paymentIntent.receipt_email || '' }
                 },
                 meta: {
-                    simulatedPayment: true,
-                    paymentMethod: paymentData.paymentMethod || 'card_dummy',
+                    stripePaymentIntentId: paymentIntent.id,
+                    stripePaymentStatus: paymentIntent.status,
+                    paymentMethod: 'stripe',
                     subtotal,
                     tax,
                     total
@@ -65,13 +62,14 @@ export default function Payment() {
             
             const json = await response.json();
             const wpOrderIdResp = json?.order?.orderNumber || json?.order?.id;
-            const href = `/success${wpOrderIdResp ? `?wpOrderId=${encodeURIComponent(String(wpOrderIdResp))}` : ''}`;
+            const href = `/success${wpOrderIdResp ? `?wpOrderId=${encodeURIComponent(String(wpOrderIdResp))}&paymentIntent=${paymentIntent.id}` : `?paymentIntent=${paymentIntent.id}`}`;
             router.replace(href);
         } catch (err) {
-            console.warn('Payment/order create failed', err);
-            throw new Error('Failed to create order — try again');
+            console.warn('Order creation failed after successful payment', err);
+            // Still redirect to success page with payment intent info
+            router.replace(`/success?paymentIntent=${paymentIntent.id}`);
         }
     };
 
-    return <PaymentPage onCompletePayment={handleCompletePayment} />;
+    return <PaymentPage onPaymentSuccess={handlePaymentSuccess} />;
 }

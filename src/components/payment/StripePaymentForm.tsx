@@ -161,7 +161,12 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           <AddressElement
             options={{
               mode: 'billing',
-              allowedCountries: ['US', 'CA'],
+              allowedCountries: ['CA', 'US'],
+              defaultValues: {
+                address: {
+                  country: 'CA'
+                }
+              }
             }}
           />
         </div>

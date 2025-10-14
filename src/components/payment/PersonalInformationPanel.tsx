@@ -11,9 +11,9 @@ const personalInfoSchema = z.object({
   phone: z.string().regex(/^[\d\s\-\+\(\)]+$/, 'Please enter a valid phone number'),
   address: z.string().min(5, 'Please enter your full address'),
   city: z.string().min(2, 'Please enter your city'),
-  state: z.string().min(1, 'Please select your state'),
-  zipCode: z.string().regex(/^\d{5}(-\d{4})?$/, 'Please enter a valid ZIP code'),
-  country: z.string().default('US')
+  state: z.string().min(1, 'Please select your province'),
+  zipCode: z.string().regex(/^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/, 'Please enter a valid postal code (e.g., K1A 0A6)'),
+  country: z.string().default('CA')
 });
 
 type PersonalInfoFormData = z.infer<typeof personalInfoSchema>;
@@ -37,7 +37,11 @@ const PersonalInformationPanel: React.FC<PersonalInformationPanelProps> = ({
     getValues
   } = useForm<PersonalInfoFormData>({
     resolver: zodResolver(personalInfoSchema),
-    defaultValues: initialData,
+    defaultValues: {
+      country: 'CA',
+      state: 'ON',
+      ...initialData
+    },
     mode: 'onChange'
   });
 
@@ -54,57 +58,20 @@ const PersonalInformationPanel: React.FC<PersonalInformationPanelProps> = ({
     return () => subscription.unsubscribe();
   }, [watch, isValid, onDataChange, onValidationChange]);
 
-  const states = [
-    { value: 'AL', label: 'Alabama' },
-    { value: 'AK', label: 'Alaska' },
-    { value: 'AZ', label: 'Arizona' },
-    { value: 'AR', label: 'Arkansas' },
-    { value: 'CA', label: 'California' },
-    { value: 'CO', label: 'Colorado' },
-    { value: 'CT', label: 'Connecticut' },
-    { value: 'DE', label: 'Delaware' },
-    { value: 'FL', label: 'Florida' },
-    { value: 'GA', label: 'Georgia' },
-    { value: 'HI', label: 'Hawaii' },
-    { value: 'ID', label: 'Idaho' },
-    { value: 'IL', label: 'Illinois' },
-    { value: 'IN', label: 'Indiana' },
-    { value: 'IA', label: 'Iowa' },
-    { value: 'KS', label: 'Kansas' },
-    { value: 'KY', label: 'Kentucky' },
-    { value: 'LA', label: 'Louisiana' },
-    { value: 'ME', label: 'Maine' },
-    { value: 'MD', label: 'Maryland' },
-    { value: 'MA', label: 'Massachusetts' },
-    { value: 'MI', label: 'Michigan' },
-    { value: 'MN', label: 'Minnesota' },
-    { value: 'MS', label: 'Mississippi' },
-    { value: 'MO', label: 'Missouri' },
-    { value: 'MT', label: 'Montana' },
-    { value: 'NE', label: 'Nebraska' },
-    { value: 'NV', label: 'Nevada' },
-    { value: 'NH', label: 'New Hampshire' },
-    { value: 'NJ', label: 'New Jersey' },
-    { value: 'NM', label: 'New Mexico' },
-    { value: 'NY', label: 'New York' },
-    { value: 'NC', label: 'North Carolina' },
-    { value: 'ND', label: 'North Dakota' },
-    { value: 'OH', label: 'Ohio' },
-    { value: 'OK', label: 'Oklahoma' },
-    { value: 'OR', label: 'Oregon' },
-    { value: 'PA', label: 'Pennsylvania' },
-    { value: 'RI', label: 'Rhode Island' },
-    { value: 'SC', label: 'South Carolina' },
-    { value: 'SD', label: 'South Dakota' },
-    { value: 'TN', label: 'Tennessee' },
-    { value: 'TX', label: 'Texas' },
-    { value: 'UT', label: 'Utah' },
-    { value: 'VT', label: 'Vermont' },
-    { value: 'VA', label: 'Virginia' },
-    { value: 'WA', label: 'Washington' },
-    { value: 'WV', label: 'West Virginia' },
-    { value: 'WI', label: 'Wisconsin' },
-    { value: 'WY', label: 'Wyoming' }
+  const provinces = [
+    { value: 'AB', label: 'Alberta' },
+    { value: 'BC', label: 'British Columbia' },
+    { value: 'MB', label: 'Manitoba' },
+    { value: 'NB', label: 'New Brunswick' },
+    { value: 'NL', label: 'Newfoundland and Labrador' },
+    { value: 'NS', label: 'Nova Scotia' },
+    { value: 'NT', label: 'Northwest Territories' },
+    { value: 'NU', label: 'Nunavut' },
+    { value: 'ON', label: 'Ontario' },
+    { value: 'PE', label: 'Prince Edward Island' },
+    { value: 'QC', label: 'Quebec' },
+    { value: 'SK', label: 'Saskatchewan' },
+    { value: 'YT', label: 'Yukon' }
   ];
 
   return (
@@ -322,7 +289,7 @@ const PersonalInformationPanel: React.FC<PersonalInformationPanelProps> = ({
               htmlFor="state" 
               className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >
-              State <span className="text-red-500">*</span>
+              Province <span className="text-red-500">*</span>
             </label>
             <select
               id="state"
@@ -338,10 +305,10 @@ const PersonalInformationPanel: React.FC<PersonalInformationPanelProps> = ({
                 transition-all duration-200
               `}
             >
-              <option value="">Select State</option>
-              {states.map((state) => (
-                <option key={state.value} value={state.value}>
-                  {state.label}
+              <option value="">Select Province</option>
+              {provinces.map((province) => (
+                <option key={province.value} value={province.value}>
+                  {province.label}
                 </option>
               ))}
             </select>
@@ -355,7 +322,7 @@ const PersonalInformationPanel: React.FC<PersonalInformationPanelProps> = ({
               htmlFor="zipCode" 
               className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >
-              ZIP Code <span className="text-red-500">*</span>
+              Postal Code <span className="text-red-500">*</span>
             </label>
             <input
               id="zipCode"
@@ -371,7 +338,7 @@ const PersonalInformationPanel: React.FC<PersonalInformationPanelProps> = ({
                 dark:bg-gray-700 dark:border-gray-600 dark:text-white
                 transition-all duration-200
               `}
-              placeholder="10001"
+              placeholder="K1A 0A6"
             />
             {errors.zipCode && (
               <p className="mt-1 text-sm text-red-500">{errors.zipCode.message}</p>

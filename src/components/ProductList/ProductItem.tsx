@@ -91,6 +91,13 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
       productSpecifications: product.productSpecifications || ''
     };
 
+    console.log('🛒 Adding to cart:', {
+      slug: product.slug,
+      title: product.title,
+      featuredImage: product.featuredImage,
+      cartProduct: cartProduct
+    });
+
     // Add to cart using Zustand store (cartItemId will be generated automatically)
     addToCart(cartProduct);
     // Previously opened the mini-cart. Now navigate to cart page.

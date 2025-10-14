@@ -1,9 +1,10 @@
 import React from 'react';
 import { useCartStore } from '../../stores/cartStore';
 import { formatPrice } from '../../lib/utils/priceUtils';
-import { CartProduct } from '../../lib/interfaces';
+import { CartProduct } from '../../lib/interfaces/cart';
 import { extractImageUrl } from '../../lib/utils/image';
 import { calculateCartSubtotal, calculateTax, getShippingCost, calculateCartTotal } from '../../lib/utils/cartCalculations';
+import { useCartProductData } from '../../hooks/useCartProductData';
 
 interface OrderSummaryPanelProps {
   showEditButton?: boolean;
@@ -15,6 +16,13 @@ const OrderSummaryPanel: React.FC<OrderSummaryPanelProps> = ({
   onEditCart
 }) => {
   const { cart } = useCartStore();
+  
+  // Enhance cart items with complete product data
+  const enhancedCart = useCartProductData(cart);
+
+  // Debug cart data
+  console.log('🛒 Raw cart data:', cart);
+  console.log('✨ Enhanced cart data:', enhancedCart);
 
   // Calculate totals using shared utilities
   const subtotal = calculateCartSubtotal(cart);
@@ -44,7 +52,7 @@ const OrderSummaryPanel: React.FC<OrderSummaryPanelProps> = ({
             <p>Your cart is empty</p>
           </div>
         ) : (
-          cart.map((item: CartProduct) => {
+          enhancedCart.map((item) => {
             const basePrice = typeof item.price === 'number' ? item.price : Number(item.price || 0) || 0;
             let optionsPrice = 0;
             const optionLines: any[] = [];
@@ -76,6 +84,10 @@ const OrderSummaryPanel: React.FC<OrderSummaryPanelProps> = ({
                     alt={item.title || 'Product'}
                     className="w-full h-full object-cover"
                     onError={(e) => {
+                      const imgUrl = extractImageUrl(item.featuredImage);
+                      console.log('🖼️ Image 404 Error for:', item.title, 'URL:', imgUrl);
+                      console.log('🛒 Full item data:', item);
+                      console.log('📦 Raw featuredImage:', item.featuredImage);
                       (e.target as HTMLImageElement).src = '/placeholder.svg';
                     }}
                   />

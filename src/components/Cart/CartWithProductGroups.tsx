@@ -67,7 +67,7 @@ const CartWithProductGroups: React.FC = () => {
   const handleCheckout = async () => {
     setRedirecting(true);
     try {
-      router.push('/payment');
+      router.push('/consultation');
     } finally {
       setRedirecting(false);
     }
@@ -203,7 +203,7 @@ const CartWithProductGroups: React.FC = () => {
                 onClick={handleCheckout}
                 className="bg-blue-600 hover:bg-blue-700 text-white border-0 py-4 text-sm uppercase font-medium transition-colors duration-200"
               >
-                {isRedirecting ? `Please wait...` : `Proceed to Checkout`}
+                {isRedirecting ? `Please wait...` : `Request Consultation`}
               </PrimaryButton>
             </div>
           </div>

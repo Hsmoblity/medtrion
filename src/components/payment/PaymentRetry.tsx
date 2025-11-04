@@ -41,11 +41,11 @@ const PaymentRetry: React.FC<PaymentRetryProps> = ({
 
     setIsProcessing('retry');
     try {
-      await router.push('/payment');
+      await router.push('/consultation');
       onRetrySuccess?.();
     } catch (error) {
-      console.error('Error navigating to payment:', error);
-      onRetryError?.('Failed to redirect to payment page. Please try again.');
+      console.error('Error navigating to consultation:', error);
+      onRetryError?.('Failed to redirect to consultation page. Please try again.');
     } finally {
       setIsProcessing(null);
     }

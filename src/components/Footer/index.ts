@@ -5,7 +5,6 @@
  */
 
 export { default as ProfessionalFooter } from './ProfessionalFooter';
-export { default as NewsletterSignup } from './NewsletterSignup';
 export { default as SocialMediaLinks } from './SocialMediaLinks';
 export { default as FooterNavigation } from './FooterNavigation';
 export { default as FooterContact } from './FooterContact';
@@ -16,7 +15,6 @@ export { default as FooterLegal } from './FooterLegal';
 export type {
   ProfessionalFooterProps,
   FooterContent,
-  NewsletterSignupProps,
   SocialMediaLinkProps,
   FooterNavigationProps,
   FooterContactProps,

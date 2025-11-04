@@ -16,15 +16,11 @@ const Cart = () => {
 
   const router = useRouter();
 
-  const handleCheckout = async () => {
-    // Navigate to the payment page and let the payment page create the
-    // order when the user confirms (Place Order). This avoids creating
-    // orphan orders prematurely.
-    setRedirecting(true);
-    try {
-      router.push('/payment');
-    } finally {
-      setRedirecting(false);
+    const handleCheckout = () => {
+    // Navigate to the consultation page and let the consultation page handle the
+    // customer information collection and consultation request submission
+    if (cart.length > 0) {
+      router.push('/consultation');
     }
   };
 

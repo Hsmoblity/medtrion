@@ -57,7 +57,7 @@ const PaymentFailedPage: React.FC<PaymentFailedPageProps> = () => {
   };
 
   const handleRetryPayment = () => {
-    router.push('/payment');
+    router.push('/consultation');
   };
 
   const handleContactSupport = () => {

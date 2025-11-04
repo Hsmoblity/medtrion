@@ -4,10 +4,8 @@ import { ProfessionalFooterProps, defaultFooterContent, footerDesignTokens } fro
 import FooterNavigation from './FooterNavigation';
 import FooterContact from './FooterContact';
 import SocialMediaLinks from './SocialMediaLinks';
-import NewsletterSignup from './NewsletterSignup';
 import PaymentMethods from './PaymentMethods';
 import FooterLegal from './FooterLegal';
-import { getDevVersion } from '../../lib/utils/devVersion';
 
 /**
  * Professional Footer Component
@@ -17,7 +15,6 @@ import { getDevVersion } from '../../lib/utils/devVersion';
  */
 const ProfessionalFooter: React.FC<ProfessionalFooterProps> = ({
   variant = 'full',
-  showNewsletter = true,
   showSocialMedia = true,
   showTrustIndicators = false,
   showContactForm = false,
@@ -26,7 +23,6 @@ const ProfessionalFooter: React.FC<ProfessionalFooterProps> = ({
   theme = 'auto'
 }) => {
   const content = customContent || defaultFooterContent;
-  const devVersion = getDevVersion();
 
   // Generate structured data for SEO
   const structuredData = {
@@ -50,13 +46,6 @@ const ProfessionalFooter: React.FC<ProfessionalFooterProps> = ({
       "email": content.companyInfo.email
     },
     "sameAs": content.socialMedia.map(social => social.url)
-  };
-
-  const handleNewsletterSubmit = async (email: string) => {
-    // TODO: Implement newsletter signup API integration
-    console.log('Newsletter signup:', email);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
   };
 
   const getVariantClasses = () => {
@@ -129,26 +118,17 @@ const ProfessionalFooter: React.FC<ProfessionalFooterProps> = ({
               />
             </div>
             
-            {/* Newsletter & Social Media Section */}
-            {variant !== 'compact' && (
+            {/* Social Media Section */}
+            {variant !== 'compact' && showSocialMedia && content.socialMedia.length > 0 && (
               <div className={`
                 ${footerDesignTokens.layout.column}
                 ${variant === 'minimal' ? 'sm:w-3/12' : 'sm:w-3/12'}
                 px-5 pt-5
               `}>
-                {showNewsletter && (
-                  <NewsletterSignup
-                    onSubmit={handleNewsletterSubmit}
-                    className="mb-8"
-                  />
-                )}
-                
-                {showSocialMedia && content.socialMedia.length > 0 && (
-                  <SocialMediaLinks
-                    socialMedia={content.socialMedia}
-                    className="mb-6"
-                  />
-                )}
+                <SocialMediaLinks
+                  socialMedia={content.socialMedia}
+                  className="mb-6"
+                />
               </div>
             )}
           </div>
@@ -174,7 +154,6 @@ const ProfessionalFooter: React.FC<ProfessionalFooterProps> = ({
           `}>
             <FooterLegal
               legal={content.legal}
-              devVersion={devVersion}
             />
           </div>
         </div>

@@ -43,11 +43,11 @@ const PaymentCancel: React.FC<PaymentCancelProps> = () => {
     setRetryError(null);
 
     try {
-      // Navigate back to payment page
-      await router.push('/payment');
+      // Navigate back to consultation page
+      await router.push('/consultation');
     } catch (error) {
       console.error('Error navigating to payment:', error);
-      setRetryError('Failed to redirect to payment page. Please try again.');
+      setRetryError('Failed to redirect to consultation page. Please try again.');
       setIsRetrying(false);
     }
   };

@@ -11,7 +11,6 @@ import { FooterLegalProps, footerDesignTokens } from '../../lib/interfaces/foote
  */
 const FooterLegal: React.FC<FooterLegalProps> = ({
   legal,
-  devVersion,
   className = ""
 }) => {
   const currentYear = new Date().getFullYear();
@@ -91,22 +90,6 @@ const FooterLegal: React.FC<FooterLegalProps> = ({
       >
         {copyrightText}
       </motion.div>
-      
-      {/* Development Version */}
-      {devVersion && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className={`
-            ${footerDesignTokens.typography.small}
-            ${footerDesignTokens.colors.text.secondary}
-            text-center opacity-75
-          `}
-        >
-          devVer: {devVersion}
-        </motion.div>
-      )}
     </motion.div>
   );
 };

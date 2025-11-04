@@ -32,12 +32,12 @@ const CartPage = () => {
     const total = formatPrice(orderTotal.total);
 
     const handleCheckout = async () => {
-        // Do not create the order here. Navigate to the payment page and
-        // allow the payment page to create the order when user submits
-        // the payment form. Keep the UX of redirecting to /payment.
+        // Do not create the order here. Navigate to the consultation page and
+        // allow the consultation page to collect customer info and submit
+        // the consultation request. Keep the UX of redirecting to /consultation.
         setRedirecting(true);
         try {
-            router.push('/payment');
+            router.push('/consultation');
         } finally {
             setRedirecting(false);
         }
@@ -145,7 +145,7 @@ const CartPage = () => {
                                         onClick={handleCheckout}
                                         fullWidth
                                     >
-                                        {isRedirecting ? 'Please wait...' : 'Proceed to Checkout'}
+                                        {isRedirecting ? 'Please wait...' : 'Request Consultation'}
                                     </PrimaryButton>
 
                                     {/* Continue Shopping */}

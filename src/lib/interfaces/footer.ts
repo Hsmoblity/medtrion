@@ -46,22 +46,12 @@ export interface FooterContent {
 
 export interface ProfessionalFooterProps {
   variant?: 'full' | 'minimal' | 'compact';
-  showNewsletter?: boolean;
   showSocialMedia?: boolean;
   showTrustIndicators?: boolean;
   showContactForm?: boolean;
   customContent?: FooterContent;
   className?: string;
   theme?: 'light' | 'dark' | 'auto';
-}
-
-export interface NewsletterSignupProps {
-  onSubmit: (email: string) => Promise<void>;
-  placeholder?: string;
-  buttonText?: string;
-  successMessage?: string;
-  errorMessage?: string;
-  className?: string;
 }
 
 export interface SocialMediaLinkProps {
@@ -97,7 +87,6 @@ export interface FooterContactProps {
 
 export interface FooterLegalProps {
   legal: FooterContent['legal'];
-  devVersion?: string;
   className?: string;
 }
 

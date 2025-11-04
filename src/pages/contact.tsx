@@ -52,7 +52,14 @@ const ContactPage: React.FC<ContactPageProps> = () => {
     setSubmitStatus('idle');
 
     try {
-      const response = await fetch("https://api.web3forms.com/submit", {
+      const web3formsUrl = process.env.NEXT_PUBLIC_WEB3FORMS_URL;
+      const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+
+      if (!web3formsUrl || !accessKey) {
+        throw new Error("Web3Forms configuration missing");
+      }
+
+      const response = await fetch(web3formsUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -60,7 +67,7 @@ const ContactPage: React.FC<ContactPageProps> = () => {
         },
         body: JSON.stringify({
           ...data,
-          access_key: "3c01bf6a-1e01-47f6-8337-e2155b97fa50",
+          access_key: accessKey,
           subject: `Contact Form: ${data.subject}`,
         }),
       });

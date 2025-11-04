@@ -58,7 +58,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
     return (
       <>
         <MetaHead 
-          title="Products - HS Mobility" 
+          title="Products - Health Supply & Mobility Inc" 
           description="Discover our range of mobility products and stairlifts"
         />
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -77,7 +77,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
   return (
     <>
       <MetaHead 
-        title="Products - HS Mobility" 
+        title="Products - Health Supply & Mobility Inc" 
         description="Discover our curated selection of mobility products including stairlifts and lift chairs. Quality solutions for enhanced independence."
       />
       

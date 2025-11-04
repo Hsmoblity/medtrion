@@ -58,11 +58,21 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
     totalPrice: enhancedSummary?.totalPrice,
     selectedOptionsCount: enhancedSummary?.selectedOptions?.length || 0
   });
+  console.log(`🔧 DEBUG: ConfigurationSummary render - enhancedSelectedOptions count:`, enhancedSelectedOptions.length);
   console.log(`🔧 DEBUG: ConfigurationSummary render - enhancedSelectedOptions:`, enhancedSelectedOptions.map(so => ({
+    id: so.id,
     optionName: so.option.name,
     totalPrice: so.totalPrice,
-    variationsCount: so.selectedVariations.length
+    variationsCount: so.selectedVariations.length,
+    category: so.category
   })));
+  
+  // Additional debug: check if component is re-rendering when store changes
+  console.log(`🔧 DEBUG: ConfigurationSummary store state:`, {
+    storeSelectedOptionsCount: selectedOptionsWithVariations.length,
+    configSummaryExists: !!configurationSummary,
+    enhancedOptionsCount: enhancedSelectedOptions.length
+  });
   
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 

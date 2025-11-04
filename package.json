@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "npx kill-port 3002 && next dev -p 3002",
+    "dev:stable": "npx kill-port 3002 && next dev -p 3002",
+    "dev:clean": "npx kill-port 3002 && rm -rf .next && next dev -p 3002",
     "dev:env": "node ./scripts/load-env-and-run-dev.js",
     "prebuild": "node ./scripts/generate-version.js",
     "build": "next build",

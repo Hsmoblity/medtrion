@@ -78,13 +78,32 @@ const CartPageGroups: React.FC = () => {
     // Generate a unique session ID for this edit session
     const sessionId = `edit_${product.cartItemId}_${Date.now()}`;
     
+    // Store the cart item data in localStorage for the configure page to load
+    const editSessionData = {
+      cartItemId: product.cartItemId,
+      sessionId: sessionId,
+      productSlug: product.slug,
+      productData: product,
+      originalOptions: product.options || [],
+      isEditMode: true,
+      timestamp: Date.now()
+    };
+    
+    try {
+      localStorage.setItem(`hsm_edit_session_${sessionId}`, JSON.stringify(editSessionData));
+      console.log('🔧 Stored edit session data in localStorage:', editSessionData);
+    } catch (error) {
+      console.error('🔧 Failed to store edit session data:', error);
+    }
+    
     // Navigate to product configuration page with edit mode parameters
     const editUrl = `/product/${product.slug}/configure?edit=true&cartItemId=${product.cartItemId}&sessionId=${sessionId}`;
     
     console.log('Navigating to edit configuration:', {
       url: editUrl,
       sessionId,
-      cartItemId: product.cartItemId
+      cartItemId: product.cartItemId,
+      optionsCount: product.options?.length || 0
     });
     
     router.push(editUrl);

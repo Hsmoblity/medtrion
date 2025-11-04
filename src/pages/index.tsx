@@ -67,8 +67,8 @@ const Home = ({ products, error }: HomeProps) => {
       {/* Testimonial Carousel Section */}
       {testimonialCarouselEnabled && <TestimonialCarousel />}
       
-      {/* Best Seller Section with Real Products - HIDDEN */}
-      {/* <BestSellerSection initialProducts={safeProducts} /> */}
+      {/* Best Seller Section with Real Products */}
+      {safeProducts.length > 0 && <BestSellerSection initialProducts={safeProducts} />}
       
       {/* FAQ Section */}
       <div>
@@ -104,10 +104,9 @@ const Home = ({ products, error }: HomeProps) => {
 import { GetServerSideProps } from 'next';
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  // DISABLED: Server-side product fetching to debug infinite loop
-  // TODO: Re-enable after fixing infinite loop issue
-  /*
+  // Re-enable server-side product fetching for basic functionality
   try {
+    console.log('Homepage: Attempting to fetch products...');
     const response = await getProducts("");
     
     // Check for error in response
@@ -131,6 +130,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
     };
 
     const items = Array.isArray(response.items) ? response.items.map(sanitize) : [];
+    console.log('Homepage: Successfully fetched', items.length, 'products');
 
     return {
       props: {
@@ -140,6 +140,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
     };
   } catch (error) {
     console.error('Homepage: Failed to fetch products:', error);
+    // Return empty products array instead of failing completely
     return {
       props: {
         products: [],
@@ -147,15 +148,6 @@ export const getServerSideProps: GetServerSideProps = async () => {
       },
     };
   }
-  */
-  
-  // Return empty products array to just load components without data
-  return {
-    props: {
-      products: [],
-      error: null,
-    },
-  };
 };
 
 export default Home;

@@ -13,6 +13,7 @@ export interface FooterContent {
     address: string;
     phone: string;
     email: string;
+    website?: string;
   };
   navigation: {
     title: string;
@@ -139,12 +140,13 @@ export const footerDesignTokens = {
 // Default footer content
 export const defaultFooterContent: FooterContent = {
   companyInfo: {
-    name: 'HSMobility',
-    description: 'HSMobility is your trusted source for a wide range of health services and mobility products designed to improve your quality of life. Please note: We are not manufacturers of Acorn stairlifts but proud affiliate partners.',
+    name: 'Health Supply & Mobility Inc',
+    description: 'Health Supply & Mobility Inc is your trusted source for a wide range of health services and mobility products designed to improve your quality of life. Please note: We are not manufacturers of Acorn stairlifts but proud affiliate partners.',
     logo: '/Logo.png',
-    address: '3495 Rebecca St #207 Oakville, ON L6L 6X9',
+    address: '3495 Rebecca St Oakville, ON L6L 6X9',
     phone: '+1 (905) 330-1774',
-    email: 'Info@hsmobility.ca'
+    email: 'Info@hsmobility.ca',
+    website: 'https://hsmobility.ca'
   },
   navigation: [
     {
@@ -152,7 +154,7 @@ export const defaultFooterContent: FooterContent = {
       links: [
         { label: 'Home', href: '/' },
         { label: 'Shop All', href: '/#shop' },
-        { label: 'Acorn Stairlifts', href: '/product/acorn-stairlifts-acorn-180-curved-stairlift' },
+        // { label: 'Acorn Stairlifts', href: '/product/acorn-stairlifts-acorn-180-curved-stairlift' },
         { label: 'Reviews', href: '/#reviews' },
         { label: 'FAQs', href: '/#faq' },
         { label: 'Blogs', href: '/blogs' }
@@ -165,6 +167,12 @@ export const defaultFooterContent: FooterContent = {
       url: 'https://www.facebook.com/profile.php?id=61565518749182',
       icon: 'FaFacebook',
       label: 'Follow us on Facebook'
+    },
+    {
+      platform: 'Instagram',
+      url: 'https://www.instagram.com/healthsupplymobility_/?hl=en',
+      icon: 'FaInstagram',
+      label: 'Follow us on Instagram'
     }
   ],
   trustIndicators: [],

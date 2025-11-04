@@ -27,7 +27,7 @@ export const useHeroContent = (): HeroContentResponse => {
 
         // Create hero content with real product data
         const heroContent: HeroContent = {
-          title: "Express Your Freedom with HS Mobility",
+          title: "Express Your Freedom with Health Supply & Mobility Inc",
           subtitle: "Empowering 1000+ Satisfied Customers to Stay Independent with Exceptional mobility products",
           statistics: [
             {
@@ -73,7 +73,7 @@ export const useHeroContent = (): HeroContentResponse => {
         
         // Fallback to mock content if API fails
         const fallbackContent: HeroContent = {
-          title: "Express Your Freedom with HS Mobility",
+          title: "Express Your Freedom with Health Supply & Mobility Inc",
           subtitle: "Empowering 1000+ Satisfied Customers to Stay Independent with Exceptional mobility products",
           statistics: [
             {
@@ -123,7 +123,7 @@ export const useHeroContent = (): HeroContentResponse => {
 
   return {
     content: content || {
-      title: "Express Your Freedom with HS Mobility",
+      title: "Express Your Freedom with Health Supply & Mobility Inc",
       subtitle: "Empowering 1000+ Satisfied Customers to Stay Independent with Exceptional mobility products",
       statistics: [],
       ctaButtons: [],

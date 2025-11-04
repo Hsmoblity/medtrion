@@ -58,7 +58,7 @@ describe('Drawer Component', () => {
     
     expect(screen.getByText('Contact Us:')).toBeInTheDocument();
     expect(screen.getByText('3495 Rebecca St')).toBeInTheDocument();
-    expect(screen.getByText('#207 Oakville, ON')).toBeInTheDocument();
+    expect(screen.getByText('Oakville, ON')).toBeInTheDocument();
     expect(screen.getByText('L6L 6X9')).toBeInTheDocument();
   });
 

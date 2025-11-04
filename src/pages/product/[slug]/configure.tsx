@@ -53,6 +53,49 @@ const ConfigurePage: React.FC<ConfigurePageProps> = ({
           if (parsedSessionData.cartItemId === editSessionData.cartItemId &&
               parsedSessionData.productSlug === router.query.slug) {
             console.log('🔧 Edit session data validated successfully');
+            
+            // Load the existing options into the configurator
+            if (parsedSessionData.originalOptions && parsedSessionData.originalOptions.length > 0) {
+              console.log('🔧 Loading existing options into configurator:', parsedSessionData.originalOptions);
+              
+              // Use configurator store to add existing options
+              const { addOption } = useConfiguratorStore.getState();
+              
+              // Convert cart options back to ConfigurableProductSchema format and add them
+              parsedSessionData.originalOptions.forEach((option: any) => {
+                // Create a basic ConfigurableProductSchema object from the cart option
+                const optionProduct: ConfigurableProductSchema = {
+                  id: option.value || option.slug || option.name,
+                  name: option.name,
+                  slug: option.value || option.slug || option.name,
+                  price: option.priceModifier || 0,
+                  optionType: option.type || 'ACCESSORY',
+                  // Add required fields with defaults
+                  title: option.name,
+                  description: option.description || '',
+                  featuredImage: option.featuredImage || '',
+                  image: undefined,
+                  productId: option.productId || null,
+                  productSpecifications: '',
+                  productPictures: [],
+                  affiliate: false,
+                  variations: [],
+                  _related_options: [],
+                  _related_options_products: []
+                };
+                
+                // Try to determine the category for this option
+                // For now, use a default category - this could be improved by storing category info in cart
+                const categoryId = option.categoryId || 'accessories';
+                
+                console.log(`🔧 Adding existing option to configurator: ${option.name} in category ${categoryId}`);
+                addOption(optionProduct, categoryId);
+              });
+              
+              console.log('🔧 Successfully loaded existing options into configurator');
+            } else {
+              console.log('🔧 No existing options found in edit session data');
+            }
           } else {
             console.warn('🔧 Edit session data mismatch:', {
               stored: parsedSessionData,

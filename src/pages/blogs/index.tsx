@@ -95,7 +95,7 @@ const BlogsPage: React.FC<BlogsPageProps> = ({ blogs: propBlogs, error: propErro
   return (
     <>
       <MetaHead 
-        title="Blog - HS Mobility" 
+        title="Blog - Health Supply & Mobility Inc" 
         description="Stay informed with the latest insights on mobility solutions, home safety, and independent living tips."
       />
       

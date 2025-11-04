@@ -7,7 +7,7 @@ export default function Payment() {
     const { cart, clearCart } = useCartStore();
 
     // Handle successful Stripe payment by creating order record
-    const handlePaymentSuccess = async (paymentIntent: any) => {
+    const handlePaymentSuccess = async (paymentIntent: any, personalInfoData?: any) => {
         try {
             console.log('🎉 Payment Success Handler Called!');
             console.log('📄 Payment Intent Details:', {
@@ -18,6 +18,7 @@ export default function Payment() {
                 customer: paymentIntent.customer
             });
             console.log('🛒 Cart Items:', cart);
+            console.log('📝 Personal Info Data:', personalInfoData);
             
             // Calculate order totals using the same logic as payment intent
             const subtotal = cart.reduce((s: number, item: any) => {
@@ -40,20 +41,51 @@ export default function Payment() {
 
             console.log('💰 Order Totals:', { subtotal, tax, total });
 
-            const orderBody = {
-                lineItems: cart.map((item: any) => ({ 
-                    slug: item.slug, 
-                    productId: item.productId ?? undefined, 
-                    quantity: item.quantity, 
-                    price: item.price, 
-                    title: item.title, 
-                    options: item.options ?? undefined 
-                })),
-                customer: {
-                    // Get customer info from Stripe payment intent if available
-                    shipping: paymentIntent.shipping || {},
-                    billing: { email: paymentIntent.receipt_email || '' }
+            // Build comprehensive customer data from form and Stripe
+            const customerData = {
+                billing: {
+                    first_name: personalInfoData?.firstName || '',
+                    last_name: personalInfoData?.lastName || '',
+                    email: personalInfoData?.email || paymentIntent.receipt_email || '',
+                    phone: personalInfoData?.phone || '',
+                    address_1: personalInfoData?.address || '',
+                    city: personalInfoData?.city || '',
+                    state: personalInfoData?.state || '',
+                    postcode: personalInfoData?.zipCode || '',
+                    country: personalInfoData?.country || 'CA'
                 },
+                shipping: {
+                    first_name: personalInfoData?.firstName || '',
+                    last_name: personalInfoData?.lastName || '',
+                    address_1: personalInfoData?.address || '',
+                    city: personalInfoData?.city || '',
+                    state: personalInfoData?.state || '',
+                    postcode: personalInfoData?.zipCode || '',
+                    country: personalInfoData?.country || 'CA'
+                }
+            };
+
+            const orderBody = {
+                lineItems: [
+                    // Product line items
+                    ...cart.map((item: any) => ({ 
+                        slug: item.slug, 
+                        productId: item.productId ?? undefined, 
+                        quantity: item.quantity, 
+                        price: item.price, 
+                        title: item.title, 
+                        options: item.options ?? undefined 
+                    })),
+                    // Tax line item (if tax > 0)
+                    ...(tax > 0 ? [{
+                        title: 'Tax (HST 13%)',
+                        quantity: 1,
+                        price: tax,
+                        productId: null,
+                        slug: 'tax-hst'
+                    }] : [])
+                ],
+                customer: customerData,
                 meta: {
                     stripePaymentIntentId: paymentIntent.id,
                     stripePaymentStatus: paymentIntent.status,

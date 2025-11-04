@@ -83,10 +83,10 @@ const ContactPage: React.FC<ContactPageProps> = () => {
 
   const contactInfo = {
     address: {
-      street: "3495 Rebecca St #207",
+      street: "3495 Rebecca St ",
       city: "Oakville, ON",
       postal: "L6L 6X9",
-      full: "3495 Rebecca St #207, Oakville, ON L6L 6X9"
+      full: "3495 Rebecca St, Oakville, ON L6L 6X9"
     },
     phone: "+1 (905) 330-1774",
     email: "Info@hsmobility.ca",
@@ -100,8 +100,8 @@ const ContactPage: React.FC<ContactPageProps> = () => {
   return (
     <PageLayout>
       <MetaHead 
-        title="Contact Us - HS Mobility" 
-        description="Get in touch with HS Mobility for mobility solutions, stairlifts, and lift chairs. Contact us for free quotes and expert advice."
+        title="Contact Us - Health Supply & Mobility Inc" 
+        description="Get in touch with Health Supply & Mobility Inc for mobility solutions, stairlifts, and lift chairs. Contact us for free quotes and expert advice."
       />
       
       <div className="min-h-screen bg-gray-50">

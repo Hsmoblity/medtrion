@@ -1,6 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  // Disable React StrictMode in development to prevent double renders
+  reactStrictMode: false,
+  
+  // Optimize development mode performance
+  webpack: (config, { dev }) => {
+    if (dev) {
+      // Reduce file watching sensitivity in development
+      config.watchOptions = {
+        ...config.watchOptions,
+        poll: false,
+        aggregateTimeout: 300,
+        ignored: ['**/node_modules', '**/.git', '**/.next'],
+      };
+    }
+    return config;
+  },
 
   images: {
     domains: [

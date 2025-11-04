@@ -16,7 +16,7 @@ export interface FeatureFlags {
 // Default feature flag values
 const DEFAULT_FLAGS: FeatureFlags = {
   homepage_showcase_layout: true, // Enable by default for now
-  homepage_enhanced_hero: true, // Enable enhanced hero by default
+  homepage_enhanced_hero: false, // Temporarily disable enhanced hero to fix display issue
   homepage_trust_indicators: true, // Enable trust indicators by default
   homepage_problem_solution: true, // Enable problem-solution section by default
   homepage_testimonial_carousel: true, // Enable testimonial carousel by default

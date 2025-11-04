@@ -89,27 +89,156 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
   }
 
   if (error) {
+    // Fallback to static content when API fails
     return (
-      <div className="py-12">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Top Products</h2>
-          <p className="text-red-500 mb-4">{error}</p>
-          <button
-            onClick={() => {
-              console.log('TopProductsStrip: Retrying fetch...');
-              fetchFeaturedProducts();
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-          >
-            Try Again
-          </button>
+      <div className="py-12 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Featured Products</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Discover our top-rated mobility solutions, carefully selected for quality and customer satisfaction.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Static Product Cards */}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="h-48 bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-500">Acorn Stairlift</span>
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-2">Acorn 180 Curved Stairlift</h3>
+                <p className="text-gray-600 text-sm mb-3">Premium curved stairlift solution</p>
+                <a href="/product/acorn-stairlifts-acorn-180-curved-stairlift" className="text-blue-600 hover:text-blue-800 font-medium">
+                  Learn More →
+                </a>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="h-48 bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-500">Mobility Aid</span>
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-2">Mobility Solutions</h3>
+                <p className="text-gray-600 text-sm mb-3">Professional mobility equipment</p>
+                <a href="/#contact-us" className="text-blue-600 hover:text-blue-800 font-medium">
+                  Get Quote →
+                </a>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="h-48 bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-500">Support</span>
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-2">Expert Installation</h3>
+                <p className="text-gray-600 text-sm mb-3">Professional setup and support</p>
+                <a href="/#contact-us" className="text-blue-600 hover:text-blue-800 font-medium">
+                  Contact Us →
+                </a>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="h-48 bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-500">Warranty</span>
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-2">5-Year Warranty</h3>
+                <p className="text-gray-600 text-sm mb-3">Comprehensive coverage included</p>
+                <a href="/#faq" className="text-blue-600 hover:text-blue-800 font-medium">
+                  Learn More →
+                </a>
+              </div>
+            </div>
+          </div>
+          
+          <div className="text-center mt-8">
+            <button
+              onClick={() => {
+                console.log('TopProductsStrip: Retrying fetch...');
+                fetchFeaturedProducts();
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+            >
+              Load Live Products
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   if (featuredProducts.length === 0) {
-    return null;
+    // Show static content when no products are loaded
+    return (
+      <div className="py-12 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Featured Products</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Discover our top-rated mobility solutions, carefully selected for quality and customer satisfaction.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="h-48 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                <span className="text-blue-800 font-semibold">Acorn Stairlift</span>
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-2">Acorn 180 Curved Stairlift</h3>
+                <p className="text-gray-600 text-sm mb-3">Premium curved stairlift solution for any staircase</p>
+                <a href="/product/acorn-stairlifts-acorn-180-curved-stairlift" className="text-blue-600 hover:text-blue-800 font-medium">
+                  Learn More →
+                </a>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="h-48 bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                <span className="text-green-800 font-semibold">Mobility Aid</span>
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-2">Professional Installation</h3>
+                <p className="text-gray-600 text-sm mb-3">Expert setup and configuration by certified technicians</p>
+                <a href="/#contact-us" className="text-blue-600 hover:text-blue-800 font-medium">
+                  Get Quote →
+                </a>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="h-48 bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
+                <span className="text-purple-800 font-semibold">24/7 Support</span>
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-2">Expert Support</h3>
+                <p className="text-gray-600 text-sm mb-3">Round-the-clock customer service and technical support</p>
+                <a href="/#contact-us" className="text-blue-600 hover:text-blue-800 font-medium">
+                  Contact Us →
+                </a>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="h-48 bg-gradient-to-br from-yellow-100 to-yellow-200 flex items-center justify-center">
+                <span className="text-yellow-800 font-semibold">5-Year Warranty</span>
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-2">Comprehensive Warranty</h3>
+                <p className="text-gray-600 text-sm mb-3">Complete protection and peace of mind included</p>
+                <a href="/#faq" className="text-blue-600 hover:text-blue-800 font-medium">
+                  Learn More →
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

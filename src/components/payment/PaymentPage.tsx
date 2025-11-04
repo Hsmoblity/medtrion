@@ -6,7 +6,7 @@ import OrderSummaryPanel from './OrderSummaryPanel';
 import EditCartButton from './EditCartButton';
 
 interface PaymentPageProps {
-  onPaymentSuccess?: (paymentIntent: any) => Promise<void>;
+  onPaymentSuccess?: (paymentIntent: any, personalInfoData?: any) => Promise<void>;
   onCompletePayment?: (formData: any) => Promise<void>; // Legacy support
 }
 
@@ -19,6 +19,13 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onPaymentSuccess, onCompleteP
 
   const handleEditCart = () => {
     router.push('/cart');
+  };
+
+  // Enhanced payment success handler that includes personal info data
+  const handlePaymentSuccessWithData = async (paymentIntent: any) => {
+    if (onPaymentSuccess) {
+      await onPaymentSuccess(paymentIntent, personalInfoData);
+    }
   };
 
   return (
@@ -59,10 +66,7 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ onPaymentSuccess, onCompleteP
             />
             
             <PaymentMethodPanel 
-              onPaymentSuccess={onPaymentSuccess || ((paymentIntent) => {
-                // Default: redirect to success page
-                router.push('/success');
-              })}
+              onPaymentSuccess={handlePaymentSuccessWithData}
               onPaymentError={(error) => {
                 console.error('Payment error:', error);
                 alert('Payment failed. Please try again.');

@@ -108,34 +108,35 @@ const MobileFooter: React.FC<MobileFooterProps> = ({
             gap: isMobile ? '12px' : '16px',
             marginTop: isMobile ? '16px' : '20px',
           }}>
-            <button
+            <a
+              href="https://www.facebook.com/profile.php?id=61565518749182"
+              target="_blank"
+              rel="noopener noreferrer"
               style={socialButtonStyles}
-              aria-label="Facebook"
-              onClick={() => {/* Open Facebook */}}
+              aria-label="Follow us on Facebook"
             >
               <FaFacebook size={isMobile ? 16 : 18} />
-            </button>
-            <button
+            </a>
+            <a
+              href="https://www.instagram.com/healthsupplymobility_/?hl=en"
+              target="_blank"
+              rel="noopener noreferrer"
               style={socialButtonStyles}
-              aria-label="Twitter"
-              onClick={() => {/* Open Twitter */}}
-            >
-              <FaTwitter size={isMobile ? 16 : 18} />
-            </button>
-            <button
-              style={socialButtonStyles}
-              aria-label="Instagram"
-              onClick={() => {/* Open Instagram */}}
+              aria-label="Follow us on Instagram"
             >
               <FaInstagram size={isMobile ? 16 : 18} />
-            </button>
-            <button
+            </a>
+            <a
+              href="https://hsmobility.ca"
+              target="_blank"
+              rel="noopener noreferrer"
               style={socialButtonStyles}
-              aria-label="LinkedIn"
-              onClick={() => {/* Open LinkedIn */}}
+              aria-label="Visit our website"
             >
-              <FaLinkedin size={isMobile ? 16 : 18} />
-            </button>
+              <svg width={isMobile ? 16 : 18} height={isMobile ? 16 : 18} fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+              </svg>
+            </a>
           </div>
         </div>
 
@@ -310,7 +311,7 @@ const MobileFooter: React.FC<MobileFooterProps> = ({
             flexWrap: 'wrap' as const,
           }}>
             <a
-              href="/privacy"
+              href="/privacy-policy"
               style={{
                 color: '#9ca3af',
                 textDecoration: 'none',
@@ -320,7 +321,7 @@ const MobileFooter: React.FC<MobileFooterProps> = ({
               Privacy Policy
             </a>
             <a
-              href="/terms"
+              href="/terms-of-service"
               style={{
                 color: '#9ca3af',
                 textDecoration: 'none',
@@ -330,7 +331,7 @@ const MobileFooter: React.FC<MobileFooterProps> = ({
               Terms of Service
             </a>
             <a
-              href="/cookies"
+              href="/cookie-policy"
               style={{
                 color: '#9ca3af',
                 textDecoration: 'none',

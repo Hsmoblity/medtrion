@@ -22,7 +22,7 @@ const MetaHead: React.FC<MetaHeadProps> = ({
 
   return (
     <Head>
-      <title>{`HS Mobility${title ? ` | ${title}` : ``}`}</title>
+      <title>{`Health Supply & Mobility Inc${title ? ` | ${title}` : ``}`}</title>
       <meta name="description" content={stripHtml(description)} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={stripHtml(description)} />

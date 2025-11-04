@@ -106,6 +106,32 @@ const FooterContact: React.FC<FooterContactProps> = ({
               {companyInfo.phone}
             </Link>
           </motion.li>
+
+          {/* Website Link */}
+          {companyInfo.website && (
+            <motion.li
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.4 }}
+              className={footerDesignTokens.spacing.item}
+            >
+              <Link
+                href={companyInfo.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`
+                  ${footerDesignTokens.typography.body}
+                  ${footerDesignTokens.colors.text.secondary}
+                  ${footerDesignTokens.colors.text.accent}
+                  transition-colors duration-300
+                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                `}
+                aria-label={`Visit our website at ${companyInfo.website}`}
+              >
+                {companyInfo.website.replace(/^https?:\/\//, '')}
+              </Link>
+            </motion.li>
+          )}
         </ul>
       </div>
     </motion.div>

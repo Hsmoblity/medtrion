@@ -351,6 +351,14 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
   const handleAddToConfiguration = () => {
     if (!currentOption) return;
     
+    // Debug logging for the issue
+    console.log('🔧 DEBUG: handleAddToConfiguration called', {
+      currentOption: currentOption.name,
+      isStoreMode,
+      currentTempSelections: currentTempSelections.length,
+      totalPrice
+    });
+    
     // Validate price calculation consistency
     const validation = validatePriceCalculation(currentOption, currentTempSelections, totalPrice);
     if (!validation.isValid) {
@@ -374,12 +382,15 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
       })),
       validation: validation.isValid ? 'valid' : 'warnings'
     });
-    
+
     if (isStoreMode) {
       // Store mode: use store action with pre-calculated price
+      console.log('🔧 DEBUG: Using store mode - calling addToConfiguration');
       addToConfiguration(currentOption, currentTempSelections, totalPrice);
+      console.log('🔧 DEBUG: addToConfiguration called successfully');
     } else {
       // Legacy mode: use callback
+      console.log('🔧 DEBUG: Using legacy mode - calling onAddToConfiguration callback');
       if (onAddToConfiguration) {
         (onAddToConfiguration as (option: ConfigurableProductSchema, variations?: Variation[], totalPrice?: number) => void)(
           currentOption, 

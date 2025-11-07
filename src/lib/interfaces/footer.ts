@@ -23,12 +23,7 @@ export interface FooterContent {
       external?: boolean;
     }>;
   }[];
-  socialMedia: Array<{
-    platform: string;
-    url: string;
-    icon: string;
-    label: string;
-  }>;
+  socialMedia: SocialMediaLinkProps[];
   trustIndicators: Array<{
     type: 'certification' | 'award' | 'partnership';
     name: string;
@@ -55,12 +50,22 @@ export interface ProfessionalFooterProps {
 }
 
 export interface SocialMediaLinkProps {
-  platform: string;
+  platform: 'facebook' | 'twitter' | 'instagram' | 'linkedin' | 'youtube';
   url: string;
   icon: string;
-  label: string;
+  label?: string;
+}
+
+export interface NewsletterSignupProps {
+  onSubmit?: (email: string) => Promise<void> | void;
+  placeholder?: string;
+  buttonText?: string;
+  successMessage?: string;
+  errorMessage?: string;
   className?: string;
 }
+
+// Footer Design Tokens
 
 export interface TrustIndicatorProps {
   type: 'certification' | 'award' | 'partnership';
@@ -152,13 +157,13 @@ export const defaultFooterContent: FooterContent = {
   ],
   socialMedia: [
     {
-      platform: 'Facebook',
+      platform: 'facebook',
       url: 'https://www.facebook.com/profile.php?id=61565518749182',
       icon: 'FaFacebook',
       label: 'Follow us on Facebook'
     },
     {
-      platform: 'Instagram',
+      platform: 'instagram',
       url: 'https://www.instagram.com/healthsupplymobility_/?hl=en',
       icon: 'FaInstagram',
       label: 'Follow us on Instagram'

@@ -47,7 +47,9 @@ const NewsletterSignup: React.FC<NewsletterSignupProps> = ({
     setMessage('');
 
     try {
-      await onSubmit(email);
+      if (onSubmit) {
+        await onSubmit(email);
+      }
       setStatus('success');
       setMessage(successMessage);
       setEmail('');

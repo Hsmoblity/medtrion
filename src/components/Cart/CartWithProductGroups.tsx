@@ -67,7 +67,7 @@ const CartWithProductGroups: React.FC = () => {
   const handleCheckout = async () => {
     setRedirecting(true);
     try {
-      router.push('/consultation');
+  router.push('/consultation/google-form');
     } finally {
       setRedirecting(false);
     }

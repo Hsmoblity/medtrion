@@ -15,6 +15,7 @@ import {
 import PageLayout from '../components/PageLayout/PageLayout';
 import MetaHead from '../components/MetaHead';
 import { PrimaryButton } from '../components/ui';
+import GoogleFormEmbed from '../components/GoogleFormEmbed/GoogleFormEmbed';
 
 // Form validation schema
 const ContactFormSchema = z.object({
@@ -141,7 +142,7 @@ const ContactPage: React.FC<ContactPageProps> = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               
-              {/* Contact Form */}
+              {/* Contact Form (Google Form iframe) */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -149,181 +150,11 @@ const ContactPage: React.FC<ContactPageProps> = () => {
                 className="bg-white rounded-2xl shadow-xl p-8"
               >
                 <h2 className="text-3xl font-bold text-gray-900 mb-6">Send us a Message</h2>
-                
-                {submitStatus === 'success' && (
-                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center">
-                    <CheckCircleIcon className="h-5 w-5 text-green-500 mr-3" />
-                    <span className="text-green-700">Thank you! Your message has been sent successfully.</span>
-                  </div>
-                )}
-
-                {submitStatus === 'error' && (
-                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center">
-                    <ExclamationTriangleIcon className="h-5 w-5 text-red-500 mr-3" />
-                    <span className="text-red-700">Sorry, there was an error sending your message. Please try again.</span>
-                  </div>
-                )}
-
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  {/* Name Fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                        First Name *
-                      </label>
-                      <input
-                        {...register('firstName')}
-                        type="text"
-                        id="firstName"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter your first name"
-                      />
-                      {errors.firstName && (
-                        <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
-                      )}
-                    </div>
-                    <div>
-                      <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                        Last Name *
-                      </label>
-                      <input
-                        {...register('lastName')}
-                        type="text"
-                        id="lastName"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter your last name"
-                      />
-                      {errors.lastName && (
-                        <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Contact Fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                        Email Address *
-                      </label>
-                      <input
-                        {...register('email')}
-                        type="email"
-                        id="email"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter your email"
-                      />
-                      {errors.email && (
-                        <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                      )}
-                    </div>
-                    <div>
-                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                        Phone Number *
-                      </label>
-                      <input
-                        {...register('phone')}
-                        type="tel"
-                        id="phone"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter your phone number"
-                      />
-                      {errors.phone && (
-                        <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Subject */}
-                  <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                      Subject *
-                    </label>
-                    <input
-                      {...register('subject')}
-                      type="text"
-                      id="subject"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="What can we help you with?"
-                    />
-                    {errors.subject && (
-                      <p className="mt-1 text-sm text-red-600">{errors.subject.message}</p>
-                    )}
-                  </div>
-
-                  {/* Inquiry Type */}
-                  <div>
-                    <label htmlFor="inquiryType" className="block text-sm font-medium text-gray-700 mb-2">
-                      Inquiry Type *
-                    </label>
-                    <select
-                      {...register('inquiryType')}
-                      id="inquiryType"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Select inquiry type</option>
-                      <option value="quote">Request Quote</option>
-                      <option value="support">Technical Support</option>
-                      <option value="general">General Question</option>
-                      <option value="complaint">Complaint</option>
-                    </select>
-                    {errors.inquiryType && (
-                      <p className="mt-1 text-sm text-red-600">{errors.inquiryType.message}</p>
-                    )}
-                  </div>
-
-                  {/* Preferred Contact Method */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Preferred Contact Method *
-                    </label>
-                    <div className="space-y-2">
-                      {[
-                        { value: 'email', label: 'Email' },
-                        { value: 'phone', label: 'Phone Call' },
-                        { value: 'either', label: 'Either Email or Phone' }
-                      ].map((option) => (
-                        <label key={option.value} className="flex items-center">
-                          <input
-                            {...register('preferredContact')}
-                            type="radio"
-                            value={option.value}
-                            className="mr-3 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="text-gray-700">{option.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                    {errors.preferredContact && (
-                      <p className="mt-1 text-sm text-red-600">{errors.preferredContact.message}</p>
-                    )}
-                  </div>
-
-                  {/* Message */}
-                  <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                      Message *
-                    </label>
-                    <textarea
-                      {...register('message')}
-                      id="message"
-                      rows={5}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
-                      placeholder="Tell us more about your needs..."
-                    />
-                    {errors.message && (
-                      <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>
-                    )}
-                  </div>
-
-                  {/* Submit Button */}
-                  <PrimaryButton
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-4 text-lg font-semibold"
-                  >
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
-                  </PrimaryButton>
-                </form>
+                <GoogleFormEmbed 
+                  apiPath="/wp-json/hsm/v1/contact-form-url" 
+                  height="70vh"
+                  showFallbackLink={true}
+                />
               </motion.div>
 
               {/* Contact Information & Map */}

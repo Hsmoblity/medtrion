@@ -75,7 +75,7 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
                   </p>
                   <div className="space-y-2">
                     <PrimaryButton
-                      href="/contact"
+                      href="/consultation/google-form"
                       size="sm"
                       className="w-full"
                     >

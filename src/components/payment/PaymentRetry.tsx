@@ -41,7 +41,7 @@ const PaymentRetry: React.FC<PaymentRetryProps> = ({
 
     setIsProcessing('retry');
     try {
-      await router.push('/consultation');
+  await router.push('/consultation/google-form');
       onRetrySuccess?.();
     } catch (error) {
       console.error('Error navigating to consultation:', error);

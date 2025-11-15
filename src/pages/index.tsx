@@ -3,11 +3,11 @@ import Hero from "components/hero";
 import FAQ from "components/faq";
 import Banner from "components/banner";
 import { Reviews } from "components/reviews";
-import Form from "components/step-form";
 import { getProducts } from "lib/contentful/contentful";
 import { ProductSchema } from "lib/interfaces";
 import ProductList from "components/ProductList/ProductList";
 import { Document } from "@contentful/rich-text-types";
+import Link from "next/link";
 
 import TopProductsStrip from "components/Home/TopProductsStrip";
 import BestSellerSection from "components/Home/BestSellerSection";
@@ -77,10 +77,36 @@ const Home = ({ products, error }: HomeProps) => {
       
       {/* Banner Section */}
       <Banner />
-      
-      {/* Contact Form Section */}
-      <div className="py-8">
-        <Form />
+
+      {/* Get a FREE Quote Section */}
+      <div className="py-16 bg-gradient-to-r from-blue-900 to-blue-800">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Get a FREE Quote
+          </h2>
+          <p className="text-xl text-blue-100 mb-8">
+            Request a free consultation and we'll help you find the perfect mobility solution
+          </p>
+          <Link
+            href="/consultation/google-form"
+            className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-900 bg-white rounded-lg hover:bg-blue-50 transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+          >
+            Request Your Free Consultation
+            <svg
+              className="ml-2 w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </Link>
+        </div>
       </div>
 
       {/* Reviews Section */}

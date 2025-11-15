@@ -126,7 +126,7 @@ const ProblemSolutionSection: React.FC = () => {
                     Explore All Solutions
                   </PrimaryButton>
                   <PrimaryButton 
-                    href="/contact" 
+                    href="/consultation/google-form" 
                     className="w-full bg-gray-600 hover:bg-gray-700"
                   >
                     Get Free Consultation
@@ -152,7 +152,7 @@ const ProblemSolutionSection: React.FC = () => {
               Our mobility experts are here to help you find the perfect solution for your specific needs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <PrimaryButton href="/contact" size="lg">
+              <PrimaryButton href="/consultation/google-form" size="lg">
                 Schedule Free Consultation
               </PrimaryButton>
               <PrimaryButton href="/products" size="lg" className="bg-gray-600 hover:bg-gray-700">

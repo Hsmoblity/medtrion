@@ -37,7 +37,7 @@ const CartPage = () => {
         // the consultation request. Keep the UX of redirecting to /consultation.
         setRedirecting(true);
         try {
-            router.push('/consultation');
+            router.push('/consultation/google-form');
         } finally {
             setRedirecting(false);
         }

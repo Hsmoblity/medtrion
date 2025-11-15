@@ -23,7 +23,7 @@ function Hero() {
                     <a href="/#shop" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors duration-200 inline-block">
                         Shop Now
                     </a>
-                    <a href="/#contact-us" className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors duration-200 inline-block">
+                    <a href="/consultation/google-form" className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors duration-200 inline-block">
                         Get Free Quote
                     </a>
                 </div>

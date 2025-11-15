@@ -35,7 +35,7 @@ const EnhancedHero: React.FC = () => {
             <PrimaryButton href="/products" size="lg">
               Explore Products
             </PrimaryButton>
-            <PrimaryButton href="/contact" size="lg" className="bg-gray-600 hover:bg-gray-700">
+            <PrimaryButton href="/consultation/google-form" size="lg" className="bg-gray-600 hover:bg-gray-700">
               Get Free Quote
             </PrimaryButton>
           </div>

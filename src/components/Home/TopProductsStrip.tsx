@@ -122,7 +122,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2">Mobility Solutions</h3>
                 <p className="text-gray-600 text-sm mb-3">Professional mobility equipment</p>
-                <a href="/#contact-us" className="text-blue-600 hover:text-blue-800 font-medium">
+                <a href="/consultation/google-form" className="text-blue-600 hover:text-blue-800 font-medium">
                   Get Quote →
                 </a>
               </div>
@@ -135,7 +135,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2">Expert Installation</h3>
                 <p className="text-gray-600 text-sm mb-3">Professional setup and support</p>
-                <a href="/#contact-us" className="text-blue-600 hover:text-blue-800 font-medium">
+                <a href="/consultation/google-form" className="text-blue-600 hover:text-blue-800 font-medium">
                   Contact Us →
                 </a>
               </div>
@@ -204,7 +204,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2">Professional Installation</h3>
                 <p className="text-gray-600 text-sm mb-3">Expert setup and configuration by certified technicians</p>
-                <a href="/#contact-us" className="text-blue-600 hover:text-blue-800 font-medium">
+                <a href="/consultation/google-form" className="text-blue-600 hover:text-blue-800 font-medium">
                   Get Quote →
                 </a>
               </div>
@@ -217,7 +217,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2">Expert Support</h3>
                 <p className="text-gray-600 text-sm mb-3">Round-the-clock customer service and technical support</p>
-                <a href="/#contact-us" className="text-blue-600 hover:text-blue-800 font-medium">
+                <a href="/consultation/google-form" className="text-blue-600 hover:text-blue-800 font-medium">
                   Contact Us →
                 </a>
               </div>

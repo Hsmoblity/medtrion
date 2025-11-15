@@ -54,7 +54,7 @@ export const useHeroContent = (): HeroContentResponse => {
             },
             {
               text: "Get Free Quote",
-              href: "/contact",
+              href: "/consultation/google-form",
               variant: "secondary"
             }
           ],
@@ -100,7 +100,7 @@ export const useHeroContent = (): HeroContentResponse => {
             },
             {
               text: "Get Free Quote",
-              href: "/contact",
+              href: "/consultation/google-form",
               variant: "secondary"
             }
           ],

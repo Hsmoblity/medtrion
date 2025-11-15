@@ -44,7 +44,7 @@ const PaymentCancel: React.FC<PaymentCancelProps> = () => {
 
     try {
       // Navigate back to consultation page
-      await router.push('/consultation');
+  await router.push('/consultation/google-form');
     } catch (error) {
       console.error('Error navigating to payment:', error);
       setRetryError('Failed to redirect to consultation page. Please try again.');

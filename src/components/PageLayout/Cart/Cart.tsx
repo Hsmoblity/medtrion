@@ -20,7 +20,7 @@ const Cart = () => {
     // Navigate to the consultation page and let the consultation page handle the
     // customer information collection and consultation request submission
     if (cart.length > 0) {
-      router.push('/consultation');
+  router.push('/consultation/google-form');
     }
   };
 

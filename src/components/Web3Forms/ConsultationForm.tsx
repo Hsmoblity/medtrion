@@ -98,31 +98,26 @@ export default function ConsultationForm({
     }
   }
 
-  const onSubmit: SubmitHandler<ConsultationFormData> = async (data) => {
+  const onSubmit: SubmitHandler<ConsultationFormData> = async (data, event) => {
     setIsSubmitting(true)
     setSubmitStatus('idle')
     setErrorMessage(null)
 
+    // Honeypot check - if website field is filled, it's a bot
+    if (event?.target) {
+      const formData = new FormData(event.target as HTMLFormElement)
+      const honeypot = formData.get('website')
+      if (honeypot && honeypot.toString().trim() !== '') {
+        console.warn('Bot detected via honeypot field')
+        setSubmitStatus('error')
+        setErrorMessage('Spam detected. Please try again.')
+        setIsSubmitting(false)
+        return
+      }
+    }
+
     try {
       const orderTotals = calculateOrderTotal()
-
-      // Prepare consultation request data
-      const consultationData = {
-        customer: data,
-        products: includeCart && cart.length > 0 ? cart.map(item => ({
-          product: {
-            id: item.productId,
-            title: item.title,
-            slug: item.slug,
-            price: item.price,
-            quantity: item.quantity
-          },
-          options: item.options || [],
-        })) : [],
-        orderTotals,
-        timestamp: new Date().toISOString(),
-        type: 'consultation_request'
-      }
 
       // Submit to Web3Forms
       const web3formsUrl = process.env.NEXT_PUBLIC_WEB3FORMS_URL
@@ -148,31 +143,38 @@ export default function ConsultationForm({
         }).join('\n')
       }
 
+      // Build submission payload - avoid duplicate data to reduce spam risk
+      // Use simpler subject line to avoid spam triggers
+      const submissionPayload: any = {
+        access_key: accessKey,
+        subject: `Consultation Request from ${data.firstName} ${data.lastName}`,
+        from_name: `${data.firstName} ${data.lastName}`,
+        email: data.email,
+        phone: data.phone,
+        address: `${data.address}, ${data.city}, ${data.province} ${data.postalCode}`,
+        preferred_contact: data.preferredContact,
+        preferred_time: data.preferredTime,
+        urgency: data.urgency,
+        message: data.additionalNotes || 'No additional notes provided',
+        // Use 'message' field instead of 'additional_notes' (Web3Forms standard)
+      }
+
+      // Only include cart-related information if cart has items
+      if (includeCart && cart.length > 0) {
+        // Include product information in message field (more natural)
+        const productInfo = formatProductsForEmail()
+        submissionPayload.message = `${data.additionalNotes || 'Consultation request'}\n\nCart Items:\n${productInfo}\n\nOrder Summary:\nSubtotal: $${orderTotals.subtotal.toFixed(2)}\nTax: $${orderTotals.tax.toFixed(2)}\nTotal: $${orderTotals.total.toFixed(2)}`
+      }
+      
+      // NOTE: Removed timestamp field - can trigger spam filters
+
       const response = await fetch(web3formsUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({
-          access_key: accessKey,
-          subject: `Professional Consultation Request - ${data.firstName} ${data.lastName}`,
-          from_name: `${data.firstName} ${data.lastName}`,
-          email: data.email,
-          phone: data.phone,
-          address: `${data.address}, ${data.city}, ${data.province} ${data.postalCode}`,
-          preferred_contact: data.preferredContact,
-          preferred_time: data.preferredTime,
-          urgency: data.urgency,
-          additional_notes: data.additionalNotes || 'None',
-          // Format products as readable text instead of JSON to avoid spam detection
-          products: formatProductsForEmail(),
-          order_subtotal: includeCart ? `$${orderTotals.subtotal.toFixed(2)}` : 'N/A',
-          order_tax: includeCart ? `$${orderTotals.tax.toFixed(2)}` : 'N/A',
-          order_total: includeCart ? `$${orderTotals.total.toFixed(2)}` : 'N/A',
-          // Include full structured data as attachment (Web3Forms supports this)
-          consultation_data: JSON.stringify(consultationData, null, 2)
-        }),
+        body: JSON.stringify(submissionPayload),
       })
 
       if (!response.ok) {
@@ -295,6 +297,16 @@ export default function ConsultationForm({
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Honeypot Field - Hidden field to catch bots (leave empty) */}
+        <input
+          type="text"
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          style={{ position: 'absolute', left: '-9999px' }}
+          aria-hidden="true"
+        />
+        
         {/* Name Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>

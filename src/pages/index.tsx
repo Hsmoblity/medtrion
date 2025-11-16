@@ -55,6 +55,9 @@ const Home = ({ products, error }: HomeProps) => {
       <MetaHead title=" Health Services & Mobility Products for a Better Life" description="Explore hsMobility for a wide range of health services and mobility products designed to improve your quality of life. As affiliate partners of Acron stairlifts, we offer trusted solutions to help you regain independence and enhance your mobility." />
       <Hero />
       
+      {/* Best Seller Section with Real Products - Moved right after Hero */}
+      {safeProducts.length > 0 && <BestSellerSection initialProducts={safeProducts} />}
+      
       {/* Trust Indicators Section */}
       {trustIndicatorsEnabled && <TrustIndicators />}
       
@@ -66,9 +69,6 @@ const Home = ({ products, error }: HomeProps) => {
       
       {/* Testimonial Carousel Section */}
       {testimonialCarouselEnabled && <TestimonialCarousel />}
-      
-      {/* Best Seller Section with Real Products */}
-      {safeProducts.length > 0 && <BestSellerSection initialProducts={safeProducts} />}
       
       {/* FAQ Section */}
       <div>

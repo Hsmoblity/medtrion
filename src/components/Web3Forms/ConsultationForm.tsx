@@ -20,6 +20,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useCartItems, useCartStore } from '../../stores/cartStore'
 import { useRouter } from 'next/router'
+import { MdShoppingCart as ShoppingCartIcon } from 'react-icons/md'
 
 // Form validation schema
 const ConsultationFormSchema = z.object({
@@ -131,6 +132,22 @@ export default function ConsultationForm({
         throw new Error("Web3Forms configuration missing. Please contact support.")
       }
 
+      // Format products data more concisely to avoid spam flags
+      const formatProductsForEmail = () => {
+        if (!includeCart || cart.length === 0) return 'No products in cart'
+        
+        // Create a concise, readable format instead of raw JSON
+        return cart.map((item, idx) => {
+          const basePrice = typeof item.price === 'number' ? item.price : Number(item.price || 0) || 0
+          const quantity = Number(item.quantity) || 1
+          const options = item.options && item.options.length > 0
+            ? item.options.map((opt: any) => `${opt.name || opt.label}: ${opt.value || opt.selectedValue}`).join(', ')
+            : 'Standard configuration'
+          
+          return `${idx + 1}. ${item.title} (Qty: ${quantity}) - $${basePrice.toFixed(2)} | Options: ${options}`
+        }).join('\n')
+      }
+
       const response = await fetch(web3formsUrl, {
         method: "POST",
         headers: {
@@ -148,12 +165,12 @@ export default function ConsultationForm({
           preferred_time: data.preferredTime,
           urgency: data.urgency,
           additional_notes: data.additionalNotes || 'None',
-          products: includeCart && cart.length > 0 
-            ? JSON.stringify(consultationData.products, null, 2)
-            : 'No products in cart',
+          // Format products as readable text instead of JSON to avoid spam detection
+          products: formatProductsForEmail(),
           order_subtotal: includeCart ? `$${orderTotals.subtotal.toFixed(2)}` : 'N/A',
           order_tax: includeCart ? `$${orderTotals.tax.toFixed(2)}` : 'N/A',
           order_total: includeCart ? `$${orderTotals.total.toFixed(2)}` : 'N/A',
+          // Include full structured data as attachment (Web3Forms supports this)
           consultation_data: JSON.stringify(consultationData, null, 2)
         }),
       })
@@ -195,8 +212,88 @@ export default function ConsultationForm({
     }
   }
 
+  const orderTotals = calculateOrderTotal()
+
   return (
     <div className={className}>
+      {/* Cart Products Display - Show when includeCart is true and cart has items */}
+      {includeCart && cart.length > 0 && (
+        <div className="mb-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+          <div className="flex items-center mb-4">
+            <ShoppingCartIcon className="h-5 w-5 text-blue-600 mr-2" />
+            <h2 className="text-xl font-semibold text-gray-900">Products in Your Cart</h2>
+          </div>
+
+          <div className="space-y-4 mb-4">
+            {cart.map((item, index) => {
+              const basePrice = typeof item.price === 'number' ? item.price : Number(item.price || 0) || 0
+              let optionsTotal = 0
+              
+              if (item.options && Array.isArray(item.options)) {
+                optionsTotal = item.options.reduce((optSum, option) => {
+                  const optPrice = Number(option.priceModifier || 0) || 0
+                  const optQuantity = Number(option.quantity || 1) || 1
+                  return optSum + (optPrice * optQuantity)
+                }, 0)
+              }
+              
+              const unitTotal = basePrice + optionsTotal
+              const quantity = Number(item.quantity) || 1
+              const itemTotal = unitTotal * quantity
+
+              return (
+                <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-gray-900">{item.title}</h3>
+                      <p className="text-sm text-gray-600">Quantity: {quantity}</p>
+                      <p className="text-sm text-gray-600">Base Price: ${basePrice.toFixed(2)}</p>
+                      
+                      {item.options && item.options.length > 0 && (
+                        <div className="mt-2">
+                          <p className="text-sm font-medium text-gray-700">Configuration:</p>
+                          <ul className="text-sm text-gray-600 ml-2 mt-1">
+                            {item.options.map((option: any, optIndex: number) => (
+                              <li key={optIndex}>
+                                {option.name || option.label}: {option.value || option.selectedValue}
+                                {option.priceModifier && Number(option.priceModifier) !== 0 && (
+                                  <span className="ml-1 text-green-600">
+                                    ({option.priceModifier > 0 ? '+' : ''}${Number(option.priceModifier).toFixed(2)})
+                                  </span>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right ml-4">
+                      <p className="font-semibold text-gray-900">${itemTotal.toFixed(2)}</p>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Order Totals */}
+          <div className="pt-4 border-t border-gray-200 space-y-2">
+            <div className="flex justify-between text-gray-600">
+              <span>Subtotal:</span>
+              <span>${orderTotals.subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-gray-600">
+              <span>Tax (HST 13%):</span>
+              <span>${orderTotals.tax.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-lg font-bold text-gray-900 border-t pt-2 mt-2">
+              <span>Total:</span>
+              <span>${orderTotals.total.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Name Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

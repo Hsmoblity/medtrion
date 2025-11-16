@@ -8,7 +8,7 @@
     "dev:clean": "npx kill-port 3000 && rm -rf .next && next dev -p 3000",
     "dev:env": "node ./scripts/load-env-and-run-dev.js",
     "prebuild": "node ./scripts/generate-version.js",
-    "build": "next build",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
     "start": "next start -p 3000",
     "lint": "next lint",
     "storybook": "storybook dev -p 6006",

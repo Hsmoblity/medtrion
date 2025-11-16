@@ -15,7 +15,7 @@ import {
 import PageLayout from '../components/PageLayout/PageLayout';
 import MetaHead from '../components/MetaHead';
 import { PrimaryButton } from '../components/ui';
-import GoogleFormEmbed from '../components/GoogleFormEmbed/GoogleFormEmbed';
+import ContactForm from '../components/Web3Forms/ContactForm';
 
 // Form validation schema
 const ContactFormSchema = z.object({
@@ -150,11 +150,7 @@ const ContactPage: React.FC<ContactPageProps> = () => {
                 className="bg-white rounded-2xl shadow-xl p-8"
               >
                 <h2 className="text-3xl font-bold text-gray-900 mb-6">Send us a Message</h2>
-                <GoogleFormEmbed 
-                  apiPath="/wp-json/hsm/v1/contact-form-url" 
-                  height="70vh"
-                  showFallbackLink={true}
-                />
+                <ContactForm />
               </motion.div>
 
               {/* Contact Information & Map */}

@@ -130,42 +130,12 @@ async function apiFetch<T = any>(
 
 /**
  * Forms API (hsm/v1 namespace)
+ * @deprecated Google Form URLs are no longer used. Use Web3Forms components directly.
  */
 export const formsApi = {
   /**
-   * Get consultation form URL
-   */
-  async getConsultFormUrl(): Promise<string> {
-    const response = await apiFetch<string | { url: string }>('/wp-json/hsm/v1/consult-form-url')
-    if (!response.success || !response.data) {
-      throw new ApiError('Consultation form URL not configured')
-    }
-    // Handle both string response and object with url property
-    const url = typeof response.data === 'string' ? response.data : response.data.url
-    if (!url || url.trim() === '') {
-      throw new ApiError('Consultation form URL is empty')
-    }
-    return url
-  },
-
-  /**
-   * Get contact form URL
-   */
-  async getContactFormUrl(): Promise<string> {
-    const response = await apiFetch<string | { url: string }>('/wp-json/hsm/v1/contact-form-url')
-    if (!response.success || !response.data) {
-      throw new ApiError('Contact form URL not configured')
-    }
-    // Handle both string response and object with url property
-    const url = typeof response.data === 'string' ? response.data : response.data.url
-    if (!url || url.trim() === '') {
-      throw new ApiError('Contact form URL is empty')
-    }
-    return url
-  },
-
-  /**
-   * Submit consultation form
+   * Submit consultation form via Web3Forms
+   * @deprecated Use Web3Forms directly in components. This method is kept for backward compatibility.
    */
   async submitConsultation(data: {
     name: string

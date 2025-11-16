@@ -3,22 +3,20 @@
  * useForms Hook - React Hook for Forms API
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * Custom React hook for accessing form-related APIs (consultation, contact)
+ * Custom React hook for submitting consultations via Web3Forms
+ * 
+ * @deprecated Google Form URLs are no longer used. Use Web3Forms components directly.
  * 
  * USAGE:
  * ```typescript
- * const { consultFormUrl, contactFormUrl, loading, error, submitConsultation } = useForms();
+ * const { submitConsultation } = useForms();
  * ```
  */
 
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { apiManager, ApiError } from '../api-manager'
 
 interface UseFormsResult {
-  consultFormUrl: string | null
-  contactFormUrl: string | null
-  loading: boolean
-  error: string | null
   submitConsultation: (data: {
     name: string
     email: string
@@ -28,41 +26,13 @@ interface UseFormsResult {
     orderTotal?: number
     gRecaptchaToken?: string
   }) => Promise<{ success: boolean; message?: string }>
-  refetch: () => Promise<void>
 }
 
 /**
- * Hook for accessing form URLs and submitting consultations
+ * Hook for submitting consultations via Web3Forms
+ * @deprecated Use Web3Forms components directly (ConsultationForm, ContactForm)
  */
 export function useForms(): UseFormsResult {
-  const [consultFormUrl, setConsultFormUrl] = useState<string | null>(null)
-  const [contactFormUrl, setContactFormUrl] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const fetchFormUrls = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const [consultUrl, contactUrl] = await Promise.all([
-        apiManager.forms.getConsultFormUrl().catch(() => null),
-        apiManager.forms.getContactFormUrl().catch(() => null),
-      ])
-
-      setConsultFormUrl(consultUrl)
-      setContactFormUrl(contactUrl)
-    } catch (err) {
-      const errorMessage = err instanceof ApiError 
-        ? err.message 
-        : 'Failed to load form URLs'
-      setError(errorMessage)
-      console.error('Error fetching form URLs:', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
   const submitConsultation = useCallback(async (data: {
     name: string
     email: string
@@ -83,12 +53,7 @@ export function useForms(): UseFormsResult {
   }, [])
 
   return {
-    consultFormUrl,
-    contactFormUrl,
-    loading,
-    error,
     submitConsultation,
-    refetch: fetchFormUrls,
   }
 }
 

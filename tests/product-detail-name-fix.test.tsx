@@ -81,7 +81,7 @@ describe('Product Detail Page Name Fix', () => {
       // Verify the result
       expect(result).toHaveProperty('props');
       expect(result.props).toHaveProperty('seoMeta');
-      expect(result.props.seoMeta.title).toBe('Test Product Title | HSMobility');
+      expect(result.props.seoMeta.title).toBe('Test Product Title | Medtrion');
       expect(result.props.seoMeta.description).toContain('Test Product Title');
     });
 
@@ -119,7 +119,7 @@ describe('Product Detail Page Name Fix', () => {
           categories={[]}
           error={null}
           seoMeta={{
-            title: 'Test Product Title | HSMobility',
+            title: 'Test Product Title | Medtrion',
             description: 'Test description',
           }}
         />
@@ -136,7 +136,7 @@ describe('Product Detail Page Name Fix', () => {
           categories={[]}
           error={null}
           seoMeta={{
-            title: 'Test Product Title | HSMobility',
+            title: 'Test Product Title | Medtrion',
             description: 'Test description',
           }}
         />
@@ -154,7 +154,7 @@ describe('Product Detail Page Name Fix', () => {
           categories={[]}
           error={null}
           seoMeta={{
-            title: 'Test Product Title | HSMobility',
+            title: 'Test Product Title | Medtrion',
             description: 'Test description',
           }}
         />
@@ -172,7 +172,7 @@ describe('Product Detail Page Name Fix', () => {
           categories={[]}
           error={null}
           seoMeta={{
-            title: 'Test Product Title | HSMobility',
+            title: 'Test Product Title | Medtrion',
             description: 'Test description',
           }}
         />
@@ -197,7 +197,7 @@ describe('Product Detail Page Name Fix', () => {
           categories={[]}
           error={null}
           seoMeta={{
-            title: ' | HSMobility',
+            title: ' | Medtrion',
             description: 'Test description',
           }}
         />
@@ -219,7 +219,7 @@ describe('Product Detail Page Name Fix', () => {
           categories={[]}
           error={null}
           seoMeta={{
-            title: 'undefined | HSMobility',
+            title: 'undefined | Medtrion',
             description: 'Test description',
           }}
         />
@@ -233,11 +233,11 @@ describe('Product Detail Page Name Fix', () => {
   describe('SEO Meta Generation', () => {
     it('should generate correct SEO meta with product title', () => {
       const seoMeta = {
-        title: `${mockProduct.title} | HSMobility`,
+        title: `${mockProduct.title} | Medtrion`,
         description: `Discover ${mockProduct.title} - ${mockProduct.shortDescription || mockProduct.description?.substring(0, 150) || 'Premium mobility solution'}. Configure your perfect mobility equipment with our comprehensive options.`
       };
 
-      expect(seoMeta.title).toBe('Test Product Title | HSMobility');
+      expect(seoMeta.title).toBe('Test Product Title | Medtrion');
       expect(seoMeta.description).toContain('Test Product Title');
       expect(seoMeta.description).toContain('Test short description');
     });
@@ -249,11 +249,11 @@ describe('Product Detail Page Name Fix', () => {
       };
 
       const seoMeta = {
-        title: `${productWithoutShortDescription.title} | HSMobility`,
+        title: `${productWithoutShortDescription.title} | Medtrion`,
         description: `Discover ${productWithoutShortDescription.title} - ${productWithoutShortDescription.shortDescription || productWithoutShortDescription.description?.substring(0, 150) || 'Premium mobility solution'}. Configure your perfect mobility equipment with our comprehensive options.`
       };
 
-      expect(seoMeta.title).toBe('Test Product Title | HSMobility');
+      expect(seoMeta.title).toBe('Test Product Title | Medtrion');
       expect(seoMeta.description).toContain('Test Product Title');
       expect(seoMeta.description).toContain('Test product description');
     });
@@ -266,11 +266,11 @@ describe('Product Detail Page Name Fix', () => {
       };
 
       const seoMeta = {
-        title: `${productWithoutDescription.title} | HSMobility`,
+        title: `${productWithoutDescription.title} | Medtrion`,
         description: `Discover ${productWithoutDescription.title} - ${productWithoutDescription.shortDescription || productWithoutDescription.description?.substring(0, 150) || 'Premium mobility solution'}. Configure your perfect mobility equipment with our comprehensive options.`
       };
 
-      expect(seoMeta.title).toBe('Test Product Title | HSMobility');
+      expect(seoMeta.title).toBe('Test Product Title | Medtrion');
       expect(seoMeta.description).toContain('Test Product Title');
       expect(seoMeta.description).toContain('Premium mobility solution');
     });

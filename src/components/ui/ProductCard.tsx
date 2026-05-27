@@ -137,7 +137,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       }}
       aria-label={`View ${normalizedProduct.title} product`}
     >
-      <div className="relative flex items-end overflow-hidden rounded-xl">
+      <div className="relative flex items-center justify-center overflow-hidden rounded-xl">
         <Image
           src={normalizedProduct.imageUrl}
           alt={`${normalizedProduct.title} Image`}

@@ -127,7 +127,7 @@ const MobileFooter: React.FC<MobileFooterProps> = ({
               <FaInstagram size={isMobile ? 16 : 18} />
             </a>
             <a
-              href="https://hsmobility.ca"
+              href="https://medtrion.ca"
               target="_blank"
               rel="noopener noreferrer"
               style={socialButtonStyles}
@@ -229,10 +229,10 @@ const MobileFooter: React.FC<MobileFooterProps> = ({
             <div style={contactInfoStyles}>
               <FaEnvelope size={isMobile ? 14 : 16} />
               <a 
-                href="mailto:info@hsmobility.com" 
+                href="mailto:info@medtrion.ca" 
                 style={{ ...linkStyles, color: '#d1d5db' }}
               >
-                info@hsmobility.com
+                info@medtrion.ca
               </a>
             </div>
           </div>

@@ -24,9 +24,11 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
     return () => clearTimeout(timer);
   }, [delay]);
 
-  // Extract numeric value for animation
+  // Only use digit-split animation when the value is truly a number+suffix pattern
+  // e.g. "1000+" or "5 Years" — NOT "24/7" (slash would be stripped into "247/")
   const numericValue = value.replace(/[^\d]/g, '');
   const suffix = value.replace(/[\d]/g, '');
+  const isAnimatable = numericValue.length > 0 && (numericValue + suffix === value);
 
   return (
     <motion.div
@@ -50,7 +52,7 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
           transition={{ duration: 0.4, delay: delay / 1000 + 0.2 }}
           className="text-3xl md:text-4xl font-bold text-gray-900 mb-1"
         >
-          {numericValue && numericValue.length > 0 ? (
+          {isAnimatable ? (
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: isVisible ? 1 : 0 }}
@@ -61,7 +63,7 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
           ) : (
             value
           )}
-          {suffix && (
+          {suffix && isAnimatable && (
             <span className="text-blue-600">{suffix}</span>
           )}
         </motion.div>

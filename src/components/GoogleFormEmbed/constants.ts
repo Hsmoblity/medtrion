@@ -4,9 +4,9 @@
 
 export const CONTACT_INFO = {
   phone: '+1 (905) 330-1774',
-  email: 'Info@hsmobility.ca',
+  email: 'Info@medtrion.ca',
   phoneHref: 'tel:+19053301774',
-  emailHref: 'mailto:Info@hsmobility.ca'
+  emailHref: 'mailto:Info@medtrion.ca'
 } as const
 
 export const DEFAULT_API_PATH = '/wp-json/hsm/v1/consult-form-url'

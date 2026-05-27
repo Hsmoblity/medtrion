@@ -24,7 +24,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
         <Header />
 
       </motion.div>
-      <div className="z-10 relative min-h-[75vh] bg-gray-50 dark:bg-gray-900">
+      <div className="z-10 relative min-h-[75vh] bg-gray-50 dark:bg-gray-900 pt-20 md:pt-24">
         {children}
       </div>
 

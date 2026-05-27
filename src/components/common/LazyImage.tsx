@@ -119,7 +119,7 @@ const LazyImage: React.FC<LazyImageProps> = ({
   const useFillLayout = !width || !height;
   const baseClass = className ? className : '';
   const imageClasses = `transition-opacity duration-500 ${baseClass} ${isLoaded ? 'opacity-100' : 'opacity-0'}`.trim();
-  const wrapperClasses = `relative inline-block overflow-hidden ${useFillLayout ? baseClass : ''}`.trim();
+  const wrapperClasses = `relative flex items-center justify-center overflow-hidden ${useFillLayout ? baseClass : ''}`.trim();
 
   const finalSrc = (showFallback ? normalizedPlaceholderSrc : normalizedSrc) || normalizedPlaceholderSrc;
   const imageSource = shouldLoad ? finalSrc : normalizedPlaceholderSrc;

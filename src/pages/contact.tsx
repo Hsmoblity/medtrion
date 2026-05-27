@@ -97,7 +97,7 @@ const ContactPage: React.FC<ContactPageProps> = () => {
       full: "3495 Rebecca St, Oakville, ON L6L 6X9"
     },
     phone: "+1 (905) 330-1774",
-    email: "Info@hsmobility.ca",
+    email: "Info@medtrion.ca",
     hours: {
       weekdays: "Monday - Friday: 9:00 AM - 6:00 PM",
       saturday: "Saturday: 10:00 AM - 4:00 PM",
@@ -108,8 +108,8 @@ const ContactPage: React.FC<ContactPageProps> = () => {
   return (
     <PageLayout>
       <MetaHead 
-        title="Contact Us - Health Supply & Mobility Inc" 
-        description="Get in touch with Health Supply & Mobility Inc for mobility solutions, stairlifts, and lift chairs. Contact us for free quotes and expert advice."
+        title="Contact Us - Medtrion" 
+        description="Get in touch with Medtrion for mobility solutions, stairlifts, and lift chairs. Contact us for free quotes and expert advice."
       />
       
       <div className="min-h-screen bg-gray-50">
@@ -233,7 +233,7 @@ const ContactPage: React.FC<ContactPageProps> = () => {
                       allowFullScreen
                       loading="lazy"
                       referrerPolicy="no-referrer-when-downgrade"
-                      title="HS Mobility Location"
+                      title="Medtrion Location"
                       className="rounded-lg"
                     />
                   </div>
@@ -259,7 +259,7 @@ const ContactPage: React.FC<ContactPageProps> = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Why Choose HS Mobility?
+                Why Choose Medtrion?
               </h2>
               <p className="text-lg text-gray-600 max-w-3xl mx-auto">
                 We're committed to providing exceptional mobility solutions with personalized service and expert support.

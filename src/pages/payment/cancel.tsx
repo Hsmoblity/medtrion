@@ -321,10 +321,10 @@ const PaymentCancel: React.FC<PaymentCancelProps> = () => {
                 <p>
                   For support, contact us at{' '}
                   <a 
-                    href="mailto:support@hsmobility.com" 
+                    href="mailto:support@medtrion.ca" 
                     className="text-blue-600 hover:text-blue-500 transition-colors duration-200"
                   >
-                    support@hsmobility.com
+                    support@medtrion.ca
                   </a>
                 </p>
               </div>

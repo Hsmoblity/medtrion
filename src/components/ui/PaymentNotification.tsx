@@ -77,7 +77,7 @@ const PaymentNotification: React.FC<PaymentNotificationProps> = ({
             <div className="space-y-3">
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <FaEnvelope className="w-4 h-4" />
-                <span>Email us at: <a href="mailto:support@hsmobility.ca" className="text-blue-600 hover:text-blue-800 underline">support@hsmobility.ca</a></span>
+                <span>Email us at: <a href="mailto:support@medtrion.ca" className="text-blue-600 hover:text-blue-800 underline">support@medtrion.ca</a></span>
               </div>
               
               <div className="flex items-center space-x-2 text-sm text-gray-600">

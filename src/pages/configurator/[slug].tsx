@@ -358,7 +358,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // This would typically involve fetching from WooCommerce or GraphQL
 
     const seoMeta = {
-      title: `Configure ${product.title} | HSMobility`,
+      title: `Configure ${product.title} | Medtrion`,
       description: `Customize your ${product.title} with our comprehensive configuration options. Choose from safety features, comfort options, installation services, and accessories.`
     };
 

@@ -62,7 +62,7 @@ const PaymentFailedPage: React.FC<PaymentFailedPageProps> = () => {
 
   const handleContactSupport = () => {
     // In a real implementation, this would open a support chat or contact form
-    window.open('mailto:support@hsmobility.ca?subject=Payment Issue', '_blank');
+    window.open('mailto:support@medtrion.ca?subject=Payment Issue', '_blank');
   };
 
   const handleContinueShopping = () => {
@@ -83,7 +83,7 @@ const PaymentFailedPage: React.FC<PaymentFailedPageProps> = () => {
   return (
     <>
       <Head>
-        <title>Payment Failed - HSMobility</title>
+        <title>Payment Failed - Medtrion</title>
         <meta name="description" content="Your payment could not be processed. Please try again." />
       </Head>
 
@@ -221,10 +221,10 @@ const PaymentFailedPage: React.FC<PaymentFailedPageProps> = () => {
                 Call us: 1-800-555-0123
               </a>
               <a
-                href="mailto:support@hsmobility.ca"
+                href="mailto:support@medtrion.ca"
                 className="text-blue-600 hover:text-blue-800 font-medium"
               >
-                Email: support@hsmobility.ca
+                Email: support@medtrion.ca
               </a>
             </div>
           </div>

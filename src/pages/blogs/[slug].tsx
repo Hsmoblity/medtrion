@@ -212,13 +212,13 @@ const BlogDetailPage = ({ blogDetailData }: any) => {
                 <meta property="og:title" content={title} />
                 <meta property="og:description" content={description} />
                 <meta property="og:image" content={imageUrl} />
-                <meta property="og:url" content={`https://hsmobility.ca/blogs/${blogDetailData.fields.slug}`} />
+                <meta property="og:url" content={`https://medtrion.ca/blogs/${blogDetailData.fields.slug}`} />
                 <meta property="article:published_time" content={publishedTime} />
                 <meta property="twitter:card" content="summary_large_image" />
                 <meta property="twitter:title" content={title} />
                 <meta property="twitter:description" content={description} />
                 <meta property="twitter:image" content={imageUrl} />
-                <link rel="canonical" href={`https://hsmobility.ca/blogs/${blogDetailData.fields.slug}`} />
+                <link rel="canonical" href={`https://medtrion.ca/blogs/${blogDetailData.fields.slug}`} />
             </Head>
 
             <section className="bg-dot-slate-50/10">

@@ -60,7 +60,7 @@ const OptionImage: React.FC<OptionImageProps> = ({
   }
 
   return (
-    <div className={`relative ${className}`} style={!fill ? { width, height } : undefined}>
+    <div className={`relative flex items-center justify-center ${className}`} style={!fill ? { width, height } : undefined}>
       {/* Loading placeholder */}
       {isLoading && (
         <div className="absolute inset-0 z-10">

@@ -154,7 +154,7 @@ const PaymentRetry: React.FC<PaymentRetryProps> = ({
       `Please help me complete my order.`
     );
     
-    window.location.href = `mailto:support@hsmobility.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:support@medtrion.ca?subject=${subject}&body=${body}`;
   };
 
   const retryOptions: RetryOption[] = [

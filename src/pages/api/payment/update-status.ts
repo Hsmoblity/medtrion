@@ -13,7 +13,7 @@ function getStripeInstance(): Stripe {
 }
 
 // WordPress REST API configuration
-const WP_REST_URL = process.env.WP_GRAPHQL_URL ? process.env.WP_GRAPHQL_URL.replace('/graphql', '') : 'https://cms.hsmobility.ca';
+const WP_REST_URL = process.env.WP_GRAPHQL_URL ? process.env.WP_GRAPHQL_URL.replace('/graphql', '') : 'https://cms.medtrion.ca';
 
 interface OrderUpdateResponse {
   success: boolean;

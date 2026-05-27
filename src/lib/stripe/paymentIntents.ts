@@ -80,7 +80,7 @@ export async function createPaymentIntent(options: PaymentIntentOptions): Promis
         source: 'payment-intents',
         timestamp: new Date().toISOString(),
       },
-      description: description || 'Payment for HSMobility order',
+      description: description || 'Payment for Medtrion order',
       receipt_email: receiptEmail,
       shipping,
     });
@@ -265,7 +265,7 @@ export async function createPaymentIntentFromCart(
     amount: total,
     currency: 'cad',
     metadata,
-    description: `Payment for ${cartItems.length} item(s) from HSMobility`,
+    description: `Payment for ${cartItems.length} item(s) from Medtrion`,
     ...options,
   });
 }

@@ -7,8 +7,8 @@ const TermsOfServicePage: React.FC = () => {
   return (
     <PageLayout>
       <MetaHead 
-        title="Terms of Service - Health Supply & Mobility Inc" 
-        description="Read the terms and conditions for using Health Supply & Mobility Inc services and website. Understand your rights and responsibilities."
+        title="Terms of Service - Medtrion" 
+        description="Read the terms and conditions for using Medtrion services and website. Understand your rights and responsibilities."
       />
       
       <div className="min-h-screen bg-gray-50">
@@ -64,8 +64,8 @@ const TermsOfServicePage: React.FC = () => {
               {/* Introduction */}
               <div className="mb-8 sm:mb-12">
                 <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
-                  These Terms of Service ("Terms") govern your use of the Health Supply & Mobility Inc website 
-                  (<a href="https://hsmobility.ca" className="text-green-600 hover:underline">hsmobility.ca</a>) 
+                  These Terms of Service ("Terms") govern your use of the Medtrion website 
+                  (<a href="https://medtrion.ca" className="text-green-600 hover:underline">medtrion.ca</a>) 
                   and services. By accessing or using our website, you agree to be bound by these Terms.
                 </p>
               </div>
@@ -90,7 +90,7 @@ const TermsOfServicePage: React.FC = () => {
               {/* Section 2: Description of Services */}
               <section id="services" className="mb-8 sm:mb-12">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">2. Description of Services</h2>
-                <p className="text-gray-700 mb-4">Health Supply & Mobility Inc provides:</p>
+                <p className="text-gray-700 mb-4">Medtrion provides:</p>
                 <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
                   <li>Sale of mobility equipment including stairlifts, lift chairs, and accessibility products</li>
                   <li>Product consultation and accessibility assessments</li>
@@ -217,7 +217,7 @@ const TermsOfServicePage: React.FC = () => {
                     <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3">Our Content</h3>
                     <p className="text-gray-700 mb-3">
                       The website and its content, including but not limited to text, graphics, images, logos, and software, 
-                      are owned by Health Supply & Mobility Inc or its licensors and are protected by copyright and other 
+                      are owned by Medtrion or its licensors and are protected by copyright and other 
                       intellectual property laws.
                     </p>
                   </div>
@@ -259,7 +259,7 @@ const TermsOfServicePage: React.FC = () => {
                   <div>
                     <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3">Limitation of Damages</h3>
                     <p className="text-gray-700">
-                      In no event shall Health Supply & Mobility Inc be liable for any indirect, incidental, special, 
+                      In no event shall Medtrion be liable for any indirect, incidental, special, 
                       consequential, or punitive damages, including but not limited to loss of profits, data, or use, 
                       incurred by you or any third party, whether in an action of contract or tort.
                     </p>
@@ -314,12 +314,12 @@ const TermsOfServicePage: React.FC = () => {
                   If you have questions about these Terms of Service, please contact us:
                 </p>
                 <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Health Supply & Mobility Inc</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Medtrion</h3>
                   <div className="space-y-2 text-gray-700">
                     <p><strong>Address:</strong> 3495 Rebecca St, Oakville, ON L6L 6X9</p>
                     <p><strong>Phone:</strong> <a href="tel:+19053301774" className="text-green-600 hover:underline">+1 (905) 330-1774</a></p>
-                    <p><strong>Email:</strong> <a href="mailto:legal@hsmobility.ca" className="text-green-600 hover:underline">legal@hsmobility.ca</a></p>
-                    <p><strong>Website:</strong> <a href="https://hsmobility.ca" className="text-green-600 hover:underline">hsmobility.ca</a></p>
+                    <p><strong>Email:</strong> <a href="mailto:legal@medtrion.ca" className="text-green-600 hover:underline">legal@medtrion.ca</a></p>
+                    <p><strong>Website:</strong> <a href="https://medtrion.ca" className="text-green-600 hover:underline">medtrion.ca</a></p>
                   </div>
                 </div>
               </section>

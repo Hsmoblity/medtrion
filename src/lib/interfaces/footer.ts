@@ -134,13 +134,13 @@ export const footerDesignTokens = {
 // Default footer content
 export const defaultFooterContent: FooterContent = {
   companyInfo: {
-    name: 'Health Supply & Mobility Inc',
-    description: 'Health Supply & Mobility Inc is your trusted source for a wide range of health services and mobility products designed to improve your quality of life. Please note: We are not manufacturers of Acorn stairlifts but proud affiliate partners.',
+    name: 'Medtrion',
+    description: 'Medtrion is your trusted source for a wide range of health services and mobility products designed to improve your quality of life. Please note: We are not manufacturers of Acorn stairlifts but proud affiliate partners.',
     logo: '/Logo.png',
     address: '3495 Rebecca St Oakville, ON L6L 6X9',
     phone: '+1 (905) 330-1774',
-    email: 'Info@hsmobility.ca',
-    website: 'https://hsmobility.ca'
+    email: 'Info@medtrion.ca',
+    website: 'https://medtrion.ca'
   },
   navigation: [
     {

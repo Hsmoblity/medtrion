@@ -48,7 +48,7 @@ describe('Drawer Component', () => {
   it('renders logo in drawer', () => {
     render(<Drawer />);
     
-    const logo = screen.getByAltText('HS Mobility Logo');
+    const logo = screen.getByAltText('Medtrion Logo');
     expect(logo).toBeInTheDocument();
     expect(logo).toHaveAttribute('src', '/Logo.png');
   });
@@ -66,10 +66,10 @@ describe('Drawer Component', () => {
     render(<Drawer />);
     
     const phoneLink = screen.getByText('+1 (905) 330-1774');
-    const emailLink = screen.getByText('Info@hsmobility.ca');
+    const emailLink = screen.getByText('Info@medtrion.ca');
     
     expect(phoneLink).toHaveAttribute('href', 'tel:+19053301774');
-    expect(emailLink).toHaveAttribute('href', 'mailto:Info@hsmobility.ca');
+    expect(emailLink).toHaveAttribute('href', 'mailto:Info@medtrion.ca');
   });
 
   it('handles navigation clicks with analytics tracking', async () => {
@@ -153,13 +153,13 @@ describe('Drawer Component', () => {
     render(<Drawer />);
     
     const phoneLink = screen.getByText('+1 (905) 330-1774');
-    const emailLink = screen.getByText('Info@hsmobility.ca');
+    const emailLink = screen.getByText('Info@medtrion.ca');
     
     // Phone link should have tel: protocol
     expect(phoneLink).toHaveAttribute('href', 'tel:+19053301774');
     
     // Email link should have mailto: protocol
-    expect(emailLink).toHaveAttribute('href', 'mailto:Info@hsmobility.ca');
+    expect(emailLink).toHaveAttribute('href', 'mailto:Info@medtrion.ca');
   });
 
   it('has consistent navigation structure with desktop header', () => {

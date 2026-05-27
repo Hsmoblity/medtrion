@@ -7,8 +7,8 @@ const CookiePolicyPage: React.FC = () => {
   return (
     <PageLayout>
       <MetaHead 
-        title="Cookie Policy - Health Supply & Mobility Inc" 
-        description="Learn how Health Supply & Mobility Inc uses cookies and similar technologies to improve your browsing experience and provide personalized services."
+        title="Cookie Policy - Medtrion" 
+        description="Learn how Medtrion uses cookies and similar technologies to improve your browsing experience and provide personalized services."
       />
       
       <div className="min-h-screen bg-gray-50">
@@ -62,8 +62,8 @@ const CookiePolicyPage: React.FC = () => {
               {/* Introduction */}
               <div className="mb-8 sm:mb-12">
                 <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
-                  This Cookie Policy explains how Health Supply & Mobility Inc uses cookies and similar technologies 
-                  when you visit our website <a href="https://hsmobility.ca" className="text-blue-600 hover:underline">hsmobility.ca</a>. 
+                  This Cookie Policy explains how Medtrion uses cookies and similar technologies 
+                  when you visit our website <a href="https://medtrion.ca" className="text-blue-600 hover:underline">medtrion.ca</a>. 
                   It explains what these technologies are, why we use them, and your choices regarding their use.
                 </p>
               </div>
@@ -387,13 +387,13 @@ const CookiePolicyPage: React.FC = () => {
                   If you have questions about this Cookie Policy or our use of cookies, please contact us:
                 </p>
                 <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Health Supply & Mobility Inc</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Medtrion</h3>
                   <div className="space-y-2 text-gray-700">
                     <p><strong>Privacy Officer:</strong> Data Protection Team</p>
                     <p><strong>Address:</strong> 3495 Rebecca St, Oakville, ON L6L 6X9</p>
                     <p><strong>Phone:</strong> <a href="tel:+19053301774" className="text-blue-600 hover:underline">+1 (905) 330-1774</a></p>
-                    <p><strong>Email:</strong> <a href="mailto:privacy@hsmobility.ca" className="text-blue-600 hover:underline">privacy@hsmobility.ca</a></p>
-                    <p><strong>Website:</strong> <a href="https://hsmobility.ca" className="text-blue-600 hover:underline">hsmobility.ca</a></p>
+                    <p><strong>Email:</strong> <a href="mailto:privacy@medtrion.ca" className="text-blue-600 hover:underline">privacy@medtrion.ca</a></p>
+                    <p><strong>Website:</strong> <a href="https://medtrion.ca" className="text-blue-600 hover:underline">medtrion.ca</a></p>
                   </div>
                 </div>
               </section>

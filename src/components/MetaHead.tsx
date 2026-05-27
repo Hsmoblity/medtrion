@@ -10,7 +10,7 @@ interface MetaHeadProps {
   type?: string;
 }
 
-const siteUrl = "https://hsmobility.ca";
+const siteUrl = "https://medtrion.ca";
 
 const MetaHead: React.FC<MetaHeadProps> = ({
   title,
@@ -22,7 +22,7 @@ const MetaHead: React.FC<MetaHeadProps> = ({
 
   return (
     <Head>
-      <title>{`Health Supply & Mobility Inc${title ? ` | ${title}` : ``}`}</title>
+      <title>{`Medtrion${title ? ` | ${title}` : ``}`}</title>
       <meta name="description" content={stripHtml(description)} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={stripHtml(description)} />

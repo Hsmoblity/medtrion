@@ -129,7 +129,7 @@ const ConsultationSuccessPage: React.FC = () => {
                   <EnvelopeIcon className="h-5 w-5 text-blue-600 mr-2" />
                   <div className="text-left">
                     <p className="font-medium text-gray-900">Email Us</p>
-                    <p className="text-gray-600">info@hsmobility.ca</p>
+                    <p className="text-gray-600">info@medtrion.ca</p>
                   </div>
                 </div>
               </div>

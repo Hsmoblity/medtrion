@@ -749,7 +749,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     const seoMeta = {
-      title: isEditMode ? `Edit Configuration | ${mappedProduct.title}` : `Configure ${mappedProduct.title} | HSMobility`,
+      title: isEditMode ? `Edit Configuration | ${mappedProduct.title}` : `Configure ${mappedProduct.title} | Medtrion`,
       description: isEditMode 
         ? `Edit your ${mappedProduct.title} configuration`
         : `Customize your ${mappedProduct.title} with our comprehensive configuration options. Choose from safety features, comfort options, installation services, and accessories.`

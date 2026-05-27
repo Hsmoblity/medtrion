@@ -58,33 +58,34 @@ const Header = () => {
   return (
     <>
       <Cart />
-      <div className={`py-2 transition-transform duration-500  ${isScrolled ? `bg-[#f1ebe0] ` : `bg-[url('/nnnoise.svg')] bg-cover bg-repeat`}`}>
-        <Link href="/" className="flex md:hidden items-center ml-6 mt-6">
-          <img
-            src="/Logo.png"
-            alt="Logo"
-            className="md:h-10 h-12 object-contain"
-          />
-        </Link>
-        <div className="md:hidden absolute top-5 right-5 flex flex-row items-center gap-2">
-          <button onClick={() => router.push('/cart')} className="relative z-50 outline-0 text-white items-center rounded-md border-1 flex flex-row" >
-            <MdShoppingCart
-              color="black"
-              size={32}
+      <div className={`md:hidden transition-transform duration-500 ${isScrolled ? `bg-[#f1ebe0]` : `bg-[url('/nnnoise.svg')] bg-cover bg-repeat`}`}>
+        <div className="flex items-center px-4 py-3">
+          {/* Logo */}
+          <Link href="/" className="flex items-center">
+            <img
+              src="/Logo.png"
+              alt="Medtrion Logo"
+              className="h-14 w-auto object-contain"
             />
-            <ClientOnly fallback={
-              <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 -right-1 -top-1 bg-white opacity-0">
-                0
-              </span>
-            }>
-              {isHydrated && cartLength > 0 && (
-                <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 -right-1 -top-1 bg-white">
-                  {cartLength}
+          </Link>
+          {/* Right side: ml-auto pins to far right regardless of logo size */}
+          <div className="ml-auto flex flex-row items-center gap-1">
+            <button onClick={() => router.push('/cart')} className="relative z-50 p-2 flex items-center justify-center">
+              <MdShoppingCart color="black" size={30} />
+              <ClientOnly fallback={
+                <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 right-0 top-0 bg-white opacity-0">
+                  0
                 </span>
-              )}
-            </ClientOnly>
-          </button>
-          <Drawer />
+              }>
+                {isHydrated && cartLength > 0 && (
+                  <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 right-0 top-0 bg-white">
+                    {cartLength}
+                  </span>
+                )}
+              </ClientOnly>
+            </button>
+            <Drawer />
+          </div>
         </div>
       </div>
       <header className={`md:flex hidden flex-row justify-between z-50 md:px-4 md:pb-2 px-1 font-medium  w-full capitalize transition-transform duration-500  ${isScrolled ? `bg-[#f1ebe0] ` : ` bg-[url('/nnnoise.svg')] bg-cover bg-repeat`}`}>

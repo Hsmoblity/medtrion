@@ -8,7 +8,7 @@ import https from 'https';
  * 
  * Flow:
  * 1. Browser calls: http://localhost:3002/api/graphql-proxy (same-origin, no CORS)
- * 2. This API route calls: https://cms.hsmobility.ca/graphql (server-to-server, no CORS)
+ * 2. This API route calls: https://cms.medtrion.ca/graphql (server-to-server, no CORS)
  * 3. Returns GraphQL response to browser
  * 
  * Benefits:
@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const graphqlEndpoint = process.env.WP_GRAPHQL_URL || 
                            process.env.NEXT_PUBLIC_WP_GRAPHQL_URL || 
-                           'https://cms.hsmobility.ca/graphql';
+                           'https://cms.medtrion.ca/graphql';
 
     // Handle SSL certificate issues for server-side requests
     if (process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') {

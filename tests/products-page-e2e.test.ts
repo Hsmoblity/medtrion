@@ -8,7 +8,7 @@ test.describe('Products Page E2E Tests', () => {
 
   test('should load products page successfully', async ({ page }) => {
     // Check page title
-    await expect(page).toHaveTitle(/Products - HS Mobility/);
+    await expect(page).toHaveTitle(/Products - Medtrion/);
     
     // Check main heading
     await expect(page.getByRole('heading', { name: 'Our Curated Product Collection' })).toBeVisible();
@@ -64,7 +64,7 @@ test.describe('Products Page E2E Tests', () => {
 
   test('should display features section correctly', async ({ page }) => {
     // Scroll to features section
-    await page.locator('text=Why Choose HS Mobility?').scrollIntoViewIfNeeded();
+    await page.locator('text=Why Choose Medtrion?').scrollIntoViewIfNeeded();
     
     // Check all three features are visible
     await expect(page.getByText('Quality Assurance')).toBeVisible();
@@ -133,7 +133,7 @@ test.describe('Products Page E2E Tests', () => {
 
   test('should have proper SEO meta tags', async ({ page }) => {
     // Check page title
-    await expect(page).toHaveTitle(/Products - HS Mobility/);
+    await expect(page).toHaveTitle(/Products - Medtrion/);
     
     // Check meta description
     const metaDescription = page.locator('meta[name="description"]');
@@ -146,7 +146,7 @@ test.describe('Products Page E2E Tests', () => {
     
     // Check h2 headings
     const h2Headings = page.getByRole('heading', { level: 2 });
-    await expect(h2Headings).toHaveCount(2); // Featured Products and Why Choose HS Mobility
+    await expect(h2Headings).toHaveCount(2); // Featured Products and Why Choose Medtrion
     
     // Check h3 headings in features section
     const h3Headings = page.getByRole('heading', { level: 3 });

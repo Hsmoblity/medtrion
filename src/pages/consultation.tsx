@@ -581,7 +581,7 @@ const ConsultationPage: React.FC = () => {
                 <EnvelopeIcon className="h-6 w-6 text-blue-600 mr-3" />
                 <div>
                   <p className="font-medium text-gray-900">Email</p>
-                  <p className="text-gray-600">info@hsmobility.ca</p>
+                  <p className="text-gray-600">info@medtrion.ca</p>
                 </div>
               </div>
               <div className="flex items-center">

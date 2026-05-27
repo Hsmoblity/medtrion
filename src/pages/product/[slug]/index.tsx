@@ -657,7 +657,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     const seoMeta = {
-      title: `${product.title || product.name || 'Product'} | HSMobility`,
+      title: `${product.title || product.name || 'Product'} | Medtrion`,
       description: `Discover ${product.title || product.name || 'Product'} - ${product.shortDescription || product.description?.substring(0, 150) || 'Premium mobility solution'}. Configure your perfect mobility equipment with our comprehensive options.`
     };
 

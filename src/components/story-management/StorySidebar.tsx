@@ -51,7 +51,7 @@ export const StorySidebar: React.FC<StorySidebarProps> = ({
         <div className="p-6 border-b border-gray-200">
           <Link href="/stories" className="flex items-center">
             <div className="text-2xl font-bold text-brand-blue">
-              HSMobility
+              Medtrion
             </div>
           </Link>
         </div>

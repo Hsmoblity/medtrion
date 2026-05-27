@@ -163,7 +163,7 @@ const SuccessPage: React.FC<SuccessPageProps> = () => {
   return (
     <>
       <Head>
-        <title>Payment Successful - HSMobility</title>
+        <title>Payment Successful - Medtrion</title>
         <meta name="description" content="Your payment has been processed successfully." />
       </Head>
 
@@ -257,10 +257,10 @@ const SuccessPage: React.FC<SuccessPageProps> = () => {
                 Call us: 1-800-555-0123
               </a>
               <a
-                href="mailto:support@hsmobility.ca"
+                href="mailto:support@medtrion.ca"
                 className="text-blue-600 hover:text-blue-800 font-medium"
               >
-                Email: support@hsmobility.ca
+                Email: support@medtrion.ca
               </a>
             </div>
           </div>

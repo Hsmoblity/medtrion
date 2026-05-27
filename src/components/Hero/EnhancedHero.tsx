@@ -12,7 +12,7 @@ const EnhancedHero: React.FC = () => {
 
   if (loading) {
     return (
-      <section className="relative z-10 w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat px-4 pt-32 pb-12 md:pb-16">
+      <section className="relative z-10 w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat px-4 pt-8 md:pt-12 pb-12 md:pb-16">
         <div className="container mx-auto">
           <LoadingOverlay show={true} />
         </div>
@@ -23,10 +23,10 @@ const EnhancedHero: React.FC = () => {
   if (error) {
     // Fallback to original hero content
     return (
-      <section className="relative z-10 w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat px-4 pt-32 pb-12 md:pb-16 flex flex-col">
+      <section className="relative z-10 w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat px-4 pt-8 md:pt-12 pb-12 md:pb-16 flex flex-col">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-poppins font-semibold text-black mb-6">
-            Express Your Freedom with HS Mobility
+            Express Your Freedom with Medtrion
           </h1>
           <p className="text-lg text-gray-600 mb-8">
             Empowering 1000+ Satisfied Customers to Stay Independent with Exceptional mobility products
@@ -45,7 +45,7 @@ const EnhancedHero: React.FC = () => {
   }
 
   return (
-    <section className="relative z-10 w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat px-4 pt-32 pb-12 md:pb-16">
+    <section className="relative z-10 w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat px-4 pt-8 md:pt-12 pb-12 md:pb-16">
       <div className="container mx-auto">
         <div className="flex md:flex-row flex-col items-center gap-12">
           {/* Dynamic Content */}

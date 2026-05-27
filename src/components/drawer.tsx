@@ -91,7 +91,7 @@ const Drawer: React.FC = () => {
                         <div className="flex md:hidden items-center ml-6 mt-4">
                             <img
                                 src="/Logo.png"
-                                alt="HS Mobility Logo"
+                                alt="Medtrion Logo"
                                 className="md:h-10 h-8 object-cover"
                             />
                         </div>
@@ -186,14 +186,14 @@ const Drawer: React.FC = () => {
                     <li className="p-2.5 transform-origin-left-5 will-change-transform-opacity-filter">
                         <div className="text-left bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <h2 className="text-xl font-bold mb-4 text-gray-800">Contact Us:</h2>
-                            <p className="text-lg text-gray-700 leading-relaxed">
+                            <div className="text-lg text-gray-700 leading-relaxed">
                                 3495 Rebecca St<br />  Oakville, ON<br />L6L 6X9<br />
                                 <br />
                                 <Link href="tel:+19053301774" className="text-xl text-blue-600 hover:text-blue-800 transition-colors duration-200">
                                     +1 (905) 330-1774
                                 </Link><br />
-                                <Link href="mailto:Info@hsmobility.ca" className="text-xl text-blue-600 hover:text-blue-800 transition-colors duration-200">Info@hsmobility.ca</Link><br />
-                                <Link href="https://hsmobility.ca" target="_blank" rel="noopener noreferrer" className="text-xl text-blue-600 hover:text-blue-800 transition-colors duration-200">hsmobility.ca</Link><br />
+                                <Link href="mailto:Info@medtrion.ca" className="text-xl text-blue-600 hover:text-blue-800 transition-colors duration-200">Info@medtrion.ca</Link><br />
+                                <Link href="https://medtrion.ca" target="_blank" rel="noopener noreferrer" className="text-xl text-blue-600 hover:text-blue-800 transition-colors duration-200">medtrion.ca</Link><br />
                                 <br />
                                 <div className="flex gap-4 mt-3">
                                     <Link href="https://www.facebook.com/profile.php?id=61565518749182" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 transition-colors duration-200" aria-label="Follow us on Facebook">
@@ -203,7 +203,7 @@ const Drawer: React.FC = () => {
                                         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987 6.62 0 11.987-5.367 11.987-11.987C24.014 5.367 18.637.001 12.017.001zM8.449 16.988c-1.297 0-2.448-.49-3.328-1.297C4.243 14.794 3.8 13.643 3.8 12.346c0-1.297.443-2.448 1.321-3.328.88-.88 2.031-1.321 3.328-1.321 1.297 0 2.448.441 3.328 1.321.88.88 1.321 2.031 1.321 3.328 0 1.297-.441 2.448-1.321 3.345-.88.807-2.031 1.297-3.328 1.297zm7.718 0c-1.297 0-2.448-.49-3.328-1.297-.879-.897-1.321-2.048-1.321-3.345 0-1.297.442-2.448 1.321-3.328.88-.88 2.031-1.321 3.328-1.321 1.297 0 2.448.441 3.328 1.321.88.88 1.321 2.031 1.321 3.328 0 1.297-.441 2.448-1.321 3.345-.88.807-2.031 1.297-3.328 1.297z"/></svg>
                                     </Link>
                                 </div>
-                            </p>
+                            </div>
                         </div>
                     </li>
                 </ul>

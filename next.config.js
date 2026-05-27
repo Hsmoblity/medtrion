@@ -23,12 +23,12 @@ const nextConfig = {
       "hsmobility.local", 
       "localhost", 
       "127.0.0.1", 
-      "cms.hsmobility.ca", 
+      "cms.medtrion.ca", 
       "images.unsplash.com",
-      "hsmobility.ca",
-      "www.hsmobility.ca",
-      "staging.hsmobility.ca",
-      "dev.hsmobility.ca"
+      "medtrion.ca",
+      "www.medtrion.ca",
+      "staging.medtrion.ca",
+      "dev.medtrion.ca"
     ],
     remotePatterns: [
       {
@@ -39,7 +39,11 @@ const nextConfig = {
         protocol: 'http',
         hostname: '**',
       }
-    ]
+    ],
+    // Cache optimized images for 24 hours (default is 60s — too short for product images)
+    minimumCacheTTL: 86400,
+    // Serve modern formats (WebP/AVIF) automatically
+    formats: ['image/avif', 'image/webp'],
   },
 
   // Fix workspace root warning by explicitly setting the output file tracing root

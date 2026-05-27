@@ -49,7 +49,7 @@ const TestimonialCarousel: React.FC = () => {
             What Our Customers Say
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Don't just take our word for it. Here's what real customers have to say about their experience with HS Mobility.
+            Don't just take our word for it. Here's what real customers have to say about their experience with Medtrion.
           </p>
         </motion.div>
 

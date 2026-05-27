@@ -116,7 +116,7 @@ lg:grid-cols-4 gap-8
 // ARIA labels
 aria-label="Follow us on Facebook"
 aria-label="Navigate to Shop All"
-aria-label="Send email to Info@hsmobility.ca"
+aria-label="Send email to Info@medtrion.ca"
 
 // Focus management
 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
@@ -250,8 +250,8 @@ SEO-optimized structured data markup:
 {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "HSMobility",
-  "url": "https://hsmobility.ca",
+  "name": "Medtrion",
+  "url": "https://medtrion.ca",
   "logo": "/Logo.png",
   "address": {
     "@type": "PostalAddress",
@@ -265,7 +265,7 @@ SEO-optimized structured data markup:
     "@type": "ContactPoint",
     "telephone": "+1 (905) 330-1774",
     "contactType": "customer service",
-    "email": "Info@hsmobility.ca"
+    "email": "Info@medtrion.ca"
   },
   "sameAs": ["https://www.facebook.com/profile.php?id=61565518749182"]
 }
@@ -307,7 +307,7 @@ import { ProfessionalFooter } from '@/components/Footer';
 
 test('renders footer with company information', () => {
   render(<ProfessionalFooter />);
-  expect(screen.getByText('HSMobility')).toBeInTheDocument();
+  expect(screen.getByText('Medtrion')).toBeInTheDocument();
   expect(screen.getByText('Contact Us')).toBeInTheDocument();
 });
 ```
@@ -430,7 +430,7 @@ npm run build
 
 ## 📄 License
 
-This component is part of the HSMobility project and follows the same licensing terms.
+This component is part of the Medtrion project and follows the same licensing terms.
 
 ---
 

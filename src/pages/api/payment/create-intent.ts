@@ -134,7 +134,7 @@ export default async function handler(
         }))),
         timestamp: new Date().toISOString(),
       },
-      description: `Payment for ${items.length} item(s) from HSMobility`,
+      description: `Payment for ${items.length} item(s) from Medtrion`,
       receipt_email: undefined, // Will be collected via Link Authentication Element
       shipping: {
         name: 'Customer',

@@ -98,7 +98,7 @@ describe('Navigation Utilities', () => {
       }));
       
       // Test mailto link
-      await handleAnchorNavigation('mailto:Info@hsmobility.ca', mockRouter, 'Email');
+      await handleAnchorNavigation('mailto:Info@medtrion.ca', mockRouter, 'Email');
       expect(consoleSpy).toHaveBeenCalledWith('Navigation Event:', expect.objectContaining({
         linkType: 'mailto'
       }));

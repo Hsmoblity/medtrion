@@ -58,7 +58,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
     return (
       <>
         <MetaHead 
-          title="Products - Health Supply & Mobility Inc" 
+          title="Products - Medtrion" 
           description="Discover our range of mobility products and stairlifts"
         />
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -77,7 +77,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
   return (
     <>
       <MetaHead 
-        title="Products - Health Supply & Mobility Inc" 
+        title="Products - Medtrion" 
         description="Discover our curated selection of mobility products including stairlifts and lift chairs. Quality solutions for enhanced independence."
       />
       
@@ -358,7 +358,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
                   </div>
                 </div>
                 <p className="text-gray-600 mb-4">
-                  "The financing options made it possible for me to get the mobility solution I needed. Highly recommend HS Mobility!"
+                  "The financing options made it possible for me to get the mobility solution I needed. Highly recommend Medtrion!"
                 </p>
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -381,7 +381,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Why Choose HS Mobility?
+                Why Choose Medtrion?
               </h2>
             </div>
             

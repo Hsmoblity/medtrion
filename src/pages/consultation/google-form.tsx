@@ -10,7 +10,7 @@ export default function ConsultationGoogleFormPage() {
 
   return (
     <PageLayout>
-      <MetaHead title="Consultation - HS Mobility" description="Request a consultation" />
+      <MetaHead title="Consultation - Medtrion" description="Request a consultation" />
       <div className="max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Request a Free Consultation</h1>

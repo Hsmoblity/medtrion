@@ -29,7 +29,7 @@ const ProfessionalFooter: React.FC<ProfessionalFooterProps> = ({
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": content.companyInfo.name,
-    "url": "https://hsmobility.ca",
+    "url": "https://medtrion.ca",
     "logo": content.companyInfo.logo,
     "address": {
       "@type": "PostalAddress",

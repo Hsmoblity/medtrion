@@ -117,7 +117,7 @@ describe('Products Page', () => {
       const mockProducts: ProductCardView[] = [];
       render(<ProductsPage products={mockProducts} />);
 
-      expect(screen.getByText('Why Choose HS Mobility?')).toBeInTheDocument();
+      expect(screen.getByText('Why Choose Medtrion?')).toBeInTheDocument();
       expect(screen.getByText('Quality Assurance')).toBeInTheDocument();
       expect(screen.getByText('Expert Support')).toBeInTheDocument();
       expect(screen.getByText('Flexible Financing')).toBeInTheDocument();

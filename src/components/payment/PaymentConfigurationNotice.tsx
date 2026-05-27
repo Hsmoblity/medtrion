@@ -106,8 +106,8 @@ const PaymentConfigurationNotice: React.FC<PaymentConfigurationNoticeProps> = ({
               </a>
             </p>
             <p className="text-sm text-blue-700">
-              <a href="mailto:support@hsmobility.ca" className="hover:text-blue-900 underline">
-                support@hsmobility.ca
+              <a href="mailto:support@medtrion.ca" className="hover:text-blue-900 underline">
+                support@medtrion.ca
               </a>
             </p>
           </div>

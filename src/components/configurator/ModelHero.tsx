@@ -302,7 +302,7 @@ const ModelHero: React.FC<ModelHeroProps> = ({
                   ) : (
                     <p className="text-sm text-gray-600 mt-1">{showRealTimePrice && (
                         <span className="inline-flex items-center space-x-1 text-xs text-green-600 animate-pulse">
-                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                          <span className="w-1.5 h-1.5 bg-green-500 rounded-full inline-block" />
                           <span>Real-time pricing active</span>
                         </span>
                       )}

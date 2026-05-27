@@ -63,7 +63,7 @@ const getApiBaseUrl = (): string => {
     return '' // Relative URLs use Next.js API proxy
   }
   // Server-side: use direct WordPress URL
-  return process.env.WP_API_URL || process.env.NEXT_PUBLIC_WP_API_URL || 'https://cms.hsmobility.ca'
+  return process.env.WP_API_URL || process.env.NEXT_PUBLIC_WP_API_URL || 'https://cms.medtrion.ca'
 }
 
 /**

@@ -70,7 +70,7 @@ describe('Product Detail GraphQL Response Fix', () => {
 
       expect(result).toHaveProperty('props');
       expect(result.props).toHaveProperty('seoMeta');
-      expect(result.props.seoMeta.title).toBe('Test Product Name | HSMobility');
+      expect(result.props.seoMeta.title).toBe('Test Product Name | Medtrion');
       expect(result.props.seoMeta.description).toContain('Test Product Name');
     });
 
@@ -110,7 +110,7 @@ describe('Product Detail GraphQL Response Fix', () => {
 
       expect(result).toHaveProperty('props');
       expect(result.props).toHaveProperty('seoMeta');
-      expect(result.props.seoMeta.title).toBe('Test Product Name | HSMobility');
+      expect(result.props.seoMeta.title).toBe('Test Product Name | Medtrion');
       expect(result.props.seoMeta.description).toContain('Test Product Name');
     });
 
@@ -173,7 +173,7 @@ describe('Product Detail GraphQL Response Fix', () => {
 
       expect(result).toHaveProperty('props');
       expect(result.props).toHaveProperty('seoMeta');
-      expect(result.props.seoMeta.title).toBe('Test Product Title | HSMobility');
+      expect(result.props.seoMeta.title).toBe('Test Product Title | Medtrion');
       expect(result.props.seoMeta.description).toContain('Test Product Title');
     });
 
@@ -204,7 +204,7 @@ describe('Product Detail GraphQL Response Fix', () => {
 
       expect(result).toHaveProperty('props');
       expect(result.props).toHaveProperty('seoMeta');
-      expect(result.props.seoMeta.title).toBe('Product | HSMobility');
+      expect(result.props.seoMeta.title).toBe('Product | Medtrion');
       expect(result.props.seoMeta.description).toContain('Product');
     });
 
@@ -257,7 +257,7 @@ describe('Product Detail GraphQL Response Fix', () => {
           categories={[]}
           error={null}
           seoMeta={{
-            title: 'Test Product Name | HSMobility',
+            title: 'Test Product Name | Medtrion',
             description: 'Test description',
           }}
         />
@@ -300,7 +300,7 @@ describe('Product Detail GraphQL Response Fix', () => {
           categories={[]}
           error={null}
           seoMeta={{
-            title: 'Test Product Title | HSMobility',
+            title: 'Test Product Title | Medtrion',
             description: 'Test description',
           }}
         />
@@ -342,7 +342,7 @@ describe('Product Detail GraphQL Response Fix', () => {
           categories={[]}
           error={null}
           seoMeta={{
-            title: 'Product | HSMobility',
+            title: 'Product | Medtrion',
             description: 'Test description',
           }}
         />

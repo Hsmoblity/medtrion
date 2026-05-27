@@ -1,10 +1,10 @@
 <?php
 /**
  * Plugin Name: HSM Stripe Webhook Processor
- * Plugin URI: https://hsmobility.ca
+ * Plugin URI: https://medtrion.ca
  * Description: Custom WordPress plugin for processing Stripe webhook events and synchronizing data with WooCommerce.
  * Version: 1.0.0
- * Author: HSMobility Team
+ * Author: Medtrion Team
  * License: GPL v2 or later
  * Text Domain: hsm-stripe-webhook
  */

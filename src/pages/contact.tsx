@@ -4,18 +4,63 @@ import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import { GraphQLClient } from 'graphql-request';
 import { 
   MdLocationOn as MapPinIcon, 
   MdPhone as PhoneIcon, 
   MdEmail as EnvelopeIcon, 
   MdAccessTime as ClockIcon,
-  MdCheckCircle as CheckCircleIcon,
-  MdWarning as ExclamationTriangleIcon
 } from 'react-icons/md';
 import PageLayout from '../components/PageLayout/PageLayout';
 import MetaHead from '../components/MetaHead';
-import { PrimaryButton } from '../components/ui';
 import ContactForm from '../components/Web3Forms/ContactForm';
+
+// CMS data types
+interface ContactPhone {
+  name: string;
+  number: string;
+}
+
+interface OpenHour {
+  day: string;
+  hours: string;
+}
+
+interface ContactInfo {
+  contactAddress: string;
+  contactEmail: string;
+  contactPhone: ContactPhone[];
+  openHours: OpenHour[];
+}
+
+// Parse "Street:3495 Rebecca St,City:Oakville ON,Postal:L6L 6X9" into parts
+function parseAddress(raw: string): { street: string; city: string; postal: string; full: string } {
+  const parts: Record<string, string> = {};
+  raw.split(',').forEach((segment) => {
+    const colonIdx = segment.indexOf(':');
+    if (colonIdx !== -1) {
+      const key = segment.slice(0, colonIdx).trim().toLowerCase();
+      const val = segment.slice(colonIdx + 1).trim();
+      parts[key] = val;
+    }
+  });
+  const street = parts['street'] ?? '';
+  const city   = parts['city']   ?? '';
+  const postal = parts['postal'] ?? '';
+  return { street, city, postal, full: [street, city, postal].filter(Boolean).join(', ') };
+}
+
+// Fallback static data if CMS is unavailable
+const FALLBACK_CONTACT: ContactInfo = {
+  contactAddress: 'Street:3495 Rebecca St,City:Oakville ON,Postal:L6L 6X9',
+  contactEmail: 'Info@medtrion.ca',
+  contactPhone: [{ name: 'General Inquiries', number: '+1 (905) 330-1774' }],
+  openHours: [
+    { day: 'Monday - Friday', hours: '9:00 AM - 6:00 PM' },
+    { day: 'Saturday',        hours: '10:00 AM - 4:00 PM' },
+    { day: 'Sunday',          hours: 'Closed' },
+  ],
+};
 
 // Form validation schema
 const ContactFormSchema = z.object({
@@ -32,12 +77,14 @@ const ContactFormSchema = z.object({
 type ContactFormData = z.infer<typeof ContactFormSchema>;
 
 interface ContactPageProps {
-  // Add any server-side props if needed
+  contactInfo: ContactInfo;
 }
 
-const ContactPage: React.FC<ContactPageProps> = () => {
+const ContactPage: React.FC<ContactPageProps> = ({ contactInfo }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  const address = parseAddress(contactInfo.contactAddress);
 
   const {
     register,
@@ -73,9 +120,7 @@ const ContactPage: React.FC<ContactPageProps> = () => {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Submission failed");
-      }
+      if (!response.ok) throw new Error("Submission failed");
 
       const result = await response.json();
       console.log('Form submitted successfully:', result);
@@ -86,22 +131,6 @@ const ContactPage: React.FC<ContactPageProps> = () => {
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const contactInfo = {
-    address: {
-      street: "3495 Rebecca St ",
-      city: "Oakville, ON",
-      postal: "L6L 6X9",
-      full: "3495 Rebecca St, Oakville, ON L6L 6X9"
-    },
-    phone: "+1 (905) 330-1774",
-    email: "Info@medtrion.ca",
-    hours: {
-      weekdays: "Monday - Friday: 9:00 AM - 6:00 PM",
-      saturday: "Saturday: 10:00 AM - 4:00 PM",
-      sunday: "Sunday: Closed"
     }
   };
 
@@ -171,24 +200,31 @@ const ContactPage: React.FC<ContactPageProps> = () => {
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">Visit Our Office</h3>
                         <address className="text-gray-600 not-italic leading-relaxed">
-                          {contactInfo.address.street}<br />
-                          {contactInfo.address.city}<br />
-                          {contactInfo.address.postal}
+                          {address.street}<br />
+                          {address.city}<br />
+                          {address.postal}
                         </address>
                       </div>
                     </div>
 
-                    {/* Phone */}
+                    {/* Phones (repeater) */}
                     <div className="flex items-start">
                       <PhoneIcon className="h-6 w-6 text-blue-600 mt-1 mr-4 flex-shrink-0" />
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">Call Us</h3>
-                        <a 
-                          href={`tel:${contactInfo.phone}`}
-                          className="text-blue-600 hover:text-blue-800 transition-colors text-lg font-medium"
-                        >
-                          {contactInfo.phone}
-                        </a>
+                        <div className="space-y-2">
+                          {contactInfo.contactPhone.map((p) => (
+                            <div key={p.name}>
+                              <span className="text-gray-500 text-sm">{p.name}</span>
+                              <a
+                                href={`tel:${p.number}`}
+                                className="block text-blue-600 hover:text-blue-800 transition-colors font-medium"
+                              >
+                                {p.number}
+                              </a>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
 
@@ -197,24 +233,26 @@ const ContactPage: React.FC<ContactPageProps> = () => {
                       <EnvelopeIcon className="h-6 w-6 text-blue-600 mt-1 mr-4 flex-shrink-0" />
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">Email Us</h3>
-                        <a 
-                          href={`mailto:${contactInfo.email}`}
+                        <a
+                          href={`mailto:${contactInfo.contactEmail}`}
                           className="text-blue-600 hover:text-blue-800 transition-colors text-lg font-medium"
                         >
-                          {contactInfo.email}
+                          {contactInfo.contactEmail}
                         </a>
                       </div>
                     </div>
 
-                    {/* Hours */}
+                    {/* Hours (repeater) */}
                     <div className="flex items-start">
                       <ClockIcon className="h-6 w-6 text-blue-600 mt-1 mr-4 flex-shrink-0" />
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">Business Hours</h3>
                         <div className="text-gray-600 space-y-1">
-                          <p>{contactInfo.hours.weekdays}</p>
-                          <p>{contactInfo.hours.saturday}</p>
-                          <p>{contactInfo.hours.sunday}</p>
+                          {contactInfo.openHours.map((h) => (
+                            <p key={h.day}>
+                              <span className="font-medium">{h.day}:</span> {h.hours}
+                            </p>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -226,7 +264,7 @@ const ContactPage: React.FC<ContactPageProps> = () => {
                   <h2 className="text-3xl font-bold text-gray-900 mb-6">Find Us</h2>
                   <div className="relative h-96 rounded-lg overflow-hidden">
                     <iframe
-                      src={`https://maps.google.com/maps?q=${encodeURIComponent(contactInfo.address.full)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                      src={`https://maps.google.com/maps?q=${encodeURIComponent(address.full)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
                       width="100%"
                       height="100%"
                       style={{ border: 0 }}
@@ -239,7 +277,7 @@ const ContactPage: React.FC<ContactPageProps> = () => {
                   </div>
                   <div className="mt-4 text-center">
                     <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contactInfo.address.full)}`}
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address.full)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors font-medium"
@@ -305,11 +343,42 @@ const ContactPage: React.FC<ContactPageProps> = () => {
 };
 
 export const getServerSideProps: GetServerSideProps<ContactPageProps> = async () => {
-  return {
-    props: {
-      // Add any server-side data if needed
-    },
-  };
+  try {
+    const endpoint = process.env.WP_GRAPHQL_URL || process.env.NEXT_PUBLIC_WP_GRAPHQL_URL || '';
+    if (!endpoint) throw new Error('No GraphQL endpoint configured');
+
+    const client = new GraphQLClient(endpoint, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    const data = await client.request<{
+      page: { contactFields: ContactInfo };
+    }>(`
+      query GetContactInfo {
+        page(id: "/contacts/", idType: URI) {
+          contactFields {
+            contactAddress
+            contactEmail
+            contactPhone { name number }
+            openHours { day hours }
+          }
+        }
+      }
+    `);
+
+    return {
+      props: {
+        contactInfo: data.page.contactFields,
+      },
+    };
+  } catch (error) {
+    console.error('Failed to fetch contact info from CMS:', error);
+    return {
+      props: {
+        contactInfo: FALLBACK_CONTACT,
+      },
+    };
+  }
 };
 
 export default ContactPage;

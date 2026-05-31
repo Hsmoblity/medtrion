@@ -52,7 +52,7 @@ const Home = ({ products, error }: HomeProps) => {
   
   return (
     <>
-      <MetaHead title=" Health Services & Mobility Products for a Better Life" description="Explore hsMobility for a wide range of health services and mobility products designed to improve your quality of life. As affiliate partners of Acron stairlifts, we offer trusted solutions to help you regain independence and enhance your mobility." />
+      <MetaHead title="Mobility Products & Accessibility Solutions | Medtrion" description="Explore Medtrion for a wide range of mobility and accessibility products designed to improve your quality of life. Trusted solutions to help you regain independence and enhance your mobility." />
       <Hero />
       
       {/* Best Seller Section with Real Products - Moved right after Hero */}

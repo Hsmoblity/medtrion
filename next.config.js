@@ -20,7 +20,7 @@ const nextConfig = {
   images: {
     domains: [
       "images.ctfassets.net", 
-      "hsmobility.local", 
+      "medtrion.local", 
       "localhost", 
       "127.0.0.1", 
       "cms.medtrion.ca", 

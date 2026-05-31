@@ -91,7 +91,7 @@ export const getStaticProps: GetStaticProps<LegalPageProps> = async () => {
       page: { title: string; content: string; modified: string } | null;
     }>(`
       query GetPrivacyPolicy {
-        page(id: "/privacy-policy/", idType: URI) {
+        page(id: "/privacy-policy-2/", idType: URI) {
           title
           content
           modified

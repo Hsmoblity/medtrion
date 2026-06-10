@@ -92,19 +92,45 @@ const FooterContact: React.FC<FooterContactProps> = ({
             transition={{ duration: 0.3, delay: 0.3 }}
             className={footerDesignTokens.spacing.item}
           >
-            <Link
-              href={`tel:${companyInfo.phone}`}
-              className={`
-                ${footerDesignTokens.typography.body}
-                ${footerDesignTokens.colors.text.secondary}
-                ${footerDesignTokens.colors.text.accent}
-                transition-colors duration-300
-                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-              `}
-              aria-label={`Call ${companyInfo.phone}`}
-            >
-              {companyInfo.phone}
-            </Link>
+            {/* Display all contact phones if available, otherwise show main phone */}
+            {companyInfo.contactPhone && companyInfo.contactPhone.length > 0 ? (
+              <div className="space-y-2">
+                {companyInfo.contactPhone.map((phoneItem, index) => (
+                  <div key={index} className="flex flex-col">
+                    {phoneItem.name && (
+                      <span className="text-sm text-gray-400 mb-1">{phoneItem.name}</span>
+                    )}
+                    <Link
+                      href={`tel:${phoneItem.number}`}
+                      className={`
+                        ${footerDesignTokens.typography.body}
+                        ${footerDesignTokens.colors.text.secondary}
+                        ${footerDesignTokens.colors.text.accent}
+                        transition-colors duration-300
+                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                      `}
+                      aria-label={`Call ${phoneItem.name || 'us'} at ${phoneItem.number}`}
+                    >
+                      {phoneItem.number}
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <Link
+                href={`tel:${companyInfo.phone}`}
+                className={`
+                  ${footerDesignTokens.typography.body}
+                  ${footerDesignTokens.colors.text.secondary}
+                  ${footerDesignTokens.colors.text.accent}
+                  transition-colors duration-300
+                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                `}
+                aria-label={`Call ${companyInfo.phone}`}
+              >
+                {companyInfo.phone}
+              </Link>
+            )}
           </motion.li>
 
           {/* Website Link */}

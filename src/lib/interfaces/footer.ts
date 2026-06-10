@@ -15,6 +15,10 @@ export interface FooterContent {
     };
     address: string;
     phone: string;
+    contactPhone?: Array<{
+      name: string;
+      number: string;
+    }>;
     email: string;
     website?: string;
   };

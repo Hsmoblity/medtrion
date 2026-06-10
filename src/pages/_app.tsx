@@ -8,10 +8,18 @@ import { SessionProvider } from "contexts/SessionContext";
 import { CartVisibilityProvider } from "contexts/cartVisibilityContext";
 import ClientOnly from "components/ClientOnly";
 import { SiteLogo, fetchSiteLogo } from "lib/fetchSiteLogo";
+import { GraphQLClient } from "graphql-request";
+import { GET_CONTACT_INFO } from "lib/graphql/queries";
+
+interface ContactPhone {
+  name: string;
+  number: string;
+}
 
 interface CustomAppProps extends AppProps {
   pageProps: {
     logo?: SiteLogo | null;
+    contactPhone?: ContactPhone[];
     [key: string]: any;
   };
 }
@@ -33,7 +41,7 @@ function MyApp({ Component, pageProps }: CustomAppProps) {
           showAtBottom={false}
         />
 
-        <PageLayout logo={pageProps.logo}>
+        <PageLayout logo={pageProps.logo} contactPhone={pageProps.contactPhone}>
           <Component {...pageProps} />
         </PageLayout>
 
@@ -50,7 +58,7 @@ function MyApp({ Component, pageProps }: CustomAppProps) {
   );
 }
 
-// Fetch logo globally for all pages
+// Fetch logo and contact phones globally for all pages
 MyApp.getInitialProps = async (appContext: AppContext) => {
   // Call page's getInitialProps if it exists
   const appProps = await App.getInitialProps(appContext);
@@ -58,11 +66,33 @@ MyApp.getInitialProps = async (appContext: AppContext) => {
   // Fetch site logo once for all pages
   const logo = await fetchSiteLogo();
 
+  // Fetch contact phone data
+  let contactPhone: ContactPhone[] = [];
+  try {
+    const endpoint = process.env.WP_GRAPHQL_URL || process.env.NEXT_PUBLIC_WP_GRAPHQL_URL || '';
+    if (endpoint) {
+      const client = new GraphQLClient(endpoint, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      const data = await client.request<{
+        page: { contactFields: { contactPhone: ContactPhone[] } };
+      }>(GET_CONTACT_INFO);
+      
+      if (data?.page?.contactFields?.contactPhone) {
+        contactPhone = data.page.contactFields.contactPhone;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch contact phone data:', error);
+  }
+
   return {
     ...appProps,
     pageProps: {
       ...appProps.pageProps,
       logo,
+      contactPhone,
     },
   };
 };

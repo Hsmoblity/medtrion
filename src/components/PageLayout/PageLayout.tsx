@@ -4,15 +4,21 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { SiteLogo } from "../../lib/fetchSiteLogo";
 
+interface ContactPhone {
+  name: string;
+  number: string;
+}
+
 interface PageLayoutProps {
   children: React.ReactNode;
   logo?: SiteLogo | null;
+  contactPhone?: ContactPhone[];
 }
 const fadeInVariant = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { duration: 0.4 } }
 };
-const PageLayout: React.FC<PageLayoutProps> = ({ children, logo }) => {
+const PageLayout: React.FC<PageLayoutProps> = ({ children, logo, contactPhone }) => {
 
   return (
     <div>
@@ -30,7 +36,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, logo }) => {
         {children}
       </div>
 
-      <Footer logo={logo} />
+      <Footer logo={logo} contactPhone={contactPhone} />
     </div>
   );
 };

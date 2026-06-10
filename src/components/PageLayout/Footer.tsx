@@ -1,22 +1,31 @@
 import { ProfessionalFooter } from '../Footer';
 import { SiteLogo } from '../../lib/fetchSiteLogo';
 
-interface FooterProps {
-  logo?: SiteLogo | null;
+interface ContactPhone {
+  name: string;
+  number: string;
 }
 
-const Footer: React.FC<FooterProps> = ({ logo }) => {
-  // Update footer content with CMS logo if available
-  const customContent = logo ? {
+interface FooterProps {
+  logo?: SiteLogo | null;
+  contactPhone?: ContactPhone[];
+}
+
+const Footer: React.FC<FooterProps> = ({ logo, contactPhone }) => {
+  // Update footer content with CMS logo and contact phones if available
+  const customContent = {
     companyInfo: {
       name: 'Medtrion',
       description: 'Medtrion is your trusted source for a wide range of health services and mobility products designed to improve your quality of life. Please note: We are not manufacturers of Acorn stairlifts but proud affiliate partners.',
-      logo: {
+      logo: logo ? {
         sourceUrl: logo.sourceUrl,
         altText: logo.altText,
-      },
+      } : '/Logo.png',
       address: '3495 Rebecca St Oakville, ON L6L 6X9',
       phone: '+1 (905) 330-1774',
+      contactPhone: contactPhone && contactPhone.length > 0 ? contactPhone : [
+        { name: 'General Inquiries', number: '+1 (905) 330-1774' }
+      ],
       email: 'Info@medtrion.ca',
       website: 'https://medtrion.ca'
     },
@@ -54,7 +63,7 @@ const Footer: React.FC<FooterProps> = ({ logo }) => {
       termsOfService: '/terms-of-service',
       cookiePolicy: '/cookie-policy'
     }
-  } : undefined;
+  };
 
   return <ProfessionalFooter customContent={customContent} />;
 };

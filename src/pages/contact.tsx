@@ -147,7 +147,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ contactInfo }) => {
   };
 
   return (
-    <PageLayout>
+    <PageLayout hideFooter>
       <MetaHead 
         title="Contact Us - Medtrion" 
         description="Get in touch with Medtrion for mobility solutions, stairlifts, and lift chairs. Contact us for free quotes and expert advice."

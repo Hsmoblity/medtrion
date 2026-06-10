@@ -13,12 +13,13 @@ interface PageLayoutProps {
   children: React.ReactNode;
   logo?: SiteLogo | null;
   contactPhone?: ContactPhone[];
+  hideFooter?: boolean;  // Optional prop to hide footer on specific pages
 }
 const fadeInVariant = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { duration: 0.4 } }
 };
-const PageLayout: React.FC<PageLayoutProps> = ({ children, logo, contactPhone }) => {
+const PageLayout: React.FC<PageLayoutProps> = ({ children, logo, contactPhone, hideFooter = false }) => {
 
   return (
     <div>
@@ -36,7 +37,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, logo, contactPhone })
         {children}
       </div>
 
-      <Footer logo={logo} contactPhone={contactPhone} />
+      {!hideFooter && <Footer logo={logo} contactPhone={contactPhone} />}
     </div>
   );
 };

@@ -27,8 +27,8 @@ const FooterContact: React.FC<FooterContactProps> = ({
         {/* Company Logo */}
         <div className="flex justify-center lg:justify-start">
           <img
-            src={companyInfo.logo}
-            alt={`${companyInfo.name} Logo`}
+            src={typeof companyInfo.logo === 'string' ? companyInfo.logo : companyInfo.logo.sourceUrl}
+            alt={typeof companyInfo.logo === 'string' ? `${companyInfo.name} Logo` : (companyInfo.logo.altText || `${companyInfo.name} Logo`)}
             className="w-64 object-contain mb-4"
           />
         </div>

@@ -4,6 +4,7 @@ import { RiMenu4Line } from "react-icons/ri";
 import Link from "next/link";
 import { useRouter } from 'next/router';
 import { handleAnchorNavigation } from "lib/utils/navigation";
+import { SiteLogo, getLogoUrl, getLogoAlt } from "../lib/fetchSiteLogo";
 
 
 interface PathProps {
@@ -73,7 +74,7 @@ function useMenuAnimation(isOpen: boolean) {
     return scope;
 }
 
-const Drawer: React.FC = () => {
+const Drawer: React.FC<{ logo?: SiteLogo | null }> = ({ logo }) => {
     const router = useRouter();
     const toggleDrawer = () => {
         setIsOpen(!isOpen);
@@ -90,8 +91,8 @@ const Drawer: React.FC = () => {
                     <div className="flex flex-col md:gap-3 gap-2 relative">
                         <div className="flex md:hidden items-center ml-6 mt-4">
                             <img
-                                src="/Logo.png"
-                                alt="Medtrion Logo"
+                                src={getLogoUrl(logo)}
+                                alt={getLogoAlt(logo)}
                                 className="md:h-10 h-8 object-cover"
                             />
                         </div>

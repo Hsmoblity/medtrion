@@ -9,8 +9,13 @@ import { useCartStore, useCartCount, useIsHydrated } from "stores/cartStore";
 import { handleAnchorNavigation } from "lib/utils/navigation";
 import ClientOnly from 'components/ClientOnly';
 import { Typography } from '../typography';
+import { SiteLogo, getLogoUrl, getLogoAlt } from "../../lib/fetchSiteLogo";
 
-const Header = () => {
+interface HeaderProps {
+  logo?: SiteLogo | null;
+}
+
+const Header: React.FC<HeaderProps> = ({ logo }) => {
   const toggleCartVisibility = useCartStore(state => state.toggleCartVisibility);
   const cartLength = useCartCount();
   const isHydrated = useIsHydrated();
@@ -63,8 +68,8 @@ const Header = () => {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <img
-              src="/Logo.png"
-              alt="Medtrion Logo"
+              src={getLogoUrl(logo)}
+              alt={getLogoAlt(logo)}
               className="h-14 w-auto object-contain"
             />
           </Link>
@@ -84,7 +89,7 @@ const Header = () => {
                 )}
               </ClientOnly>
             </button>
-            <Drawer />
+            <Drawer logo={logo} />
           </div>
         </div>
       </div>
@@ -95,8 +100,8 @@ const Header = () => {
 
           <Link href="/" className="flex items-start">
             <img
-              src="/Logo.png"
-              alt="Logo"
+              src={getLogoUrl(logo)}
+              alt={getLogoAlt(logo)}
               className="w-52 object-cover"
             />
           </Link>

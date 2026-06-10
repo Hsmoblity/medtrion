@@ -2,15 +2,17 @@ import Header from "./Header";
 import Footer from "./Footer";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { SiteLogo } from "../../lib/fetchSiteLogo";
 
 interface PageLayoutProps {
   children: React.ReactNode;
+  logo?: SiteLogo | null;
 }
 const fadeInVariant = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { duration: 0.4 } }
 };
-const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
+const PageLayout: React.FC<PageLayoutProps> = ({ children, logo }) => {
 
   return (
     <div>
@@ -21,14 +23,14 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
         variants={fadeInVariant}
         id="header" className="fixed top-0 left-0 right-0 z-50 "
       >
-        <Header />
+        <Header logo={logo} />
 
       </motion.div>
       <div className="z-10 relative min-h-[75vh] bg-gray-50 dark:bg-gray-900 pt-20 md:pt-24">
         {children}
       </div>
 
-      <Footer />
+      <Footer logo={logo} />
     </div>
   );
 };

@@ -894,6 +894,64 @@ export const CREATE_HEADLESS_ORDER = gql`
 `;
 
 // ============================================================================
+// CONTACT PAGE QUERIES
+// ============================================================================
+
+/**
+ * Get contact page information including logo
+ * Used by: src/pages/contact.tsx - getServerSideProps()
+ */
+export const GET_CONTACT_INFO = gql`
+  query GetContactInfo {
+    page(id: "/contacts/", idType: URI) {
+      contactFields {
+        contactAddress
+        contactEmail
+        contactPhone {
+          name
+          number
+        }
+        openHours {
+          day
+          hours
+        }
+        logo {
+          sourceUrl
+          altText
+          mediaDetails {
+            width
+            height
+          }
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * Get site-wide settings including logo
+ * Used for header, footer, and other global components
+ */
+export const GET_SITE_SETTINGS = gql`
+  query GetSiteSettings {
+    generalSettings {
+      title
+      description
+      url
+    }
+    # Custom logo from theme customizer or site settings
+    siteLogo {
+      sourceUrl
+      altText
+      mediaDetails {
+        width
+        height
+      }
+    }
+  }
+`;
+
+// ============================================================================
 // QUERY DOCUMENTATION AND USAGE MAP
 // ============================================================================
 
@@ -923,6 +981,8 @@ export const QUERY_USAGE_MAP = {
   GET_FEATURED_PRODUCTS: ['src/stores/homepageStore.ts:fetchFeaturedProducts'],
   CREATE_HEADLESS_STRIPE_SESSION: ['src/pages/api/stripe.ts'],
   CREATE_HEADLESS_ORDER: ['src/pages/api/create-order.ts'],
+  GET_CONTACT_INFO: ['src/pages/contact.tsx:getServerSideProps'],
+  GET_SITE_SETTINGS: ['src/pages/_app.tsx', 'src/components/PageLayout/Header.tsx'],
 } as const;
 
 // All queries are already exported individually above

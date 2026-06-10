@@ -9,7 +9,10 @@ export interface FooterContent {
   companyInfo: {
     name: string;
     description: string;
-    logo: string;
+    logo: string | {
+      sourceUrl: string;
+      altText?: string;
+    };
     address: string;
     phone: string;
     email: string;

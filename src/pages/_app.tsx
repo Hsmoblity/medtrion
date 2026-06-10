@@ -1,13 +1,22 @@
 import "/globals.css";
-import type { AppProps } from "next/app";
+import type { AppProps, AppContext } from "next/app";
+import App from "next/app";
 import PageLayout from "components/PageLayout/PageLayout";
 import NextTopLoader from "nextjs-toploader";
 import { Cursor } from "components/custom-cursor";
 import { SessionProvider } from "contexts/SessionContext";
 import { CartVisibilityProvider } from "contexts/cartVisibilityContext";
 import ClientOnly from "components/ClientOnly";
+import { SiteLogo, fetchSiteLogo } from "lib/fetchSiteLogo";
 
-function MyApp({ Component, pageProps }: AppProps) {
+interface CustomAppProps extends AppProps {
+  pageProps: {
+    logo?: SiteLogo | null;
+    [key: string]: any;
+  };
+}
+
+function MyApp({ Component, pageProps }: CustomAppProps) {
   return (
     <SessionProvider>
       <CartVisibilityProvider>
@@ -24,7 +33,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           showAtBottom={false}
         />
 
-        <PageLayout>
+        <PageLayout logo={pageProps.logo}>
           <Component {...pageProps} />
         </PageLayout>
 
@@ -40,5 +49,22 @@ function MyApp({ Component, pageProps }: AppProps) {
     </SessionProvider>
   );
 }
+
+// Fetch logo globally for all pages
+MyApp.getInitialProps = async (appContext: AppContext) => {
+  // Call page's getInitialProps if it exists
+  const appProps = await App.getInitialProps(appContext);
+
+  // Fetch site logo once for all pages
+  const logo = await fetchSiteLogo();
+
+  return {
+    ...appProps,
+    pageProps: {
+      ...appProps.pageProps,
+      logo,
+    },
+  };
+};
 
 export default MyApp;

@@ -14,6 +14,7 @@ import {
 import PageLayout from '../components/PageLayout/PageLayout';
 import MetaHead from '../components/MetaHead';
 import ContactForm from '../components/Web3Forms/ContactForm';
+import { GET_CONTACT_INFO } from '../lib/graphql/queries';
 
 // CMS data types
 interface ContactPhone {
@@ -26,11 +27,21 @@ interface OpenHour {
   hours: string;
 }
 
+interface Logo {
+  sourceUrl: string;
+  altText?: string;
+  mediaDetails?: {
+    width: number;
+    height: number;
+  };
+}
+
 interface ContactInfo {
   contactAddress: string;
   contactEmail: string;
   contactPhone: ContactPhone[];
   openHours: OpenHour[];
+  logo?: Logo;
 }
 
 // Parse "Street:3495 Rebecca St,City:Oakville ON,Postal:L6L 6X9" into parts
@@ -60,6 +71,10 @@ const FALLBACK_CONTACT: ContactInfo = {
     { day: 'Saturday',        hours: '10:00 AM - 4:00 PM' },
     { day: 'Sunday',          hours: 'Closed' },
   ],
+  logo: {
+    sourceUrl: '/Logo.png',
+    altText: 'Medtrion Logo',
+  },
 };
 
 // Form validation schema
@@ -353,18 +368,7 @@ export const getServerSideProps: GetServerSideProps<ContactPageProps> = async ()
 
     const data = await client.request<{
       page: { contactFields: ContactInfo };
-    }>(`
-      query GetContactInfo {
-        page(id: "/contacts/", idType: URI) {
-          contactFields {
-            contactAddress
-            contactEmail
-            contactPhone { name number }
-            openHours { day hours }
-          }
-        }
-      }
-    `);
+    }>(GET_CONTACT_INFO);
 
     return {
       props: {

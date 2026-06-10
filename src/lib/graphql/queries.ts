@@ -900,6 +900,8 @@ export const CREATE_HEADLESS_ORDER = gql`
 /**
  * Get contact page information including logo
  * Used by: src/pages/contact.tsx - getServerSideProps()
+ * 
+ * NOTE: Logo field is String type (URL only) in WordPress ACF
  */
 export const GET_CONTACT_INFO = gql`
   query GetContactInfo {
@@ -915,14 +917,7 @@ export const GET_CONTACT_INFO = gql`
           day
           hours
         }
-        logo {
-          sourceUrl
-          altText
-          mediaDetails {
-            width
-            height
-          }
-        }
+        logo
       }
     }
   }

@@ -41,7 +41,7 @@ interface ContactInfo {
   contactEmail: string;
   contactPhone: ContactPhone[];
   openHours: OpenHour[];
-  logo?: Logo;
+  logo?: string | Logo;  // Can be string URL or Logo object
 }
 
 // Parse "Street:3495 Rebecca St,City:Oakville ON,Postal:L6L 6X9" into parts
@@ -71,10 +71,7 @@ const FALLBACK_CONTACT: ContactInfo = {
     { day: 'Saturday',        hours: '10:00 AM - 4:00 PM' },
     { day: 'Sunday',          hours: 'Closed' },
   ],
-  logo: {
-    sourceUrl: '/Logo.png',
-    altText: 'Medtrion Logo',
-  },
+  logo: '/Logo.png',  // String URL fallback
 };
 
 // Form validation schema
@@ -370,13 +367,16 @@ export const getServerSideProps: GetServerSideProps<ContactPageProps> = async ()
       page: { contactFields: ContactInfo };
     }>(GET_CONTACT_INFO);
 
+    console.log('✅ Contact info fetched from CMS:', JSON.stringify(data.page.contactFields.contactPhone, null, 2));
+
     return {
       props: {
         contactInfo: data.page.contactFields,
       },
     };
   } catch (error) {
-    console.error('Failed to fetch contact info from CMS:', error);
+    console.error('❌ Failed to fetch contact info from CMS:', error);
+    console.error('Using fallback contact data with', FALLBACK_CONTACT.contactPhone.length, 'phone(s)');
     return {
       props: {
         contactInfo: FALLBACK_CONTACT,

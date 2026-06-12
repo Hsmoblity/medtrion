@@ -11,11 +11,23 @@ import ClientOnly from 'components/ClientOnly';
 import { Typography } from '../typography';
 import { SiteLogo, getLogoUrl, getLogoAlt } from "../../lib/fetchSiteLogo";
 
-interface HeaderProps {
-  logo?: SiteLogo | null;
+interface ContactPhone {
+  name: string;
+  number: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ logo }) => {
+interface ContactInfo {
+  contactAddress: string;
+  contactEmail: string;
+  contactPhone: ContactPhone[];
+}
+
+interface HeaderProps {
+  logo?: SiteLogo | null;
+  contactInfo?: ContactInfo | null;
+}
+
+const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
   const toggleCartVisibility = useCartStore(state => state.toggleCartVisibility);
   const cartLength = useCartCount();
   const isHydrated = useIsHydrated();
@@ -89,7 +101,7 @@ const Header: React.FC<HeaderProps> = ({ logo }) => {
                 )}
               </ClientOnly>
             </button>
-            <Drawer logo={logo} />
+            <Drawer logo={logo} contactInfo={contactInfo} />
           </div>
         </div>
       </div>

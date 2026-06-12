@@ -6,13 +6,19 @@ interface ContactPhone {
   number: string;
 }
 
-interface FooterProps {
-  logo?: SiteLogo | null;
-  contactPhone?: ContactPhone[];
+interface ContactInfo {
+  contactAddress: string;
+  contactEmail: string;
+  contactPhone: ContactPhone[];
 }
 
-const Footer: React.FC<FooterProps> = ({ logo, contactPhone }) => {
-  // Update footer content with CMS logo and contact phones if available
+interface FooterProps {
+  logo?: SiteLogo | null;
+  contactInfo?: ContactInfo | null;
+}
+
+const Footer: React.FC<FooterProps> = ({ logo, contactInfo }) => {
+  // Use dynamic contact info from CMS, with fallbacks
   const customContent = {
     companyInfo: {
       name: 'Medtrion',
@@ -21,12 +27,12 @@ const Footer: React.FC<FooterProps> = ({ logo, contactPhone }) => {
         sourceUrl: logo.sourceUrl,
         altText: logo.altText,
       } : '/Logo.png',
-      address: '3495 Rebecca St Oakville, ON L6L 6X9',
-      phone: '+1 (905) 330-1774',
-      contactPhone: contactPhone && contactPhone.length > 0 ? contactPhone : [
-        { name: 'General Inquiries', number: '+1 (905) 330-1774' }
-      ],
-      email: 'Info@medtrion.ca',
+      address: contactInfo?.contactAddress || '3495 Rebecca St Oakville, ON L6L 6X9',
+      phone: contactInfo?.contactPhone?.[0]?.number || '+1 (905) 330-1774',
+      contactPhone: contactInfo?.contactPhone && contactInfo.contactPhone.length > 0 
+        ? contactInfo.contactPhone 
+        : [{ name: 'General Inquiries', number: '+1 (905) 330-1774' }],
+      email: contactInfo?.contactEmail || 'Info@medtrion.ca',
       website: 'https://medtrion.ca'
     },
     navigation: [

@@ -16,10 +16,16 @@ interface ContactPhone {
   number: string;
 }
 
+interface ContactInfo {
+  contactAddress: string;
+  contactEmail: string;
+  contactPhone: ContactPhone[];
+}
+
 interface CustomAppProps extends AppProps {
   pageProps: {
     logo?: SiteLogo | null;
-    contactPhone?: ContactPhone[];
+    contactInfo?: ContactInfo | null;
     [key: string]: any;
   };
 }
@@ -41,7 +47,7 @@ function MyApp({ Component, pageProps }: CustomAppProps) {
           showAtBottom={false}
         />
 
-        <PageLayout logo={pageProps.logo} contactPhone={pageProps.contactPhone}>
+        <PageLayout logo={pageProps.logo} contactInfo={pageProps.contactInfo}>
           <Component {...pageProps} />
         </PageLayout>
 
@@ -58,7 +64,7 @@ function MyApp({ Component, pageProps }: CustomAppProps) {
   );
 }
 
-// Fetch logo and contact phones globally for all pages
+// Fetch logo and contact info globally for all pages
 MyApp.getInitialProps = async (appContext: AppContext) => {
   // Call page's getInitialProps if it exists
   const appProps = await App.getInitialProps(appContext);
@@ -66,8 +72,8 @@ MyApp.getInitialProps = async (appContext: AppContext) => {
   // Fetch site logo once for all pages
   const logo = await fetchSiteLogo();
 
-  // Fetch contact phone data
-  let contactPhone: ContactPhone[] = [];
+  // Fetch contact info (address, email, phones)
+  let contactInfo: ContactInfo | null = null;
   try {
     const endpoint = process.env.WP_GRAPHQL_URL || process.env.NEXT_PUBLIC_WP_GRAPHQL_URL || '';
     if (endpoint) {
@@ -76,15 +82,15 @@ MyApp.getInitialProps = async (appContext: AppContext) => {
       });
       
       const data = await client.request<{
-        page: { contactFields: { contactPhone: ContactPhone[] } };
+        page: { contactFields: ContactInfo };
       }>(GET_CONTACT_INFO);
       
-      if (data?.page?.contactFields?.contactPhone) {
-        contactPhone = data.page.contactFields.contactPhone;
+      if (data?.page?.contactFields) {
+        contactInfo = data.page.contactFields;
       }
     }
   } catch (error) {
-    console.error('Failed to fetch contact phone data:', error);
+    console.error('Failed to fetch contact info from CMS:', error);
   }
 
   return {
@@ -92,7 +98,7 @@ MyApp.getInitialProps = async (appContext: AppContext) => {
     pageProps: {
       ...appProps.pageProps,
       logo,
-      contactPhone,
+      contactInfo,
     },
   };
 };

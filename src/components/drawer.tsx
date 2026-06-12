@@ -74,7 +74,23 @@ function useMenuAnimation(isOpen: boolean) {
     return scope;
 }
 
-const Drawer: React.FC<{ logo?: SiteLogo | null }> = ({ logo }) => {
+interface ContactPhone {
+    name: string;
+    number: string;
+}
+
+interface ContactInfo {
+    contactAddress: string;
+    contactEmail: string;
+    contactPhone: ContactPhone[];
+}
+
+interface DrawerProps {
+    logo?: SiteLogo | null;
+    contactInfo?: ContactInfo | null;
+}
+
+const Drawer: React.FC<DrawerProps> = ({ logo, contactInfo }) => {
     const router = useRouter();
     const toggleDrawer = () => {
         setIsOpen(!isOpen);
@@ -188,12 +204,37 @@ const Drawer: React.FC<{ logo?: SiteLogo | null }> = ({ logo }) => {
                         <div className="text-left bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <h2 className="text-xl font-bold mb-4 text-gray-800">Contact Us:</h2>
                             <div className="text-lg text-gray-700 leading-relaxed">
-                                3495 Rebecca St<br />  Oakville, ON<br />L6L 6X9<br />
+                                {contactInfo?.contactAddress || '3495 Rebecca St Oakville, ON L6L 6X9'}
                                 <br />
-                                <Link href="tel:+19053301774" className="text-xl text-blue-600 hover:text-blue-800 transition-colors duration-200">
-                                    +1 (905) 330-1774
+                                <br />
+                                {contactInfo?.contactPhone && contactInfo.contactPhone.length > 0 ? (
+                                    <div className="space-y-2">
+                                        {contactInfo.contactPhone.map((phone, index) => (
+                                            <div key={index}>
+                                                <Link 
+                                                    href={`tel:${phone.number.replace(/\D/g, '')}`} 
+                                                    className="text-xl text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                                                >
+                                                    {phone.number}
+                                                </Link>
+                                                {phone.name && <span className="text-sm text-gray-500 ml-2">({phone.name})</span>}
+                                                <br />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <>
+                                        <Link href="tel:+19053301774" className="text-xl text-blue-600 hover:text-blue-800 transition-colors duration-200">
+                                            +1 (905) 330-1774
+                                        </Link><br />
+                                    </>
+                                )}
+                                <Link 
+                                    href={`mailto:${contactInfo?.contactEmail || 'Info@medtrion.ca'}`} 
+                                    className="text-xl text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                                >
+                                    {contactInfo?.contactEmail || 'Info@medtrion.ca'}
                                 </Link><br />
-                                <Link href="mailto:Info@medtrion.ca" className="text-xl text-blue-600 hover:text-blue-800 transition-colors duration-200">Info@medtrion.ca</Link><br />
                                 <Link href="https://medtrion.ca" target="_blank" rel="noopener noreferrer" className="text-xl text-blue-600 hover:text-blue-800 transition-colors duration-200">medtrion.ca</Link><br />
                                 <br />
                                 <div className="flex gap-4 mt-3">

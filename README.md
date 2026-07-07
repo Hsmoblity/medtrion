@@ -2,8 +2,9 @@
 
 This is a sample E‑commerce application built with Next.js, Contentful and Stripe. It uses TailwindCSS and SASS for styling.
 
-**📊 Project Status**: [View Dashboard](docs/PROJECT_STATUS_DASHBOARD.md) | [Detailed Summary](docs/PROJECT_STATUS_SUMMARY.md)  
-**📋 Data Analysis**: [Data Model Analysis](docs/DATA_MODEL_ANALYSIS.md) | [Quick Reference](docs/DATA_MODEL_QUICK_REFERENCE.md)
+**📊 Project Status**: [Documentation Index](docs/architecture/DOCUMENTATION_INDEX.md) | [Executive Summary](docs/architecture/NEXT_HSMOBILITY_EXECUTIVE_SUMMARY.md)  
+**📋 Reference**: [Quick Reference](docs/architecture/NEXT_HSMOBILITY_QUICK_REFERENCE.md) | [Architecture Summary](docs/architecture/ARCHITECTURE_SUMMARY.md)  
+**📁 All Docs**: [docs/README.md](docs/README.md)
 
 ## 📝 Story Management System
 
@@ -26,10 +27,9 @@ A comprehensive user story management system integrated into the HSMobility plat
 5. Use filters and search to find stories quickly
 
 ### Documentation
-- **[User Guide](docs/user-guides/story-management-user-guide.md)**: Complete guide for using the story management interface
-- **[Technical Documentation](docs/technical/story-management-system.md)**: Architecture and implementation details
-- **[API Documentation](docs/api/story-management-api.md)**: REST API endpoints and usage
-- **[Component Documentation](docs/technical/story-management-components.md)**: React component library reference
+- **[Documentation Index](docs/architecture/DOCUMENTATION_INDEX.md)**: Full project documentation map
+- **[API Documentation](docs/api/submit-consultation-api.md)**: Consultation API reference
+- **[Environment Variables](docs/guides/ENVIRONMENT_VARIABLES.md)**: Configuration guide
 
 ### Story Management Pages
 - **Story Dashboard**: `/stories` - Main dashboard with list/grid/kanban views
@@ -273,4 +273,4 @@ WP_GRAPHQL_URL=https://your-site.com/graphql
 CONFIGURATOR_GRAPHQL_URL=https://your-site.com/configurator-graphql
 ```
 
-For detailed information, see [Data Architecture Documentation](docs/DATA_ARCHITECTURE_SINGLE_SOURCE.md).
+For detailed information, see [Architecture Summary](docs/architecture/ARCHITECTURE_SUMMARY.md) and [Quick Reference](docs/architecture/NEXT_HSMOBILITY_QUICK_REFERENCE.md).

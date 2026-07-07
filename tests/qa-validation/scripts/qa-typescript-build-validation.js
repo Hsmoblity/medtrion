@@ -22,7 +22,7 @@ const QATypeScriptBuildValidation = {
       },
       {
         name: 'Test file TypeScript compilation',
-        file: 'src/components/__tests__/qa-configurator-image-bug.test.tsx',
+        file: 'tests/archive/src/components/__tests__/qa-configurator-image-bug.test.tsx',
         description: 'Test files should compile without TypeScript errors',
         expectedResult: 'No TypeScript compilation errors'
       },

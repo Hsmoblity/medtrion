@@ -1,16 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FooterPaymentMethodsProps, footerDesignTokens } from '../../lib/interfaces/footer';
+import { FooterPaymentMethodsProps } from '../../lib/interfaces/footer';
 
 /**
  * Payment Methods Component
- * 
- * Displays accepted payment method icons with consistent styling.
- * Maintains consistency with header design patterns.
+ *
+ * Displays accepted payment method icons as consistent, bordered badges
+ * rather than loose floating logos, so sizes line up and the row reads
+ * as one deliberate group instead of scattered images.
  */
 const PaymentMethods: React.FC<FooterPaymentMethodsProps> = ({
   paymentMethods,
-  className = ""
+  className = '',
 }) => {
   const getPaymentIcon = (method: string) => {
     const iconMap: { [key: string]: string } = {
@@ -20,9 +21,9 @@ const PaymentMethods: React.FC<FooterPaymentMethodsProps> = ({
       discover: '/discover.svg',
       paypal: '/paypal.svg',
       applepay: '/applepay.svg',
-      googlepay: '/googlepay.svg'
+      googlepay: '/googlepay.svg',
     };
-    
+
     return iconMap[method.toLowerCase()] || `/payment-icons/${method.toLowerCase()}.svg`;
   };
 
@@ -34,9 +35,9 @@ const PaymentMethods: React.FC<FooterPaymentMethodsProps> = ({
       discover: 'Discover',
       paypal: 'PayPal',
       applepay: 'Apple Pay',
-      googlepay: 'Google Pay'
+      googlepay: 'Google Pay',
     };
-    
+
     return altMap[method.toLowerCase()] || method;
   };
 
@@ -45,26 +46,26 @@ const PaymentMethods: React.FC<FooterPaymentMethodsProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.3 }}
-      className={className}
+      className={`font-sans ${className}`}
     >
-      <h3 className={`${footerDesignTokens.typography.heading} mb-4`}>
-        We Accept
+      <h3 className="text-xl uppercase text-black font-black font-poppins mb-4">
+        We accept
       </h3>
-      <div className="flex justify-center gap-6 flex-wrap">
+      
+      <div className="flex flex-wrap justify-center gap-2.5 lg:justify-start">
         {paymentMethods.map((method, index) => (
           <motion.div
             key={method}
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className="transition-transform duration-300"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.06 }}
+            whileHover={{ y: -2 }}
+            className="flex h-10 w-16 items-center justify-center rounded-md border border-gray-200 bg-white px-3 transition-shadow duration-200 hover:border-gray-300 hover:shadow-sm"
           >
             <img
               src={getPaymentIcon(method)}
               alt={getPaymentAlt(method)}
-              className="w-10 h-auto object-contain"
+              className="h-5 w-auto object-contain"
               loading="lazy"
             />
           </motion.div>

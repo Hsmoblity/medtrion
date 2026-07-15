@@ -114,7 +114,7 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
             <img
               src={getLogoUrl(logo)}
               alt={getLogoAlt(logo)}
-              className="w-52 object-cover"
+              className="w-20 object-cover pt-1"
             />
           </Link>
           {/* Navigation Menu */}

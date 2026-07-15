@@ -36,7 +36,7 @@ const SocialMediaLinks: React.FC<{ socialMedia: SocialMediaLinkProps[]; classNam
       <h3 className={`${footerDesignTokens.typography.heading} mb-4`}>
         Follow Us
       </h3>
-      <div className="flex justify-center space-x-4">
+      <div className="flex justify-start gap-4">
         {socialMedia.map((social, index) => (
           <motion.a
             key={social.platform}

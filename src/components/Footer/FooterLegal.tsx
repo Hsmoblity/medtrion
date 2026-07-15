@@ -1,20 +1,24 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { FooterLegalProps, footerDesignTokens } from '../../lib/interfaces/footer';
+import { FooterLegalProps } from '../../lib/interfaces/footer';
 
 /**
  * Footer Legal Component
- * 
- * Displays legal links and copyright information with consistent styling.
- * Maintains consistency with header design patterns.
+ *
+ * Displays legal links and copyright information. Self-contained styling
+ * (no external design-token lookup) so typography and spacing render
+ * correctly regardless of how those tokens resolve elsewhere in the app.
  */
 const FooterLegal: React.FC<FooterLegalProps> = ({
   legal,
-  className = ""
+  className = '',
 }) => {
   const currentYear = new Date().getFullYear();
   const copyrightText = legal.copyright.replace('2025', currentYear.toString());
+
+  const linkClass =
+    'text-[13px] font-medium text-gray-500 transition-colors duration-200 hover:text-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 rounded-sm px-1 py-0.5';
 
   return (
     <motion.div
@@ -22,74 +26,59 @@ const FooterLegal: React.FC<FooterLegalProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.4 }}
       className={`
-        flex flex-col items-center space-y-4
-        border-t border-gray-300 pt-6 mt-8
+        flex flex-col-reverse items-center gap-4
+        border-t border-gray-200 pt-6 mt-8
+        sm:flex-row sm:justify-between
+        font-sans
         ${className}
       `}
     >
-      {/* Legal Links */}
-      <div className="flex flex-wrap justify-center gap-6">
-        <Link
-          href={legal.privacyPolicy}
-          className={`
-            ${footerDesignTokens.typography.small}
-            ${footerDesignTokens.colors.text.secondary}
-            ${footerDesignTokens.colors.text.accent}
-            transition-colors duration-300
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-            rounded px-2 py-1
-          `}
-          aria-label="Read our privacy policy"
-        >
-          Privacy Policy
-        </Link>
-        
-        <Link
-          href={legal.termsOfService}
-          className={`
-            ${footerDesignTokens.typography.small}
-            ${footerDesignTokens.colors.text.secondary}
-            ${footerDesignTokens.colors.text.accent}
-            transition-colors duration-300
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-            rounded px-2 py-1
-          `}
-          aria-label="Read our terms of service"
-        >
-          Terms of Service
-        </Link>
-        
-        {legal.cookiePolicy && (
-          <Link
-            href={legal.cookiePolicy}
-            className={`
-              ${footerDesignTokens.typography.small}
-              ${footerDesignTokens.colors.text.secondary}
-              ${footerDesignTokens.colors.text.accent}
-              transition-colors duration-300
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-              rounded px-2 py-1
-            `}
-            aria-label="Read our cookie policy"
-          >
-            Cookie Policy
-          </Link>
-        )}
-      </div>
-      
       {/* Copyright */}
-      <motion.div
+      <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.6 }}
-        className={`
-          ${footerDesignTokens.typography.body}
-          ${footerDesignTokens.colors.text.secondary}
-          text-center
-        `}
+        className="text-center text-[13px] text-gray-500 sm:text-left"
       >
         {copyrightText}
-      </motion.div>
+      </motion.p>
+
+      {/* Legal Links */}
+      <nav aria-label="Legal">
+        <ul className="flex flex-wrap items-center justify-center gap-2">
+          <li>
+            <Link
+              href={legal.privacyPolicy}
+              className={linkClass}
+              aria-label="Read our privacy policy"
+            >
+              Privacy policy
+            </Link>
+          </li>
+
+          <li>
+            <Link
+              href={legal.termsOfService}
+              className={linkClass}
+              aria-label="Read our terms of service"
+            >
+              Terms of service
+            </Link>
+          </li>
+
+          {legal.cookiePolicy && (
+            <li>
+              <Link
+                href={legal.cookiePolicy}
+                className={linkClass}
+                aria-label="Read our cookie policy"
+              >
+                Cookie policy
+              </Link>
+            </li>
+          )}
+        </ul>
+      </nav>
     </motion.div>
   );
 };

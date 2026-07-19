@@ -5,11 +5,16 @@ class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
+          <meta
+            name="google-site-verification"
+            content="AEL46LtQY2o6ioOghar3_E01kBxihXt__08hm5dP0eE"
+          />
           <link
             rel="preconnect"
             href="https://fonts.gstatic.com"
             crossOrigin="true"
           />
+          <link rel="canonical" href="https://medtrion.ca/" />
         </Head>
         <body>
           <Main />

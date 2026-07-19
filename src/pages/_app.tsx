@@ -1,3 +1,4 @@
+import Script from "next/script";
 import "/globals.css";
 import type { AppProps, AppContext } from "next/app";
 import App from "next/app";
@@ -10,7 +11,6 @@ import ClientOnly from "components/ClientOnly";
 import { SiteLogo, fetchSiteLogo } from "lib/fetchSiteLogo";
 import { GraphQLClient } from "graphql-request";
 import { GET_CONTACT_INFO } from "lib/graphql/queries";
-
 interface ContactPhone {
   name: string;
   number: string;
@@ -33,6 +33,20 @@ interface CustomAppProps extends AppProps {
 function MyApp({ Component, pageProps }: CustomAppProps) {
   return (
     <SessionProvider>
+      <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-F38S3008XY"
+          strategy="afterInteractive"
+        />
+
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-F38S3008XY');
+          `}
+        </Script>
       <CartVisibilityProvider>
         <NextTopLoader
           color="#debe75"

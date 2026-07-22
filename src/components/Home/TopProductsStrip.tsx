@@ -75,9 +75,9 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
 
   if (loading) {
     return (
-      <div className="py-12">
-        <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Top Products</h2>
+      <div className="py-16 md:py-20 bg-white">
+        <div className="container-center">
+          <h2 className="text-4xl md:text-5xl font-primary font-bold text-[#0d163c] mb-8">Featured Products</h2>
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="animate-pulse rounded-lg bg-gray-200 h-96"></div>
@@ -91,10 +91,10 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
   if (error) {
     // Fallback to static content when API fails
     return (
-      <div className="py-12 bg-gray-50">
-        <div className="container mx-auto px-4">
+      <div className="py-16 md:py-20 bg-white">
+        <div className="container-center">
           <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Featured Products</h2>
+            <h2 className="text-4xl md:text-5xl font-primary font-bold text-[#0d163c] mb-4">Featured Products</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Discover our top-rated mobility solutions, carefully selected for quality and customer satisfaction.
             </p>
@@ -109,7 +109,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2">Acorn 180 Curved Stairlift</h3>
                 <p className="text-gray-600 text-sm mb-3">Premium curved stairlift solution</p>
-                <a href="/product/acorn-stairlifts-acorn-180-curved-stairlift" className="text-blue-600 hover:text-blue-800 font-medium">
+                <a href="/product/acorn-stairlifts-acorn-180-curved-stairlift" className="inline-flex items-center bg-[#3fa2a3] hover:bg-[#f7a236] text-white px-6 py-3 rounded-[35px] font-primary font-semibold transition-all duration-300">
                   Learn More →
                 </a>
               </div>
@@ -122,7 +122,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2">Mobility Solutions</h3>
                 <p className="text-gray-600 text-sm mb-3">Professional mobility equipment</p>
-                <a href="/consultation/google-form" className="text-blue-600 hover:text-blue-800 font-medium">
+                <a href="/consultation/google-form" className="inline-flex items-center bg-[#3fa2a3] hover:bg-[#f7a236] text-white px-6 py-3 rounded-[35px] font-primary font-semibold transition-all duration-300">
                   Get Quote →
                 </a>
               </div>
@@ -135,7 +135,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2">Expert Installation</h3>
                 <p className="text-gray-600 text-sm mb-3">Professional setup and support</p>
-                <a href="/consultation/google-form" className="text-blue-600 hover:text-blue-800 font-medium">
+                <a href="/consultation/google-form" className="inline-flex items-center bg-[#3fa2a3] hover:bg-[#f7a236] text-white px-6 py-3 rounded-[35px] font-primary font-semibold transition-all duration-300">
                   Contact Us →
                 </a>
               </div>
@@ -148,7 +148,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2">5-Year Warranty</h3>
                 <p className="text-gray-600 text-sm mb-3">Comprehensive coverage included</p>
-                <a href="/#faq" className="text-blue-600 hover:text-blue-800 font-medium">
+                <a href="/#faq" className="inline-flex items-center bg-[#3fa2a3] hover:bg-[#f7a236] text-white px-6 py-3 rounded-[35px] font-primary font-semibold transition-all duration-300">
                   Learn More →
                 </a>
               </div>
@@ -161,7 +161,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
                 console.log('TopProductsStrip: Retrying fetch...');
                 fetchFeaturedProducts();
               }}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              className="bg-[#3fa2a3] hover:bg-[#f7a236] text-white font-primary font-semibold py-3 px-6 rounded-[35px] transition-all duration-300"
             >
               Load Live Products
             </button>
@@ -174,10 +174,10 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
   if (featuredProducts.length === 0) {
     // Show static content when no products are loaded
     return (
-      <div className="py-12 bg-gray-50">
-        <div className="container mx-auto px-4">
+      <div className="py-16 md:py-20 bg-white">
+        <div className="container-center">
           <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Featured Products</h2>
+            <h2 className="text-4xl md:text-5xl font-primary font-bold text-[#0d163c] mb-4">Featured Products</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Discover our top-rated mobility solutions, carefully selected for quality and customer satisfaction.
             </p>
@@ -191,7 +191,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2">Acorn 180 Curved Stairlift</h3>
                 <p className="text-gray-600 text-sm mb-3">Premium curved stairlift solution for any staircase</p>
-                <a href="/product/acorn-stairlifts-acorn-180-curved-stairlift" className="text-blue-600 hover:text-blue-800 font-medium">
+                <a href="/product/acorn-stairlifts-acorn-180-curved-stairlift" className="inline-flex items-center bg-[#3fa2a3] hover:bg-[#f7a236] text-white px-6 py-3 rounded-[35px] font-primary font-semibold transition-all duration-300">
                   Learn More →
                 </a>
               </div>
@@ -204,7 +204,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2">Professional Installation</h3>
                 <p className="text-gray-600 text-sm mb-3">Expert setup and configuration by certified technicians</p>
-                <a href="/consultation/google-form" className="text-blue-600 hover:text-blue-800 font-medium">
+                <a href="/consultation/google-form" className="inline-flex items-center bg-[#3fa2a3] hover:bg-[#f7a236] text-white px-6 py-3 rounded-[35px] font-primary font-semibold transition-all duration-300">
                   Get Quote →
                 </a>
               </div>
@@ -217,7 +217,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2">Expert Support</h3>
                 <p className="text-gray-600 text-sm mb-3">Round-the-clock customer service and technical support</p>
-                <a href="/consultation/google-form" className="text-blue-600 hover:text-blue-800 font-medium">
+                <a href="/consultation/google-form" className="inline-flex items-center bg-[#3fa2a3] hover:bg-[#f7a236] text-white px-6 py-3 rounded-[35px] font-primary font-semibold transition-all duration-300">
                   Contact Us →
                 </a>
               </div>
@@ -230,7 +230,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2">Comprehensive Warranty</h3>
                 <p className="text-gray-600 text-sm mb-3">Complete protection and peace of mind included</p>
-                <a href="/#faq" className="text-blue-600 hover:text-blue-800 font-medium">
+                <a href="/#faq" className="inline-flex items-center bg-[#3fa2a3] hover:bg-[#f7a236] text-white px-6 py-3 rounded-[35px] font-primary font-semibold transition-all duration-300">
                   Learn More →
                 </a>
               </div>
@@ -242,8 +242,8 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
   }
 
   return (
-    <div className="py-12 bg-gray-50">
-      <div className="container mx-auto px-4">
+    <div className="py-16 md:py-20 bg-white">
+      <div className="container-center">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -251,7 +251,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
           transition={{ duration: 0.6 }}
           className="text-center mb-8"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Featured Products</h2>
+          <h2 className="text-4xl md:text-5xl font-primary font-bold text-[#0d163c] mb-4">Featured Products</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Discover our top-rated mobility solutions, carefully selected for quality and customer satisfaction.
           </p>
@@ -288,7 +288,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-lg transition-colors ${
-                    viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+                    viewMode === 'grid' ? 'bg-[#3fa2a3] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -298,7 +298,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
                 <button
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-lg transition-colors ${
-                    viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+                    viewMode === 'list' ? 'bg-[#3fa2a3] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -325,7 +325,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search products..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
                     />
                   </div>
 
@@ -335,7 +335,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value as any)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
                     >
                       <option value="newest">Newest First</option>
                       <option value="price-low">Price: Low to High</option>
@@ -436,3 +436,4 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
 };
 
 export default TopProductsStrip;
+

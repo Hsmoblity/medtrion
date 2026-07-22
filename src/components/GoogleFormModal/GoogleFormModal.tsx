@@ -44,7 +44,7 @@ export default function GoogleFormModal({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center justify-center px-6 py-3 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+        className="inline-flex items-center justify-center px-6 py-3 rounded-[35px] bg-[#3fa2a3] text-white hover:bg-[#f7a236] font-primary font-semibold shadow-md transition-all duration-300"
       >
         {buttonLabel}
       </button>
@@ -55,7 +55,7 @@ export default function GoogleFormModal({
           <div ref={ref} className={`relative z-10 w-full ${modalWidth} bg-white rounded-lg shadow-lg overflow-hidden`} style={{ maxHeight: '90vh' }}>
             <div className="flex items-center justify-between p-4 border-b">
               <h3 className="text-lg font-semibold">{modalTitle}</h3>
-              <button onClick={() => setOpen(false)} className="text-gray-600 hover:text-gray-800">✕</button>
+              <button onClick={() => setOpen(false)} className="p-2 rounded-full text-gray-600 hover:bg-[#f7a236] hover:text-white transition-all duration-300">✕</button>
             </div>
             <div className={`p-4 ${modalHeight}`} style={{ minHeight: '300px' }}>
               {/* Mobile-optimized: Smaller padding on mobile */}
@@ -91,3 +91,4 @@ export default function GoogleFormModal({
     </>
   )
 }
+

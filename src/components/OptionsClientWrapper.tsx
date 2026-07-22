@@ -243,7 +243,7 @@ export default function OptionsClientWrapper({ product, editSessionData }: Props
                     <p className="text-yellow-700 mb-4">The item you&apos;re trying to edit could not be found in your cart.</p>
                     <button 
                         onClick={() => router.push('/cart')}
-                        className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors"
+                        className="px-6 py-3 bg-[#f7a236] text-white rounded-[35px] font-primary font-semibold hover:bg-[#3fa2a3] transition-all duration-300"
                     >
                         Return to Cart
                     </button>

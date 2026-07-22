@@ -55,11 +55,11 @@ const FooterContact: React.FC<FooterContactProps> = ({
   className = '',
 }) => {
   const rowClass =
-    'flex items-start gap-3 text-[15px] leading-relaxed text-gray-600';
+    'flex items-start gap-3 text-sm leading-relaxed text-white';
   const iconWrapClass =
-    'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-50 text-teal-700';
+    'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-[#f7a236]';
   const linkClass =
-    'text-gray-700 transition-colors duration-200 hover:text-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 rounded-sm';
+    'text-slate-100 transition-colors duration-200 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#f7a236] focus:ring-offset-2 rounded-sm';
 
   return (
     <motion.div
@@ -70,28 +70,6 @@ const FooterContact: React.FC<FooterContactProps> = ({
     >
 
       <div className="space-y-6">
-        {/* Logo */}
-        <div className="flex justify-center lg:justify-start">
-          <img
-            src={
-              typeof companyInfo.logo === 'string'
-                ? companyInfo.logo
-                : companyInfo.logo.sourceUrl
-            }
-            alt={
-              typeof companyInfo.logo === 'string'
-                ? `${companyInfo.name} logo`
-                : companyInfo.logo.altText || `${companyInfo.name} logo`
-            }
-            className="h-14 w-auto object-contain"
-          />
-        </div>
-
-        {/* Description */}
-        <p className="text-center text-[15px] leading-relaxed text-gray-600 lg:text-left">
-          {companyInfo.description}
-        </p>
-
         {/* Contact details */}
         <ul className="space-y-4">
           {/* Address */}
@@ -149,7 +127,7 @@ const FooterContact: React.FC<FooterContactProps> = ({
                 {companyInfo.contactPhone.map((phoneItem, index) => (
                   <div key={index} className="flex flex-col">
                     {phoneItem.name && (
-                      <span className="text-xs font-medium uppercase tracking-wide text-gray-400">
+                      <span className="text-xs font-medium uppercase tracking-wide text-slate-300">
                         {phoneItem.name}
                       </span>
                     )}

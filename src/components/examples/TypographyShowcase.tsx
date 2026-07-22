@@ -95,7 +95,7 @@ export const TypographyShowcase: React.FC = () => {
           
           <div>
             <Text variant="small" weight="medium" color="secondary">Button Text</Text>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+            <button className="px-6 py-3 bg-[#3fa2a3] text-white rounded-[35px] font-primary font-semibold hover:bg-[#f7a236] transition-all duration-300">
               <Typography variant="button">Primary Button</Typography>
             </button>
           </div>

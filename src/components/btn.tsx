@@ -26,7 +26,7 @@ export const AnimatedSubscribeButton: React.FC<
             <AnimatePresence mode="wait">
                 {isSubscribed ? (
                     <motion.button
-                        className="relative flex w-48 items-center justify-center overflow-hidden rounded-md bg-white p-2.5 outline outline-1 outline-black transition-all duration-200 hover:shadow-lg"
+                        className="relative flex w-48 items-center justify-center overflow-hidden rounded-lg bg-white p-2.5 outline outline-2 outline-[#3fa2a3] transition-all duration-200 hover:shadow-lg hover:outline-[#2d8687]"
                         onClick={() => setIsSubscribed(false)}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -44,8 +44,8 @@ export const AnimatedSubscribeButton: React.FC<
                     </motion.button>
                 ) : (
                     <motion.button
-                        className="relative flex w-48 cursor-pointer items-center justify-center rounded-md border-none p-2.5 transition-all duration-200 hover:shadow-lg"
-                        style={{ backgroundColor: buttonColor, color: buttonTextColor }}
+                        className="relative flex w-48 cursor-pointer items-center justify-center rounded-lg border-none p-2.5 transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 shadow-md"
+                        style={{ backgroundColor: buttonColor || '#3fa2a3', color: buttonTextColor || '#ffffff' }}
                         onClick={() => setIsSubscribed(true)}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -70,12 +70,12 @@ export const DrawOutlineButton = ({ children, ...rest }: any) => {
     return (
         <button
             {...rest}
-            className="group relative px-4 py-2 font-bold text-black transition-all duration-300 hover:text-gray-800 hover:bg-gray-50 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
+            className="group relative px-4 py-2 font-primary font-semibold text-[#0d163c] transition-colors duration-300 hover:text-[#3fa2a3] rounded-none focus:outline-none"
         >
             <span className="relative z-10">{children}</span>
 
             {/* BOTTOM UNDERLINE EFFECT */}
-            <span className="absolute bottom-1 left-2 h-0.5 w-0 bg-black transition-all duration-300 ease-out group-hover:w-[90%]" />
+            <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-[#3fa2a3] transition-all duration-300 ease-out group-hover:w-full" />
         </button>
     );
 };

@@ -79,17 +79,17 @@ const Home = ({ products, error }: HomeProps) => {
       <Banner />
 
       {/* Get a FREE Quote Section */}
-      <div className="py-16 bg-gradient-to-r from-blue-900 to-blue-800">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+      <div className="py-16 md:py-20 bg-gradient-to-r from-[#0d163c] to-[#1a234f]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-4xl md:text-5xl font-primary font-bold text-white mb-4">
             Get a FREE Quote
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-lg md:text-xl text-gray-200 mb-8 font-primary">
             Request a free consultation and we'll help you find the perfect mobility solution
           </p>
           <Link
             href="/consultation/google-form"
-            className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-900 bg-white rounded-lg hover:bg-blue-50 transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            className="inline-flex items-center justify-center px-6 py-3 text-lg font-primary font-semibold text-white bg-[#f7a236] rounded-[35px] hover:bg-[#3fa2a3] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
             Request Your Free Consultation
             <svg

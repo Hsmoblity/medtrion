@@ -317,7 +317,7 @@ export default function ConsultationForm({
               {...register('firstName')}
               type="text"
               id="firstName"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             />
             {errors.firstName && (
               <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
@@ -332,7 +332,7 @@ export default function ConsultationForm({
               {...register('lastName')}
               type="text"
               id="lastName"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             />
             {errors.lastName && (
               <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
@@ -350,7 +350,7 @@ export default function ConsultationForm({
               {...register('email')}
               type="email"
               id="email"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             />
             {errors.email && (
               <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -365,7 +365,7 @@ export default function ConsultationForm({
               {...register('phone')}
               type="tel"
               id="phone"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             />
             {errors.phone && (
               <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
@@ -382,7 +382,7 @@ export default function ConsultationForm({
             {...register('address')}
             type="text"
             id="address"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
           />
           {errors.address && (
             <p className="mt-1 text-sm text-red-600">{errors.address.message}</p>
@@ -398,7 +398,7 @@ export default function ConsultationForm({
               {...register('city')}
               type="text"
               id="city"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             />
             {errors.city && (
               <p className="mt-1 text-sm text-red-600">{errors.city.message}</p>
@@ -413,7 +413,7 @@ export default function ConsultationForm({
               {...register('province')}
               type="text"
               id="province"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             />
             {errors.province && (
               <p className="mt-1 text-sm text-red-600">{errors.province.message}</p>
@@ -428,7 +428,7 @@ export default function ConsultationForm({
               {...register('postalCode')}
               type="text"
               id="postalCode"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             />
             {errors.postalCode && (
               <p className="mt-1 text-sm text-red-600">{errors.postalCode.message}</p>
@@ -445,7 +445,7 @@ export default function ConsultationForm({
             <select
               {...register('preferredContact')}
               id="preferredContact"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             >
               <option value="email">Email</option>
               <option value="phone">Phone</option>
@@ -463,7 +463,7 @@ export default function ConsultationForm({
             <select
               {...register('preferredTime')}
               id="preferredTime"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             >
               <option value="morning">Morning</option>
               <option value="afternoon">Afternoon</option>
@@ -482,7 +482,7 @@ export default function ConsultationForm({
             <select
               {...register('urgency')}
               id="urgency"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             >
               <option value="immediate">Immediate</option>
               <option value="within_week">Within a Week</option>
@@ -504,7 +504,7 @@ export default function ConsultationForm({
             {...register('additionalNotes')}
             id="additionalNotes"
             rows={4}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             placeholder="Tell us more about your needs..."
           />
         </div>
@@ -529,7 +529,7 @@ export default function ConsultationForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+          className="w-full bg-[#3fa2a3] hover:bg-[#f7a236] disabled:bg-gray-400 text-white font-primary font-semibold py-3 px-6 rounded-[35px] transition-all duration-300"
         >
           {isSubmitting ? 'Submitting...' : 'Submit Consultation Request'}
         </button>

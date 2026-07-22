@@ -21,7 +21,7 @@ const PaymentNotification: React.FC<PaymentNotificationProps> = ({
   const getIcon = () => {
     switch (type) {
       case 'configuration':
-        return <FaCreditCard className="w-6 h-6 text-blue-600" />;
+        return <FaCreditCard className="w-6 h-6 text-[#3fa2a3]" />;
       case 'maintenance':
         return <FaExclamationCircle className="w-6 h-6 text-yellow-600" />;
       case 'error':
@@ -77,12 +77,12 @@ const PaymentNotification: React.FC<PaymentNotificationProps> = ({
             <div className="space-y-3">
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <FaEnvelope className="w-4 h-4" />
-                <span>Email us at: <a href="mailto:support@medtrion.ca" className="text-blue-600 hover:text-blue-800 underline">support@medtrion.ca</a></span>
+                <span>Email us at: <a href="mailto:support@medtrion.ca" className="text-[#3fa2a3] hover:text-blue-800 underline">support@medtrion.ca</a></span>
               </div>
               
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <FaPhone className="w-4 h-4" />
-                <span>Call us at: <a href="tel:+1-800-HSM-HELP" className="text-blue-600 hover:text-blue-800 underline">1-800-HSM-HELP</a></span>
+                <span>Call us at: <a href="tel:+1-800-HSM-HELP" className="text-[#3fa2a3] hover:text-blue-800 underline">1-800-HSM-HELP</a></span>
               </div>
             </div>
           )}
@@ -91,7 +91,7 @@ const PaymentNotification: React.FC<PaymentNotificationProps> = ({
             <div className="mt-4">
               <button
                 onClick={onRetry}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-primary font-semibold rounded-[35px] text-white bg-[#3fa2a3] hover:bg-[#f7a236] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#f7a236] transition-all duration-300"
               >
                 Try Again
               </button>

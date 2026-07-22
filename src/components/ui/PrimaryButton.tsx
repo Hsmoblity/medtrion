@@ -10,6 +10,7 @@ interface PrimaryButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   loading?: boolean;
   asChild?: boolean;
   href?: string;
+  variant?: 'primary' | 'secondary';
 }
 
 const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
@@ -20,35 +21,44 @@ const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
     loading = false, 
     asChild = false,
     href,
+    variant = 'primary',
     className = '',
     disabled,
     ...props 
   }, ref) => {
+    // Variant-based color classes
+    const variantClasses = {
+      primary: 'bg-[#3fa2a3] hover:bg-[#f7a236] hover:text-white focus:ring-[#f7a236]',
+      secondary: 'bg-[#f7a236] hover:bg-[#3fa2a3] hover:text-white focus:ring-[#3fa2a3]'
+    };
+
     // Base classes following Base Style Foundation
     const baseClasses = [
-      // Colors - following Primary Blue tokens
-      'bg-blue-600 hover:bg-blue-700 text-white',
+      // Colors - apply variant-specific colors
+      variantClasses[variant] + ' text-white',
       // Focus ring - following accessibility guidelines
-      'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+      'focus:outline-none focus:ring-2 focus:ring-offset-2',
       // Transitions
-      'transition-colors duration-200',
+      'transition-all duration-300',
       // Typography
-      'font-medium',
+      'font-primary font-semibold',
       // Border radius
-      'rounded-md',
+      'rounded-[35px]',
       // Disabled state
       'disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-75',
       // Flex for loading state
       'inline-flex items-center justify-center',
       // Prevent text selection
-      'select-none'
+      'select-none',
+      // Shadow and hover effects
+      'shadow-md hover:shadow-lg transform hover:-translate-y-1'
     ].join(' ');
 
     // Size variants
     const sizeClasses = {
       sm: 'px-4 py-2 text-sm',
-      md: 'px-6 py-3 text-base',
-      lg: 'px-8 py-4 text-lg'
+      md: 'px-5 py-3 text-base',
+      lg: 'px-6 py-3 text-base md:text-lg min-w-[11rem]'
     };
 
     // Width classes

@@ -6,7 +6,7 @@
 @import './src/styles/typography.css';
 
 body {
-  @apply bg-white;
+  @apply bg-white font-primary;
   /* Ensure cursor is visible by default */
   cursor: auto !important;
 }
@@ -18,8 +18,9 @@ html {
 @font-face {
   font-family: 'Poppins';
   font-style: normal;
-  font-weight: 400;
-  src: url('https://fonts.googleapis.com/css2?family=Acme&display=swap'); /* IE9 Compat Modes */
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 }
 ::-webkit-scrollbar {
   width: 12px;
@@ -62,4 +63,77 @@ input[type="text"], input[type="email"], input[type="password"], textarea {
 /* Fallback for custom cursor issues */
 .custom-cursor-fallback {
   cursor: auto !important;
+}
+
+/* Layout and Alignment Utilities */
+.container-center {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.section-padding {
+  @apply py-12 sm:py-16 lg:py-20;
+}
+
+.section-spacing {
+  @apply mb-8 sm:mb-12 lg:mb-16;
+}
+
+/* Brand Color Utilities */
+.text-brand-dark {
+  @apply text-[#0d163c];
+}
+
+.text-brand-primary {
+  @apply text-[#3fa2a3];
+}
+
+.text-brand-accent {
+  @apply text-[#f7a236];
+}
+
+.bg-brand-dark {
+  @apply bg-[#0d163c];
+}
+
+.bg-brand-primary {
+  @apply bg-[#3fa2a3];
+}
+
+.bg-brand-accent {
+  @apply bg-[#f7a236];
+}
+
+.border-brand-primary {
+  @apply border-[#3fa2a3];
+}
+
+.hover\:text-brand-primary:hover {
+  @apply text-[#3fa2a3];
+}
+
+.hover\:bg-brand-primary:hover {
+  @apply bg-[#3fa2a3];
+}
+
+/* Improved Text Alignment */
+.text-center-responsive {
+  @apply text-left sm:text-center;
+}
+
+.flex-center-responsive {
+  @apply flex flex-col sm:flex-row items-start sm:items-center justify-start sm:justify-center;
+}
+
+/* Consistent Heading Styles with Brand Font */
+h1, h2, h3, h4, h5, h6 {
+  @apply font-primary font-bold;
+}
+
+/* Improved Link Styles */
+a {
+  @apply transition-colors duration-300;
+}
+
+a:hover {
+  @apply text-brand-primary;
 }

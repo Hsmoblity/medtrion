@@ -174,7 +174,7 @@ class ConfiguratorErrorBoundary extends Component<Props, State> {
                 <PrimaryButton
                   onClick={this.handleRetry}
                   size="sm"
-                  className="bg-red-600 hover:bg-red-700 focus:ring-red-500"
+                  className="bg-[#f7a236] hover:bg-[#3fa2a3] text-white rounded-[35px] px-6 py-3 focus:ring-[#3fa2a3]"
                 >
                   Try Again
                 </PrimaryButton>

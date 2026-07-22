@@ -84,7 +84,7 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
                     <PrimaryButton
                       href="/products"
                       size="sm"
-                      className="w-full bg-gray-600 hover:bg-gray-700"
+                      className="w-full bg-[#f7a236] hover:bg-[#3fa2a3] text-white rounded-[35px] px-6 py-3 font-primary font-semibold"
                     >
                       Browse Products
                     </PrimaryButton>

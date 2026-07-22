@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ProfessionalFooterProps, defaultFooterContent, footerDesignTokens } from '../../lib/interfaces/footer';
 import FooterNavigation from './FooterNavigation';
@@ -59,6 +60,14 @@ const ProfessionalFooter: React.FC<ProfessionalFooterProps> = ({
     }
   };
 
+  const companyLogoSrc = typeof content.companyInfo.logo === 'string'
+    ? content.companyInfo.logo
+    : content.companyInfo.logo.sourceUrl;
+
+  const companyLogoAlt = typeof content.companyInfo.logo === 'string'
+    ? `${content.companyInfo.name} logo`
+    : content.companyInfo.logo.altText || `${content.companyInfo.name} logo`;
+
   return (
     <>
       {/* Structured Data for SEO */}
@@ -69,92 +78,102 @@ const ProfessionalFooter: React.FC<ProfessionalFooterProps> = ({
       
       <footer
         className={`
-          w-full bg-inherit
+          w-full
           ${className}
         `}
         role="contentinfo"
         aria-label="Site footer"
       >
-        <div className={`
-          ${footerDesignTokens.colors.background}
-          ${getVariantClasses()}
-        `}>
-          <div className={`
-            ${footerDesignTokens.layout.container}
-            ${footerDesignTokens.spacing.container}
-            ${footerDesignTokens.layout.grid}
-            ${footerDesignTokens.colors.text.primary}
-            ${variant === 'compact' ? 'sm:text-left text-center' : 'md:text-left text-center'}
-          `}>
-            
-            {/* Navigation Section */}
-            {variant !== 'compact' && (
-              <div className={`
-                ${footerDesignTokens.layout.column}
-                ${variant === 'minimal' ? 'sm:w-2/12' : 'sm:w-2/12'}
-                border-r border-gray-300 hidden md:block
-              `}>
-                {content.navigation.map((nav, index) => (
+        <div className={`${footerDesignTokens.colors.background} ${getVariantClasses()} border-t border-slate-700`}>
+          <div className={`${footerDesignTokens.layout.container} ${footerDesignTokens.spacing.container} space-y-10`}>
+            {/* Top summary + search */}
+            <div className="grid gap-8 lg:grid-cols-[1.9fr_1.1fr] items-center">
+              <div className="space-y-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-4">
+                    <Image
+                      src={companyLogoSrc}
+                      alt={companyLogoAlt}
+                      width={144}
+                      height={48}
+                      className="h-12 w-auto object-contain filter invert"
+                      unoptimized
+                    />
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.28em] text-white">Google Reviews</p>
+                      <div className="mt-2 flex items-center gap-3 text-white">
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: 5 }).map((_, starIndex) => (
+                            <span key={starIndex} className="text-[#f7a236]">★</span>
+                          ))}
+                        </div>
+                        <span className="text-sm font-medium text-white">200+ rating and review</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <p className="max-w-3xl text-sm leading-7 text-white">
+                  {content.companyInfo.description}
+                </p>
+              </div>
+
+              <div className="rounded-[35px] border border-slate-800 bg-[#050812] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.18)]">
+                <form className="space-y-4">
+                  <label htmlFor="footer-search" className="text-xs uppercase tracking-[0.28em] text-white">
+                    Search this site
+                  </label>
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <input
+                      id="footer-search"
+                      type="search"
+                      placeholder="Search the site"
+                      className="w-full rounded-full border border-slate-800 bg-[#050812] px-5 py-3 text-sm text-white placeholder:text-slate-400 focus:border-[#f7a236] focus:outline-none focus:ring-2 focus:ring-[#f7a236]/20"
+                    />
+                    <button
+                      type="submit"
+                      className="inline-flex items-center justify-center rounded-full bg-[#f7a236] px-6 py-3 text-sm font-semibold text-slate-950 transition-colors duration-200 hover:bg-[#d68d2b]"
+                    >
+                      Search
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            {/* Main columns */}
+            <div className="grid gap-6 xl:grid-cols-3">
+              <div className="rounded-[35px] bg-slate-950/90 p-6">
+                <h3 className={`${footerDesignTokens.typography.heading} mb-4`}>Contact</h3>
+                <FooterContact companyInfo={content.companyInfo} className="!p-0" />
+              </div>
+
+              {content.navigation.filter(nav => nav.title !== 'Services').map((nav, index) => (
+                <div
+                  key={index}
+                  className="rounded-[35px] bg-slate-950/90 p-6"
+                >
                   <FooterNavigation
-                    key={index}
                     title={nav.title}
                     links={nav.links}
-                    className="mb-6"
+                    className="!mb-0"
                   />
+                </div>
+              ))}
+            </div>
+
+            {/* Payments and city tags */}
+            <div className="rounded-[35px] border border-slate-800 bg-slate-950/90 p-6">
+              <PaymentMethods paymentMethods={content.paymentMethods} className="mb-0" />
+              <div className="mt-6 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.32em] text-white">
+                {['Los Angeles', 'Long Beach', 'San Diego', 'San Jose', 'San Francisco', 'Irvine', 'New York', 'Seattle', 'Bakersfield', 'Las Vegas'].map((city) => (
+                  <span key={city} className="rounded-full bg-slate-900/80 px-3 py-2 text-white">
+                    {city}
+                  </span>
                 ))}
               </div>
-            )}
-            
-            {/* Company Information Section */}
-            <div className={`
-              ${footerDesignTokens.layout.column}
-              ${variant === 'compact' ? 'sm:w-full' : variant === 'minimal' ? 'sm:w-7/12' : 'sm:w-7/12'}
-              ${variant === 'compact' ? '' : 'border-r border-gray-300'}
-              text-center
-            `}>
-              <FooterContact
-                companyInfo={content.companyInfo}
-                className="mb-6"
-              />
             </div>
-            
-            {/* Social Media Section */}
-            {variant !== 'compact' && showSocialMedia && content.socialMedia.length > 0 && (
-              <div className={`
-                ${footerDesignTokens.layout.column}
-                ${variant === 'minimal' ? 'sm:w-3/12' : 'sm:w-3/12'}
-                px-5 pt-5
-              `}>
-                <SocialMediaLinks
-                  socialMedia={content.socialMedia}
-                  className="mb-6"
-                />
-              </div>
-            )}
-          </div>
-          
-          {/* Payment Methods Section */}
-          {content.paymentMethods.length > 0 && (
-            <div className={`
-              ${footerDesignTokens.layout.container}
-              ${footerDesignTokens.spacing.container}
-              mt-8
-            `}>
-              <PaymentMethods
-                paymentMethods={content.paymentMethods}
-                className="mb-6"
-              />
-            </div>
-          )}
-          
-          {/* Legal Section */}
-          <div className={`
-            ${footerDesignTokens.layout.container}
-            ${footerDesignTokens.spacing.container}
-          `}>
-            <FooterLegal
-              legal={content.legal}
-            />
+
+            <FooterLegal legal={content.legal} className="px-6" />
           </div>
         </div>
       </footer>

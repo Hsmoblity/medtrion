@@ -110,31 +110,31 @@ export interface FooterPaymentMethodsProps {
 // Design system tokens following header consistency
 export const footerDesignTokens = {
   colors: {
-    background: 'bg-[url(\'/nnnoise.svg\')] bg-cover bg-repeat', // Consistent with header
+    background: 'bg-[#050812] text-white',
     text: {
-      primary: 'text-black', // Consistent with header
-      secondary: 'text-gray-500',
-      accent: 'hover:text-indigo-600', // Consistent with header hover colors
+      primary: 'text-white',
+      secondary: 'text-white',
+      accent: 'text-white hover:text-[#f7a236]',
       white: 'text-white'
     },
-    borders: 'border-gray-300'
+    borders: 'border-slate-800'
   },
   typography: {
-    heading: 'text-xl uppercase text-black font-black font-poppins', // Consistent with header
-    body: 'text-base leading-6',
-    caption: 'text-sm',
-    small: 'text-xs'
+    heading: 'text-sm uppercase tracking-[0.28em] font-semibold text-white',
+    body: 'text-base leading-6 text-white',
+    caption: 'text-sm text-slate-400',
+    small: 'text-xs text-slate-400'
   },
   spacing: {
-    section: 'py-2', // Consistent with header
-    container: 'px-4 sm:px-6 md:px-6',
-    grid: 'gap-6',
+    section: 'py-10',
+    container: 'px-4 sm:px-6 lg:px-8',
+    grid: 'gap-8',
     item: 'my-2'
   },
   layout: {
-    container: 'max-w-screen-xl mx-auto',
-    grid: 'sm:flex justify-between',
-    column: 'p-5'
+    container: 'max-w-7xl mx-auto',
+    grid: 'grid grid-cols-1 gap-8 xl:grid-cols-4',
+    column: 'space-y-4'
   }
 } as const;
 
@@ -143,7 +143,7 @@ export const defaultFooterContent: FooterContent = {
   companyInfo: {
     name: 'Medtrion',
     description: 'Medtrion is your trusted source for a wide range of health services and mobility products designed to improve your quality of life. Please note: We are not manufacturers of Acorn stairlifts but proud affiliate partners.',
-    logo: '/Logo.png',
+    logo: '/med-logo.png',
     address: '3495 Rebecca St Oakville, ON L6L 6X9',
     phone: '+1 (905) 330-1774',
     email: 'Info@medtrion.ca',
@@ -151,14 +151,22 @@ export const defaultFooterContent: FooterContent = {
   },
   navigation: [
     {
-      title: 'Menu',
+      title: 'Products',
       links: [
-        { label: 'Home', href: '/' },
-        { label: 'Shop All', href: '/#shop' },
-        // { label: 'Acorn Stairlifts', href: '/product/acorn-stairlifts-acorn-180-curved-stairlift' },
-        { label: 'Reviews', href: '/#reviews' },
-        { label: 'FAQs', href: '/#faq' },
-        { label: 'Blogs', href: '/blogs' }
+        { label: 'Mobility Scooters', href: '/products/mobility-scooters' },
+        { label: 'Stairlifts', href: '/products/stairlifts' },
+        { label: 'Bathroom Aids', href: '/products/bathroom-aids' },
+        { label: 'Lift Chairs', href: '/products/lift-chairs' }
+      ]
+    },
+
+    {
+      title: 'Help',
+      links: [
+        { label: 'Privacy Policy', href: '/privacy-policy' },
+        { label: 'FAQ', href: '/#faq' },
+        { label: 'Blog', href: '/blogs' },
+        { label: 'Contact Us', href: '/contact' }
       ]
     }
   ],

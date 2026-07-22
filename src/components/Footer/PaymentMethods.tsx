@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { FooterPaymentMethodsProps } from '../../lib/interfaces/footer';
 
@@ -48,7 +49,7 @@ const PaymentMethods: React.FC<FooterPaymentMethodsProps> = ({
       transition={{ duration: 0.6, delay: 0.3 }}
       className={`font-sans ${className}`}
     >
-      <h3 className="text-xl uppercase text-black font-black font-poppins mb-4">
+      <h3 className="text-xl uppercase text-white font-black font-poppins mb-4">
         We accept
       </h3>
       
@@ -60,13 +61,15 @@ const PaymentMethods: React.FC<FooterPaymentMethodsProps> = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.06 }}
             whileHover={{ y: -2 }}
-            className="flex h-10 w-16 items-center justify-center rounded-md border border-gray-200 bg-white px-3 transition-shadow duration-200 hover:border-gray-300 hover:shadow-sm"
+            className="flex h-10 w-16 items-center justify-center rounded-md border border-slate-700 bg-slate-900 px-3 transition-shadow duration-200 hover:border-slate-500 hover:shadow-sm"
           >
-            <img
+            <Image
               src={getPaymentIcon(method)}
               alt={getPaymentAlt(method)}
+              width={32}
+              height={20}
               className="h-5 w-auto object-contain"
-              loading="lazy"
+              unoptimized
             />
           </motion.div>
         ))}

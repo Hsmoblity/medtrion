@@ -23,10 +23,7 @@ const Footer: React.FC<FooterProps> = ({ logo, contactInfo }) => {
     companyInfo: {
       name: 'Medtrion',
       description: 'Medtrion is your trusted source for a wide range of health services and mobility products designed to improve your quality of life. Please note: We are not manufacturers of Acorn stairlifts but proud affiliate partners.',
-      logo: logo ? {
-        sourceUrl: logo.sourceUrl,
-        altText: logo.altText,
-      } : '/Logo.png',
+      logo: '/med-logo.png',
       address: contactInfo?.contactAddress || '3495 Rebecca St Oakville, ON L6L 6X9',
       phone: contactInfo?.contactPhone?.[0]?.number || '+1 (905) 330-1774',
       contactPhone: contactInfo?.contactPhone && contactInfo.contactPhone.length > 0 
@@ -37,13 +34,30 @@ const Footer: React.FC<FooterProps> = ({ logo, contactInfo }) => {
     },
     navigation: [
       {
-        title: 'Menu',
+        title: 'Products',
         links: [
-          { label: 'Home', href: '/' },
-          { label: 'Shop All', href: '/#shop' },
-          { label: 'Reviews', href: '/#reviews' },
-          { label: 'FAQs', href: '/#faq' },
-          { label: 'Blogs', href: '/blogs' }
+          { label: 'Mobility Scooters', href: '/products/mobility-scooters' },
+          { label: 'Stairlifts', href: '/products/stairlifts' },
+          { label: 'Bathroom Aids', href: '/products/bathroom-aids' },
+          { label: 'Lift Chairs', href: '/products/lift-chairs' }
+        ]
+      },
+      {
+        title: 'Services',
+        links: [
+          { label: 'Installation', href: '/services/installation' },
+          { label: 'Maintenance', href: '/services/maintenance' },
+          { label: 'Home Assessments', href: '/services/home-assessments' },
+          { label: 'Design Consultation', href: '/services/design-consultation' }
+        ]
+      },
+      {
+        title: 'Help',
+        links: [
+          { label: 'Privacy Policy', href: '/privacy-policy' },
+          { label: 'FAQ', href: '/#faq' },
+          { label: 'Blog', href: '/blogs' },
+          { label: 'Contact Us', href: '/contact' }
         ]
       }
     ],

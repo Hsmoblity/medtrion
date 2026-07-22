@@ -149,7 +149,7 @@ const ConsultationSuccessPage: React.FC = () => {
                 </PrimaryButton>
               </Link>
               <Link href="/products">
-                <button className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+                <button className="px-6 py-3 border-2 border-[#3fa2a3] bg-[#3fa2a3] text-white rounded-[35px] font-primary font-semibold hover:bg-[#f7a236] hover:border-[#f7a236] transition-all duration-300">
                   Browse More Products
                 </button>
               </Link>

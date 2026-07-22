@@ -30,13 +30,13 @@ const TrustCard: React.FC<TrustCardProps> = ({ indicator, index }) => {
       className="group relative bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 border border-gray-100"
     >
       {/* Icon */}
-      <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-full mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
+      <div className="flex items-center justify-center w-16 h-16 bg-[#fef3e2] rounded-full mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
         <span className="text-2xl">{getIconComponent(indicator.icon)}</span>
       </div>
 
       {/* Content */}
       <div className="text-center">
-        <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-300">
+        <h3 className="text-xl font-semibold text-[#0d163c] mb-2 group-hover:text-[#3fa2a3] transition-colors duration-300">
           {indicator.title}
         </h3>
         
@@ -45,7 +45,7 @@ const TrustCard: React.FC<TrustCardProps> = ({ indicator, index }) => {
         </p>
 
         {/* Highlight */}
-        <div className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-full">
+        <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#3fa2a3] to-[#f7a236] text-white text-sm font-primary font-semibold rounded-[35px] shadow-md transition-all duration-300">
           {indicator.highlight}
         </div>
 
@@ -58,7 +58,7 @@ const TrustCard: React.FC<TrustCardProps> = ({ indicator, index }) => {
       </div>
 
       {/* Hover effect overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-indigo-50/0 group-hover:from-blue-50/50 group-hover:to-indigo-50/50 rounded-2xl transition-all duration-300 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#fef3e2]/0 to-[#f0f9f8]/0 group-hover:from-[#fef3e2]/50 group-hover:to-[#f0f9f8]/50 rounded-2xl transition-all duration-300 pointer-events-none" />
     </motion.div>
   );
 };

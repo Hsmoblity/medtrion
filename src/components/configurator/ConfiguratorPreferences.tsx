@@ -387,7 +387,7 @@ const ConfiguratorPreferences: React.FC<ConfiguratorPreferencesProps> = ({
               className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm ${
                 highContrast 
                   ? 'bg-white text-black hover:bg-gray-200 focus:ring-white' 
-                  : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                  : 'bg-[#3fa2a3] text-white hover:bg-[#f7a236] focus:ring-[#f7a236] rounded-[35px] px-6 py-3'
               }`}
               onClick={onClose}
             >
@@ -398,7 +398,7 @@ const ConfiguratorPreferences: React.FC<ConfiguratorPreferencesProps> = ({
               className={`mt-3 w-full inline-flex justify-center rounded-md border shadow-sm px-4 py-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm ${
                 highContrast 
                   ? 'bg-gray-700 text-white border-gray-500 hover:bg-gray-600 focus:ring-gray-400' 
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 focus:ring-blue-500'
+                  : 'bg-[#f7a236] text-white border-[#f7a236] hover:bg-[#3fa2a3] focus:ring-[#3fa2a3] rounded-[35px] px-6 py-3'
               }`}
               onClick={handleResetPreferences}
             >
@@ -409,7 +409,7 @@ const ConfiguratorPreferences: React.FC<ConfiguratorPreferencesProps> = ({
               className={`mt-3 w-full inline-flex justify-center rounded-md border shadow-sm px-4 py-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm ${
                 highContrast 
                   ? 'bg-gray-700 text-white border-gray-500 hover:bg-gray-600 focus:ring-gray-400' 
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 focus:ring-blue-500'
+                  : 'bg-[#f7a236] text-white border-[#f7a236] hover:bg-[#3fa2a3] focus:ring-[#3fa2a3] rounded-[35px] px-6 py-3'
               }`}
               onClick={onClose}
             >

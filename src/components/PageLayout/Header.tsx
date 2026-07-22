@@ -75,13 +75,13 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
   return (
     <>
       <Cart />
-      <div className={`md:hidden transition-transform duration-500 ${isScrolled ? `bg-[#f1ebe0]` : `bg-[url('/nnnoise.svg')] bg-cover bg-repeat`}`}>
+      <div className="md:hidden bg-white transition-transform duration-500">
         <div className="flex items-center px-4 py-3">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <img
-              src={getLogoUrl(logo)}
-              alt={getLogoAlt(logo)}
+              src="/med-logo.png"
+              alt="Medtrion Logo"
               className="h-14 w-auto object-contain"
             />
           </Link>
@@ -105,15 +105,15 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
           </div>
         </div>
       </div>
-      <header className={`md:flex hidden flex-row justify-between z-50 md:px-4 md:pb-2 px-1 font-medium  w-full capitalize transition-transform duration-500  ${isScrolled ? `bg-[#f1ebe0] ` : ` bg-[url('/nnnoise.svg')] bg-cover bg-repeat`}`}>
+      <header className="md:flex hidden flex-row justify-between z-50 md:px-4 md:pb-2 px-1 font-medium text-[#0d163c] w-full capitalize bg-white transition-transform duration-500">
 
         <div className="w-full mx-auto flex justify-between  max-w-7xl px-6">
           {/* Logo */}
 
           <Link href="/" className="flex items-start">
             <img
-              src={getLogoUrl(logo)}
-              alt={getLogoAlt(logo)}
+              src="/med-logo.png"
+              alt="Medtrion Logo"
               className="w-20 object-cover pt-1"
             />
           </Link>
@@ -126,7 +126,7 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
                   e.preventDefault();
                   handleAnchorNavigation(item.href, router, item.name);
                 }}
-                className="uppercase font-bold font-poppins tracking-widest"
+                className="uppercase font-bold font-poppins tracking-widest text-[#0d163c] hover:text-[#3fa2a3]"
               >
                 {item.name}
               </DrawOutlineButton>

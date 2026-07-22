@@ -201,7 +201,7 @@ const CartWithProductGroups: React.FC = () => {
                 disabled={isRedirecting}
                 loading={isRedirecting}
                 onClick={handleCheckout}
-                className="bg-blue-600 hover:bg-blue-700 text-white border-0 py-4 text-sm uppercase font-medium transition-colors duration-200"
+                className="bg-[#3fa2a3] hover:bg-[#f7a236] text-white border-0 py-3 px-6 rounded-[35px] text-sm uppercase font-primary font-semibold transition-all duration-300"
               >
                 {isRedirecting ? `Please wait...` : `Request Consultation`}
               </PrimaryButton>

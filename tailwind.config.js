@@ -17,13 +17,13 @@ module.exports = {
     extend: {
       // Enhanced Typography System
       fontFamily: {
-        'primary': ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
-        'secondary': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
-        'display': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+        'primary': ['Poppins', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+        'secondary': ['Poppins', 'system-ui', 'sans-serif'],
+        'display': ['Poppins', 'system-ui', 'sans-serif'],
         'mono': ['"JetBrains Mono"', '"Fira Code"', 'Monaco', 'Consolas', 'monospace'],
         // Legacy support
-        'poppins': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
-        'sans': ['Inter', 'system-ui', 'sans-serif']
+        'poppins': ['Poppins', 'system-ui', 'sans-serif'],
+        'sans': ['Poppins', 'system-ui', 'sans-serif']
       },
       
       fontSize: {
@@ -64,6 +64,16 @@ module.exports = {
         'wide': '0.025em',
         'wider': '0.05em',
         'widest': '0.1em'
+      },
+      
+      colors: {
+        // Medtrion Design System Colors
+        'brand': {
+          'dark': '#0d163c',     // Dark navy blue
+          'primary': '#3fa2a3',  // Teal
+          'accent': '#f7a236',   // Orange
+          'light': '#ffffff'     // White
+        }
       },
       width: {
         "custom-31": "31.871429%",

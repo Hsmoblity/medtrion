@@ -385,14 +385,14 @@ const OptionVariationPopup: React.FC<OptionVariationPopupProps> = ({
                   {errorState.retry && (
                     <button
                       onClick={errorState.retry}
-                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      className="px-6 py-3 bg-[#f7a236] text-white rounded-[35px] font-primary font-semibold hover:bg-[#3fa2a3] transition-all duration-300"
                     >
                       Try Again
                     </button>
                   )}
                   <button
                     onClick={onClose}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                    className="px-6 py-3 bg-[#f7a236] text-white rounded-[35px] font-primary font-semibold hover:bg-[#3fa2a3] transition-all duration-300"
                   >
                     Close
                   </button>

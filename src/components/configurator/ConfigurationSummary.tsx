@@ -181,7 +181,7 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
             {onPrintSummary && (
               <button
                 onClick={onPrintSummary}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-6 py-3 border border-[#f7a236] shadow-sm text-sm leading-4 font-primary font-semibold rounded-[35px] text-white bg-[#f7a236] hover:bg-[#3fa2a3] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3fa2a3] transition-all duration-300"
               >
                 <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -192,7 +192,7 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
             {onEditConfiguration && (
               <button
                 onClick={onEditConfiguration}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-6 py-3 border border-[#f7a236] shadow-sm text-sm font-primary font-semibold rounded-[35px] text-white bg-[#f7a236] hover:bg-[#3fa2a3] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3fa2a3] transition-all duration-300"
               >
                 <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -552,7 +552,7 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
             {onSaveConfiguration && (
               <button
                 onClick={onSaveConfiguration}
-                className="flex-1 sm:flex-none bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                className="flex-1 sm:flex-none bg-[#f7a236] hover:bg-[#3fa2a3] text-white font-primary font-semibold py-3 px-6 rounded-[35px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#3fa2a3] focus:ring-offset-2"
               >
                 Save
               </button>
@@ -561,7 +561,7 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
             {onShareConfiguration && (
               <button
                 onClick={onShareConfiguration}
-                className="flex-1 sm:flex-none bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                className="flex-1 sm:flex-none bg-[#f7a236] hover:bg-[#3fa2a3] text-white font-primary font-semibold py-3 px-6 rounded-[35px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#3fa2a3] focus:ring-offset-2"
               >
                 Share
               </button>

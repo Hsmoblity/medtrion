@@ -162,7 +162,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               <button className="text-sm leading-8 font-bold text-black underline">
                 Learn More
               </button>
-              <div className="flex items-center space-x-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 px-4 py-1.5 text-white duration-200 transition-colors">
+              <div className="flex items-center space-x-1.5 rounded-[35px] bg-[#3fa2a3] hover:bg-[#f7a236] px-6 py-3 text-white font-primary font-semibold duration-300 transition-all">
                 <button className="text-sm">Get a Quote</button>
               </div>
             </>
@@ -187,7 +187,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 {showAddToCartButton && (
                   <button 
                     onClick={handleAddToCartClick}
-                    className="flex items-center justify-center space-x-1.5 rounded-lg bg-gray-600 px-4 py-1.5 text-white duration-100 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                    className="flex items-center justify-center space-x-1.5 rounded-[35px] bg-[#3fa2a3] px-6 py-3 text-white font-primary font-semibold duration-300 hover:bg-[#f7a236] shadow-md focus:outline-none focus:ring-2 focus:ring-[#f7a236] focus:ring-offset-2"
                   >
                     <span className="text-sm">Add to cart</span>
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,7 +237,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         {/* Dynamic Badge */}
         {normalizedProduct.badges.length > 0 && (
           <div className="absolute top-4 left-4">
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+            <span className="bg-gradient-to-r from-[#3fa2a3] to-[#f7a236] text-white px-4 py-2 rounded-full text-sm font-primary font-semibold shadow-md">
               {normalizedProduct.badges[0]}
             </span>
           </div>
@@ -266,7 +266,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       
       {/* Product Info */}
       <div className="p-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+        <h3 className="text-xl font-primary font-semibold text-[#0d163c] mb-2 group-hover:text-[#3fa2a3] transition-colors">
           {normalizedProduct.title}
         </h3>
         
@@ -296,9 +296,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
           >
             View Details
           </PrimaryButton>
-          <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          <button className="p-2 border-2 border-[#3fa2a3] rounded-[35px] hover:bg-[#f7a236] transition-all duration-300 text-[#3fa2a3] hover:text-white">
+            <svg className="w-5 h-5" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
           </button>
         </div>
@@ -326,7 +326,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           {normalizedProduct.badges.slice(0, 2).map((badge, badgeIndex) => (
             <span
               key={badgeIndex}
-              className="inline-block rounded-full bg-red-500 px-3 py-1 text-xs font-semibold text-white mb-2 mr-2"
+              className="inline-block rounded-full bg-gradient-to-r from-[#3fa2a3] to-[#f7a236] px-4 py-2 text-xs font-primary font-semibold text-white mb-2 mr-2 shadow-md"
             >
               {badge}
             </span>

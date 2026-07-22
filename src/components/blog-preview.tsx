@@ -61,7 +61,7 @@ const BlogImage: React.FC<{
         <div className="relative w-full h-full">
             {isLoading && (
                 <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-                    <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-8 h-8 border-2 border-[#3fa2a3] border-t-transparent rounded-full animate-spin"></div>
                 </div>
             )}
             
@@ -145,7 +145,7 @@ const ComingSoonModal: React.FC<{ isOpen: boolean; onClose: () => void; blogTitl
                     <div className="text-center">
                         {/* Icon */}
                         <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
-                            <svg className="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="h-8 w-8 text-[#3fa2a3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
@@ -167,7 +167,7 @@ const ComingSoonModal: React.FC<{ isOpen: boolean; onClose: () => void; blogTitl
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                             <button
                                 onClick={onClose}
-                                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                className="px-6 py-3 bg-[#3fa2a3] text-white rounded-[35px] hover:bg-[#f7a236] transition-all duration-300 font-primary font-semibold focus:outline-none focus:ring-2 focus:ring-[#f7a236] focus:ring-offset-2"
                             >
                                 Got it
                             </button>
@@ -294,7 +294,7 @@ export function BlogsPre({ blogs }: BlogsPreProps) {
                                     className="h-full w-full object-cover"
                                 />
                                 {/* Coming Soon Badge */}
-                                <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+                                <div className="absolute top-4 right-4 bg-[#3fa2a3] text-white px-3 py-1 rounded-full text-xs font-medium">
                                     Coming Soon
                                 </div>
                             </div>
@@ -305,7 +305,7 @@ export function BlogsPre({ blogs }: BlogsPreProps) {
                                 <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
                                     {blog.description}
                                 </p>
-                                <div className="mt-3 text-xs text-blue-600 font-medium">
+                                <div className="mt-3 text-xs text-[#3fa2a3] font-medium">
                                     Click to learn more
                                 </div>
                             </div>
@@ -317,7 +317,7 @@ export function BlogsPre({ blogs }: BlogsPreProps) {
             {/* Loading Spinner */}
             {loading && (
                 <div className="flex justify-center py-4">
-                    <div className="w-12 h-12 border-4 border-t-transparent border-blue-500 rounded-full animate-spin"></div>
+                    <div className="w-12 h-12 border-4 border-t-transparent border-[#3fa2a3] rounded-full animate-spin"></div>
                 </div>
             )}
 
@@ -330,3 +330,4 @@ export function BlogsPre({ blogs }: BlogsPreProps) {
         </>
     );
 }
+

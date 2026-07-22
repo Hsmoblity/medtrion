@@ -18,7 +18,7 @@ const FooterLegal: React.FC<FooterLegalProps> = ({
   const copyrightText = legal.copyright.replace('2025', currentYear.toString());
 
   const linkClass =
-    'text-[13px] font-medium text-gray-500 transition-colors duration-200 hover:text-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 rounded-sm px-1 py-0.5';
+    'text-[13px] font-medium text-white transition-colors duration-200 hover:text-[#f7a236] focus:outline-none focus:ring-[#f7a236] focus:ring-offset-2 rounded-sm px-1 py-0.5';
 
   return (
     <motion.div
@@ -27,7 +27,7 @@ const FooterLegal: React.FC<FooterLegalProps> = ({
       transition={{ duration: 0.6, delay: 0.4 }}
       className={`
         flex flex-col-reverse items-center gap-4
-        border-t border-gray-200 pt-6 mt-8
+        border-t border-slate-700 pt-6 mt-8
         sm:flex-row sm:justify-between
         font-sans
         ${className}
@@ -38,7 +38,7 @@ const FooterLegal: React.FC<FooterLegalProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.6 }}
-        className="text-center text-[13px] text-gray-500 sm:text-left"
+        className="text-center text-[13px] text-white sm:text-left"
       >
         {copyrightText}
       </motion.p>

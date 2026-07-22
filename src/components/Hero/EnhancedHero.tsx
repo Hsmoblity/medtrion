@@ -12,8 +12,8 @@ const EnhancedHero: React.FC = () => {
 
   if (loading) {
     return (
-      <section className="relative z-10 w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat px-4 pt-8 md:pt-12 pb-12 md:pb-16">
-        <div className="container mx-auto">
+      <section className="relative z-10 w-full bg-white px-4 pt-8 md:pt-12 pb-12 md:pb-16">
+        <div className="container-center">
           <LoadingOverlay show={true} />
         </div>
       </section>
@@ -23,9 +23,9 @@ const EnhancedHero: React.FC = () => {
   if (error) {
     // Fallback to original hero content
     return (
-      <section className="relative z-10 w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat px-4 pt-8 md:pt-12 pb-12 md:pb-16 flex flex-col">
-        <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-poppins font-semibold text-black mb-6">
+      <section className="relative z-10 w-full bg-white px-4 pt-8 md:pt-12 pb-12 md:pb-16 flex flex-col">
+        <div className="container-center text-center">
+          <h1 className="text-4xl md:text-6xl font-poppins font-semibold text-[#0d163c] mb-6">
             Express Your Freedom with Medtrion
           </h1>
           <p className="text-lg text-gray-600 mb-8">
@@ -35,7 +35,7 @@ const EnhancedHero: React.FC = () => {
             <PrimaryButton href="/products" size="lg">
               Explore Products
             </PrimaryButton>
-            <PrimaryButton href="/consultation/google-form" size="lg" className="bg-gray-600 hover:bg-gray-700">
+            <PrimaryButton href="/consultation/google-form" size="lg" variant="secondary">
               Get Free Quote
             </PrimaryButton>
           </div>
@@ -45,8 +45,8 @@ const EnhancedHero: React.FC = () => {
   }
 
   return (
-    <section className="relative z-10 w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat px-4 pt-8 md:pt-12 pb-12 md:pb-16">
-      <div className="container mx-auto">
+    <section className="relative z-10 w-full bg-white px-4 pt-8 md:pt-12 pb-12 md:pb-16">
+      <div className="container-center">
         <div className="flex md:flex-row flex-col items-center gap-12">
           {/* Dynamic Content */}
           <motion.div
@@ -55,7 +55,7 @@ const EnhancedHero: React.FC = () => {
             transition={{ duration: 0.8 }}
             className="flex-1"
           >
-            <h1 className="text-left font-poppins md:text-6xl text-5xl font-semibold text-black mb-6 leading-tight">
+            <h1 className="text-left font-poppins md:text-6xl text-5xl font-semibold text-[#0d163c] mb-6 leading-tight">
               {content.title}
             </h1>
             
@@ -85,7 +85,7 @@ const EnhancedHero: React.FC = () => {
                   key={index}
                   href={button.href}
                   size="lg"
-                  className={button.variant === 'secondary' ? 'bg-gray-600 hover:bg-gray-700' : ''}
+                  variant={button.variant === 'secondary' ? 'secondary' : 'primary'}
                 >
                   {button.text}
                 </PrimaryButton>
@@ -109,8 +109,6 @@ const EnhancedHero: React.FC = () => {
         </div>
       </div>
       
-      {/* Decorative bottom section */}
-      <div className="md:h-24 h-12 relative bottom-12 bg-[url('/nnnoise.svg')] bg-cover bg-repeat w-full -skew-y-6 -z-10"></div>
     </section>
   );
 };

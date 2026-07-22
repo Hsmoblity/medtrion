@@ -71,7 +71,7 @@ const FALLBACK_CONTACT: ContactInfo = {
     { day: 'Saturday',        hours: '10:00 AM - 4:00 PM' },
     { day: 'Sunday',          hours: 'Closed' },
   ],
-  logo: '/Logo.png',  // String URL fallback
+  logo: '/med-logo.png',  // String URL fallback
 };
 
 // Form validation schema

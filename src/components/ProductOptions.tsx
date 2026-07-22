@@ -516,7 +516,7 @@ const ProductOptions: React.FC<Props> = ({
                         console.log('ProductOptions button clicked, selected map:', selected); 
                         addSelectedToCart(); 
                     }} 
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    className="px-6 py-3 bg-[#3fa2a3] text-white rounded-[35px] font-primary font-semibold hover:bg-[#f7a236] transition-all duration-300"
                 >
                     {editMode ? 'Save Changes' : 'Add Selected Options'}
                 </button>

@@ -114,7 +114,7 @@ const BlogsPage: React.FC<BlogsPageProps> = ({ blogs: propBlogs, error: propErro
               <p className="text-gray-600 mb-4">{error}</p>
               <button 
                 onClick={() => window.location.reload()} 
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="bg-[#3fa2a3] text-white px-6 py-3 rounded-[35px] font-primary font-semibold hover:bg-[#f7a236] transition-all duration-300"
               >
                 Try Again
               </button>

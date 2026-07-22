@@ -43,13 +43,13 @@ const BestSellerSection: React.FC<BestSellerSectionProps> = ({ initialProducts =
 
   if (loading) {
     return (
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
+      <section className="py-16 md:py-20 bg-white">
+        <div className="container-center">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl md:text-5xl font-primary font-bold text-[#0d163c] mb-4">
               Explore Our Best Sellers
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-[#4b5563] max-w-2xl mx-auto font-primary">
               Discover our most popular mobility solutions, trusted by thousands of customers.
             </p>
           </div>
@@ -67,15 +67,15 @@ const BestSellerSection: React.FC<BestSellerSectionProps> = ({ initialProducts =
 
   if (error) {
     return (
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
+      <section className="py-16 md:py-20 bg-white">
+        <div className="container-center">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl md:text-5xl font-primary font-bold text-[#0d163c] mb-4">
               Explore Our Best Sellers
             </h2>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md mx-auto">
-              <p className="text-yellow-700">Unable to load products at this time.</p>
-              <p className="text-sm text-yellow-600 mt-2">Please try again later.</p>
+            <div className="bg-[#fef3e2] border border-[#f7a236] rounded-lg p-6 max-w-md mx-auto">
+              <p className="text-[#d97706]">Unable to load products at this time.</p>
+              <p className="text-sm text-[#b45309] mt-2">Please try again later.</p>
             </div>
           </div>
         </div>
@@ -88,13 +88,13 @@ const BestSellerSection: React.FC<BestSellerSectionProps> = ({ initialProducts =
   }
 
   return (
-    <section className="py-16 bg-white">
-      <div className="container mx-auto px-4">
+    <section className="py-16 md:py-20 bg-white">
+      <div className="container-center">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-primary font-bold text-[#0d163c] mb-4">
             Explore Our Best Sellers
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-[#4b5563] max-w-2xl mx-auto font-primary">
             Discover our most popular mobility solutions, trusted by thousands of customers worldwide.
           </p>
         </div>

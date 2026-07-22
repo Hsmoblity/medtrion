@@ -31,8 +31,8 @@ const EditCartButton: React.FC<EditCartButtonProps> = ({
   };
 
   const variantClasses = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 border-blue-600',
-    secondary: 'bg-gray-600 text-white hover:bg-gray-700 border-gray-600',
+    primary: 'bg-[#3fa2a3] text-white hover:bg-[#f7a236] border-[#3fa2a3] rounded-[35px] px-6 py-3',
+    secondary: 'bg-[#f7a236] text-white hover:bg-[#3fa2a3] border-[#f7a236] rounded-[35px] px-6 py-3',
     outline: 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 border-gray-300 dark:border-gray-600 hover:border-gray-400'
   };
 
@@ -41,7 +41,7 @@ const EditCartButton: React.FC<EditCartButtonProps> = ({
       onClick={handleEditCart}
       className={`
         w-full rounded-lg border-2 font-medium
-        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-[#3fa2a3] focus:ring-offset-2
         transition-all duration-200
         flex items-center justify-center gap-2
         ${sizeClasses[size]}

@@ -23,25 +23,25 @@ const CompatibilityAlert: React.FC<CompatibilityAlertProps> = ({
         return {
           container: 'bg-red-50 border-red-200 text-red-800',
           icon: 'text-red-400',
-          button: 'bg-red-600 hover:bg-red-700 text-white'
+          button: 'bg-[#3fa2a3] hover:bg-[#f7a236] text-white rounded-[35px] px-6 py-3'
         };
       case 'WARNING':
         return {
           container: 'bg-yellow-50 border-yellow-200 text-yellow-800',
           icon: 'text-yellow-400',
-          button: 'bg-yellow-600 hover:bg-yellow-700 text-white'
+          button: 'bg-[#f7a236] hover:bg-[#3fa2a3] text-white rounded-[35px] px-6 py-3'
         };
       case 'INFO':
         return {
           container: 'bg-blue-50 border-blue-200 text-blue-800',
           icon: 'text-blue-400',
-          button: 'bg-blue-600 hover:bg-blue-700 text-white'
+          button: 'bg-[#3fa2a3] hover:bg-[#f7a236] text-white rounded-[35px] px-6 py-3'
         };
       default:
         return {
           container: 'bg-gray-50 border-gray-200 text-gray-800',
           icon: 'text-gray-400',
-          button: 'bg-gray-600 hover:bg-gray-700 text-white'
+          button: 'bg-[#f7a236] hover:bg-[#3fa2a3] text-white rounded-[35px] px-6 py-3'
         };
     }
   };

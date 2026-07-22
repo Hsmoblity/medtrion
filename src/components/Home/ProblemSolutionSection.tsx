@@ -8,19 +8,19 @@ const ProblemSolutionSection: React.FC = () => {
   const [activeProblem, setActiveProblem] = useState(0);
 
   return (
-    <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
-      <div className="container mx-auto px-4">
+    <section className="py-16 md:py-20 bg-white">
+      <div className="container-center">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-primary font-bold text-[#0d163c] mb-4">
             We Understand Your Challenges
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-[#4b5563] max-w-2xl mx-auto font-primary">
             Every mobility challenge has a solution. Let us help you find yours with our comprehensive range of products and services.
           </p>
         </motion.div>
@@ -33,7 +33,7 @@ const ProblemSolutionSection: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="space-y-4"
           >
-            <h3 className="text-2xl font-semibold text-gray-900 mb-6">
+            <h3 className="text-3xl font-primary font-bold text-[#0d163c] mb-6">
               Select Your Challenge
             </h3>
             {problemsSolutions.map((problem, index) => (
@@ -60,10 +60,10 @@ const ProblemSolutionSection: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.5 }}
-                className="bg-white rounded-2xl shadow-xl p-8"
+                className="bg-gradient-to-br from-white to-[#f9f7f3] rounded-2xl shadow-lg border border-[#3fa2a3]/20 p-8"
               >
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#3fa2a3]/20 to-[#f7a236]/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#3fa2a3]/40">
                     <span className="text-3xl">
                       {problemsSolutions[activeProblem] ? 
                         (() => {
@@ -80,21 +80,21 @@ const ProblemSolutionSection: React.FC = () => {
                       }
                     </span>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  <h3 className="text-3xl font-primary font-bold text-[#0d163c] mb-2">
                     Our Solution
                   </h3>
-                  <p className="text-lg text-blue-600 font-semibold">
+                  <p className="text-lg font-primary font-semibold text-[#3fa2a3]">
                     {problemsSolutions[activeProblem]?.solution}
                   </p>
                 </div>
                 
-                <p className="text-gray-700 mb-6 text-center">
+                <p className="text-[#4b5563] mb-6 text-center font-primary">
                   {problemsSolutions[activeProblem]?.description}
                 </p>
                 
                 {/* Product List */}
                 <div className="mb-6">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h4 className="text-lg font-primary font-semibold text-[#0d163c] mb-4">
                     Recommended Products:
                   </h4>
                   <div className="space-y-3">
@@ -127,7 +127,8 @@ const ProblemSolutionSection: React.FC = () => {
                   </PrimaryButton>
                   <PrimaryButton 
                     href="/consultation/google-form" 
-                    className="w-full bg-gray-600 hover:bg-gray-700"
+                    variant="secondary"
+                    className="w-full"
                   >
                     Get Free Consultation
                   </PrimaryButton>
@@ -144,7 +145,7 @@ const ProblemSolutionSection: React.FC = () => {
           transition={{ duration: 0.6, delay: 0.6 }}
           className="text-center mt-16"
         >
-          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-4xl mx-auto">
+          <div className="w-full bg-white rounded-2xl shadow-lg p-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Still Not Sure Which Solution Is Right For You?
             </h3>
@@ -155,7 +156,7 @@ const ProblemSolutionSection: React.FC = () => {
               <PrimaryButton href="/consultation/google-form" size="lg">
                 Schedule Free Consultation
               </PrimaryButton>
-              <PrimaryButton href="/products" size="lg" className="bg-gray-600 hover:bg-gray-700">
+              <PrimaryButton href="/products" size="lg" variant="secondary">
                 Browse All Products
               </PrimaryButton>
             </div>

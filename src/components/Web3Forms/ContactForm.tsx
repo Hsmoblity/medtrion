@@ -115,7 +115,7 @@ export default function ContactForm({
               {...register('firstName')}
               type="text"
               id="firstName"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-[#3fa2a3]/30 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             />
             {errors.firstName && (
               <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
@@ -130,7 +130,7 @@ export default function ContactForm({
               {...register('lastName')}
               type="text"
               id="lastName"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-[#3fa2a3]/30 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             />
             {errors.lastName && (
               <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
@@ -148,7 +148,7 @@ export default function ContactForm({
               {...register('email')}
               type="email"
               id="email"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-[#3fa2a3]/30 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             />
             {errors.email && (
               <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -163,7 +163,7 @@ export default function ContactForm({
               {...register('phone')}
               type="tel"
               id="phone"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-[#3fa2a3]/30 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             />
             {errors.phone && (
               <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
@@ -180,7 +180,7 @@ export default function ContactForm({
             {...register('subject')}
             type="text"
             id="subject"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2 border border-[#3fa2a3]/30 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
           />
           {errors.subject && (
             <p className="mt-1 text-sm text-red-600">{errors.subject.message}</p>
@@ -196,7 +196,7 @@ export default function ContactForm({
             {...register('message')}
             id="message"
             rows={6}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2 border border-[#3fa2a3]/30 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
             placeholder="Tell us how we can help you..."
           />
           {errors.message && (
@@ -224,7 +224,7 @@ export default function ContactForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+          className="w-full bg-[#3fa2a3] hover:bg-[#f7a236] disabled:bg-gray-400 text-white font-primary font-semibold py-3 px-6 rounded-[35px] transition-all duration-300"
         >
           {isSubmitting ? 'Sending...' : 'Send Message'}
         </button>

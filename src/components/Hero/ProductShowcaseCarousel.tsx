@@ -184,7 +184,7 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
       onMouseLeave={handleMouseLeave}
     >
       {/* Main Product Display */}
-      <div className="relative h-[450px] md:h-[500px] lg:h-[600px] bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div className="relative min-h-[520px] md:min-h-[560px] lg:min-h-[620px] bg-white rounded-2xl shadow-xl overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
@@ -192,10 +192,10 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.1 }}
             transition={{ duration: 0.5 }}
-            className="relative h-full"
+            className="relative min-h-full"
           >
             {/* Product Image */}
-            <div className="relative h-[300px] md:h-[350px] lg:h-[400px] overflow-hidden">
+            <div className="relative h-[220px] md:h-[260px] lg:h-[300px] overflow-hidden">
               <Image
                 src={currentProduct.image}
                 alt={currentProduct.title}
@@ -209,7 +209,7 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
               
               {/* Badge */}
               <div className="absolute top-4 left-4">
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                <span className="bg-gradient-to-r from-[#3fa2a3] to-[#f7a236] text-white px-4 py-2 rounded-[35px] text-xs md:text-sm font-primary font-semibold shadow-md transition-all duration-300">
                   {currentProduct.badge}
                 </span>
               </div>
@@ -217,20 +217,20 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
 
             {/* Product Info */}
             <div className="p-6 md:p-8">
-              <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-3">
+              <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">
                 {currentProduct.title}
               </h3>
-              <p className="text-gray-600 mb-4 md:mb-6 line-clamp-2 text-sm md:text-base">
-                {sanitizeHtml(currentProduct.description || '', { maxLength: 150 })}
+              <p className="text-gray-600 mb-3 md:mb-4 line-clamp-2 text-xs md:text-sm">
+                {sanitizeHtml(currentProduct.description || '', { maxLength: 130 })}
               </p>
-              <div className="flex items-center justify-between mb-4 md:mb-6">
-                <span className="text-2xl md:text-3xl font-bold text-gray-900">
+              <div className="flex items-center justify-between mb-3 md:mb-4">
+                <span className="text-lg md:text-xl font-bold text-gray-900">
                   {currentProduct.price}
                 </span>
               </div>
               <PrimaryButton 
                 disabled
-                className="w-full text-sm md:text-base py-3 md:py-4 opacity-50 cursor-not-allowed"
+                className="w-full text-sm py-2.5 opacity-50 cursor-not-allowed"
                 aria-disabled="true"
                 title="View Details is temporarily disabled"
               >
@@ -249,8 +249,8 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
             onClick={() => onSlideChange(index)}
             className={`w-3 h-3 md:w-4 md:h-4 rounded-full transition-all duration-300 ${
               index === currentSlide 
-                ? 'bg-blue-600 scale-125' 
-                : 'bg-gray-300 hover:bg-gray-400'
+                ? 'bg-[#3fa2a3] scale-125' 
+                : 'bg-[#f7a236] hover:bg-[#3fa2a3]'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
@@ -260,7 +260,7 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
       {/* Navigation Arrows */}
       <button
         onClick={() => onSlideChange((currentSlide - 1 + carouselProducts.length) % carouselProducts.length)}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-600 hover:text-gray-900 rounded-full p-2 shadow-lg transition-all duration-200"
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full border border-[#3fa2a3]/20 bg-[#3fa2a3] text-white shadow-[0_10px_25px_rgba(63,162,163,0.25)] transition-all duration-300 hover:bg-[#f7a236] hover:text-white"
         aria-label="Previous product"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -270,7 +270,7 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
       
       <button
         onClick={() => onSlideChange((currentSlide + 1) % carouselProducts.length)}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-600 hover:text-gray-900 rounded-full p-2 shadow-lg transition-all duration-200"
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full border border-[#3fa2a3]/20 bg-[#3fa2a3] text-white shadow-[0_10px_25px_rgba(63,162,163,0.25)] transition-all duration-300 hover:bg-[#f7a236] hover:text-white"
         aria-label="Next product"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

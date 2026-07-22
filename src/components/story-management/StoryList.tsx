@@ -164,10 +164,10 @@ export const StoryList: React.FC<StoryListProps> = ({
               <button className="px-3 py-2 text-sm font-medium text-brand-blue bg-brand-blue-light rounded">
                 1
               </button>
-              <button className="px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 rounded">
+              <button className="px-3 py-2 text-sm font-medium text-gray-500 hover:bg-[#f7a236] hover:text-white rounded-[35px] transition-all duration-300">
                 2
               </button>
-              <button className="px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 rounded">
+              <button className="px-3 py-2 text-sm font-medium text-gray-500 hover:bg-[#f7a236] hover:text-white rounded-[35px] transition-all duration-300">
                 3
               </button>
             </div>

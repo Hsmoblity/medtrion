@@ -391,7 +391,7 @@ export default function Form() {
                                 type='button'
                                 onClick={prev}
                                 disabled={currentStep === 0}
-                                className='rounded-md bg-gray-800 flex flex-row px-4 py-2 text-lg font-semibold text-white shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200'
+                                className='rounded-[35px] bg-[#f7a236] flex flex-row px-6 py-3 text-lg font-primary font-semibold text-white shadow-md ring-1 ring-inset ring-[#f7a236] hover:bg-[#3fa2a3] hover:text-white disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300'
                             >
                                 <BiLeftArrowAlt size={24} className='hover:-translate-x-1 transition-transform duration-200' />
                             </button>
@@ -399,7 +399,7 @@ export default function Form() {
                                 type='button'
                                 onClick={next}
                                 disabled={currentStep === steps.length - 1}
-                                className='rounded-md bg-gray-800 px-4 py-2 text-lg font-semibold text-white shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200'
+                                className='rounded-[35px] bg-[#f7a236] px-6 py-3 text-lg font-primary font-semibold text-white shadow-md ring-1 ring-inset ring-[#f7a236] hover:bg-[#3fa2a3] hover:text-white disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300'
                             >
                                 <BiRightArrowAlt size={24} className='hover:translate-x-1 transition-transform duration-200' />
                             </button>

@@ -144,7 +144,7 @@ export async function fetchSiteLogo(): Promise<SiteLogo | null> {
  * Returns CMS logo URL or fallback to static file
  */
 export function getLogoUrl(logo: SiteLogo | null | undefined): string {
-  return logo?.sourceUrl || '/Logo.png';
+  return logo?.sourceUrl || '/med-logo.png';
 }
 
 /**

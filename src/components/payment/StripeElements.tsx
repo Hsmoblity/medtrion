@@ -161,7 +161,7 @@ const StripeElements: React.FC<StripeElementsProps> = ({
           <div className="text-red-800 mb-4">{error}</div>
           <button
             onClick={handleRetry}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+            className="bg-[#f7a236] hover:bg-[#3fa2a3] text-white px-6 py-3 rounded-[35px] font-primary font-semibold transition-all duration-300"
           >
             Try Again
           </button>

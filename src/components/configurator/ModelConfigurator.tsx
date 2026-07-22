@@ -904,7 +904,7 @@ const ModelConfigurator: React.FC<ModelConfiguratorProps> = ({
               className={`w-full font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-150 ${
                 highContrast 
                   ? 'bg-black text-white border-2 border-white hover:bg-gray-800 focus:ring-white' 
-                  : 'bg-gray-200 hover:bg-gray-300 text-gray-800 focus:ring-gray-500'
+                  : 'bg-[#f7a236] hover:bg-[#3fa2a3] text-white focus:ring-[#3fa2a3] rounded-[35px] px-6 py-3'
               }`}
               aria-label={showSummary ? 'Continue configuring options' : 'Review current configuration'}
             >

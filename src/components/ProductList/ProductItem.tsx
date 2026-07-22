@@ -234,7 +234,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
             </div>
             <div className="mb-3 space-y-3">
               {(product as any).affiliate ? (
-                <a href="#" className="block w-full text-center bg-green-600 text-white py-3 rounded">Learn More</a>
+                <a href="#" className="block w-full text-center bg-[#3fa2a3] hover:bg-[#f7a236] text-white py-3 px-6 rounded-[35px] font-primary font-semibold transition-all duration-300">Learn More</a>
               ) : (
                 <>
                   {/* Configure Button - Primary Action */}
@@ -257,7 +257,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
                       }
                       openOptionsModal();
                     }} 
-                    className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                    className="w-full bg-[#3fa2a3] hover:bg-[#f7a236] text-white py-3 px-6 rounded-[35px] font-primary font-semibold transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-[#f7a236] focus:ring-offset-2"
                   >
                     Quick Add to Cart
                   </button>

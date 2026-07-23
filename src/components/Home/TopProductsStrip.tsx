@@ -77,7 +77,8 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
     return (
       <div className="py-16 md:py-20 bg-white">
         <div className="container-center">
-          <h2 className="text-4xl md:text-5xl font-primary font-bold text-[#0d163c] mb-8">Featured Products</h2>
+          <h2 className="text-4xl md:text-5xl font-primary font-bold text-[#0d163c] mb-4">Featured Products</h2>
+          <div className="mx-auto mb-4 h-1.5 w-24 rounded-full bg-gradient-to-r from-[#f7a236] to-[#3fa2a3]" />
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="animate-pulse rounded-lg bg-gray-200 h-96"></div>
@@ -95,6 +96,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
         <div className="container-center">
           <div className="text-center mb-8">
             <h2 className="text-4xl md:text-5xl font-primary font-bold text-[#0d163c] mb-4">Featured Products</h2>
+            <div className="mx-auto mb-4 h-1.5 w-24 rounded-full bg-gradient-to-r from-[#f7a236] to-[#3fa2a3]" />
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Discover our top-rated mobility solutions, carefully selected for quality and customer satisfaction.
             </p>
@@ -178,6 +180,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
         <div className="container-center">
           <div className="text-center mb-8">
             <h2 className="text-4xl md:text-5xl font-primary font-bold text-[#0d163c] mb-4">Featured Products</h2>
+            <div className="mx-auto mb-4 h-1.5 w-24 rounded-full bg-gradient-to-r from-[#f7a236] to-[#3fa2a3]" />
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Discover our top-rated mobility solutions, carefully selected for quality and customer satisfaction.
             </p>
@@ -252,6 +255,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
           className="text-center mb-8"
         >
           <h2 className="text-4xl md:text-5xl font-primary font-bold text-[#0d163c] mb-4">Featured Products</h2>
+          <div className="mx-auto mb-4 h-1.5 w-24 rounded-full bg-gradient-to-r from-[#f7a236] to-[#3fa2a3]" />
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Discover our top-rated mobility solutions, carefully selected for quality and customer satisfaction.
           </p>
@@ -270,7 +274,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                  className="flex items-center gap-2 px-4 py-2 bg-yellow-100 text-[#0d163c] rounded-lg shadow-sm hover:bg-yellow-200 transition-shadow"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -288,7 +292,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-lg transition-colors ${
-                    viewMode === 'grid' ? 'bg-[#3fa2a3] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+                    viewMode === 'grid' ? 'bg-[#3fa2a3] text-white' : 'bg-yellow-100 text-[#0d163c] hover:bg-yellow-200'
                   }`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -298,7 +302,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
                 <button
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-lg transition-colors ${
-                    viewMode === 'list' ? 'bg-[#3fa2a3] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+                    viewMode === 'list' ? 'bg-[#3fa2a3] text-white' : 'bg-yellow-100 text-[#0d163c] hover:bg-yellow-200'
                   }`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -314,7 +318,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="bg-white rounded-lg shadow-sm p-4 mb-6"
+                className="bg-gray-50 rounded-lg border border-gray-200 shadow-sm p-4 mb-6"
               >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Search */}
@@ -369,9 +373,9 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className={`${
+            className={`bg-gray-50 rounded-2xl p-6 ${
               viewMode === 'grid' 
-                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6'
                 : 'space-y-4'
             }`}
           >
@@ -391,10 +395,9 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
             ))}
           </motion.div>
         ) : (
-          <>
-            {/* Desktop: Grid layout, Mobile: Horizontal scroll */}
-            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {featuredProducts.slice(0, 4).map((product, index) => (
+          <div className="bg-gray-50 rounded-2xl p-6">
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+              {featuredProducts.slice(0, 3).map((product, index) => (
                 <ProductCard 
                   key={product.databaseId || product.slug || index} 
                   product={product} 
@@ -408,11 +411,11 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
                 />
               ))}
             </div>
-            
+
             {/* Mobile: Horizontal scroll */}
             <div className="md:hidden">
               <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
-                {featuredProducts.slice(0, 4).map((product, index) => (
+                {featuredProducts.slice(0, 3).map((product, index) => (
                   <div key={product.databaseId || product.slug || index} className="flex-none w-72">
                     <ProductCard 
                       product={product} 
@@ -428,7 +431,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
                 ))}
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>

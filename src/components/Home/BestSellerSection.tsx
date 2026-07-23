@@ -94,6 +94,7 @@ const BestSellerSection: React.FC<BestSellerSectionProps> = ({ initialProducts =
           <h2 className="text-4xl md:text-5xl font-primary font-bold text-[#0d163c] mb-4">
             Explore Our Best Sellers
           </h2>
+          <div className="mx-auto mb-4 h-1.5 w-24 rounded-full bg-gradient-to-r from-[#f7a236] to-[#3fa2a3]" />
           <p className="text-lg md:text-xl text-[#4b5563] max-w-2xl mx-auto font-primary">
             Discover our most popular mobility solutions, trusted by thousands of customers worldwide.
           </p>

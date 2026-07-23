@@ -241,11 +241,11 @@ export function BlogsPre({ blogs }: BlogsPreProps) {
 
     return (
         <>
-            <div className="container mx-auto justify-center grid grid-cols-1 md:grid-cols-3 overflow-hidden gap-8 py-10">
+            <div className="mx-auto grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
                 {visibleBlogs.map((blog, index) => (
                     <div
                         key={index}
-                        className="relative block p-2 h-full w-full group cursor-pointer"
+                        className="group relative h-full w-full cursor-pointer overflow-hidden rounded-[24px] border border-[#0b1f3a]/10 bg-white p-2 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(11,31,58,0.08)]"
                         onMouseEnter={() => setHoveredIndex(index)}
                         onMouseLeave={() => setHoveredIndex(null)}
                         onClick={(e) => handleBlogClick(e, blog)}
@@ -262,7 +262,7 @@ export function BlogsPre({ blogs }: BlogsPreProps) {
                         <AnimatePresence>
                             {hoveredIndex === index && (
                                 <motion.span
-                                    className="absolute inset-0 h-full w-full bg-neutral-200  block rounded-xl"
+                                    className="absolute inset-0 block h-full w-full rounded-[24px] bg-[#f7fbfd]"
                                     layoutId="hoverBackground"
                                     initial={{ opacity: 0 }}
                                     animate={{
@@ -286,7 +286,7 @@ export function BlogsPre({ blogs }: BlogsPreProps) {
                             transition={{ duration: 0.7 }} // Duration of fade-in
                         >
                             {/* Image Container */}
-                            <div className="h-[300px] overflow-hidden rounded-t-xl relative">
+                            <div className="relative h-[240px] overflow-hidden rounded-[18px]">
                                 <BlogImage
                                     src={blog.image}
                                     alt={blog.alt || "Blog image"}
@@ -298,14 +298,14 @@ export function BlogsPre({ blogs }: BlogsPreProps) {
                                     Coming Soon
                                 </div>
                             </div>
-                            <div className="inset-y-0 left-0 w-full bg-[#f0eade] rounded-b-md flex flex-col justify-center p-4">
-                                <h2 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2">
+                            <div className="mt-4 flex flex-col justify-center rounded-[18px] bg-[#f8fbff] p-4">
+                                <h2 className="mb-2 text-lg font-bold text-[#0b1f3a] line-clamp-2">
                                     {blog.title}
                                 </h2>
                                 <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
                                     {blog.description}
                                 </p>
-                                <div className="mt-3 text-xs text-[#3fa2a3] font-medium">
+                                <div className="mt-3 text-xs font-medium text-[#3fa2a3]">
                                     Click to learn more
                                 </div>
                             </div>

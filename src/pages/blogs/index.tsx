@@ -100,15 +100,31 @@ const BlogsPage: React.FC<BlogsPageProps> = ({ blogs: propBlogs, error: propErro
       />
       
       <div className="min-h-screen bg-gray-50">
+        <section className="bg-gradient-to-r from-[#0b1f3a] via-[#153a5f] to-[#3fa2a3] text-white pt-16 pb-12 sm:pt-20 sm:pb-16">
+          <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-3xl text-center">
+              <span className="mb-4 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.25em] text-[#f7a236]">
+                Helpful Insights
+              </span>
+              <h1 className="text-4xl font-bold md:text-5xl">
+                Our Blog & Resources
+              </h1>
+              <p className="mt-4 text-lg leading-8 text-blue-100 md:text-xl">
+                Read practical guidance on mobility products, home safety, and everyday independence.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {loading ? (
-          <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="flex items-center justify-center min-h-[50vh] py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
               <p className="text-gray-600">Loading blogs...</p>
             </div>
           </div>
         ) : error ? (
-          <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="flex items-center justify-center min-h-[50vh] py-12">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Blogs Temporarily Unavailable</h2>
               <p className="text-gray-600 mb-4">{error}</p>

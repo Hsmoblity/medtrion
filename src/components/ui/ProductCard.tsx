@@ -33,6 +33,7 @@ export interface ProductCardProps {
   
   // Styling props
   className?: string;
+  noCardSurface?: boolean;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -45,7 +46,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   showConfigureButton = true,
   showAddToCartButton = true,
   cardClickBehavior = 'configurator',
-  className = ''
+  className = '',
+  noCardSurface = false
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
@@ -125,7 +127,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   // Render different variants
   const renderBasicVariant = () => (
     <article 
-      className={`rounded-xl bg-white p-3 shadow-lg hover:shadow-xl transform hover:scale-105 duration-300 cursor-pointer ${className}`}
+      className={`cursor-pointer rounded-[24px] ${noCardSurface ? 'bg-transparent border-none shadow-none hover:shadow-none' : 'border border-[#0b1f3a]/10 bg-white shadow-[0_15px_40px_rgba(11,31,58,0.06)] hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(11,31,58,0.1)]'} p-3 transition-all duration-300 ${className}`}
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
@@ -137,7 +139,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       }}
       aria-label={`View ${normalizedProduct.title} product`}
     >
-      <div className="relative flex items-center justify-center overflow-hidden rounded-xl">
+      <div className="relative flex items-center justify-center overflow-hidden rounded-[18px]">
         <Image
           src={normalizedProduct.imageUrl}
           alt={`${normalizedProduct.title} Image`}
@@ -149,8 +151,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
       </div>
       
       <div className="mt-1 p-2">
-        <h2 className="text-slate-700 font-poppins font-black">{normalizedProduct.title}</h2>
-        <div className="mt-1 text-sm text-slate-400 font-semibold line-clamp-3">
+        <h2 className="font-poppins font-black text-[#0b1f3a]">{normalizedProduct.title}</h2>
+        <div className="mt-1 line-clamp-3 text-sm font-semibold text-slate-500">
           <HydrationErrorBoundary>
             <RichContent content={normalizedProduct.description} />
           </HydrationErrorBoundary>
@@ -168,7 +170,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             </>
           ) : (
             <>
-              <p className="text-lg font-bold text-blue-500">${normalizedProduct.price.toFixed(2)}</p>
+              <p className="text-lg font-bold text-[#153a5f]">${normalizedProduct.price.toFixed(2)}</p>
               <div className="flex flex-col space-y-2" onClick={(e) => e.stopPropagation()}>
                 {showConfigureButton && (
                   <PrimaryButton
@@ -209,7 +211,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       whileHover={{ y: -5, scale: 1.02 }}
-      className={`group relative bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 cursor-pointer ${className}`}
+      className={`group relative cursor-pointer overflow-hidden rounded-[24px] ${noCardSurface ? 'border-none bg-transparent shadow-none hover:shadow-none' : 'border border-[#0b1f3a]/10 bg-white shadow-[0_15px_40px_rgba(11,31,58,0.06)] hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(11,31,58,0.1)]'} transition-all duration-500 ${className}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleCardClick}
@@ -266,12 +268,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
       
       {/* Product Info */}
       <div className="p-6">
-        <h3 className="text-xl font-primary font-semibold text-[#0d163c] mb-2 group-hover:text-[#3fa2a3] transition-colors">
+        <h3 className="mb-2 font-primary text-xl font-semibold text-[#0b1f3a] transition-colors group-hover:text-[#3fa2a3]">
           {normalizedProduct.title}
         </h3>
         
         {normalizedProduct.description && (
-          <div className="text-gray-600 mb-4 line-clamp-2">
+          <div className="mb-4 line-clamp-2 text-gray-600">
             <HydrationErrorBoundary>
               <RichContent content={normalizedProduct.description} />
             </HydrationErrorBoundary>
@@ -308,7 +310,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   const renderHeroVariant = () => (
     <div 
-      className={`group relative overflow-hidden rounded-lg bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl cursor-pointer ${className}`}
+      className={`group relative cursor-pointer overflow-hidden rounded-[24px] ${noCardSurface ? 'border-none bg-transparent shadow-none hover:shadow-none' : 'border border-slate-200 bg-slate-50 shadow-[0_15px_40px_rgba(11,31,58,0.06)] hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(11,31,58,0.1)]'} transition-all duration-300 ${className}`}
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
@@ -342,7 +344,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       )}
 
       <div className="block">
-        <div className="relative h-64 w-full">
+        <div className="relative h-64 w-full overflow-hidden bg-white rounded-t-[24px]">
           <Image
             src={normalizedProduct.imageUrl}
             alt={normalizedProduct.title || 'Product image'}
@@ -353,20 +355,20 @@ const ProductCard: React.FC<ProductCardProps> = ({
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
           />
         </div>
-        <div className="p-6">
-          <h3 className="text-xl font-semibold text-gray-900 line-clamp-2">{normalizedProduct.title}</h3>
+        <div className="rounded-b-[24px] border-t border-slate-200 bg-slate-50 p-6">
+          <h3 className="line-clamp-2 text-xl font-semibold text-[#0b1f3a]">{normalizedProduct.title}</h3>
           {normalizedProduct.description && (
-            <div className="mt-2 text-gray-600 line-clamp-2">
+            <div className="mt-2 text-slate-600 line-clamp-2">
               <HydrationErrorBoundary>
                 <RichContent content={normalizedProduct.description} />
               </HydrationErrorBoundary>
             </div>
           )}
           
-          <div className="mt-4 flex items-center justify-between">
+          <div className="mt-4 flex items-center justify-between gap-4">
             <div className="flex flex-col">
               {normalizedProduct.price > 0 && (
-                <span className="text-2xl font-bold text-gray-900">${normalizedProduct.price.toFixed(2)}</span>
+                <span className="text-2xl font-bold text-[#153a5f]">${normalizedProduct.price.toFixed(2)}</span>
               )}
             </div>
             <div className="flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>

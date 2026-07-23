@@ -20,6 +20,7 @@ const ProblemSolutionSection: React.FC = () => {
           <h2 className="text-4xl md:text-5xl font-primary font-bold text-[#0d163c] mb-4">
             We Understand Your Challenges
           </h2>
+          <div className="mx-auto mb-4 h-1.5 w-24 rounded-full bg-gradient-to-r from-[#f7a236] to-[#3fa2a3]" />
           <p className="text-lg md:text-xl text-[#4b5563] max-w-2xl mx-auto font-primary">
             Every mobility challenge has a solution. Let us help you find yours with our comprehensive range of products and services.
           </p>

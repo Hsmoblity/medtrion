@@ -27,10 +27,10 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial, index })
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="bg-white rounded-2xl shadow-lg p-6 h-full flex flex-col"
+      className="flex h-full flex-col rounded-[24px] bg-white p-6 text-center"
     >
       {/* Header */}
-      <div className="flex items-center mb-4">
+      <div className="flex flex-col items-center mb-4 text-center">
         {testimonial.image ? (
           <div className="relative w-12 h-12 rounded-full overflow-hidden mr-4">
             <Image
@@ -41,8 +41,8 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial, index })
             />
           </div>
         ) : (
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mr-4">
-            <span className="text-lg font-semibold text-blue-600">
+          <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#0b1f3a] to-[#3fa2a3]">
+            <span className="text-lg font-semibold text-white">
               {testimonial.name.split(' ').map(n => n[0]).join('')}
             </span>
           </div>
@@ -52,7 +52,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial, index })
           <div className="flex items-center gap-2">
             <h4 className="font-semibold text-gray-900">{testimonial.name}</h4>
             {testimonial.verified && (
-              <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#3fa2a3]">
                 <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
@@ -64,22 +64,22 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial, index })
       </div>
 
       {/* Rating */}
-      <div className="flex items-center mb-4">
-        <div className="flex">
+      <div className="mb-4 flex flex-col items-center justify-center gap-2">
+        <div className="flex justify-center gap-1">
           {renderStars(testimonial.rating)}
         </div>
-        <span className="ml-2 text-sm text-gray-600">{testimonial.rating}/5</span>
+        <span className="text-sm text-gray-600">{testimonial.rating}/5</span>
       </div>
 
       {/* Testimonial Text */}
-      <blockquote className="text-gray-700 mb-4 flex-1">
+      <blockquote className="mb-4 flex-1 text-gray-700">
         "{testimonial.text}"
       </blockquote>
 
       {/* Product */}
-      <div className="pt-4 border-t border-gray-100">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-blue-600 font-medium">
+      <div className="border-t border-gray-100 pt-4 text-center">
+        <div className="flex flex-col items-center justify-center gap-1">
+          <span className="text-sm font-medium text-[#153a5f]">
             {testimonial.product}
           </span>
           <div className="text-xs text-gray-500">

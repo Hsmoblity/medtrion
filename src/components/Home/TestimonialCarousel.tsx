@@ -36,27 +36,29 @@ const TestimonialCarousel: React.FC = () => {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-blue-50 to-indigo-50">
-      <div className="container mx-auto px-4">
+    <section className="py-20 bg-gradient-to-br from-[#f4f8fb] via-[#f7fbfd] to-[#fef7eb]">
+      <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="mb-12 text-center"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="mb-4 text-3xl font-bold text-[#0b1f3a] md:text-4xl">
             What Our Customers Say
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <div className="mx-auto mb-4 h-1.5 w-24 rounded-full bg-gradient-to-r from-[#f7a236] to-[#3fa2a3]" />
+          <p className="mx-auto max-w-2xl text-lg text-gray-600">
             Don't just take our word for it. Here's what real customers have to say about their experience with Medtrion.
           </p>
         </motion.div>
 
+        <div className="rounded-[28px] p-6 sm:p-8 text-center">
         {/* Desktop Carousel */}
         <div className="hidden lg:block">
           <div 
-            className="relative max-w-6xl mx-auto"
+            className="relative mx-auto max-w-[600px]"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
@@ -79,36 +81,15 @@ const TestimonialCarousel: React.FC = () => {
               </AnimatePresence>
             </div>
 
-            {/* Navigation Arrows */}
-            <button
-              onClick={goToPrevious}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-[#f7a236] text-gray-600 hover:text-white rounded-full p-3 shadow-lg transition-all duration-300"
-              aria-label="Previous testimonial"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            
-            <button
-              onClick={goToNext}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-600 hover:text-gray-900 rounded-full p-3 shadow-lg transition-all duration-200"
-              aria-label="Next testimonial"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-
             {/* Dots Navigation */}
             <div className="flex justify-center space-x-2 mt-8">
               {testimonials.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => goToSlide(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  className={`h-3 w-3 rounded-full transition-all duration-300 ${
                     index === currentIndex
-                      ? 'bg-blue-600 scale-125'
+                      ? 'scale-125 bg-[#3fa2a3]'
                       : 'bg-gray-300 hover:bg-gray-400'
                   }`}
                   aria-label={`Go to testimonial ${index + 1}`}
@@ -136,7 +117,7 @@ const TestimonialCarousel: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-center mt-12"
+          className="mt-12 text-center"
         >
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <PrimaryButton href="/contact" size="lg">
@@ -147,6 +128,7 @@ const TestimonialCarousel: React.FC = () => {
             </PrimaryButton>
           </div>
         </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -155,17 +155,17 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
   // Loading state
   if (loading) {
     return (
-      <div className="relative w-full max-w-md md:max-w-xl lg:max-w-2xl mx-auto">
-        <div className="relative h-[450px] md:h-[500px] lg:h-[600px] bg-gray-100 rounded-2xl shadow-xl overflow-hidden animate-pulse">
-          <div className="h-[300px] md:h-[350px] lg:h-[400px] bg-gray-200"></div>
-          <div className="p-6 md:p-8">
-            <div className="h-6 bg-gray-200 rounded mb-3"></div>
-            <div className="h-4 bg-gray-200 rounded mb-4"></div>
-            <div className="h-8 bg-gray-200 rounded mb-4"></div>
-            <div className="h-12 bg-gray-200 rounded"></div>
+      <div className="relative mx-auto w-full max-w-[420px] sm:max-w-[460px]">
+        <div className="relative h-[420px] overflow-hidden rounded-[24px] border border-white/20 bg-white/75 backdrop-blur-sm animate-pulse">
+          <div className="h-[220px] bg-gray-200"></div>
+          <div className="p-5">
+            <div className="mb-3 h-5 rounded bg-gray-200"></div>
+            <div className="mb-4 h-3 rounded bg-gray-200"></div>
+            <div className="mb-4 h-7 rounded bg-gray-200"></div>
+            <div className="h-10 rounded bg-gray-200"></div>
           </div>
         </div>
-        <div className="text-center mt-4 text-sm text-gray-500">
+        <div className="mt-4 text-center text-sm text-gray-300">
           Loading featured products...
         </div>
       </div>
@@ -179,12 +179,12 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
 
   return (
     <div 
-      className="relative w-full max-w-md md:max-w-xl lg:max-w-2xl mx-auto"
+      className="relative mx-auto w-full max-w-[420px] sm:max-w-[460px]"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {/* Main Product Display */}
-      <div className="relative min-h-[520px] md:min-h-[560px] lg:min-h-[620px] bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div className="relative min-h-[440px] overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_10px_35px_rgba(7,22,45,0.12)]">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
@@ -195,12 +195,12 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
             className="relative min-h-full"
           >
             {/* Product Image */}
-            <div className="relative h-[220px] md:h-[260px] lg:h-[300px] overflow-hidden">
+            <div className="relative h-[260px] overflow-hidden rounded-t-[24px] bg-white">
               <Image
                 src={currentProduct.image}
                 alt={currentProduct.title}
                 fill
-                className="object-cover transition-transform duration-500 hover:scale-105"
+                className="object-contain transition-transform duration-500 hover:scale-105"
                 priority={currentSlide === 0}
                 onError={() => handleImageError(currentSlide)}
                 placeholder="blur"
@@ -208,75 +208,64 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
               />
               
               {/* Badge */}
-              <div className="absolute top-4 left-4">
-                <span className="bg-gradient-to-r from-[#3fa2a3] to-[#f7a236] text-white px-4 py-2 rounded-[35px] text-xs md:text-sm font-primary font-semibold shadow-md transition-all duration-300">
+              <div className="absolute top-3 left-3">
+                <span className="rounded-full bg-gradient-to-r from-[#3fa2a3] to-[#f7a236] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-white shadow-lg">
                   {currentProduct.badge}
                 </span>
               </div>
             </div>
 
             {/* Product Info */}
-            <div className="p-6 md:p-8">
-              <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">
+            <div className="rounded-b-[24px] border-t border-slate-200 bg-slate-50 p-5">
+              <h3 className="mb-2 text-[17px] font-semibold text-slate-900">
                 {currentProduct.title}
               </h3>
-              <p className="text-gray-600 mb-3 md:mb-4 line-clamp-2 text-xs md:text-sm">
-                {sanitizeHtml(currentProduct.description || '', { maxLength: 130 })}
+              <p className="mb-3 line-clamp-2 text-sm text-slate-600">
+                {sanitizeHtml(currentProduct.description || '', { maxLength: 120 })}
               </p>
-              <div className="flex items-center justify-between mb-3 md:mb-4">
-                <span className="text-lg md:text-xl font-bold text-gray-900">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-base font-bold text-slate-900">
                   {currentProduct.price}
                 </span>
               </div>
-              <PrimaryButton 
-                disabled
-                className="w-full text-sm py-2.5 opacity-50 cursor-not-allowed"
-                aria-disabled="true"
-                title="View Details is temporarily disabled"
-              >
-                View Details
-              </PrimaryButton>
+              {currentProduct.slug ? (
+                <PrimaryButton
+                  href={`/products/${currentProduct.slug}`}
+                  size="lg"
+                  fullWidth
+                >
+                  View Details
+                </PrimaryButton>
+              ) : (
+                <PrimaryButton
+                  disabled
+                  className="w-full py-3 text-sm"
+                  aria-disabled="true"
+                  title="View Details is temporarily unavailable"
+                >
+                  View Details
+                </PrimaryButton>
+              )}
             </div>
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* Navigation Dots */}
-      <div className="flex justify-center mt-6 md:mt-8 space-x-3">
+      <div className="mt-5 flex justify-center space-x-2.5">
         {carouselProducts.map((_, index) => (
           <button
             key={index}
             onClick={() => onSlideChange(index)}
-            className={`w-3 h-3 md:w-4 md:h-4 rounded-full transition-all duration-300 ${
+            className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${
               index === currentSlide 
-                ? 'bg-[#3fa2a3] scale-125' 
-                : 'bg-[#f7a236] hover:bg-[#3fa2a3]'
+                ? 'scale-125 bg-[#3fa2a3]' 
+                : 'bg-white/70 hover:bg-[#3fa2a3]'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}
       </div>
-
-      {/* Navigation Arrows */}
-      <button
-        onClick={() => onSlideChange((currentSlide - 1 + carouselProducts.length) % carouselProducts.length)}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full border border-[#3fa2a3]/20 bg-[#3fa2a3] text-white shadow-[0_10px_25px_rgba(63,162,163,0.25)] transition-all duration-300 hover:bg-[#f7a236] hover:text-white"
-        aria-label="Previous product"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-      
-      <button
-        onClick={() => onSlideChange((currentSlide + 1) % carouselProducts.length)}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full border border-[#3fa2a3]/20 bg-[#3fa2a3] text-white shadow-[0_10px_25px_rgba(63,162,163,0.25)] transition-all duration-300 hover:bg-[#f7a236] hover:text-white"
-        aria-label="Next product"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
     </div>
   );
 };

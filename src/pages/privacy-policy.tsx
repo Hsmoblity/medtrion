@@ -23,7 +23,7 @@ const PrivacyPolicyPage: React.FC<LegalPageProps> = ({ title, content, modified 
     : null;
 
   return (
-    <PageLayout>
+    <PageLayout hideFooter>
       <MetaHead
         title="Privacy Policy - Medtrion"
         description="Read Medtrion's Privacy Policy to understand how we collect, use, and protect your personal information."
@@ -31,7 +31,7 @@ const PrivacyPolicyPage: React.FC<LegalPageProps> = ({ title, content, modified 
 
       <div className="min-h-screen bg-gray-50">
         {/* Hero */}
-        <section className="bg-gradient-to-r from-gray-900 to-gray-800 text-white pt-32 pb-16">
+        <section className="bg-gradient-to-r from-[#0b1f3a] via-[#153a5f] to-[#3fa2a3] text-white pt-20 pb-12 sm:pt-24 sm:pb-16">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}

@@ -108,7 +108,7 @@ export default function ContactForm({
         {/* Name Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="firstName" className="mb-1 block text-sm font-medium text-[#0b1f3a]">
               First Name *
             </label>
             <input
@@ -123,7 +123,7 @@ export default function ContactForm({
           </div>
 
           <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="lastName" className="mb-1 block text-sm font-medium text-[#0b1f3a]">
               Last Name *
             </label>
             <input
@@ -141,7 +141,7 @@ export default function ContactForm({
         {/* Contact Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="mb-1 block text-sm font-medium text-[#0b1f3a]">
               Email *
             </label>
             <input
@@ -156,7 +156,7 @@ export default function ContactForm({
           </div>
 
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="phone" className="mb-1 block text-sm font-medium text-[#0b1f3a]">
               Phone *
             </label>
             <input
@@ -173,7 +173,7 @@ export default function ContactForm({
 
         {/* Subject */}
         <div>
-          <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="subject" className="mb-1 block text-sm font-medium text-[#0b1f3a]">
             Subject *
           </label>
           <input
@@ -189,14 +189,14 @@ export default function ContactForm({
 
         {/* Message */}
         <div>
-          <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="message" className="mb-1 block text-sm font-medium text-[#0b1f3a]">
             Message *
           </label>
           <textarea
             {...register('message')}
             id="message"
             rows={6}
-            className="w-full px-4 py-2 border border-[#3fa2a3]/30 rounded-lg focus:ring-2 focus:ring-[#3fa2a3] focus:border-[#3fa2a3]"
+            className="w-full rounded-lg border border-[#0b1f3a]/15 bg-[#f8fbff] px-4 py-2.5 text-gray-700 shadow-sm transition focus:border-[#3fa2a3] focus:outline-none focus:ring-2 focus:ring-[#3fa2a3]"
             placeholder="Tell us how we can help you..."
           />
           {errors.message && (
@@ -224,7 +224,7 @@ export default function ContactForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-[#3fa2a3] hover:bg-[#f7a236] disabled:bg-gray-400 text-white font-primary font-semibold py-3 px-6 rounded-[35px] transition-all duration-300"
+          className="w-full rounded-[35px] bg-gradient-to-r from-[#0b1f3a] via-[#153a5f] to-[#3fa2a3] px-6 py-3 font-primary font-semibold text-white transition-all duration-300 hover:from-[#153a5f] hover:via-[#3fa2a3] hover:to-[#f7a236] disabled:bg-gray-400"
         >
           {isSubmitting ? 'Sending...' : 'Send Message'}
         </button>

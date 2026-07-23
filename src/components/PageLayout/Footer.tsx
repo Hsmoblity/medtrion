@@ -36,10 +36,11 @@ const Footer: React.FC<FooterProps> = ({ logo, contactInfo }) => {
       {
         title: 'Products',
         links: [
-          { label: 'Mobility Scooters', href: '/products/mobility-scooters' },
-          { label: 'Stairlifts', href: '/products/stairlifts' },
-          { label: 'Bathroom Aids', href: '/products/bathroom-aids' },
-          { label: 'Lift Chairs', href: '/products/lift-chairs' }
+          { label: 'Acorn 180 Curved Stairlift', href: '/product/acorn-stairlifts-acorn-180-curved-stairlift' },
+          { label: 'Acorn 130 Straight Stairlift', href: '/product/acorn-stairlifts-acorn-130-straight-stairlift' },
+          { label: 'VivaLift Tranquil 2 Lift Chair', href: '/product/vivalift-tranquil-2-plr-935s-lift-chair' },
+          { label: 'VivaLift Ultra Lift Chair', href: '/product/vivalift-ultra-plr4955s-lift-chair' },
+          { label: 'VivaLift Classic Lift Chair', href: '/product/vivalift-classic-plr-835s-lift-chair' }
         ]
       },
       {

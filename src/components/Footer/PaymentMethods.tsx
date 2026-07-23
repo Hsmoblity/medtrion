@@ -49,11 +49,11 @@ const PaymentMethods: React.FC<FooterPaymentMethodsProps> = ({
       transition={{ duration: 0.6, delay: 0.3 }}
       className={`font-sans ${className}`}
     >
-      <h3 className="text-xl uppercase text-white font-black font-poppins mb-4">
+      <h3 className="text-xl uppercase text-white font-black font-poppins mb-5">
         We accept
       </h3>
       
-      <div className="flex flex-wrap justify-center gap-2.5 lg:justify-start">
+      <div className="flex flex-wrap justify-center gap-3 lg:justify-start">
         {paymentMethods.map((method, index) => (
           <motion.div
             key={method}

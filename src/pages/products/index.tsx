@@ -83,13 +83,16 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
       
       <div className="min-h-screen bg-gray-50">
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white pt-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div className="text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">
+        <div className="bg-gradient-to-r from-[#0b1f3a] via-[#153a5f] to-[#3fa2a3] text-white pt-20 pb-12 sm:pt-24 sm:pb-16">
+          <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-3xl text-center">
+              <span className="mb-4 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.25em] text-[#f7a236]">
+                Shop All Products
+              </span>
+              <h1 className="text-4xl md:text-5xl font-bold">
                 Our Curated Product Collection
               </h1>
-              <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
+              <p className="mt-4 text-lg leading-8 text-blue-100 md:text-xl">
                 Discover our handpicked selection of mobility solutions designed to enhance your independence and quality of life.
               </p>
             </div>
@@ -97,19 +100,20 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
         </div>
 
         {/* Product Categories Section */}
-        <div className="bg-white py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-br from-[#f4f8fb] via-[#f7fbfd] to-[#fef7eb] py-12 sm:py-14">
+          <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold text-[#0b1f3a] mb-4">
                 Product Categories
               </h2>
+              <div className="mx-auto mb-4 h-1.5 w-24 rounded-full bg-gradient-to-r from-[#f7a236] to-[#3fa2a3]" />
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 Explore our comprehensive range of mobility solutions organized by category.
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-8 text-center">
+              <div className="rounded-[24px] border border-[#0b1f3a]/10 bg-white p-8 text-center shadow-[0_15px_40px_rgba(11,31,58,0.06)]">
                 <div className="bg-blue-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -124,7 +128,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
                 </a>
               </div>
               
-              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-8 text-center">
+              <div className="rounded-[24px] border border-[#0b1f3a]/10 bg-white p-8 text-center shadow-[0_15px_40px_rgba(11,31,58,0.06)]">
                 <div className="bg-green-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -139,7 +143,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
                 </a>
               </div>
               
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-8 text-center">
+              <div className="rounded-[24px] border border-[#0b1f3a]/10 bg-white p-8 text-center shadow-[0_15px_40px_rgba(11,31,58,0.06)]">
                 <div className="bg-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -158,18 +162,19 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
         </div>
 
         {/* Products Grid */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold text-[#0b1f3a] mb-4">
               Featured Products
             </h2>
+            <div className="mx-auto mb-4 h-1.5 w-24 rounded-full bg-gradient-to-r from-[#f7a236] to-[#3fa2a3]" />
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Each product has been carefully selected for its quality, reliability, and ability to improve daily living.
             </p>
           </div>
 
-          {/* Products Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="rounded-[28px] border border-[#0b1f3a]/10 bg-gradient-to-br from-white via-[#f8fbff] to-[#f2fbfa] p-6 shadow-[0_20px_60px_rgba(11,31,58,0.08)] sm:p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {products.map((product, index) => (
               <ProductCard
                 key={product.slug}
@@ -182,11 +187,12 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
                 cardClickBehavior="configurator"
               />
             ))}
+            </div>
           </div>
 
           {/* Call to Action */}
           <div className="text-center mt-16">
-            <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl mx-auto">
+            <div className="mx-auto max-w-2xl rounded-[24px] border border-[#0b1f3a]/10 bg-white p-8 shadow-[0_15px_40px_rgba(11,31,58,0.06)]">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
                 Need Help Choosing?
               </h3>
@@ -212,18 +218,19 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
         </div>
 
         {/* Product Comparison Section */}
-        <div id="comparison" className="bg-gray-50 py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div id="comparison" className="bg-gradient-to-br from-[#f4f8fb] via-[#f7fbfd] to-[#fef7eb] py-16">
+          <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold text-[#0b1f3a] mb-4">
                 Compare Our Products
               </h2>
+              <div className="mx-auto mb-4 h-1.5 w-24 rounded-full bg-gradient-to-r from-[#f7a236] to-[#3fa2a3]" />
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 Find the perfect mobility solution by comparing features, specifications, and benefits.
               </p>
             </div>
             
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div className="overflow-hidden rounded-[28px] border border-[#0b1f3a]/10 bg-white shadow-[0_20px_60px_rgba(11,31,58,0.08)]">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -283,19 +290,20 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
         </div>
 
         {/* Testimonials Section */}
-        <div className="bg-white py-16">
+        <div className="bg-gradient-to-br from-[#f4f8fb] via-[#f7fbfd] to-[#fef7eb] py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold text-[#0b1f3a] mb-4">
                 What Our Customers Say
               </h2>
+              <div className="mx-auto mb-4 h-1.5 w-24 rounded-full bg-gradient-to-r from-[#f7a236] to-[#3fa2a3]" />
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 Real stories from real customers who have transformed their lives with our mobility solutions.
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="bg-gray-50 rounded-lg p-6">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <div className="rounded-[24px] border border-[#0b1f3a]/10 bg-white p-6 shadow-[0_15px_40px_rgba(11,31,58,0.06)]">
                 <div className="flex items-center mb-4">
                   <div className="flex text-yellow-400">
                     {[...Array(5)].map((_, i) => (
@@ -377,18 +385,19 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
         </div>
 
         {/* Features Section */}
-        <div className="bg-gray-50 py-16">
+        <div className="bg-gradient-to-br from-[#f4f8fb] via-[#f7fbfd] to-[#fef7eb] py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold text-[#0b1f3a] mb-4">
                 Why Choose Medtrion?
               </h2>
+              <div className="mx-auto mb-4 h-1.5 w-24 rounded-full bg-gradient-to-r from-[#f7a236] to-[#3fa2a3]" />
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+              <div className="rounded-[24px] border border-[#0b1f3a]/10 bg-white p-8 text-center shadow-[0_15px_40px_rgba(11,31,58,0.06)]">
+                <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#f7a236] text-white">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
@@ -398,9 +407,9 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
                 </p>
               </div>
               
-              <div className="text-center">
-                <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="rounded-[24px] border border-[#0b1f3a]/10 bg-white p-8 text-center shadow-[0_15px_40px_rgba(11,31,58,0.06)]">
+                <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#3fa2a3] text-white">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z" />
                   </svg>
                 </div>
@@ -410,9 +419,9 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
                 </p>
               </div>
               
-              <div className="text-center">
-                <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="rounded-[24px] border border-[#0b1f3a]/10 bg-white p-8 text-center shadow-[0_15px_40px_rgba(11,31,58,0.06)]">
+                <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#153a5f] text-white">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                   </svg>
                 </div>

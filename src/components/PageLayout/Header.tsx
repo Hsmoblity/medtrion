@@ -75,8 +75,8 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
   return (
     <>
       <Cart />
-      <div className="md:hidden bg-white transition-transform duration-500">
-        <div className="flex items-center px-4 py-3">
+      <div className="md:hidden sticky top-0 z-50 bg-white shadow-sm transition-transform duration-500">
+        <div className="flex items-center justify-between px-4 py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <img
@@ -86,8 +86,8 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
             />
           </Link>
           {/* Right side: ml-auto pins to far right regardless of logo size */}
-          <div className="ml-auto flex flex-row items-center gap-1">
-            <button onClick={() => router.push('/cart')} className="relative z-50 p-2 flex items-center justify-center">
+          <div className="ml-auto flex flex-row items-center gap-3">
+            <button onClick={() => router.push('/cart')} className="relative z-50 p-2 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors">
               <MdShoppingCart color="black" size={30} />
               <ClientOnly fallback={
                 <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 right-0 top-0 bg-white opacity-0">
@@ -105,20 +105,20 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
           </div>
         </div>
       </div>
-      <header className="md:flex hidden flex-row justify-between z-50 md:px-4 md:pb-2 px-1 font-medium text-[#0d163c] w-full capitalize bg-white transition-transform duration-500">
+      <header className="z-50 hidden w-full flex-row justify-between bg-gradient-to-r from-white via-[#f8fbff] to-[#fef7eb] px-1 font-medium capitalize text-[#0d163c] transition-transform duration-500 md:flex md:px-4 md:pb-2">
 
-        <div className="w-full mx-auto flex justify-between  max-w-7xl px-6">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-2">
           {/* Logo */}
 
           <Link href="/" className="flex items-start">
             <img
               src="/med-logo.png"
               alt="Medtrion Logo"
-              className="w-20 object-cover pt-1"
+              className="w-20 object-contain pt-1"
             />
           </Link>
           {/* Navigation Menu */}
-          <nav className="flex space-x-6 text-lg mt-2">
+          <nav className="mt-2 flex items-center space-x-5 text-lg">
             {menuItems.map((item, index) => (
               <DrawOutlineButton
                 key={index} 
@@ -126,7 +126,7 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
                   e.preventDefault();
                   handleAnchorNavigation(item.href, router, item.name);
                 }}
-                className="uppercase font-bold font-poppins tracking-widest text-[#0d163c] hover:text-[#3fa2a3]"
+                className="rounded-full px-3 py-2 font-poppins font-bold uppercase tracking-[0.2em] text-[#0d163c] transition-all duration-300 hover:bg-[#fef7eb] hover:text-[#3fa2a3]"
               >
                 {item.name}
               </DrawOutlineButton>

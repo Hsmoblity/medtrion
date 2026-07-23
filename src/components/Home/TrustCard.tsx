@@ -27,25 +27,25 @@ const TrustCard: React.FC<TrustCardProps> = ({ indicator, index }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       whileHover={{ y: -5, scale: 1.02 }}
-      className="group relative bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 border border-gray-100"
+      className="group relative rounded-[24px] border border-[#0b1f3a]/10 bg-white p-6 shadow-[0_15px_40px_rgba(11,31,58,0.06)] transition-all duration-300 hover:shadow-[0_20px_50px_rgba(11,31,58,0.1)]"
     >
       {/* Icon */}
-      <div className="flex items-center justify-center w-16 h-16 bg-[#fef3e2] rounded-full mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
-        <span className="text-2xl">{getIconComponent(indicator.icon)}</span>
+      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#fff5e0] via-[#fde7c2] to-[#f7d79a] border border-[#f7c17d]/40 shadow-sm transition-transform duration-300 group-hover:scale-110">
+        <span className="text-2xl text-[#b56e0b]">{getIconComponent(indicator.icon)}</span>
       </div>
 
       {/* Content */}
       <div className="text-center">
-        <h3 className="text-xl font-semibold text-[#0d163c] mb-2 group-hover:text-[#3fa2a3] transition-colors duration-300">
+        <h3 className="mb-2 text-xl font-semibold text-[#0b1f3a] transition-colors duration-300 group-hover:text-[#3fa2a3]">
           {indicator.title}
         </h3>
         
-        <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+        <p className="mb-4 text-sm leading-relaxed text-gray-600">
           {indicator.description}
         </p>
 
         {/* Highlight */}
-        <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#3fa2a3] to-[#f7a236] text-white text-sm font-primary font-semibold rounded-[35px] shadow-md transition-all duration-300">
+        <div className="inline-flex items-center rounded-[35px] bg-[#3fa2a3] px-4 py-2 text-sm font-primary font-semibold text-white shadow-md">
           {indicator.highlight}
         </div>
 
@@ -56,9 +56,6 @@ const TrustCard: React.FC<TrustCardProps> = ({ indicator, index }) => {
           </div>
         )}
       </div>
-
-      {/* Hover effect overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#fef3e2]/0 to-[#f0f9f8]/0 group-hover:from-[#fef3e2]/50 group-hover:to-[#f0f9f8]/50 rounded-2xl transition-all duration-300 pointer-events-none" />
     </motion.div>
   );
 };

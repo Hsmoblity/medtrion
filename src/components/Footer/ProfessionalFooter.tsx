@@ -78,7 +78,7 @@ const ProfessionalFooter: React.FC<ProfessionalFooterProps> = ({
       
       <footer
         className={`
-          w-full
+          w-full bg-slate-950 text-white
           ${className}
         `}
         role="contentinfo"
@@ -88,7 +88,7 @@ const ProfessionalFooter: React.FC<ProfessionalFooterProps> = ({
           <div className={`${footerDesignTokens.layout.container} ${footerDesignTokens.spacing.container} space-y-10`}>
             {/* Main columns */}
             <div className="grid items-start gap-6 xl:grid-cols-3">
-              <div className="rounded-[35px] bg-slate-950/90 p-6">
+              <div className=" p-6">
                 <div className="space-y-5">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-4">
@@ -124,7 +124,7 @@ const ProfessionalFooter: React.FC<ProfessionalFooterProps> = ({
                 .map((nav, index) => (
                   <div
                     key={index}
-                    className="rounded-[35px] bg-slate-950/90"
+                    className=""
                   >
                     <FooterNavigation
                       title={nav.title}
@@ -134,14 +134,14 @@ const ProfessionalFooter: React.FC<ProfessionalFooterProps> = ({
                   </div>
                 ))}
 
-              <div className="rounded-[35px] bg-slate-950/90">
+              <div className="">
                 <h3 className={`${footerDesignTokens.typography.heading} mb-4`}>Contact</h3>
                 <FooterContact companyInfo={content.companyInfo} className="!p-0" />
               </div>
             </div>
 
             {/* Payments and city tags */}
-            <div className="rounded-[35px] border border-slate-800 bg-slate-950/90 p-6">
+            <div className="rounded-[35px] border border-slate-800  p-6">
               <PaymentMethods paymentMethods={content.paymentMethods} className="mb-0" />
               <div className="mt-6 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.32em] text-white">
                 {['Los Angeles', 'Long Beach', 'San Diego', 'San Jose', 'San Francisco', 'Irvine', 'New York', 'Seattle', 'Bakersfield', 'Las Vegas'].map((city) => (

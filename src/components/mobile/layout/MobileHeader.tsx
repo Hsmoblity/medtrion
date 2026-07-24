@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FaBars, FaTimes, FaSearch, FaShoppingCart, FaUser } from 'react-icons/fa';
+import Image from 'next/image';
+import { FaBars, FaTimes, FaShoppingCart } from 'react-icons/fa';
 import { useMobileOptimization } from '../hooks/useMobileOptimization';
+import { getLogoUrl, getLogoAlt } from '../../../lib/fetchSiteLogo';
 
 interface MobileHeaderProps {
   title?: string;
@@ -82,14 +84,11 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({
   };
 
   // Logo styles
-  const logoStyles = {
+  const logoStyles: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     cursor: 'pointer',
-    fontSize: isMobile ? '18px' : '20px',
-    fontWeight: 'bold',
-    color: '#1f2937',
-    textDecoration: 'none',
+    gap: '8px',
   };
 
   // Action buttons styles
@@ -125,44 +124,31 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({
       >
         <div style={headerContentStyles}>
           {/* Logo */}
-          <div 
+          <div
             style={logoStyles}
             onClick={handleLogoClick}
             role="button"
             tabIndex={0}
             aria-label="Go to homepage"
           >
-            {title || 'HSM Mobility'}
+            <Image
+              src={getLogoUrl(undefined)}
+              alt={getLogoAlt(undefined)}
+              width={120}
+              height={40}
+              style={{ objectFit: 'contain' }}
+            />
           </div>
 
-          {/* Action Buttons */}
+          {/* Action Buttons: Cart then Menu (compact row) */}
           <div style={actionButtonsStyles}>
-            {/* Search Button */}
-            <button
-              style={buttonStyles}
-              onClick={toggleSearch}
-              aria-label="Search"
-              aria-expanded={isSearchOpen}
-            >
-              <FaSearch size={isMobile ? 16 : 18} />
-            </button>
-
             {/* Cart Button */}
             <button
               style={buttonStyles}
               onClick={() => {/* Navigate to cart */}}
               aria-label="Shopping cart"
             >
-              <FaShoppingCart size={isMobile ? 16 : 18} />
-            </button>
-
-            {/* User Button */}
-            <button
-              style={buttonStyles}
-              onClick={() => {/* Navigate to user account */}}
-              aria-label="User account"
-            >
-              <FaUser size={isMobile ? 16 : 18} />
+              <FaShoppingCart size={isMobile ? 18 : 20} />
             </button>
 
             {/* Menu Toggle Button */}
@@ -173,9 +159,9 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({
               aria-expanded={isMenuOpen}
             >
               {isMenuOpen ? (
-                <FaTimes size={isMobile ? 16 : 18} />
+                <FaTimes size={isMobile ? 18 : 20} />
               ) : (
-                <FaBars size={isMobile ? 16 : 18} />
+                <FaBars size={isMobile ? 18 : 20} />
               )}
             </button>
           </div>
@@ -244,6 +230,16 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({
           aria-label="Mobile navigation menu"
         >
           <div style={{ padding: '24px' }}>
+            {/* Logo inside mobile menu */}
+            <div style={{ marginBottom: 18 }} onClick={handleLogoClick}>
+              <Image
+                src={getLogoUrl(undefined)}
+                alt={getLogoAlt(undefined)}
+                width={140}
+                height={48}
+                style={{ objectFit: 'contain' }}
+              />
+            </div>
             {/* Navigation Links */}
             <div style={{ marginBottom: '32px' }}>
               <h3 style={{ 

@@ -43,7 +43,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column' as const,
-    paddingTop: showHeader ? (isMobile ? '60px' : '80px') : '0',
+    paddingTop: showHeader ? (isMobile ? '72px' : '88px') : '0',
     paddingBottom: showFooter ? (isMobile ? '60px' : '80px') : '0',
     minHeight: 'calc(100vh - 120px)',
   };

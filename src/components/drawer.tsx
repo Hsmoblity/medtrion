@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useImperativeHandle } from "react";
 import { useAnimate, stagger } from "framer-motion";
 import { RiMenu4Line } from "react-icons/ri";
 import Link from "next/link";
@@ -88,15 +88,34 @@ interface ContactInfo {
 interface DrawerProps {
     logo?: SiteLogo | null;
     contactInfo?: ContactInfo | null;
+    /**
+     * If true, Drawer will render its internal menu toggle button.
+     * Set to false when parent renders the toggle in the header.
+     */
+    showInternalToggle?: boolean;
 }
 
-const Drawer: React.FC<DrawerProps> = ({ logo, contactInfo }) => {
+export interface DrawerHandle {
+    toggle: () => void;
+    open: () => void;
+    close: () => void;
+    isOpen: () => boolean;
+}
+
+const Drawer = React.forwardRef<DrawerHandle, DrawerProps>(({ logo, contactInfo, showInternalToggle = true }, ref) => {
     const router = useRouter();
     const toggleDrawer = () => {
         setIsOpen(!isOpen);
     };
     const [isOpen, setIsOpen] = useState(false);
     const scope = useMenuAnimation(isOpen);
+
+    useImperativeHandle(ref, () => ({
+        toggle: () => setIsOpen(v => !v),
+        open: () => setIsOpen(true),
+        close: () => setIsOpen(false),
+        isOpen: () => isOpen,
+    }), [isOpen]);
     return (
         <div
             ref={scope}
@@ -250,15 +269,17 @@ const Drawer: React.FC<DrawerProps> = ({ logo, contactInfo }) => {
                     </li>
                 </ul>
             </nav>
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="w-12 h-12 rounded-full bg-transparent p-2.5 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
-                aria-label="Toggle navigation menu"
-            >
-                <RiMenu4Line size={32} className="text-gray-700" />
-            </button>
+            {showInternalToggle && (
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="w-12 h-12 rounded-full bg-transparent p-2.5 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
+                    aria-label="Toggle navigation menu"
+                >
+                    <RiMenu4Line size={32} className="text-gray-700" />
+                </button>
+            )}
         </div>
     );
-}
+});
 
 export default Drawer;

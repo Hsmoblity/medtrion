@@ -3,7 +3,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from 'next/router';
 import { MdShoppingCart } from "react-icons/md";
 import { DrawOutlineButton } from "components/btn";
-import Drawer from "components/drawer";
+import Drawer, { DrawerHandle } from "components/drawer";
+import { RiMenu4Line } from 'react-icons/ri';
+import { useRef } from 'react';
 import Link from "next/link";
 import { useCartStore, useCartCount, useIsHydrated } from "stores/cartStore";
 import { handleAnchorNavigation } from "lib/utils/navigation";
@@ -43,6 +45,11 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [scrollDirection, setScrollDirection] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const drawerRef = useRef<DrawerHandle | null>(null);
+
+  const toggleDrawerFromHeader = () => {
+    if (drawerRef.current) drawerRef.current.toggle();
+  };
 
 
 
@@ -101,7 +108,15 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
                 )}
               </ClientOnly>
             </button>
-            <Drawer logo={logo} contactInfo={contactInfo} />
+            {/* Drawer controlled from header: render hamburger here */}
+            <button
+              onClick={toggleDrawerFromHeader}
+              className="w-12 h-12 rounded-full bg-transparent p-2.5 hover:bg-gray-100 transition-colors duration-200 focus:outline-none"
+              aria-label="Open menu"
+            >
+              <RiMenu4Line size={26} className="text-gray-700" />
+            </button>
+            <Drawer ref={drawerRef} logo={logo} contactInfo={contactInfo} showInternalToggle={false} />
           </div>
         </div>
       </div>

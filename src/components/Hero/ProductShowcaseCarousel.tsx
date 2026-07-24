@@ -155,7 +155,7 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
   // Loading state
   if (loading) {
     return (
-      <div className="relative mx-auto w-full max-w-[420px] sm:max-w-[460px]">
+      <div className="relative w-full max-w-[420px] sm:max-w-[460px] ml-auto">
         <div className="relative h-[420px] overflow-hidden rounded-[24px] border border-white/20 bg-white/75 backdrop-blur-sm animate-pulse">
           <div className="h-[220px] bg-gray-200"></div>
           <div className="p-5">
@@ -179,7 +179,7 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
 
   return (
     <div 
-      className="relative mx-auto w-full max-w-[420px] sm:max-w-[460px]"
+      className="relative w-full max-w-[420px] sm:max-w-[460px] ml-auto"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

@@ -119,9 +119,9 @@ const EnhancedHero: React.FC = () => {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative"
+            className="relative flex justify-end pr-0"
           >
-            <div className="rounded-[32px] overflow-hidden">
+            <div className="rounded-[32px] overflow-hidden max-w-[640px] w-full pr-0">
               <ProductShowcaseCarousel 
                 products={content.featuredProducts}
                 currentSlide={currentSlide}

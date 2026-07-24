@@ -1,0 +1,25 @@
+name: Deploy to AWS Lightsail
+
+on:
+  push:
+    branches:
+      - medtrion
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/bitnami/working/hsmobility
+            git fetch github medtrion
+            git reset --hard github/medtrion
+            cp /home/bitnami/env-backup-20260722 /home/bitnami/working/hsmobility/.env
+            npm install
+            npm run build
+            pm2 restart medtrion

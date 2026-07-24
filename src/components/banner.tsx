@@ -7,12 +7,12 @@ import { PrimaryButton } from 'components/ui';
 function Banner() {
     const router = useRouter();
     return (
+        <section className="py-8 md:py-12 bg-white">
+            <div className="container-center">
+                <div className="relative overflow-hidden rounded-[28px] border border-white/60 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(240,247,246,0.9)_45%,rgba(247,237,221,0.9))] p-[1px] shadow-[0_20px_60px_rgba(13,22,60,0.12)] backdrop-blur-xl">
+                    <div className="rounded-[27px] bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.98),_rgba(245,241,232,0.92)_45%,_rgba(234,247,246,0.9))] p-8 md:p-10">
 
-        <div className="w-full max-w-7xl mx-auto my-8 md:my-12 px-4 md:px-0">
-            <div className="relative overflow-hidden rounded-[28px] border border-white/60 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(240,247,246,0.9)_45%,rgba(247,237,221,0.9))] p-[1px] shadow-[0_20px_60px_rgba(13,22,60,0.12)] backdrop-blur-xl">
-                <div className="rounded-[27px] bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.98),_rgba(245,241,232,0.92)_45%,_rgba(234,247,246,0.9))] p-8 md:p-10">
-
-                <div className="container-center flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div className="container-center flex flex-col md:flex-row items-center justify-between gap-8">
                     {/* Image Section */}
                     <div className="flex flex-col w-full md:w-1/4 mb-4 md:mb-0">
                         <img
@@ -49,10 +49,11 @@ function Banner() {
                     >
                         Check out
                     </PrimaryButton>
-                </div>
+                    </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
     );
 }
 

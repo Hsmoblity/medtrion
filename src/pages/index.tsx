@@ -79,7 +79,7 @@ const Home = ({ products, error }: HomeProps) => {
       <Banner />
 
       {/* Get a FREE Quote Section */}
-      <div className="py-16 md:py-20 bg-gradient-to-r from-[#0d163c] to-[#1a234f]">
+      <div className="py-16 md:py-20 bg-[#0d163c]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-primary font-bold text-white mb-4">
             Get a FREE Quote

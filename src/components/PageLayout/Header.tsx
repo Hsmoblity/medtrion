@@ -83,7 +83,7 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
     <>
       <Cart />
       <div className="md:hidden sticky top-0 z-50 bg-white shadow-sm transition-transform duration-500">
-        <div className="flex items-center justify-between px-4 py-4">
+        <div className="flex items-center justify-between px-4 py-0 md:py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <img

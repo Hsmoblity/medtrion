@@ -137,3 +137,19 @@ a {
 a:hover {
   @apply text-brand-primary;
 }
+
+.swiper-pagination {
+  margin-top: 20px;
+  position: relative !important;
+}
+
+.swiper-pagination-bullet {
+  width: 10px;
+  height: 10px;
+  background: #0d163c !important;
+  opacity: 1;
+}
+
+.swiper-pagination-bullet-active {
+  background: #3fa2a3 !important;
+}

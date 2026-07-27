@@ -355,7 +355,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
           />
         </div>
-        <div className="rounded-b-[24px] border-t border-slate-200 bg-slate-50 p-6">
+        <div className="rounded-b-[24px] border-t border-slate-200 bg-slate-50 p-6 flex flex-col justify-between h-[220px]">
           <h3 className="line-clamp-2 text-xl font-semibold text-[#0b1f3a]">{normalizedProduct.title}</h3>
           {normalizedProduct.description && (
             <div className="mt-2 text-slate-600 line-clamp-2">
@@ -365,7 +365,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             </div>
           )}
           
-          <div className="mt-4 flex items-center justify-between gap-4">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-4 md:border md:p-2 md:rounded-full">
             <div className="flex flex-col">
               {normalizedProduct.price > 0 && (
                 <span className="text-2xl font-bold text-[#153a5f]">${normalizedProduct.price.toFixed(2)}</span>

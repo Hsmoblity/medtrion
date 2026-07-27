@@ -5,6 +5,7 @@ import CartPageGroups from 'components/Cart/CartPageGroups';
 import { useRouter } from 'next/router';
 import { PrimaryButton } from '../components/ui';
 import { formatPrice, calculateOrderTotal } from 'lib/utils/priceUtils';
+import Hero from "@/components/Common/Hero";
 
 const CartPage = () => {
     const cart = useCartItems();
@@ -46,12 +47,21 @@ const CartPage = () => {
     // Show loading state while cart is hydrating
     if (!isHydrated) {
         return (
+             <>
+        {/* Hero Section */}
+        <Hero
+  badge="Shopping"
+  title="Shopping Cart"
+  description="Review your selected products before requesting your consultation."
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Shopping Cart" },
+  ]}
+/>
             <div className="min-h-screen bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    {/* Header */}
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
-                    </div>
+                   
+                   
                     
                     {/* Loading State */}
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
@@ -62,16 +72,25 @@ const CartPage = () => {
                     </div>
                 </div>
             </div>
+            </>
         );
     }
 
     return (
+         <>
+         {/* Hero Section */}
+        <Hero
+  badge="Shopping"
+  title="Shopping Cart"
+  description="Review your selected products before requesting your consultation."
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Shopping Cart" },
+  ]}
+/>
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
-                </div>
+                
 
                 {cart.length > 0 ? (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -197,6 +216,7 @@ const CartPage = () => {
                 )}
             </div>
         </div>
+        </>
     )
 }
 

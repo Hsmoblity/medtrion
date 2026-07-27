@@ -3,7 +3,7 @@ import { GetServerSideProps } from 'next';
 import MetaHead from '../../components/MetaHead';
 import BlogsList from '../../components/blog-list';
 import { Blog } from '../../components/blog-preview';
-
+import Hero from "../../components/Common/Hero";
 // Temporary blog data for demonstration
 const TEMPORARY_BLOGS: Blog[] = [
   {
@@ -100,21 +100,16 @@ const BlogsPage: React.FC<BlogsPageProps> = ({ blogs: propBlogs, error: propErro
       />
       
       <div className="min-h-screen bg-gray-50">
-        <section className="bg-gradient-to-r from-[#0b1f3a] via-[#153a5f] to-[#3fa2a3] text-white pt-16 pb-12 sm:pt-20 sm:pb-16">
-          <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-3xl text-center">
-              <span className="mb-4 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.25em] text-[#f7a236]">
-                Helpful Insights
-              </span>
-              <h1 className="text-4xl font-bold md:text-5xl">
-                Our Blog & Resources
-              </h1>
-              <p className="mt-4 text-lg leading-8 text-blue-100 md:text-xl">
-                Read practical guidance on mobility products, home safety, and everyday independence.
-              </p>
-            </div>
-          </div>
-        </section>
+         {/* Hero Section */}
+        <Hero
+            badge="Helpful Insights"
+            title="Our Blog & Resources"
+            description="Read practical guidance on mobility products, home safety, and everyday independence."
+            breadcrumbs={[
+              { label: "Home", href: "/" },
+              { label: "Our Blog & Resources" },
+            ]}
+          />
 
         {loading ? (
           <div className="flex items-center justify-center min-h-[50vh] py-12">

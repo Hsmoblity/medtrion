@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { GraphQLClient } from 'graphql-request';
 import PageLayout from '../components/PageLayout/PageLayout';
 import MetaHead from '../components/MetaHead';
-
+import Hero from "@/components/Common/Hero";
 interface LegalPageProps {
   title: string;
   content: string;
@@ -17,32 +17,22 @@ const CookiePolicyPage: React.FC<LegalPageProps> = ({ title, content, modified }
     : null;
 
   return (
-    <PageLayout>
+    <PageLayout hideFooter>
       <MetaHead
         title="Cookie Policy - Medtrion"
         description="Learn how Medtrion uses cookies and similar technologies to improve your browsing experience and provide personalized services."
       />
 
       <div className="min-h-screen bg-gray-50">
-        {/* Hero */}
-        <section className="bg-gradient-to-r from-blue-900 to-blue-800 text-white pt-32 pb-16">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center"
-            >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">{title}</h1>
-              <p className="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto">
-                Learn how we use cookies and similar technologies to enhance your experience.
-              </p>
-              {lastUpdated && (
-                <p className="text-sm sm:text-base text-blue-200 mt-4">Last updated: {lastUpdated}</p>
-              )}
-            </motion.div>
-          </div>
-        </section>
+        <Hero
+            badge={`Last updated: ${lastUpdated}`}
+            title="Cookie Policy"
+            description="Learn how we use cookies and similar technologies to enhance your experience."
+            breadcrumbs={[
+              { label: "Home", href: "/" },
+              { label: "Cookie Policy" },
+            ]}
+          />
 
         {/* Content */}
         <section className="py-12 sm:py-16">

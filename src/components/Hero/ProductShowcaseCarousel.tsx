@@ -230,7 +230,7 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
               </div>
               {currentProduct.slug ? (
                 <PrimaryButton
-                  href={`/products/${currentProduct.slug}`}
+                  href={`/product/${currentProduct.slug}`}
                   size="lg"
                   fullWidth
                 >

@@ -39,7 +39,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, logo, contactInfo, hi
         <Header logo={logo} contactInfo={contactInfo} />
 
       </motion.div>
-      <div className="relative z-10 min-h-[75vh] bg-gray-50 pt-20 md:pt-10 dark:bg-gray-900">
+      <div className="relative z-10 min-h-[75vh] ">
         {children}
       </div>
 

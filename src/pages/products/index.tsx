@@ -8,6 +8,9 @@ import ProductCard from '../../components/ui/ProductCard';
 import MetaHead from '../../components/MetaHead';
 import { PrimaryButton } from '../../components/ui';
 
+
+import Hero from "@/components/Common/Hero";
+
 interface ProductsPageProps {
   products: ProductCardView[];
   error?: string;
@@ -82,22 +85,16 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
       />
       
       <div className="min-h-screen bg-gray-50">
-        {/* Hero Section */}
-        <div className="bg-gradient-to-r from-[#0b1f3a] via-[#153a5f] to-[#3fa2a3] text-white pt-20 pb-12 sm:pt-24 sm:pb-16">
-          <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-3xl text-center">
-              <span className="mb-4 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.25em] text-[#f7a236]">
-                Shop All Products
-              </span>
-              <h1 className="text-4xl md:text-5xl font-bold">
-                Our Curated Product Collection
-              </h1>
-              <p className="mt-4 text-lg leading-8 text-blue-100 md:text-xl">
-                Discover our handpicked selection of mobility solutions designed to enhance your independence and quality of life.
-              </p>
-            </div>
-          </div>
-        </div>
+         {/* Hero Section */}
+        <Hero
+            badge="Shop All Products"
+            title="Our Curated Product Collection"
+            description="Read practical guidance on mobility products, home safety, and everyday independence."
+            breadcrumbs={[
+              { label: "Home", href: "/" },
+              { label: "Shop All" },
+            ]}
+          />
 
         {/* Product Categories Section */}
         <div className="bg-gradient-to-br from-[#f4f8fb] via-[#f7fbfd] to-[#fef7eb] py-12 sm:py-14">

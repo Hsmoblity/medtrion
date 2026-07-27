@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { GraphQLClient } from 'graphql-request';
 import PageLayout from '../components/PageLayout/PageLayout';
 import MetaHead from '../components/MetaHead';
+import Hero from "@/components/Common/Hero";
 
 interface LegalPageProps {
   title: string;
@@ -30,25 +31,18 @@ const PrivacyPolicyPage: React.FC<LegalPageProps> = ({ title, content, modified 
       />
 
       <div className="min-h-screen bg-gray-50">
-        {/* Hero */}
-        <section className="bg-gradient-to-r from-[#0b1f3a] via-[#153a5f] to-[#3fa2a3] text-white pt-20 pb-12 sm:pt-24 sm:pb-16">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center"
-            >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">{title}</h1>
-              <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto">
-                How we collect, use, and protect your personal information.
-              </p>
-              {lastUpdated && (
-                <p className="text-sm sm:text-base text-gray-400 mt-4">Last updated: {lastUpdated}</p>
-              )}
-            </motion.div>
-          </div>
-        </section>
+        <Hero
+            badge={`Last updated: ${lastUpdated}`}
+            title="Privacy Policy"
+            description="How we collect, use, and protect your personal information.
+
+"
+            breadcrumbs={[
+              { label: "Home", href: "/" },
+              { label: "Privacy Policy" },
+            ]}
+          />
+        
 
         {/* Content */}
         <section className="py-12 sm:py-16">

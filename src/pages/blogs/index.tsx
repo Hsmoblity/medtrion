@@ -3,7 +3,7 @@ import { GetServerSideProps } from 'next';
 import MetaHead from '../../components/MetaHead';
 import BlogsList from '../../components/blog-list';
 import { Blog } from '../../components/blog-preview';
-import Hero from "@/components/Common/Hero";
+import Hero from "@/components/common/Hero";
 // Temporary blog data for demonstration
 const TEMPORARY_BLOGS: Blog[] = [
   {

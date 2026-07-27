@@ -9,7 +9,7 @@ import MetaHead from '../../components/MetaHead';
 import { PrimaryButton } from '../../components/ui';
 
 
-import Hero from "@/components/Common/Hero";
+import Hero from "@/components/common/Hero";
 
 interface ProductsPageProps {
   products: ProductCardView[];

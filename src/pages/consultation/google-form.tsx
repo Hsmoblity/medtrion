@@ -4,7 +4,7 @@ import MetaHead from '../../components/MetaHead'
 import ConsultationForm from '../../components/Web3Forms/ConsultationForm'
 import { useCartItems } from '../../stores/cartStore'
 
-import Hero from "@/components/Common/Hero";
+import Hero from "@/components/common/Hero";
 
 export default function ConsultationGoogleFormPage() {
   const cart = useCartItems()

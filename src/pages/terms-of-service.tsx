@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { GraphQLClient } from 'graphql-request';
 import PageLayout from '../components/PageLayout/PageLayout';
 import MetaHead from '../components/MetaHead';
-import Hero from "@/components/Common/Hero";
+import Hero from "@/components/common/Hero";
 interface LegalPageProps {
   title: string;
   content: string;

@@ -11,7 +11,7 @@ import { normalizeImageUrl } from "lib/utils/image";
 import { useConfiguratorStore } from "stores/configuratorStore";
 import { motion } from "framer-motion";
 
-import Hero from "@/components/Common/Hero";
+import Hero from "@/components/common/Hero";
 // Import components
 import ModelHero from "components/configurator/ModelHero";
 import ConfiguratorSidebar from "components/configurator/ConfiguratorSidebar";

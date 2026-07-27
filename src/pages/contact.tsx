@@ -5,7 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { GraphQLClient } from "graphql-request";
-import Hero from "@/components/Common/Hero";
+import Hero from "@/components/common/Hero";
 import {
   MdLocationOn as MapPinIcon,
   MdPhone as PhoneIcon,

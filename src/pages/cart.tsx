@@ -5,7 +5,7 @@ import CartPageGroups from 'components/Cart/CartPageGroups';
 import { useRouter } from 'next/router';
 import { PrimaryButton } from '../components/ui';
 import { formatPrice, calculateOrderTotal } from 'lib/utils/priceUtils';
-import Hero from "@/components/Common/Hero";
+import Hero from "@/components/common/Hero";
 
 const CartPage = () => {
     const cart = useCartItems();

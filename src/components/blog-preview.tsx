@@ -144,7 +144,7 @@ const ComingSoonModal: React.FC<{ isOpen: boolean; onClose: () => void; blogTitl
                     {/* Content */}
                     <div className="text-center">
                         {/* Icon */}
-                        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
+                        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-orange-100 mb-4">
                             <svg className="h-8 w-8 text-[#3fa2a3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>

@@ -56,16 +56,16 @@ const ConsultationSuccessPage: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-blue-50 rounded-lg p-6 mb-8"
+              className="bg-orange-50 rounded-lg p-6 mb-8"
             >
-              <h2 className="text-xl font-semibold text-blue-900 mb-4">What Happens Next?</h2>
+              <h2 className="text-xl font-semibold text-brand-dark mb-4">What Happens Next?</h2>
               <div className="text-left space-y-3">
                 <div className="flex items-start">
                   <div className="flex-shrink-0 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center mr-3 mt-0.5">
                     <span className="text-white text-sm font-bold">1</span>
                   </div>
                   <div>
-                    <p className="text-blue-800">
+                    <p className="text-brand-dark">
                       <span className="font-medium">Review & Assessment</span> - 
                       Our mobility specialists will review your configuration and requirements.
                     </p>
@@ -76,7 +76,7 @@ const ConsultationSuccessPage: React.FC = () => {
                     <span className="text-white text-sm font-bold">2</span>
                   </div>
                   <div>
-                    <p className="text-blue-800">
+                    <p className="text-brand-dark">
                       <span className="font-medium">Personal Contact</span> - 
                       We'll reach out via your preferred contact method within 24 hours.
                     </p>
@@ -87,7 +87,7 @@ const ConsultationSuccessPage: React.FC = () => {
                     <span className="text-white text-sm font-bold">3</span>
                   </div>
                   <div>
-                    <p className="text-blue-800">
+                    <p className="text-brand-dark">
                       <span className="font-medium">Personalized Consultation</span> - 
                       Discuss options, pricing, installation, and answer all your questions.
                     </p>
@@ -98,7 +98,7 @@ const ConsultationSuccessPage: React.FC = () => {
                     <span className="text-white text-sm font-bold">4</span>
                   </div>
                   <div>
-                    <p className="text-blue-800">
+                    <p className="text-brand-dark">
                       <span className="font-medium">Next Steps</span> - 
                       Schedule installation, arrange financing, or modify your configuration as needed.
                     </p>
@@ -119,14 +119,14 @@ const ConsultationSuccessPage: React.FC = () => {
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
-                  <PhoneIcon className="h-5 w-5 text-blue-600 mr-2" />
+                  <PhoneIcon className="h-5 w-5 text-brand-primary mr-2" />
                   <div className="text-left">
                     <p className="font-medium text-gray-900">Call Us</p>
                     <p className="text-gray-600">(905) 844-7171</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
-                  <EnvelopeIcon className="h-5 w-5 text-blue-600 mr-2" />
+                  <EnvelopeIcon className="h-5 w-5 text-brand-primary mr-2" />
                   <div className="text-left">
                     <p className="font-medium text-gray-900">Email Us</p>
                     <p className="text-gray-600">info@medtrion.ca</p>

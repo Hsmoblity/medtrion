@@ -584,10 +584,10 @@ const OptionCard: React.FC<OptionCardProps> = ({
             <div className={`
               w-8 h-8 bg-gray-200 rounded-full 
               flex items-center justify-center text-gray-500 transform 
-              transition-all duration-300 ease-out hover:bg-blue-100 hover:text-blue-600
-              hover:scale-110 hover:shadow-md hover:ring-2 hover:ring-blue-200
+              transition-all duration-300 ease-out hover:bg-orange-100 hover:text-orange-600
+              hover:scale-110 hover:shadow-md hover:ring-2 hover:ring-orange-200
               ${reducedMotion ? 'transition-none' : 'scale-100 opacity-100'}
-              focus:ring-2 focus:ring-blue-300 focus:outline-none
+              focus:ring-2 focus:ring-orange-300 focus:outline-none
             `}>
               <svg className={`w-5 h-5 transition-transform duration-200 ${!reducedMotion ? 'group-hover:rotate-45' : ''}`} fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -600,7 +600,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
         {isVariable && showVariationCount && (
           <div className="absolute top-16 right-4 z-10">
             <div className={`
-              bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full
+              bg-orange-100 text-orange-700 text-xs font-medium px-2 py-1 rounded-full
               border border-purple-200 shadow-sm
               transition-all duration-300 ease-out
               hover:bg-purple-200 hover:shadow-md hover:scale-105
@@ -608,7 +608,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
             `}>
               Variable
               {variationCount > 0 && (
-                <span className="ml-1 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-purple-600 bg-purple-200 rounded-full">
+                <span className="ml-1 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-orange-600 bg-orange-200 rounded-full">
                   {variationCount}
                 </span>
               )}
@@ -619,7 +619,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
         {/* Compatibility Warning */}
         {hasCompatibilityIssues && showCompatibility && (
           <div className="absolute top-4 left-4">
-            <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center">
+            <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
               <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
@@ -664,9 +664,9 @@ const OptionCard: React.FC<OptionCardProps> = ({
           {showPrice && (
             <div className="mb-3 relative">
               <div className={`
-                font-bold text-blue-600 mb-1 transition-all duration-500 ease-out
+                font-bold text-brand-primary mb-1 transition-all duration-500 ease-out
                 ${largeText ? 'text-4xl' : size === 'large' ? 'text-3xl' : 'text-2xl'}
-                ${showRealTimePrice && currentPrice !== undefined ? 'text-green-600' : 'text-blue-600'}
+                ${showRealTimePrice && currentPrice !== undefined ? 'text-green-600' : 'text-brand-primary'}
                 ${!reducedMotion && showRealTimePrice ? 'animate-[fadeIn_0.5s_ease-out]' : ''}
                 relative
               `}>
@@ -721,13 +721,13 @@ const OptionCard: React.FC<OptionCardProps> = ({
           {/* Badges */}
           <div className="flex flex-wrap gap-2 mb-3">
             {option.adaCompliant && showSafety && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                 ADA Compliant
               </span>
             )}
             
             {option.safetyRating && showSafety && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
                 Safety: {option.safetyRating}
               </span>
             )}
@@ -754,7 +754,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
 
           {/* Insurance Preview */}
           {showInsurance && insuranceEstimate && (
-            <div className="text-sm text-green-600 mb-2">
+            <div className="text-sm text-brand-primary mb-2">
               Insurance may cover up to ${insuranceEstimate.estimatedCoverage}
             </div>
           )}
@@ -770,11 +770,11 @@ const OptionCard: React.FC<OptionCardProps> = ({
             }}
             disabled={disabled || loading}
             className={`
-              w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200
+              w-full py-3 px-4 rounded-full font-semibold text-sm transition-all duration-200
               flex items-center justify-center gap-2
               ${isSelected 
-                ? 'bg-green-600 hover:bg-green-700 text-white border-2 border-green-600 shadow-md' 
-                : 'bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-600'
+                ? 'bg-brand-acient hover:bg-brand-accent text-whitshadow-md' 
+                : 'bg-brand-primary hover:bg-brand-primary text-white'
               }
               ${disabled || loading 
                 ? 'opacity-50 cursor-not-allowed' 
@@ -825,7 +825,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
         {/* Loading Overlay */}
         {loading && (
           <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded-lg">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
           </div>
         )}
       </div>

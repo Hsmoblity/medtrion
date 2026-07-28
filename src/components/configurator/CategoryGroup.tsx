@@ -136,7 +136,7 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
   const getHeaderIcon = () => {
     if (loading || category.loadingState === 'loading') {
       return (
-        <svg className="animate-spin h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24">
+        <svg className="animate-spin h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
         </svg>
@@ -200,7 +200,7 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
       <div className="border-b border-gray-200">
         <button
           onClick={toggleCollapse}
-          className="w-full px-6 py-4 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-all duration-300 ease-out group"
+          className="w-full px-6 py-4 text-left hover:bg-gradient-to-r hover:from-orange-50 hover:to-yellow-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-inset transition-all duration-300 ease-out group"
           aria-expanded={!isCollapsed}
           aria-controls={`category-${category.id}-content`}
         >
@@ -211,7 +211,7 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-3">
-                  <h3 className="option-cards-title text-lg font-medium text-gray-900 transition-colors duration-300 group-hover:text-blue-700">
+                  <h3 className="option-cards-title text-lg font-medium text-gray-900 transition-colors duration-300 group-hover:text-gray-800">
                     {category.name}
                   </h3>
                   {category.required && (
@@ -220,12 +220,12 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
                     </span>
                   )}
                   {selectedOptionsWithVariations.length > 0 && (
-                    <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-blue-600 rounded-full transition-all duration-300 hover:bg-blue-700 hover:scale-110 animate-[fadeIn_0.5s_ease-out]">
+                    <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-brand-primary rounded-full transition-all duration-300 hover:bg-orange-700 hover:scale-110 animate-[fadeIn_0.5s_ease-out]">
                       {selectedOptionsWithVariations.length}
                     </span>
                   )}
                   {showVariationCount && selectedOptionsWithVariations.length > 0 && (
-                    <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-medium leading-none text-blue-600 bg-blue-100 rounded-full transition-all duration-300 hover:bg-blue-200 hover:scale-105 animate-[slideInUp_0.4s_ease-out]">
+                    <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-medium leading-none text-brand-white bg-brand-primary bg-orange-100 rounded-full transition-all duration-300 hover:bg-orange-200 hover:scale-105 animate-[slideInUp_0.4s_ease-out]">
                       {selectedOptionsWithVariations.reduce((sum, option) => sum + option.selectedVariations.length, 0)} variations
                     </span>
                   )}
@@ -243,7 +243,7 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
             
             <div className="flex items-center ml-4">
               <svg
-                className={`h-5 w-5 text-gray-400 transition-all duration-300 ease-out group-hover:text-blue-500 ${
+                className={`h-5 w-5 text-gray-400 transition-all duration-300 ease-out group-hover:text-gray-800 ${
                   isCollapsed ? 'transform rotate-180' : ''
                 }`}
                 fill="none"
@@ -289,15 +289,15 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
         {/* Help Text */}
         {category.helpText && !isCollapsed && !validationError && !error && (
           <div className="px-6 pb-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+            <div className="bg-orange-50 border border-orange-200 rounded-md p-3">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="h-5 w-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm text-blue-700">{category.helpText}</p>
+                  <p className="text-sm text-orange-700">{category.helpText}</p>
                 </div>
               </div>
             </div>
@@ -412,7 +412,7 @@ const CategoryGroup: React.FC<CategoryGroupProps> = ({
                       onClick={() => {
                         selectedOptions.forEach(option => onToggleOption?.(option));
                       }}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      className="text-white bg-brand-primary hover:bg-brand-accent text-sm font-medium"
                     >
                       Clear All
                     </button>

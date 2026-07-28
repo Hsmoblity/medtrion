@@ -189,7 +189,7 @@ const PaymentAnalytics: React.FC<PaymentAnalyticsProps> = ({ className = '' }) =
         
         <div className="bg-white rounded-lg shadow p-4">
           <div className="text-sm font-medium text-gray-500">Success Rate</div>
-          <div className="text-2xl font-bold text-blue-600">{metrics.successRate.toFixed(1)}%</div>
+          <div className="text-2xl font-bold text-brand-primary">{metrics.successRate.toFixed(1)}%</div>
         </div>
         
         <div className="bg-white rounded-lg shadow p-4">
@@ -212,7 +212,7 @@ const PaymentAnalytics: React.FC<PaymentAnalyticsProps> = ({ className = '' }) =
             <select
               value={filters.status}
               onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-orange-500"
             >
               <option value="">All Statuses</option>
               <option value="success">Success</option>
@@ -228,7 +228,7 @@ const PaymentAnalytics: React.FC<PaymentAnalyticsProps> = ({ className = '' }) =
               type="date"
               value={filters.dateFrom}
               onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-orange-500"
             />
           </div>
           
@@ -238,7 +238,7 @@ const PaymentAnalytics: React.FC<PaymentAnalyticsProps> = ({ className = '' }) =
               type="date"
               value={filters.dateTo}
               onChange={(e) => setFilters(prev => ({ ...prev, dateTo: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-orange-500"
             />
           </div>
           
@@ -247,7 +247,7 @@ const PaymentAnalytics: React.FC<PaymentAnalyticsProps> = ({ className = '' }) =
             <select
               value={filters.limit}
               onChange={(e) => setFilters(prev => ({ ...prev, limit: parseInt(e.target.value) }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-orange-500"
             >
               <option value={25}>25</option>
               <option value={50}>50</option>

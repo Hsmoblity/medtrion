@@ -108,7 +108,7 @@ export const TypographyShowcase: React.FC = () => {
             <input 
               id="example-input"
               type="email" 
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-orange-500"
               placeholder="Enter your email"
             />
           </div>
@@ -188,7 +188,7 @@ export const Example = () => {
           On mobile devices, headings are slightly smaller, while on desktop they scale up 
           for better visual hierarchy.
         </Text>
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+        <div className="bg-orange-50 dark:bg-blue-900/20 p-4 rounded-lg">
           <Text variant="small" weight="medium" color="info">
             💡 Tip: Resize your browser window to see responsive typography in action!
           </Text>

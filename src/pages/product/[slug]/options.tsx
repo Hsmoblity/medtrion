@@ -150,12 +150,12 @@ const OptionsPage = ({ product, editingCartItem, editSessionData, seoMeta, error
                 ) : (
                     // Fallback to old system if configurator data not available
                     <div>
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-                            <h3 className="text-lg font-semibold text-blue-800 mb-2">Configuration Loading</h3>
-                            <p className="text-blue-700 mb-4">
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 text-center">
+                            <h3 className="text-lg font-semibold text-brand-dark mb-2">Configuration Loading</h3>
+                            <p className="text-brand-dark mb-4">
                                 Loading configuration options for {product.title}...
                             </p>
-                            <p className="text-sm text-blue-600">
+                            <p className="text-sm text-brand-primary">
                                 If this message persists, please refresh the page or contact support.
                             </p>
                         </div>

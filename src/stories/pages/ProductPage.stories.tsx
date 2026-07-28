@@ -135,7 +135,7 @@ const ProductPageShowcase: React.FC = () => {
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
                   {mockProduct.title}
                 </h1>
-                <p className="text-2xl font-semibold text-blue-600 mb-4">
+                <p className="text-2xl font-semibold text-brand-primary mb-4">
                   ${mockProduct.price.toFixed(2)}
                 </p>
                 <p className="text-gray-600 leading-relaxed">

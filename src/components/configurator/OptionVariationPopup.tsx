@@ -438,11 +438,11 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
         {/* Enhanced Header with gradient and better animations */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
           <div className="flex items-center gap-3 animate-[fadeIn_0.6s_ease-out]">
-            <h2 className="text-2xl font-bold text-gray-900 transition-colors duration-300 hover:text-blue-700">
+            <h2 className="text-2xl font-bold text-gray-900 transition-colors duration-300 hover:text-brand-primary">
               {currentOption.name || currentOption.title}
             </h2>
             {isEditMode && (
-              <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full animate-pulse border border-blue-200">
+              <span className="px-3 py-1 bg-orange-100 text-brand-dark text-sm font-medium rounded-full animate-pulse border border-orange-200">
                 Edit Mode
               </span>
             )}
@@ -495,12 +495,12 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
 
           {/* Edit Mode Info */}
           {isEditMode && currentVariations.length > 0 && (
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h3 className="font-semibold text-blue-900 mb-2">Current Selection</h3>
-              <p className="text-blue-700 text-sm">
+            <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+              <h3 className="font-semibold text-brand-dark mb-2">Current Selection</h3>
+              <p className="text-dark-brand text-sm">
                 Currently selected: {currentVariations.map(v => v.name).join(', ')}
               </p>
-              <p className="text-blue-600 text-xs mt-1">
+              <p className="text-gray-500 text-xs mt-1">
                 Make your changes below and click &quot;Update Configuration&quot; to save.
               </p>
             </div>
@@ -572,7 +572,7 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
               </div>
               <button
                 onClick={onClose}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-brand-dark text-white rounded-lg hover:bg-brand-accent transition-colors"
               >
                 Close
               </button>
@@ -616,7 +616,7 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
               <div className="border-t border-gray-300 pt-2">
                 <div className="flex justify-between">
                   <span className="font-semibold text-gray-900">Total Option Price:</span>
-                  <span className="font-bold text-lg text-blue-600">
+                  <span className="font-bold text-lg text-brand-primary">
                     ${totalPrice.toFixed(2)}
                   </span>
                 </div>
@@ -635,7 +635,7 @@ const OptionVariationPopup: React.FC<UnifiedOptionVariationPopupProps> = ({
           </button>
           <button
             onClick={handleAddToConfiguration}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="px-6 py-2 bg-brand-dark text-white rounded-lg hover:bg-brand-accent transition-colors font-medium"
             disabled={currentTempSelections.length === 0}
           >
             {isEditMode ? 'Update Configuration' : 'Add to Configuration'}

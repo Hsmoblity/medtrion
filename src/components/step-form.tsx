@@ -167,7 +167,7 @@ export default function Form() {
                                                 id='firstName'
                                                 {...register('firstName')}
                                                 autoComplete='given-name'
-                                                className='block w-full rounded-md border-0 py-2.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 sm:text-lg sm:leading-6'
+                                                className='block w-full rounded-md border-0 py-2.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-500 focus:border-orange-500 transition-colors duration-200 sm:text-lg sm:leading-6'
                                             />
                                             {errors.firstName?.message && (
                                                 <p className='mt-2 text-xl text-red-400'>
@@ -190,7 +190,7 @@ export default function Form() {
                                                 id='lastName'
                                                 {...register('lastName')}
                                                 autoComplete='family-name'
-                                                className='block w-full rounded-md border-0 py-2.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 sm:text-lg sm:leading-6'
+                                                className='block w-full rounded-md border-0 py-2.5 pl-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-500 focus:border-orange-500 transition-colors duration-200 sm:text-lg sm:leading-6'
                                             />
                                             {errors.lastName?.message && (
                                                 <p className='mt-2 text-xl text-red-400'>

@@ -69,7 +69,7 @@ export default function GoogleFormEmbed({
       {showFallbackLink && (
         <p className="mb-4 text-sm text-gray-600">
           If the form doesn't load,{' '}
-          <a href={url} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-800 underline">
+          <a href={url} target="_blank" rel="noreferrer" className="text-brand-primary hover:text-brand-dark underline">
             open it in a new tab
           </a>
           .

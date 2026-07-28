@@ -36,11 +36,11 @@
 }
 
 .productType {
-  @apply text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium;
+  @apply text-xs bg-orange-100 text-brand-dark px-2 py-1 rounded-full font-medium;
 }
 
 .configurationStatus {
-  @apply flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-200;
+  @apply flex items-center justify-between bg-orange-50 p-3 rounded-lg border border-orange-200;
   /* Prevent overflow and ensure proper spacing */
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -51,12 +51,12 @@
 }
 
 .configText {
-  @apply text-sm text-blue-700 font-medium;
+  @apply text-sm text-brand-dark font-medium;
 }
 
 .btnEditConfig {
-  @apply text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center space-x-1;
-  @apply transition-colors duration-200 px-3 py-1 bg-white border border-blue-300 rounded-md hover:bg-blue-50;
+  @apply text-xs text-brand-primary hover:text-brand-dark font-medium flex items-center space-x-1;
+  @apply transition-colors duration-200 px-3 py-1 bg-white border border-orange-300 rounded-md hover:bg-orange-50;
   /* Ensure button fits within container */
   flex-shrink: 0;
   white-space: nowrap;
@@ -121,7 +121,7 @@
 }
 
 .connectionDot {
-  @apply w-3 h-3 bg-blue-500 rounded-full shadow-sm;
+  @apply w-3 h-3 bg-orange-500 rounded-full shadow-sm;
   @apply border-2 border-white;
 }
 
@@ -142,7 +142,7 @@
 }
 
 .optionsCount {
-  @apply text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium border border-blue-200;
+  @apply text-xs bg-orange-100 text-brand-dark px-3 py-1 rounded-full font-medium border border-orange-200;
 }
 
 .optionsList {

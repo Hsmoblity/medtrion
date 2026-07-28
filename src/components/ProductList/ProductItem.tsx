@@ -217,7 +217,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
 
           <div className="flex gap-3 mt-3 overflow-x-auto">
             {IMAGE_URLS.map((url, idx) => (
-              <button key={idx} type="button" aria-label={`Go to slide ${idx + 1}`} onClick={() => setIndex(idx)} className={`h-16 w-16 flex-shrink-0 border ${idx === index ? 'border-blue-500' : 'border-zinc-200 dark:border-zinc-800'}`}>
+              <button key={idx} type="button" aria-label={`Go to slide ${idx + 1}`} onClick={() => setIndex(idx)} className={`h-16 w-16 flex-shrink-0 border ${idx === index ? 'border-orange-500' : 'border-zinc-200 dark:border-zinc-800'}`}>
                 <img src={url} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
               </button>
             ))}
@@ -229,7 +229,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mt-2 mb-4">{product.title}</h1>
 
             <div className="mb-3">
-              <p className="text-3xl font-extrabold text-blue-600">${(Number((product as any).price) || 0).toFixed(2)}</p>
+              <p className="text-3xl font-extrabold text-brand-primary">${(Number((product as any).price) || 0).toFixed(2)}</p>
               {(product as any).regularPrice && <p className="text-sm text-gray-500 line-through">${Number((product as any).regularPrice || 0).toFixed(2)}</p>}
             </div>
             <div className="mb-3 space-y-3">
@@ -277,7 +277,7 @@ const ProductItem: React.FC<ProductItemProps> = ({ product }) => {
         <div className="bg-white border rounded-lg">
           <div className="flex flex-wrap border-b">
             {['Overview', 'Documentation', 'Reviews', 'Specifications'].map((t) => (
-              <button key={t} onClick={() => setSelectedTab(t as any)} className={`px-4 py-3 -mb-px ${selectedTab === t ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'}`}>
+              <button key={t} onClick={() => setSelectedTab(t as any)} className={`px-4 py-3 -mb-px ${selectedTab === t ? 'border-b-2 border-orange-600 text-brand-primary' : 'text-gray-600'}`}>
                 {t}
               </button>
             ))}

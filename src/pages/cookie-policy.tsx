@@ -44,16 +44,16 @@ const CookiePolicyPage: React.FC<LegalPageProps> = ({ title, content, modified }
               className="bg-white rounded-lg shadow-lg p-6 sm:p-8 lg:p-12"
             >
               <div
-                className="prose prose-gray max-w-none prose-headings:font-bold prose-a:text-blue-600 hover:prose-a:text-blue-800"
+                className="prose prose-gray max-w-none prose-headings:font-bold prose-a:text-brand-primary hover:prose-a:text-brand-dark"
                 dangerouslySetInnerHTML={{ __html: content }}
               />
 
               <div className="border-t pt-6 mt-8">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Related Policies</h3>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <a href="/privacy-policy" className="text-blue-600 hover:text-blue-800 hover:underline">Privacy Policy</a>
-                  <a href="/terms-of-service" className="text-blue-600 hover:text-blue-800 hover:underline">Terms of Service</a>
-                  <a href="/contact" className="text-blue-600 hover:text-blue-800 hover:underline">Contact Us</a>
+                  <a href="/privacy-policy" className="text-brand-primary hover:text-brand-dark hover:underline">Privacy Policy</a>
+                  <a href="/terms-of-service" className="text-brand-primary hover:text-brand-dark hover:underline">Terms of Service</a>
+                  <a href="/contact" className="text-brand-primary hover:text-brand-dark hover:underline">Contact Us</a>
                 </div>
               </div>
             </motion.div>

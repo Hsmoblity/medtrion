@@ -221,7 +221,7 @@ const PaymentRetry: React.FC<PaymentRetryProps> = ({
               className={`
                 relative group flex items-start p-4 border rounded-lg transition-all duration-200
                 ${option.primary 
-                  ? 'border-blue-300 bg-blue-50 hover:bg-blue-100' 
+                  ? 'border-orange-300 bg-orange-50 hover:bg-orange-100' 
                   : 'border-gray-300 bg-white hover:bg-gray-50'
                 }
                 ${isProcessing === option.id 
@@ -233,7 +233,7 @@ const PaymentRetry: React.FC<PaymentRetryProps> = ({
             >
               <div className={`
                 flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-lg
-                ${option.primary ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}
+                ${option.primary ? 'bg-orange-100 text-brand-primary' : 'bg-gray-100 text-gray-600'}
               `}>
                 {isProcessing === option.id ? (
                   <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
@@ -248,13 +248,13 @@ const PaymentRetry: React.FC<PaymentRetryProps> = ({
               <div className="ml-4 flex-1 text-left">
                 <div className={`
                   text-sm font-medium
-                  ${option.primary ? 'text-blue-900' : 'text-gray-900'}
+                  ${option.primary ? 'text-brand-dark' : 'text-gray-900'}
                 `}>
                   {option.label}
                 </div>
                 <div className={`
                   text-sm mt-1
-                  ${option.primary ? 'text-blue-700' : 'text-gray-500'}
+                  ${option.primary ? 'text-brand-dark' : 'text-gray-500'}
                 `}>
                   {option.description}
                 </div>
@@ -264,7 +264,7 @@ const PaymentRetry: React.FC<PaymentRetryProps> = ({
                 <svg 
                   className={`
                     w-5 h-5 transition-transform duration-200 group-hover:translate-x-1
-                    ${option.primary ? 'text-blue-600' : 'text-gray-400'}
+                    ${option.primary ? 'text-brand-primary' : 'text-gray-400'}
                   `} 
                   fill="none" 
                   stroke="currentColor" 

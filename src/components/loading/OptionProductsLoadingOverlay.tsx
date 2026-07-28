@@ -25,7 +25,7 @@ const LoadingSpinner: React.FC<{
   className?: string;
 }> = ({ 
   size = 'md', 
-  color = 'text-blue-600',
+  color = 'text-brand-primary',
   className = '' 
 }) => {
   const sizeClasses = {
@@ -84,7 +84,7 @@ const LoadingProgress: React.FC<{
       </div>
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div 
-          className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
+          className="bg-brand-primary h-2 rounded-full transition-all duration-300 ease-out"
           style={{ width: `${progress}%` }}
           role="progressbar"
           aria-valuenow={progress}
@@ -224,7 +224,7 @@ export const OptionProductsLoadingOverlay: React.FC<LoadingOverlayProps> = ({
           {/* Loading spinner */}
           <LoadingSpinner 
             size={isSlowLoading ? 'lg' : 'md'}
-            color={isSlowLoading ? 'text-yellow-600' : 'text-blue-600'}
+            color={isSlowLoading ? 'text-yellow-600' : 'text-brand-primary'}
           />
           
           {/* Loading message */}

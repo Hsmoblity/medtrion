@@ -242,7 +242,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Initializing payment...</p>
         </div>
       </div>
@@ -299,12 +299,12 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           
           <div className="flex items-center">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              isProcessing ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'
+              isProcessing ? 'bg-orange-500 text-white' : 'bg-gray-300 text-gray-600'
             }`}>
               {isProcessing ? '⏳' : '3'}
             </div>
             <span className={`ml-2 text-sm font-medium ${
-              isProcessing ? 'text-blue-600' : 'text-gray-600'
+              isProcessing ? 'text-brand-primary' : 'text-gray-600'
             }`}>
               Process Payment
             </span>
@@ -563,7 +563,7 @@ const StripeElements: React.FC<StripeElementsProps> = ({
     return (
       <div className="stripe-elements-container">
         <div className="flex items-center justify-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
           <span className="ml-3 text-gray-600">Preparing payment...</span>
         </div>
       </div>

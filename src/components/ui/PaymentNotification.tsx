@@ -34,7 +34,7 @@ const PaymentNotification: React.FC<PaymentNotificationProps> = ({
   const getBackgroundColor = () => {
     switch (type) {
       case 'configuration':
-        return 'bg-blue-50 border-blue-200';
+        return 'bg-orange-50 border-orange-200';
       case 'maintenance':
         return 'bg-yellow-50 border-yellow-200';
       case 'error':
@@ -47,7 +47,7 @@ const PaymentNotification: React.FC<PaymentNotificationProps> = ({
   const getTextColor = () => {
     switch (type) {
       case 'configuration':
-        return 'text-blue-800';
+        return 'text-brand-dark';
       case 'maintenance':
         return 'text-yellow-800';
       case 'error':
@@ -77,12 +77,12 @@ const PaymentNotification: React.FC<PaymentNotificationProps> = ({
             <div className="space-y-3">
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <FaEnvelope className="w-4 h-4" />
-                <span>Email us at: <a href="mailto:support@medtrion.ca" className="text-[#3fa2a3] hover:text-blue-800 underline">support@medtrion.ca</a></span>
+                <span>Email us at: <a href="mailto:support@medtrion.ca" className="text-[#3fa2a3] hover:text-brand-dark underline">support@medtrion.ca</a></span>
               </div>
               
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <FaPhone className="w-4 h-4" />
-                <span>Call us at: <a href="tel:+1-800-HSM-HELP" className="text-[#3fa2a3] hover:text-blue-800 underline">1-800-HSM-HELP</a></span>
+                <span>Call us at: <a href="tel:+1-800-HSM-HELP" className="text-[#3fa2a3] hover:text-brand-dark underline">1-800-HSM-HELP</a></span>
               </div>
             </div>
           )}

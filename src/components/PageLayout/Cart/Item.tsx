@@ -199,7 +199,7 @@ const Item: React.FC<ItemProps> = ({ product }) => {
             {slug ? (
               <a
                 href={`/product/${slug}`}
-                className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors duration-200"
+                className="text-sm text-brand-primary hover:text-brand-dark hover:underline font-medium transition-colors duration-200"
                 onClick={(e) => {
                   e.preventDefault();
                   router.push(`/product/${slug}`);
@@ -262,7 +262,7 @@ const Item: React.FC<ItemProps> = ({ product }) => {
           className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md ${
             isStartingEdit || editStatus === 'editing'
               ? 'text-gray-400 bg-gray-100 border-gray-200 cursor-not-allowed'
-              : 'text-blue-600 hover:text-blue-800 hover:bg-blue-50 border border-blue-200 cursor-pointer'
+              : 'text-brand-primary hover:text-brand-dark hover:bg-orange-50 border border-orange-200 cursor-pointer'
           }`}
           aria-label={`Edit configuration for ${title}`}
         >
@@ -313,7 +313,7 @@ const Item: React.FC<ItemProps> = ({ product }) => {
           {/* Selected Variation */}
           {product.variationId && (
             <div className="mb-3">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-brand-dark">
                 Configuration: {product.variationId}
               </span>
             </div>

@@ -24,13 +24,13 @@ export function FormFallback({ message, className = '', height }: FormFallbackPr
         <div className="space-y-2 text-sm text-yellow-700">
           <p>
             <strong>Phone:</strong>{' '}
-            <a href={CONTACT_INFO.phoneHref} className="text-blue-600 hover:underline">
+            <a href={CONTACT_INFO.phoneHref} className="text-brand-primary hover:underline">
               {CONTACT_INFO.phone}
             </a>
           </p>
           <p>
             <strong>Email:</strong>{' '}
-            <a href={CONTACT_INFO.emailHref} className="text-blue-600 hover:underline">
+            <a href={CONTACT_INFO.emailHref} className="text-brand-primary hover:underline">
               {CONTACT_INFO.email}
             </a>
           </p>

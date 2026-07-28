@@ -223,7 +223,7 @@ const ConsultationPage: React.FC = () => {
               className="bg-white rounded-lg shadow-lg p-6"
             >
               <div className="flex items-center mb-6">
-                <ShoppingCartIcon className="h-6 w-6 text-blue-600 mr-2" />
+                <ShoppingCartIcon className="h-6 w-6 text-brand-primary mr-2" />
                 <h2 className="text-2xl font-semibold text-gray-900">Your Configuration</h2>
               </div>
 
@@ -278,9 +278,9 @@ const ConsultationPage: React.FC = () => {
               </div>
 
               {/* Consultation Benefits */}
-              <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-                <h3 className="font-semibold text-blue-900 mb-2">What to Expect:</h3>
-                <ul className="text-sm text-blue-800 space-y-1">
+              <div className="mt-8 p-4 bg-orange-50 rounded-lg">
+                <h3 className="font-semibold text-brand-dark mb-2">What to Expect:</h3>
+                <ul className="text-sm text-brand-dark space-y-1">
                   <li>• Personalized product recommendations</li>
                   <li>• Professional installation guidance</li>
                   <li>• Warranty and maintenance information</li>
@@ -297,7 +297,7 @@ const ConsultationPage: React.FC = () => {
               className="bg-white rounded-lg shadow-lg p-6"
             >
               <div className="flex items-center mb-6">
-                <PersonIcon className="h-6 w-6 text-blue-600 mr-2" />
+                <PersonIcon className="h-6 w-6 text-brand-primary mr-2" />
                 <h2 className="text-2xl font-semibold text-gray-900">Contact Information</h2>
               </div>
 
@@ -510,7 +510,7 @@ const ConsultationPage: React.FC = () => {
                   <input
                     {...register('consent')}
                     type="checkbox"
-                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="mt-1 h-4 w-4 text-brand-primary focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <label className="text-sm text-gray-700">
                     I consent to be contacted by HSM Mobility regarding my consultation request. 
@@ -571,21 +571,21 @@ const ConsultationPage: React.FC = () => {
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Or Contact Us Directly</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="flex items-center">
-                <PhoneIcon className="h-6 w-6 text-blue-600 mr-3" />
+                <PhoneIcon className="h-6 w-6 text-brand-primary mr-3" />
                 <div>
                   <p className="font-medium text-gray-900">Phone</p>
                   <p className="text-gray-600">(905) 844-7171</p>
                 </div>
               </div>
               <div className="flex items-center">
-                <EnvelopeIcon className="h-6 w-6 text-blue-600 mr-3" />
+                <EnvelopeIcon className="h-6 w-6 text-brand-primary mr-3" />
                 <div>
                   <p className="font-medium text-gray-900">Email</p>
                   <p className="text-gray-600">info@medtrion.ca</p>
                 </div>
               </div>
               <div className="flex items-center">
-                <ClockIcon className="h-6 w-6 text-blue-600 mr-3" />
+                <ClockIcon className="h-6 w-6 text-brand-primary mr-3" />
                 <div>
                   <p className="font-medium text-gray-900">Business Hours</p>
                   <p className="text-gray-600">Mon-Fri: 9 AM - 5 PM</p>

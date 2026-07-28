@@ -316,7 +316,7 @@ const ConfigurationValidator: React.FC<ConfigurationValidatorProps> = ({
             </span>
           )}
           {infos > 0 && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-brand-dark">
               {infos} Suggestion{infos === 1 ? '' : 's'}
             </span>
           )}
@@ -346,8 +346,8 @@ const ConfigurationValidator: React.FC<ConfigurationValidatorProps> = ({
                       : 'border-yellow-200 bg-yellow-50 text-yellow-800';
                   case 'info':
                     return highContrast 
-                      ? 'border-blue-400 bg-blue-900 text-blue-100'
-                      : 'border-blue-200 bg-blue-50 text-blue-800';
+                      ? 'border-orange-400 bg-blue-900 text-blue-100'
+                      : 'border-orange-200 bg-orange-50 text-brand-dark';
                   default:
                     return highContrast ? 'border-gray-400 bg-gray-900 text-gray-100' : 'border-gray-200 bg-gray-50 text-gray-800';
                 }
@@ -391,7 +391,7 @@ const ConfigurationValidator: React.FC<ConfigurationValidatorProps> = ({
           <button
             onClick={() => setShowResolutions(!showResolutions)}
             className={`text-sm font-medium focus:outline-none focus:underline ${
-              highContrast ? 'text-white hover:text-gray-300' : 'text-blue-600 hover:text-blue-500'
+              highContrast ? 'text-white hover:text-gray-300' : 'text-brand-primary hover:text-gray-500'
             }`}
           >
             {showResolutions ? 'Hide' : 'Show'} Resolution Suggestions

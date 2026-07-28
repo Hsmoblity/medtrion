@@ -120,7 +120,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
                 <p className="text-gray-600 mb-4">
                   Safe and reliable stairlifts for straight and curved staircases, designed for comfort and ease of use.
                 </p>
-                <a href="/products?category=stairlifts" className="text-blue-600 hover:text-blue-700 font-semibold">
+                <a href="/products?category=stairlifts" className="text-brand-primary hover:text-brand-dark font-semibold">
                   View Stairlifts →
                 </a>
               </div>
@@ -267,7 +267,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
                           2 Years
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <a href={`/product/${product.slug}`} className="text-blue-600 hover:text-blue-900">
+                          <a href={`/product/${product.slug}`} className="text-brand-primary hover:text-brand-dark">
                             View Details
                           </a>
                         </td>

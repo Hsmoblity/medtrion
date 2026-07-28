@@ -19,7 +19,7 @@ export const Quote: React.FC<QuoteProps> = ({
       <Typography
         variant="quote"
         as="blockquote"
-        className="quote-text border-l-4 border-blue-500 pl-6 py-2"
+        className="quote-text border-l-4 border-orange-500 pl-6 py-2"
         {...props}
       >
         "{children}"
@@ -37,7 +37,7 @@ export const Quote: React.FC<QuoteProps> = ({
               {author ? ', ' : '— '}
               <a 
                 href={cite} 
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline"
+                className="text-brand-primary dark:text-gray-400 hover:text-brand-dark dark:hover:text-gray-300 underline"
                 target="_blank"
                 rel="noopener noreferrer"
               >

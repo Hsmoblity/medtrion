@@ -299,7 +299,7 @@ describe('Cart View More Functionality', () => {
 
       const viewMoreLink = screen.getByText('View More →');
       expect(viewMoreLink).toHaveAttribute('href', '/product/test-product-slug');
-      expect(viewMoreLink).toHaveClass('text-sm', 'text-blue-600', 'hover:text-blue-800', 'hover:underline');
+      expect(viewMoreLink).toHaveClass('text-sm', 'text-brand-primary', 'hover:text-brand-dark', 'hover:underline');
     });
 
     it('should have proper accessibility attributes for fallback message', () => {

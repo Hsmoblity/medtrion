@@ -189,7 +189,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <div className="h-48 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                <span className="text-blue-800 font-semibold">Acorn Stairlift</span>
+                <span className="text-brand-dark font-semibold">Acorn Stairlift</span>
               </div>
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2">Acorn 180 Curved Stairlift</h3>

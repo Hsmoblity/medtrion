@@ -24,7 +24,7 @@ export function FormError({
     <div className={`flex flex-col items-center justify-center text-center ${className}`} style={height ? { height } : undefined}>
       <p className="text-red-600 mb-4">{error}</p>
       {showFallbackLink && url && (
-        <a href={url} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+        <a href={url} target="_blank" rel="noreferrer" className="text-brand-primary underline">
           Open form in new tab
         </a>
       )}

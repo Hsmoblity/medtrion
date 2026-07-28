@@ -54,7 +54,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   // Default spinner component
   const DefaultSpinner = () => (
     <svg
-      className={`animate-spin h-8 w-8 text-blue-600 ${prefersReducedMotion ? 'animate-none' : ''}`}
+      className={`animate-spin h-8 w-8 text-brand-primary ${prefersReducedMotion ? 'animate-none' : ''}`}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"

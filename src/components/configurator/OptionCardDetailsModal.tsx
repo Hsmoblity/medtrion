@@ -144,7 +144,7 @@ const OptionCardDetailsModal: React.FC<OptionCardDetailsModalProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <span className="text-sm text-gray-600 font-medium">Price:</span>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-2xl font-bold text-brand-primary">
                     {formatPrice(option.price)}
                   </p>
                 </div>
@@ -192,7 +192,7 @@ const OptionCardDetailsModal: React.FC<OptionCardDetailsModalProps> = ({
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Safety & Compliance</h3>
                 <div className="flex flex-wrap gap-3">
                   {option.adaCompliant && (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-teal-50 text-brand-primary">
                       <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
@@ -201,7 +201,7 @@ const OptionCardDetailsModal: React.FC<OptionCardDetailsModalProps> = ({
                   )}
                   
                   {option.safetyRating && (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-brand-dark">
                       Safety Rating: {option.safetyRating}
                     </span>
                   )}
@@ -213,15 +213,15 @@ const OptionCardDetailsModal: React.FC<OptionCardDetailsModalProps> = ({
             {(option.installationRequired || option.installationTime) && (
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Installation</h3>
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                   <div className="flex items-start">
-                    <svg className="w-5 h-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-5 h-5 text-orange-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
                     <div>
-                      <p className="text-sm text-yellow-800 font-medium">Professional Installation Required</p>
+                      <p className="text-sm text-orange-800 font-medium">Professional Installation Required</p>
                       {option.installationTime && (
-                        <p className="text-sm text-yellow-700 mt-1">
+                        <p className="text-sm text-orange-700 mt-1">
                           Estimated installation time: {option.installationTime} hours
                         </p>
                       )}
@@ -237,12 +237,12 @@ const OptionCardDetailsModal: React.FC<OptionCardDetailsModalProps> = ({
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Financing Options</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {financingOptions.slice(0, 2).map((financing) => (
-                    <div key={financing.id} className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h4 className="font-medium text-blue-900">{financing.name}</h4>
-                      <p className="text-2xl font-bold text-blue-600 my-2">
+                    <div key={financing.id} className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                      <h4 className="font-medium text-brand-dark">{financing.name}</h4>
+                      <p className="text-2xl font-bold text-brand-primary my-2">
                         ${financing.monthlyPayment}/mo
                       </p>
-                      <div className="text-sm text-blue-700 space-y-1">
+                      <div className="text-sm text-brand-dark space-y-1">
                         <p>Term: {financing.termMonths} months</p>
                         <p>APR: {(financing.interestRate * 100).toFixed(1)}%</p>
                         {financing.downPayment > 0 && (
@@ -262,26 +262,26 @@ const OptionCardDetailsModal: React.FC<OptionCardDetailsModalProps> = ({
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <span className="text-sm text-green-600 font-medium">Estimated Coverage:</span>
-                      <p className="text-xl font-bold text-green-700">
+                      <span className="text-sm text-brand-primary font-medium">Estimated Coverage:</span>
+                      <p className="text-xl font-bold text-brand-primary">
                         ${insuranceEstimate.estimatedCoverage}
                       </p>
                     </div>
                     <div>
-                      <span className="text-sm text-green-600 font-medium">Your Cost:</span>
-                      <p className="text-xl font-bold text-green-700">
+                      <span className="text-sm text-brand-primary font-medium">Your Cost:</span>
+                      <p className="text-xl font-bold text-brand-primary">
                         ${insuranceEstimate.outOfPocketCost}
                       </p>
                     </div>
                   </div>
                   <div className="mt-3">
-                    <span className="text-sm text-green-600 font-medium">Coverage Types:</span>
-                    <p className="text-sm text-green-700">
+                    <span className="text-sm text-brand-primary font-medium">Coverage Types:</span>
+                    <p className="text-sm text-brand-primary">
                       {insuranceEstimate.coverageTypes.join(', ')}
                     </p>
                   </div>
                   {insuranceEstimate.requiresPreApproval && (
-                    <p className="text-sm text-green-600 mt-2 font-medium">
+                    <p className="text-sm text-brand-primary mt-2 font-medium">
                       *Pre-approval may be required
                     </p>
                   )}
@@ -295,7 +295,7 @@ const OptionCardDetailsModal: React.FC<OptionCardDetailsModalProps> = ({
             <div className="flex justify-end space-x-3">
               <button
                 onClick={onClose}
-                className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 transition-colors"
               >
                 Close
               </button>

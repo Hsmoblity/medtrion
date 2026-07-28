@@ -222,7 +222,7 @@ export default function ConsultationForm({
       {includeCart && cart.length > 0 && (
         <div className="mb-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
           <div className="flex items-center mb-4">
-            <ShoppingCartIcon className="h-5 w-5 text-blue-600 mr-2" />
+            <ShoppingCartIcon className="h-5 w-5 text-brand-primary mr-2" />
             <h2 className="text-xl font-semibold text-gray-900">Products in Your Cart</h2>
           </div>
 

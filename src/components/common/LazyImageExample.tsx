@@ -115,29 +115,29 @@ const LazyImageExample: React.FC = () => {
       </div>
 
       {/* Performance Benefits */}
-      <div className="bg-blue-50 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-blue-900 mb-4">
+      <div className="bg-orange-50 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-brand-dark mb-4">
           Performance Benefits
         </h3>
-        <ul className="space-y-2 text-blue-800">
+        <ul className="space-y-2 text-brand-dark">
           <li className="flex items-center">
-            <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+            <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
             Images only load when they enter the viewport
           </li>
           <li className="flex items-center">
-            <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+            <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
             Shimmer placeholder maintains layout stability
           </li>
           <li className="flex items-center">
-            <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+            <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
             Smooth fade-in transitions improve user experience
           </li>
           <li className="flex items-center">
-            <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+            <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
             Automatic fallback for failed image loads
           </li>
           <li className="flex items-center">
-            <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+            <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
             Configurable loading behavior for different use cases
           </li>
         </ul>

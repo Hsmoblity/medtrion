@@ -40,7 +40,7 @@ const PaymentConfigurationNotice: React.FC<PaymentConfigurationNoticeProps> = ({
           </div>
           
           <div className="flex items-start space-x-3">
-            <FaClock className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <FaClock className="w-5 h-5 text-brand-primary mt-0.5 flex-shrink-0" />
             <div>
               <h5 className="font-medium text-gray-900">Temporary Service</h5>
               <p className="text-sm text-gray-600">
@@ -92,31 +92,31 @@ const PaymentConfigurationNotice: React.FC<PaymentConfigurationNoticeProps> = ({
       </div>
 
       {/* Contact Information */}
-      <div className="bg-blue-50 rounded-lg border border-blue-200 p-6">
-        <h4 className="text-lg font-semibold text-blue-900 mb-4">
+      <div className="bg-orange-50 rounded-lg border border-orange-200 p-6">
+        <h4 className="text-lg font-semibold text-brand-dark mb-4">
           Need Immediate Assistance?
         </h4>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <h5 className="font-medium text-blue-800">Customer Service</h5>
-            <p className="text-sm text-blue-700">
-              <a href="tel:+1-800-HSM-HELP" className="hover:text-blue-900 underline">
+            <h5 className="font-medium text-brand-dark">Customer Service</h5>
+            <p className="text-sm text-brand-dark">
+              <a href="tel:+1-800-HSM-HELP" className="hover:text-brand-dark underline">
                 1-800-HSM-HELP
               </a>
             </p>
-            <p className="text-sm text-blue-700">
-              <a href="mailto:support@medtrion.ca" className="hover:text-blue-900 underline">
+            <p className="text-sm text-brand-dark">
+              <a href="mailto:support@medtrion.ca" className="hover:text-brand-dark underline">
                 support@medtrion.ca
               </a>
             </p>
           </div>
           
           <div className="space-y-2">
-            <h5 className="font-medium text-blue-800">Business Hours</h5>
-            <p className="text-sm text-blue-700">Monday - Friday: 9:00 AM - 6:00 PM</p>
-            <p className="text-sm text-blue-700">Saturday: 10:00 AM - 4:00 PM</p>
-            <p className="text-sm text-blue-700">Sunday: Closed</p>
+            <h5 className="font-medium text-brand-dark">Business Hours</h5>
+            <p className="text-sm text-brand-dark">Monday - Friday: 9:00 AM - 6:00 PM</p>
+            <p className="text-sm text-brand-dark">Saturday: 10:00 AM - 4:00 PM</p>
+            <p className="text-sm text-brand-dark">Sunday: Closed</p>
           </div>
         </div>
       </div>

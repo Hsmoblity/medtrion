@@ -108,7 +108,7 @@ const CartOptions: React.FC<{
             {/* Action Buttons */}
             <button
               onClick={() => onEdit?.(String(mainProduct.cartItemId))}
-              className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200"
+              className="p-2 text-gray-600 hover:text-brand-primary hover:bg-orange-50 rounded-md transition-colors duration-200"
               title="Edit product"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,7 +156,7 @@ const CartOptions: React.FC<{
             {options.map((option, index) => (
               <div 
                 key={option.cartItemId || index}
-                className="flex items-center space-x-3 p-3 bg-white rounded-md border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                className="flex items-center space-x-3 p-3 bg-white rounded-md border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-200"
               >
                 <img
                   src="/temp.webp"
@@ -180,7 +180,7 @@ const CartOptions: React.FC<{
                   
                   <button
                     onClick={() => onEdit?.(String(option.cartItemId))}
-                    className="p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-100 rounded transition-colors duration-200"
+                    className="p-1 text-gray-500 hover:text-brand-primary hover:bg-orange-100 rounded transition-colors duration-200"
                     title="Edit option"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

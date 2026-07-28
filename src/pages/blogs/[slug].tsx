@@ -183,7 +183,7 @@ const BlogDetailPage = ({ blogDetailData }: any) => {
 
             // Inline nodes
             [INLINES.HYPERLINK]: (node: any, children: React.ReactNode) => (
-                <a href={node.data.uri} className="text-blue-500 underline" target="_blank" rel="noopener noreferrer">
+                <a href={node.data.uri} className="text-gray-500 underline" target="_blank" rel="noopener noreferrer">
                     {children}
                 </a>
             ),

@@ -213,13 +213,13 @@ const OptionVariationCard: React.FC<OptionVariationCardProps> = ({
       'cursor-pointer',
       {
         // Selection states
-        'border-blue-500 bg-blue-50': isSelected && !disabled,
+        'border-orange-500 bg-orange-50': isSelected && !disabled,
         'border-gray-200 bg-white': !isSelected && !disabled,
         'border-gray-300 bg-gray-50': disabled,
         
         // Hover states
         'hover:border-gray-300 hover:shadow-md': !disabled && !isSelected,
-        'hover:border-blue-600 hover:shadow-lg': !disabled && isSelected,
+        'hover:border-orange-600 hover:shadow-lg': !disabled && isSelected,
         
         // Focus states
         'ring-2 ring-blue-500 ring-offset-2': internalState.isFocused,
@@ -284,7 +284,7 @@ const OptionVariationCard: React.FC<OptionVariationCardProps> = ({
       <div className="absolute top-2 right-2">
         {isSelected ? (
           <div className={`
-            w-6 h-6 bg-blue-500 rounded-full 
+            w-6 h-6 bg-orange-500 rounded-full 
             flex items-center justify-center text-white transform 
             transition-all duration-200 shadow-md
             ${reducedMotion ? 'transition-none' : 'scale-100 opacity-100'}
@@ -374,7 +374,7 @@ const OptionVariationCard: React.FC<OptionVariationCardProps> = ({
         {/* Price */}
         {showPrice && (
           <div className={`
-            font-bold text-blue-600
+            font-bold text-brand-primary
             ${largeText ? 'text-xl' : size === 'large' ? 'text-lg' : 'text-base'}
           `}>
             {formatVariationPrice(variation.price)}

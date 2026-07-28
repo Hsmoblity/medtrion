@@ -66,7 +66,7 @@ const CartPage = () => {
                     {/* Loading State */}
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
                         <div className="flex items-center justify-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
                             <span className="ml-3 text-gray-600">Loading cart...</span>
                         </div>
                     </div>
@@ -107,7 +107,7 @@ const CartPage = () => {
                                                 console.log('🔧 Manual cleanup triggered');
                                                 cleanupWrongOptions();
                                             }}
-                                            className="text-sm text-blue-600 hover:text-blue-800 underline"
+                                            className="text-sm text-brand-primary hover:text-brand-dark underline"
                                         >
                                             Clean Up Options
                                         </button>
@@ -171,7 +171,7 @@ const CartPage = () => {
                                     <div className="text-center">
                                         <Link
                                             href="/#shop"
-                                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                                            className="text-brand-primary hover:text-brand-dark text-sm font-medium"
                                         >
                                             Continue Shopping
                                         </Link>
@@ -180,12 +180,12 @@ const CartPage = () => {
                             </div>
 
                             {/* Additional Information */}
-                            <div className="mt-6 bg-blue-50 rounded-lg p-4 border border-blue-200">
-                                <h3 className="text-sm font-medium text-blue-900 mb-2">Need Help?</h3>
-                                <p className="text-sm text-blue-700 mb-3">
+                            <div className="mt-6 bg-orange-50 rounded-lg p-4 border border-orange-200">
+                                <h3 className="text-sm font-medium text-brand-dark mb-2">Need Help?</h3>
+                                <p className="text-sm text-brand-dark mb-3">
                                     Our mobility specialists are here to help you choose the right equipment.
                                 </p>
-                                <div className="text-sm text-blue-700">
+                                <div className="text-sm text-brand-dark">
                                     <p>📞 Call: 1-800-790-1635</p>
                                     <p>💬 Live Chat: Available 9AM-6PM EST</p>
                                 </div>

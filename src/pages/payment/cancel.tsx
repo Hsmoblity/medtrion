@@ -322,7 +322,7 @@ const PaymentCancel: React.FC<PaymentCancelProps> = () => {
                   For support, contact us at{' '}
                   <a 
                     href="mailto:support@medtrion.ca" 
-                    className="text-blue-600 hover:text-blue-500 transition-colors duration-200"
+                    className="text-brand-primary hover:text-gray-500 transition-colors duration-200"
                   >
                     support@medtrion.ca
                   </a>

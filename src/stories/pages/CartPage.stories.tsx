@@ -175,8 +175,8 @@ const CartPageShowcase: React.FC = () => {
                 </div>
 
                 {shipping > 0 && (
-                  <div className="mb-6 p-3 bg-blue-50 rounded-md">
-                    <p className="text-sm text-blue-800">
+                  <div className="mb-6 p-3 bg-orange-50 rounded-md">
+                    <p className="text-sm text-brand-dark">
                       Add ${(1000 - subtotal).toFixed(2)} more for free shipping!
                     </p>
                   </div>
@@ -247,7 +247,7 @@ const CartPageShowcase: React.FC = () => {
                   />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-blue-600 font-medium">{item.price}</p>
+                <p className="text-brand-primary font-medium">{item.price}</p>
               </div>
             ))}
           </div>

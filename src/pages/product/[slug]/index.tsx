@@ -383,14 +383,14 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
       {/* Hero Section */}
       <Hero
-  badge="Product"
-  title={product.title || product.name || "Product"}
-  description={stripHtml(product.shortDescription || product.description || "").slice(0, 160)}
-  breadcrumbs={[
-    { label: "Home", href: "/" },
-    { label: product.title || product.name || "Product" },
-  ]}
-/>
+        badge="Product"
+        title={product.title || product.name || "Product"}
+        description={stripHtml(product.shortDescription || product.description || "").slice(0, 160)}
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: product.title || product.name || "Product" },
+        ]}
+      />
 
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">

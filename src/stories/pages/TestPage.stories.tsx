@@ -27,9 +27,9 @@ const TestPage: React.FC = () => {
               </p>
             </div>
             
-            <div className="bg-blue-50 p-4 rounded-md">
-              <h3 className="font-semibold text-blue-800 mb-2">🔧 Configured</h3>
-              <p className="text-blue-700 text-sm">
+            <div className="bg-orange-50 p-4 rounded-md">
+              <h3 className="font-semibold text-brand-dark mb-2">🔧 Configured</h3>
+              <p className="text-brand-dark text-sm">
                 Storybook aliases for woocommerce module
               </p>
             </div>
@@ -49,15 +49,15 @@ const TestPage: React.FC = () => {
           </h2>
           <ul className="space-y-2 text-gray-600">
             <li className="flex items-center">
-              <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+              <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
               Test the Homepage showcase story
             </li>
             <li className="flex items-center">
-              <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+              <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
               Test the ProductPage showcase story
             </li>
             <li className="flex items-center">
-              <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+              <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
               Test the CartPage showcase story
             </li>
             <li className="flex items-center">

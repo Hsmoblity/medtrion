@@ -315,7 +315,7 @@ export const themeClasses = {
   button: {
     primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
     secondary: 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2', 
-    outline: 'bg-transparent text-blue-600 border-2 border-blue-600 hover:bg-blue-50',
+    outline: 'bg-transparent text-brand-primary border-2 border-orange-600 hover:bg-orange-50',
     ghost: 'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
   },
   
@@ -336,7 +336,7 @@ export const themeClasses = {
     caption: 'text-xs font-normal font-primary leading-normal text-gray-500 dark:text-gray-500',
     
     // Interactive Text Styles
-    link: 'text-base font-medium font-primary text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline transition-colors duration-200',
+    link: 'text-base font-medium font-primary text-brand-primary dark:text-gray-400 hover:text-brand-dark dark:hover:text-gray-300 underline transition-colors duration-200',
     button: 'text-base font-semibold font-primary tracking-wide',
     label: 'text-sm font-medium font-primary text-gray-700 dark:text-gray-300',
     
@@ -352,7 +352,7 @@ export const themeClasses = {
   },
   
   // Input styles
-  input: 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+  input: 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-orange-500',
   
   // Border styles
   border: 'border-gray-200 dark:border-gray-700'

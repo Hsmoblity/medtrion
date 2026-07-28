@@ -150,11 +150,11 @@ const getTypographyClasses = (props: Omit<TypographyProps, 'children'>): string 
         secondary: 'text-gray-600 dark:text-gray-400',
         tertiary: 'text-gray-500 dark:text-gray-500',
         inverse: 'text-white dark:text-gray-900',
-        accent: 'text-blue-600 dark:text-blue-400',
+        accent: 'text-brand-primary dark:text-gray-400',
         success: 'text-green-600 dark:text-green-400',
         error: 'text-red-600 dark:text-red-400',
         warning: 'text-yellow-600 dark:text-yellow-400',
-        info: 'text-blue-600 dark:text-blue-400'
+        info: 'text-brand-primary dark:text-gray-400'
       };
       classes.push(colorClasses[color]);
     } else {
@@ -162,7 +162,7 @@ const getTypographyClasses = (props: Omit<TypographyProps, 'children'>): string 
       if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(variant)) {
         classes.push('text-gray-900 dark:text-white');
       } else if (variant === 'link') {
-        classes.push('text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300');
+        classes.push('text-brand-primary dark:text-gray-400 hover:text-brand-dark dark:hover:text-gray-300');
       } else {
         classes.push('text-gray-700 dark:text-gray-300');
       }

@@ -33,8 +33,8 @@ const CompatibilityAlert: React.FC<CompatibilityAlertProps> = ({
         };
       case 'INFO':
         return {
-          container: 'bg-blue-50 border-blue-200 text-blue-800',
-          icon: 'text-blue-400',
+          container: 'bg-orange-50 border-orange-200 text-brand-dark',
+          icon: 'text-gray-400',
           button: 'bg-[#3fa2a3] hover:bg-[#f7a236] text-white rounded-[35px] px-6 py-3'
         };
       default:

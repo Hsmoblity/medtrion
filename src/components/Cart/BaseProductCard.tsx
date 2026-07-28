@@ -87,7 +87,7 @@ const BaseProductCard: React.FC<BaseProductCardProps> = ({
             {slug ? (
               <a
                 href={`/product/${slug}`}
-                className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors duration-200"
+                className="text-sm text-brand-primary hover:text-brand-dark hover:underline font-medium transition-colors duration-200"
                 onClick={(e) => {
                   e.preventDefault();
                   router.push(`/product/${slug}`);

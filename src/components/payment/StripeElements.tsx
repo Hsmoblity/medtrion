@@ -15,7 +15,7 @@ const DynamicStripePaymentForm = dynamic(() => import('./StripePaymentForm'), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center p-8">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
       <span className="ml-3 text-gray-600">Loading payment form...</span>
     </div>
   )
@@ -139,7 +139,7 @@ const StripeElements: React.FC<StripeElementsProps> = ({
     return (
       <div className="stripe-elements-container">
         <div className="flex items-center justify-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
           <span className="ml-3 text-gray-600">Preparing payment...</span>
         </div>
       </div>

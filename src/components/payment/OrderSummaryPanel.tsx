@@ -190,7 +190,7 @@ const OrderSummaryPanel: React.FC<OrderSummaryPanelProps> = ({
             <span className="text-lg font-semibold text-gray-900 dark:text-white">
               Total:
             </span>
-            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+            <span className="text-2xl font-bold text-brand-primary dark:text-gray-400">
               {formatPrice(total)}
             </span>
           </div>

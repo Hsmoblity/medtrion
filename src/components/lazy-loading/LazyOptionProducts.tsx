@@ -280,7 +280,7 @@ export const LazyOptionProducts: React.FC<LazyOptionProductsProps> = ({
     <div className={`space-y-8 ${className}`}>
       {/* Performance metrics display (development only) */}
       {process.env.NODE_ENV === 'development' && performanceMetrics && (
-        <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs">
+        <div className="bg-orange-50 border border-orange-200 rounded p-3 text-xs">
           <details>
             <summary className="cursor-pointer font-semibold">
               Performance Metrics ({loadingDuration.toFixed(2)}ms)

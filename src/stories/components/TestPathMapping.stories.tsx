@@ -101,10 +101,10 @@ const TestPathMapping: React.FC = () => {
           
           <div className="p-3 bg-gray-50 rounded">
             <p className="text-sm text-gray-600 mb-1">
-              <strong>{"cn('bg-blue-500', 'text-white'):"}</strong>
+              <strong>{"cn('bg-orange-500', 'text-white'):"}</strong>
             </p>
             <p className="text-sm text-gray-800 font-mono">
-              <code>{cn('bg-blue-500', 'text-white')}</code>
+              <code>{cn('bg-orange-500', 'text-white')}</code>
             </p>
           </div>
         </div>

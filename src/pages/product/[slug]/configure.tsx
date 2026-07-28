@@ -436,7 +436,7 @@ const ConfigurePage: React.FC<ConfigurePageProps> = ({
               }
             </p>
             {isEditMode && (
-              <div className="flex items-center gap-2 text-sm text-blue-600 mt-2">
+              <div className="flex items-center gap-2 text-sm text-brand-primary mt-2">
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
                   className="h-4 w-4" 

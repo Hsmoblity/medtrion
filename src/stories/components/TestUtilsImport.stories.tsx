@@ -30,7 +30,7 @@ const TestUtilsImport: React.FC = () => {
 
   // Test cn function
   const testClasses = cn(
-    'bg-blue-500',
+    'bg-orange-500',
     'text-white',
     'p-4',
     'rounded',
@@ -98,7 +98,7 @@ const TestUtilsImport: React.FC = () => {
         </h3>
         <div className="p-4 bg-gray-50 rounded">
           <p className="text-sm text-gray-600 mb-2">
-            Input: <code className="bg-gray-200 px-1 rounded">bg-blue-500 text-white p-4 rounded hover:bg-blue-600</code>
+            Input: <code className="bg-gray-200 px-1 rounded">bg-orange-500 text-white p-4 rounded hover:bg-blue-600</code>
           </p>
           <p className="text-sm text-gray-800 mb-3">
             Output: <code className="bg-gray-200 px-1 rounded">{testClasses}</code>

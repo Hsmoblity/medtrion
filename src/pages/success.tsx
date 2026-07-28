@@ -134,7 +134,7 @@ const SuccessPage: React.FC<SuccessPageProps> = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading payment confirmation...</p>
         </div>
       </div>
@@ -211,12 +211,12 @@ const SuccessPage: React.FC<SuccessPageProps> = () => {
           </div>
 
           {/* Additional Information */}
-          <div className="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-3">What happens next?</h3>
-            <div className="space-y-3 text-blue-800">
+          <div className="mt-12 bg-orange-50 border border-orange-200 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-brand-dark mb-3">What happens next?</h3>
+            <div className="space-y-3 text-brand-dark">
               <div className="flex items-start">
-                <div className="flex-shrink-0 w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                  <span className="text-xs font-semibold text-blue-800">1</span>
+                <div className="flex-shrink-0 w-6 h-6 bg-orange-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  <span className="text-xs font-semibold text-brand-dark">1</span>
                 </div>
                 <div>
                   <p className="font-medium">Order Confirmation</p>
@@ -225,8 +225,8 @@ const SuccessPage: React.FC<SuccessPageProps> = () => {
               </div>
               
               <div className="flex items-start">
-                <div className="flex-shrink-0 w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                  <span className="text-xs font-semibold text-blue-800">2</span>
+                <div className="flex-shrink-0 w-6 h-6 bg-orange-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  <span className="text-xs font-semibold text-brand-dark">2</span>
                 </div>
                 <div>
                   <p className="font-medium">Processing</p>
@@ -235,8 +235,8 @@ const SuccessPage: React.FC<SuccessPageProps> = () => {
               </div>
               
               <div className="flex items-start">
-                <div className="flex-shrink-0 w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                  <span className="text-xs font-semibold text-blue-800">3</span>
+                <div className="flex-shrink-0 w-6 h-6 bg-orange-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  <span className="text-xs font-semibold text-brand-dark">3</span>
                 </div>
                 <div>
                   <p className="font-medium">Installation Scheduling</p>
@@ -252,13 +252,13 @@ const SuccessPage: React.FC<SuccessPageProps> = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href="tel:+1-800-555-0123"
-                className="text-blue-600 hover:text-blue-800 font-medium"
+                className="text-brand-primary hover:text-brand-dark font-medium"
               >
                 Call us: 1-800-555-0123
               </a>
               <a
                 href="mailto:support@medtrion.ca"
-                className="text-blue-600 hover:text-blue-800 font-medium"
+                className="text-brand-primary hover:text-brand-dark font-medium"
               >
                 Email: support@medtrion.ca
               </a>

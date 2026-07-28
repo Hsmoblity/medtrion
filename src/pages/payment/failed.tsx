@@ -149,8 +149,8 @@ const PaymentFailedPage: React.FC<PaymentFailedPageProps> = () => {
             
             <div className="space-y-4">
               <div className="flex items-start">
-                <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                  <span className="text-xs font-semibold text-blue-800">1</span>
+                <div className="flex-shrink-0 w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  <span className="text-xs font-semibold text-brand-dark">1</span>
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">Check Your Payment Method</h3>
@@ -161,8 +161,8 @@ const PaymentFailedPage: React.FC<PaymentFailedPageProps> = () => {
               </div>
               
               <div className="flex items-start">
-                <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                  <span className="text-xs font-semibold text-blue-800">2</span>
+                <div className="flex-shrink-0 w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  <span className="text-xs font-semibold text-brand-dark">2</span>
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">Contact Your Bank</h3>
@@ -173,8 +173,8 @@ const PaymentFailedPage: React.FC<PaymentFailedPageProps> = () => {
               </div>
               
               <div className="flex items-start">
-                <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                  <span className="text-xs font-semibold text-blue-800">3</span>
+                <div className="flex-shrink-0 w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                  <span className="text-xs font-semibold text-brand-dark">3</span>
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">Try Again</h3>
@@ -216,13 +216,13 @@ const PaymentFailedPage: React.FC<PaymentFailedPageProps> = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href="tel:+1-800-555-0123"
-                className="text-blue-600 hover:text-blue-800 font-medium"
+                className="text-brand-primary hover:text-brand-dark font-medium"
               >
                 Call us: 1-800-555-0123
               </a>
               <a
                 href="mailto:support@medtrion.ca"
-                className="text-blue-600 hover:text-blue-800 font-medium"
+                className="text-brand-primary hover:text-brand-dark font-medium"
               >
                 Email: support@medtrion.ca
               </a>

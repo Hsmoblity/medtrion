@@ -93,7 +93,7 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
             />
           </Link>
           {/* Right side: ml-auto pins to far right regardless of logo size */}
-          <div className="ml-auto flex flex-row items-center gap-3">
+          <div className="ml-auto flex flex-row items-center">
             <button onClick={() => router.push('/cart')} className="relative z-50 p-2 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors">
               <MdShoppingCart color="black" size={30} />
               <ClientOnly fallback={
@@ -111,7 +111,7 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
             {/* Drawer controlled from header: render hamburger here */}
             <button
               onClick={toggleDrawerFromHeader}
-              className="w-12 h-12 rounded-full bg-transparent p-2.5 hover:bg-gray-100 transition-colors duration-200 focus:outline-none"
+              className="w-12 h-12 ml-3 rounded-full bg-slate-100 p-2.5 hover:bg-gray-100 transition-colors duration-200 focus:outline-none"
               aria-label="Open menu"
             >
               <RiMenu4Line size={26} className="text-gray-700" />

@@ -223,7 +223,7 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
               from={0}
               to={configuration.grandTotal || 0}
               prefix="$"
-              className="total-price-amount text-xl font-bold text-blue-600"
+              className="total-price-amount text-xl font-bold text-brand-primary"
             />
           </div>
           
@@ -236,17 +236,17 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
           
           {/* Financing Options */}
           {onViewFinancing && (configuration.grandTotal || 0) > 1000 && (
-            <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="mt-6 p-4 bg-green-50 border border-orange-200 rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-medium text-green-800">Financing Available</h4>
-                  <p className="text-sm text-green-600">
+                  <h4 className="text-sm font-medium text-brand-primary">Financing Available</h4>
+                  <p className="text-sm text-gray-500">
                     As low as $47/month
                   </p>
                 </div>
                 <button
                   onClick={handleViewFinancing}
-                  className="text-green-700 hover:text-green-900 text-sm font-medium underline"
+                  className="text-brand-primary hover:text-brand-accent text-sm font-medium underline"
                 >
                   View Options
                 </button>
@@ -256,17 +256,17 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
           {/* Insurance Information */}
           {onCheckInsurance && (configuration.grandTotal || 0) > 500 && (
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center justify-between">
+            <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+              <div className="flex items-center justify-between"> 
                 <div>
-                  <h4 className="text-sm font-medium text-blue-800">Insurance Coverage</h4>
-                  <p className="text-sm text-blue-600">
+                  <h4 className="text-sm font-medium text-brand-primary">Insurance Coverage</h4>
+                  <p className="text-sm text-brand-primary">
                     May be covered by insurance
                   </p>
                 </div>
                 <button
                   onClick={handleCheckInsurance}
-                  className="text-blue-700 hover:text-blue-900 text-sm font-medium underline"
+                  className="text-brand-primary hover:text-brand-accent text-sm font-medium underline"
                 >
                   Check Eligibility
                 </button>

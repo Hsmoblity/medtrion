@@ -343,7 +343,7 @@ const ConfiguratorPreferences: React.FC<ConfiguratorPreferencesProps> = ({
                                   id={`${section.id}-${pref.id}`}
                                   value={pref.value}
                                   onChange={(e) => handlePreferenceChange(section.id, pref.id, e.target.value)}
-                                  className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+                                  className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-orange-500 sm:text-sm ${
                                     highContrast 
                                       ? 'bg-black text-white border-white' 
                                       : 'bg-white text-gray-900 border-gray-300'

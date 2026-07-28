@@ -50,11 +50,11 @@ const TestImports: React.FC = () => {
         ))}
       </div>
       
-      <div className="mt-6 p-4 bg-blue-50 rounded-md">
-        <h3 className="font-semibold text-blue-800 mb-2">
+      <div className="mt-6 p-4 bg-orange-50 rounded-md">
+        <h3 className="font-semibold text-brand-dark mb-2">
           🎉 All Components Imported Successfully!
         </h3>
-        <p className="text-sm text-blue-700">
+        <p className="text-sm text-brand-dark">
           All components used in the showcase pages can now be imported without errors.
           The default export issue with the Reviews component has been fixed.
         </p>

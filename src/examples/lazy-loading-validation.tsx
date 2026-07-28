@@ -69,7 +69,7 @@ export const LazyLoadingExamples = {
       loadingComponent={
         <div className="text-center py-8">
           <div className="inline-flex items-center space-x-2">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-600"></div>
             <span className="text-gray-600">Loading your customization options...</span>
           </div>
         </div>
@@ -130,30 +130,30 @@ export const LazyLoadingExamples = {
       <div className="space-y-6">
         {/* Performance Metrics Display */}
         {metrics && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-semibold text-blue-900 mb-2">Performance Metrics</h4>
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+            <h4 className="font-semibold text-brand-dark mb-2">Performance Metrics</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
-                <span className="text-blue-700 font-medium">Duration:</span>
+                <span className="text-brand-dark font-medium">Duration:</span>
                 <br />
-                <span className="text-blue-900">{metrics.duration?.toFixed(2)}ms</span>
+                <span className="text-brand-dark">{metrics.duration?.toFixed(2)}ms</span>
               </div>
               <div>
-                <span className="text-blue-700 font-medium">LCP:</span>
+                <span className="text-brand-dark font-medium">LCP:</span>
                 <br />
-                <span className="text-blue-900">
+                <span className="text-brand-dark">
                   {metrics.largestContentfulPaint?.toFixed(2) || 'N/A'}ms
                 </span>
               </div>
               <div>
-                <span className="text-blue-700 font-medium">Cache Hit:</span>
+                <span className="text-brand-dark font-medium">Cache Hit:</span>
                 <br />
-                <span className="text-blue-900">{metrics.cacheHit ? '✅' : '❌'}</span>
+                <span className="text-brand-dark">{metrics.cacheHit ? '✅' : '❌'}</span>
               </div>
               <div>
-                <span className="text-blue-700 font-medium">Options:</span>
+                <span className="text-brand-dark font-medium">Options:</span>
                 <br />
-                <span className="text-blue-900">{metrics.optionCount || 0}</span>
+                <span className="text-brand-dark">{metrics.optionCount || 0}</span>
               </div>
             </div>
           </div>
@@ -251,7 +251,7 @@ export const LazyLoadingExamples = {
                 <p className="text-sm text-gray-600 mt-1">
                   {product.optionType || 'Option'}
                 </p>
-                <p className="text-lg font-bold text-blue-600 mt-2">
+                <p className="text-lg font-bold text-brand-primary mt-2">
                   ${parseFloat(product.price?.toString() || '0').toFixed(2)}
                 </p>
               </div>

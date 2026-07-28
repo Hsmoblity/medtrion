@@ -122,7 +122,7 @@ const PaymentStatus: React.FC<PaymentStatusProps> = ({
   const getStatusIcon = () => {
     if (statusData.loading) {
       return (
-        <svg className="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
+        <svg className="animate-spin w-5 h-5 text-brand-primary" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
         </svg>
@@ -181,10 +181,10 @@ const PaymentStatus: React.FC<PaymentStatusProps> = ({
   };
 
   const getStatusColor = () => {
-    if (statusData.loading) return 'text-blue-600';
+    if (statusData.loading) return 'text-brand-primary';
     if (statusData.errorMessage) return 'text-yellow-600';
     if (statusData.sessionStatus === 'complete' && statusData.paymentStatus === 'paid') {
-      return statusData.webhookProcessed ? 'text-green-600' : 'text-blue-600';
+      return statusData.webhookProcessed ? 'text-green-600' : 'text-brand-primary';
     }
     return 'text-gray-600';
   };
@@ -210,7 +210,7 @@ const PaymentStatus: React.FC<PaymentStatusProps> = ({
           <button
             onClick={verifyPaymentStatus}
             disabled={statusData.loading}
-            className="text-xs text-blue-600 hover:text-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-xs text-brand-primary hover:text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Refresh
           </button>

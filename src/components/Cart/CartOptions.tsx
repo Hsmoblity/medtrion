@@ -155,8 +155,8 @@ const CartOptions: React.FC<CartOptionsProps> = ({
     <div className={`bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 ${className}`}>
       {/* Data Source Indicator (for debugging) */}
       {useRealData && (
-        <div className="px-4 py-1 bg-blue-50 border-b border-blue-200">
-          <span className="text-xs text-blue-600 font-medium">Real Data Mode</span>
+        <div className="px-4 py-1 bg-orange-50 border-b border-orange-200">
+          <span className="text-xs text-brand-primary font-medium">Real Data Mode</span>
         </div>
       )}
       
@@ -230,7 +230,7 @@ const CartOptions: React.FC<CartOptionsProps> = ({
             {/* Action Buttons */}
             <button
               onClick={() => handleEdit(safeMainProduct)}
-              className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200"
+              className="p-2 text-gray-600 hover:text-brand-primary hover:bg-orange-50 rounded-md transition-colors duration-200"
               title="Edit product"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -278,7 +278,7 @@ const CartOptions: React.FC<CartOptionsProps> = ({
             {safeOptions.map((option, index) => (
               <div 
                 key={option.cartItemId || index}
-                className="flex items-center space-x-3 p-3 bg-white rounded-md border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                className="flex items-center space-x-3 p-3 bg-white rounded-md border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-200"
               >
                 <Image
                   src={getSafeImage(option)}
@@ -304,7 +304,7 @@ const CartOptions: React.FC<CartOptionsProps> = ({
                   
                   <button
                     onClick={() => handleEdit(option)}
-                    className="p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-100 rounded transition-colors duration-200"
+                    className="p-1 text-gray-500 hover:text-brand-primary hover:bg-orange-100 rounded transition-colors duration-200"
                     title="Edit option"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

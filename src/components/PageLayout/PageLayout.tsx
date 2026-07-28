@@ -29,7 +29,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, logo, contactInfo, hi
 
   return (
     <div>
-      <Link href="https://harbourfrontwebdesigns.com" className="absolute top-[-9999] left-[-9999] -z-50">Website Designer and Developer</Link>
+      <Link href="https://markitme.ca/" className="absolute top-[-9999] left-[-9999] -z-50">Website Designer and Developer</Link>
       <motion.div
         initial="hidden"
         animate="visible"

@@ -13,13 +13,13 @@ import { PrimaryButton } from '../../components/ui';
 
 const ConsultationSuccessPage: React.FC = () => {
   return (
-    <PageLayout>
+    <PageLayout hideFooter>
       <MetaHead
         title="Consultation Request Submitted - HSM Mobility"
         description="Your consultation request has been successfully submitted. We'll contact you soon."
       />
 
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="min-h-screen bg-gray-50 py-20 mt-20">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}

@@ -6,8 +6,7 @@ import ProductCard from "../ui/ProductCard";
 import { mapToProductCardView } from "../../lib/interfaces/homepage";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination } from "swiper/modules";
-
+import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 
@@ -117,118 +116,77 @@ const BestSellerSection: React.FC<BestSellerSectionProps> = ({
 
         {/* Product Grid */}
         <>
-          {/* Desktop & Tablet Grid */}
-          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {products.map((product, index) => {
-              const productCardView = mapToProductCardView(product);
+          {/* Product Slider - All Devices */}
+            <div className="mb-12">
+              <Swiper
+                 modules={[Pagination, Autoplay]}
+  spaceBetween={30}
+  loop={true}
+  autoplay={{
+    delay: 3000,
+    disableOnInteraction: false,
+  }}
+  pagination={{
+    clickable: true,
+  }}
+  breakpoints={{
+    0: {
+      slidesPerView: 1,
+    },
+    768: {
+      slidesPerView: 2,
+    },
+    1024: {
+      slidesPerView: 3,
+    },
+  }}
+              >
+                {products.map((product, index) => {
+                  const productCardView = mapToProductCardView(product);
 
-              if (index < 2) {
-                productCardView.badges = ["Best Seller"];
-              }
+                  if (index < 2) {
+                    productCardView.badges = ["Best Seller"];
+                  }
 
-              return (
-                <ProductCard
-                  key={product.slug || index}
-                  product={productCardView}
-                  variant="hero"
-                  priority={index < 3}
-                  position={index}
-                  showConfigureButton={false}
-                  showAddToCartButton={false}
-                  cardClickBehavior="configurator"
-                  onHeroClick={(slug, badge, position) => {
-                    if (typeof window !== "undefined") {
-                      try {
-                        const gtag = (window as any).gtag;
-                        if (gtag) {
-                          gtag("event", "best_seller_click", {
-                            product_slug: slug,
+                  return (
+                    <SwiperSlide key={product.slug || index}>
+                      <ProductCard
+                        product={productCardView}
+                        variant="hero"
+                        priority={index < 3}
+                        position={index}
+                        showConfigureButton={false}
+                        showAddToCartButton={false}
+                        cardClickBehavior="configurator"
+                        onHeroClick={(slug, badge, position) => {
+                          if (typeof window !== "undefined") {
+                            try {
+                              const gtag = (window as any).gtag;
+                              if (gtag) {
+                                gtag("event", "best_seller_click", {
+                                  product_slug: slug,
+                                  badge,
+                                  position,
+                                  section: "best_sellers",
+                                });
+                              }
+                            } catch (error) {
+                              console.warn("Analytics tracking failed:", error);
+                            }
+                          }
+
+                          console.log("Best seller clicked:", {
+                            slug,
                             badge,
                             position,
-                            section: "best_sellers",
                           });
-                        }
-                      } catch (error) {
-                        console.warn("Analytics tracking failed:", error);
-                      }
-                    }
-
-                    console.log("Best seller clicked:", {
-                      slug,
-                      badge,
-                      position,
-                    });
-                  }}
-                />
-              );
-            })}
-          </div>
-
-          {/* Mobile Slider */}
-          <div className="md:hidden mb-12">
-            <Swiper
-              modules={[Pagination]}
-              spaceBetween={20}
-              slidesPerView={1.1}
-              centeredSlides
-              pagination={{
-                clickable: true,
-              }}
-              breakpoints={{
-                480: {
-                  slidesPerView: 1.2,
-                },
-                640: {
-                  slidesPerView: 1.4,
-                },
-              }}
-            >
-              {products.map((product, index) => {
-                const productCardView = mapToProductCardView(product);
-
-                if (index < 2) {
-                  productCardView.badges = ["Best Seller"];
-                }
-
-                return (
-                  <SwiperSlide key={product.slug || index}>
-                    <ProductCard
-                      product={productCardView}
-                      variant="hero"
-                      priority={index < 3}
-                      position={index}
-                      showConfigureButton={false}
-                      showAddToCartButton={false}
-                      cardClickBehavior="configurator"
-                      onHeroClick={(slug, badge, position) => {
-                        if (typeof window !== "undefined") {
-                          try {
-                            const gtag = (window as any).gtag;
-                            if (gtag) {
-                              gtag("event", "best_seller_click", {
-                                product_slug: slug,
-                                badge,
-                                position,
-                                section: "best_sellers",
-                              });
-                            }
-                          } catch (error) {
-                            console.warn("Analytics tracking failed:", error);
-                          }
-                        }
-
-                        console.log("Best seller clicked:", {
-                          slug,
-                          badge,
-                          position,
-                        });
-                      }}
-                    />
-                  </SwiperSlide>
-                );
-              })}
-            </Swiper>
-          </div>
+                        }}
+                      />
+                    </SwiperSlide>
+                  );
+                })}
+              </Swiper>
+            </div>
         </>
 
         {/* Call to Action */}

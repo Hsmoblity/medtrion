@@ -16,7 +16,7 @@ const Hero = ({ badge, title, description, breadcrumbs }: HeroProps) => {
   const router = useRouter();
 
   return (
-    <section className="bg-gradient-to-r from-[#0b1f3a] via-[#153a5f] to-[#3fa2a3] text-white pt-[135px] pb-12 sm:pt-20 sm:pb-12 md:pt-[125px] md:pb-10">
+    <section className="bg-gradient-to-r from-[#0b1f3a] via-[#153a5f] to-[#3fa2a3] text-white pt-[155px] pb-12 sm:pt-20 sm:pb-12 md:pt-[150px] md:pb-10">
       <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
         {/* Hero Content */}
         <div className="mx-auto max-w-3xl text-center">

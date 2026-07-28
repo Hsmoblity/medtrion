@@ -109,7 +109,7 @@ const EnhancedHero: React.FC = () => {
   }
 
   return (
-    <section className="relative z-10 overflow-hidden bg-gradient-to-br from-[#07162d] via-[#0f2d4c] to-[#2f8f8f] px-4 pt-[140px] pb-10 sm:pt-20 md:pt-[150px] md:pb-20">
+    <section className="relative z-10 overflow-hidden bg-gradient-to-br from-[#07162d] via-[#0f2d4c] to-[#2f8f8f] px-4 pt-[170px] pb-10 sm:pt-20 md:pt-[150px] md:pb-20">
       <div className="absolute inset-0 opacity-30">
         <div className="absolute left-[-8%] top-[-10%] h-40 w-40 sm:h-56 sm:w-56 rounded-full bg-[#f7a236]/35 blur-3xl" />
         <div className="absolute bottom-[-8%] right-[-6%] h-48 w-48 sm:h-64 sm:w-64 rounded-full bg-[#3fa2a3]/30 blur-3xl" />

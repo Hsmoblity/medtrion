@@ -89,7 +89,7 @@ const Home = ({ products, error }: HomeProps) => {
           </p>
           <Link
             href="/consultation/google-form"
-            className="inline-flex items-center justify-center px-6 py-3 text-lg font-primary font-semibold text-white bg-[#f7a236] rounded-[35px] hover:bg-[#3fa2a3] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            className="inline-flex items-center justify-center px-6 py-3 text-lg font-primary font-semibold text-white bg-[#f7a236] rounded-[35px] hover:bg-[#3fa2a3] hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
             Request Your Free Consultation
             <svg

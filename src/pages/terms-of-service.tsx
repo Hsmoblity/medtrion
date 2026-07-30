@@ -19,8 +19,8 @@ const TermsOfServicePage: React.FC<LegalPageProps> = ({ title, content, modified
   return (
     <PageLayout hideFooter>
       <MetaHead
-        title="Terms of Service - Medtrion"
-        description="Read the terms and conditions for using Medtrion services and website. Understand your rights and responsibilities."
+        title="Terms of Service | Medtrion"
+        description="Review Medtrion's terms of service outlining the rules & conditions for using our website, products & consultation services."
       />
       
       <div className="min-h-screen bg-gray-50">

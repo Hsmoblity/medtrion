@@ -95,8 +95,8 @@ const BlogsPage: React.FC<BlogsPageProps> = ({ blogs: propBlogs, error: propErro
   return (
     <>
       <MetaHead 
-        title="Blog - Medtrion" 
-        description="Stay informed with the latest insights on mobility solutions, home safety, and independent living tips."
+        title="Mobility & Stairlift Blog | Medtrion Canada" 
+        description="Guides, tips & advice on stairlifts, lift chairs & mobility equipment for Canadian homes. Expert insights from Medtrion — serving Ontario & the GTA."
       />
       
       <div className="min-h-screen bg-gray-50">

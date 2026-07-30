@@ -61,8 +61,8 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
     return (
       <>
         <MetaHead 
-          title="Products - Medtrion" 
-          description="Discover our range of mobility products and stairlifts"
+          title="Shop Stairlifts, Lift Chairs & Mobility Aids | Medtrion Oakville" 
+          description="Shop Stairlifts, Lift Chairs & Mobility Aids | Medtrion Oakville"
         />
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">

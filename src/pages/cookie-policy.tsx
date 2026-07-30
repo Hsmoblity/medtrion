@@ -19,8 +19,8 @@ const CookiePolicyPage: React.FC<LegalPageProps> = ({ title, content, modified }
   return (
     <PageLayout hideFooter>
       <MetaHead
-        title="Cookie Policy - Medtrion"
-        description="Learn how Medtrion uses cookies and similar technologies to improve your browsing experience and provide personalized services."
+        title="Cookie Policy | Medtrion"
+        description="Learn how Medtrion uses cookies to improve your browsing experience, and how you can manage your cookie preferences."
       />
 
       <div className="min-h-screen bg-gray-50">

@@ -26,8 +26,8 @@ const PrivacyPolicyPage: React.FC<LegalPageProps> = ({ title, content, modified 
   return (
     <PageLayout hideFooter>
       <MetaHead
-        title="Privacy Policy - Medtrion"
-        description="Read Medtrion's Privacy Policy to understand how we collect, use, and protect your personal information."
+        title="Privacy Policy | Medtrion"
+        description="Read Medtrion's privacy policy to understand how we collect, use & protect your personal information when you use our website or services."
       />
 
       <div className="min-h-screen bg-gray-50">

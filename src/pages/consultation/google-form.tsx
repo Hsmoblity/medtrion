@@ -12,7 +12,7 @@ export default function ConsultationGoogleFormPage() {
 
   return (
     <PageLayout hideFooter>
-      <MetaHead title="Consultation - Medtrion" description="Request a consultation" />
+      <MetaHead title="Free Mobility Consultation | Medtrion Canada" description="Book your free stairlift or mobility equipment consultation with Medtrion. No obligation, expert advice & fast response across Ontario & the GTA." />
       <Hero
            
             title="Request a Free Consultation"

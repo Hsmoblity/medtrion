@@ -52,7 +52,7 @@ const Home = ({ products, error }: HomeProps) => {
   
   return (
     <>
-      <MetaHead title="Mobility Products & Accessibility Solutions | Medtrion" description="Explore Medtrion for a wide range of mobility and accessibility products designed to improve your quality of life. Trusted solutions to help you regain independence and enhance your mobility." />
+      <MetaHead title="Stairlifts & Mobility Aids in Oakville, ON | Medtrion" description="Medtrion supplies stairlifts, lift chairs & mobility equipment across the GTA. Free consultation, expert install & 5-year warranty. " />
       <Hero />
       
       {/* Best Seller Section with Real Products - Moved right after Hero */}

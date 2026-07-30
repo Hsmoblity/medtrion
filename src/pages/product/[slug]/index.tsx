@@ -832,11 +832,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
+    // const seoMeta = {
+    //   title: `${product.title || product.name || "Product"} | Medtrion`,
+    //   description: `Discover ${product.title || product.name || "Product"} - ${product.shortDescription || product.description?.substring(0, 150) || "Premium mobility solution"}. Configure your perfect mobility equipment with our comprehensive options.`,
+    // };
     const seoMeta = {
-      title: `${product.title || product.name || "Product"} | Medtrion`,
-      description: `Discover ${product.title || product.name || "Product"} - ${product.shortDescription || product.description?.substring(0, 150) || "Premium mobility solution"}. Configure your perfect mobility equipment with our comprehensive options.`,
-    };
-
+  title: product.seo?.title || `${product.title || product.name || "Product"} | Medtrion`,
+  description: product.seo?.description || `Discover ${product.title || product.name || "Product"} - ${product.shortDescription || product.description?.substring(0, 150) || "Premium mobility solution"}. Configure your perfect mobility equipment with our comprehensive options.`,
+};
+ 
     return {
       props: {
         product: sanitizedProduct,

@@ -62,6 +62,11 @@ function mapWooToProductSchema(product: any): ProductSchema {
 		price,
 		affiliate: false,
 		productId: product.id,
+		seo: {
+			title: product.seo?.title || null,
+			description: product.seo?.description || null,
+			focusKeywords: product.seo?.focusKeywords || null,
+		},
 		// Read related options from common GraphQL meta shapes if present
 		// Prefer normalized `_related_options` if present (set by `fetchGraphQLProducts`),
 		// otherwise fall back to parsing common meta shapes.

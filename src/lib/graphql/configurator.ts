@@ -319,6 +319,7 @@ export function normalizeSlugQueryResponse(wooProduct: any): any {
     type: wooProduct.__typename?.replace('Product', '').toLowerCase() || 'simple',
     affiliate: false,
     productId: wooProduct.databaseId?.toString(),
+    seo: wooProduct.seo || null,
     
     // Configurator-specific fields
     baseModel: true,

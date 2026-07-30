@@ -36,6 +36,11 @@ export const GET_ALL_PRODUCTS = gql`
         
         # New GraphQL field added by WP plugin: relatedOptions
         relatedOptions
+        seo {
+          title
+          description
+          focusKeywords
+        }
         image {
           sourceUrl
         }
@@ -74,6 +79,11 @@ export const GET_PRODUCT_BY_SLUG = gql`
         __typename
         shortDescription
         description
+        seo {
+          title
+          description
+          focusKeywords
+        }
         localAttributes { 
           nodes { 
             label 

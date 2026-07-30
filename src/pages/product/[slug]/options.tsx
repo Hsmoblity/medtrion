@@ -238,11 +238,21 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         const editingCartItem = isEditMode && cartItemId;
         
         // Add SEO meta tags for edit mode (noindex)
-        const seoMeta = isEditMode ? {
-            noIndex: true,
-            title: `Edit Configuration | ${product.title}`,
-            description: 'Editing product configuration'
-        } : null;
+        // const seoMeta = isEditMode ? {
+        //     noIndex: true,
+        //     title: `Edit Configuration | ${product.title}`,
+        //     description: 'Editing product configuration'
+        // } : null;
+        // Add SEO meta tags — normal mode aur edit mode dono ke liye
+        const seoMeta = {
+            title: isEditMode
+                ? `Edit Configuration | ${product.title}`
+                : (product.seo?.title || `${product.title} — Choose Options`),
+            description: isEditMode
+                ? 'Editing product configuration'
+                : (product.seo?.description || product.shortDescription || `Customize and configure your ${product.title}.`),
+            noIndex: isEditMode,
+        };
         
         // Convert Contentful product to ConfigurableProductSchema for ModelConfigurator
         const baseModel: ConfigurableProductSchema = {

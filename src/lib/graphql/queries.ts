@@ -794,6 +794,85 @@ export const SAVE_CONFIGURATION = gql`
     }
   }
 `;
+/**
+ * Get products by category
+ * Used by: src/lib/graphql/configurator.ts - GetProductsByCategory()
+ */
+export const GET_PRODUCTS_BY_CATEGORY = `
+query GetProductsByCategory(
+$category: String!
+) {
+products(
+where: {
+category: $category
+}
+first: 100
+) {
+nodes {
+id
+databaseId
+name
+slug
+description
+shortDescription
+sku
+type
+
+    image {
+      sourceUrl
+      altText
+    }
+
+    galleryImages {
+      nodes {
+        sourceUrl
+        altText
+      }
+    }
+
+    ... on ProductWithPricing {
+      price
+      regularPrice
+      salePrice
+    }
+
+    ... on VariableProduct {
+      variations(
+        first: 100
+      ) {
+        nodes {
+          id
+          databaseId
+          name
+          slug
+          sku
+
+          image {
+            sourceUrl
+            altText
+          }
+
+          ... on ProductWithPricing {
+            price
+            regularPrice
+            salePrice
+          }
+
+          attributes {
+            nodes {
+              name
+              value
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+}
+`;
 
 // ============================================================================
 // LEGACY COMPATIBILITY

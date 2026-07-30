@@ -96,18 +96,26 @@ const ProductShowcaseCarousel: React.FC<ProductShowcaseCarouselProps> = ({
 }) => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
-  const { featuredProducts, loading, error, fetchFeaturedProducts } = useHomepageStore();
+  const {
+  featuredProducts,
+  loading,
+  error,
+  fetchProductsByCategory,
+} = useHomepageStore();
 
-  // Fetch real products on component mount
-  useEffect(() => {
-    if (featuredProducts.length === 0 && !loading) {
-      fetchFeaturedProducts();
-    }
-  }, [featuredProducts.length, loading, fetchFeaturedProducts]);
+useEffect(() => {
+  if (featuredProducts.length === 0 && !loading) {
+    fetchProductsByCategory('stair-lifts');
+  }
+}, [
+  featuredProducts.length,
+  loading,
+  fetchProductsByCategory,
+]);
 
   // Transform real products for carousel display
   const carouselProducts = featuredProducts.length > 0 
-    ? featuredProducts.slice(0, 4).map((product, index) => {
+    ? featuredProducts.map((product, index) => { 
         console.log('Hero Slider - Product data:', {
           slug: product.slug,
           title: product.title,

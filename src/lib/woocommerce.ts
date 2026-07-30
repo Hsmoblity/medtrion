@@ -58,7 +58,8 @@ import {
   GET_OPTION_PRODUCT_BY_ID,
   GET_OPTION_PRODUCTS_BY_IDS,
   GET_CART,
-  GET_FEATURED_PRODUCTS
+  GET_FEATURED_PRODUCTS,
+  GET_PRODUCTS_BY_CATEGORY
 } from './graphql/queries';
 import { parsePrice } from './utils/priceUtils';
 import {
@@ -976,7 +977,37 @@ export async function getFeaturedProducts(limit: number = 6) {
     throw error;
   }
 }
+/**
+ * Get all products from a WooCommerce category
+ *
+ * @param categorySlug WooCommerce category slug
+ * @returns All products belonging to the category
+ */
+export async function getProductsByCategory(
+  categorySlug: string
+) {
+  if (!client) {
+    throw new Error(
+      'GraphQL client not initialized. Check WP_GRAPHQL_URL configuration.'
+    );
+  }
 
+  try {
+    return await runClientRequest(
+      GET_PRODUCTS_BY_CATEGORY,
+      {
+        category: categorySlug,
+      }
+    );
+  } catch (error) {
+    console.error(
+      `getProductsByCategory failed for "${categorySlug}":`,
+      error
+    );
+
+    throw error;
+  }
+}
 // ============================================================================
 // ORDER OPERATIONS (Consolidated from integrations/wordpress.ts)
 // ============================================================================

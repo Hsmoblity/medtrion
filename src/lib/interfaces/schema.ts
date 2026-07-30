@@ -11,6 +11,11 @@ export interface ProductSchema {
   price: number;
   affiliate: boolean;
   productId?: string;
+  seo?: {
+    title: string | null;
+    description: string | null;
+    focusKeywords: string | null;
+  } | null;
   variations?: Array<{
     id: string;
     databaseId?: number;

@@ -817,7 +817,11 @@ description
 shortDescription
 sku
 type
-
+ seo {
+        title
+        description
+        focusKeywords
+      }
     image {
       sourceUrl
       altText

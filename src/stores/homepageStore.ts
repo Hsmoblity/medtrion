@@ -11,6 +11,7 @@ import { mapWooToProductSchema } from '../lib/contentful/contentful';
 
 interface HomepageState {
 featuredProducts: ProductCardView[];
+categoryProducts: ProductCardView[]; 
 loading: boolean;
 error: string | null;
 
@@ -22,12 +23,13 @@ fetchProductsByCategory: (categorySlug: string) => Promise<void>;
 
 export const useHomepageStore = create<HomepageState>((set) => ({
 featuredProducts: [],
+categoryProducts: [], 
 loading: false,
 error: null,
 
 // Existing featured products function
 fetchFeaturedProducts: async () => {
-set({ loading: true, error: null });
+set({ loading: true, error: null, categoryProducts: [] });
 
 
 try {
@@ -84,7 +86,7 @@ try {
   }
 
   set({
-    featuredProducts: finalProducts,
+    categoryProducts: finalProducts,
     loading: false,
   });
 } catch (error) {

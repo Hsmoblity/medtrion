@@ -165,81 +165,146 @@ if (WP_GRAPHQL_URL) {
 }
 
 // Helper wrapper around client.request to add retry logic and better logging
-export async function runClientRequest(query: any, variables?: Record<string, any>) {
+// Helper wrapper around client.request to add retry logic and better logging
+export async function runClientRequest<T = any>(
+    query: string,
+    variables?: Record<string, any>
+): Promise<T> {
     // Validate GraphQL endpoint configuration
     const validation = validateGraphQLEndpoint(WP_GRAPHQL_URL);
+
     if (!validation.isValid) {
-        throw new GraphQLValidationError(validation.error!, WP_GRAPHQL_URL);
+        throw new GraphQLValidationError(
+            validation.error!,
+            WP_GRAPHQL_URL
+        );
     }
 
     if (!client) {
-        throw new GraphQLValidationError('GraphQL client not configured', WP_GRAPHQL_URL);
+        throw new GraphQLValidationError(
+            'GraphQL client not configured',
+            WP_GRAPHQL_URL
+        );
     }
 
-    const { timeout, maxAttempts, retryDelay } = DEFAULT_GRAPHQL_OPTIONS;
+    const {
+        timeout,
+        maxAttempts,
+        retryDelay,
+    } = DEFAULT_GRAPHQL_OPTIONS;
+
     const timeoutFetch = createTimeoutFetch(timeout);
 
     // Hard limit of attempts to prevent infinite loops
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    for (
+        let attempt = 1;
+        attempt <= maxAttempts;
+        attempt++
+    ) {
         try {
-            const body = JSON.stringify({ query, variables });
+            const body = JSON.stringify({
+                query,
+                variables,
+            });
+
             const fetchOptions: RequestInit = {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+
+                headers: {
+                    'Content-Type':
+                        'application/json',
+                },
+
                 body,
             };
 
-            // In Node.js environment, handle SSL certificate issues if NODE_TLS_REJECT_UNAUTHORIZED is set
-            if (typeof window === 'undefined' && process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') {
-                // For server-side requests with SSL issues, we need to use a custom agent
-                // This is already handled by the environment variable
-            }
-
-            const response = await timeoutFetch(WP_GRAPHQL_URL, fetchOptions);
+            const response = await timeoutFetch(
+                WP_GRAPHQL_URL,
+                fetchOptions
+            );
 
             if (!response.ok) {
-                const errorBody = await response.text();
-                throw new Error(`GraphQL request failed with status ${response.status}: ${errorBody}`);
+                const errorBody =
+                    await response.text();
+
+                throw new Error(
+                    `GraphQL request failed with status ` +
+                    `${response.status}: ${errorBody}`
+                );
             }
 
             const json = await response.json();
 
             if (json.errors) {
-                throw new Error(`GraphQL errors: ${JSON.stringify(json.errors, null, 2)}`);
+                throw new Error(
+                    `GraphQL errors: ${JSON.stringify(
+                        json.errors,
+                        null,
+                        2
+                    )}`
+                );
             }
 
-            return json.data;
+            // Important: return typed GraphQL data
+            return json.data as T;
+
         } catch (err: any) {
-            const { errorCategory, errorContext } = logGraphQLError(err, {
+            const {
+                errorCategory,
+                errorContext,
+            } = logGraphQLError(err, {
                 url: WP_GRAPHQL_URL,
                 attempt,
                 maxAttempts,
             });
 
-            // Don't retry on validation errors or final attempt
-            if (errorCategory === 'graphql' || attempt === maxAttempts) {
-                // Throw appropriate error type based on category
+            // Don't retry GraphQL errors
+            // or the final attempt
+            if (
+                errorCategory === 'graphql' ||
+                attempt === maxAttempts
+            ) {
                 switch (errorCategory) {
                     case 'timeout':
                         throw new GraphQLTimeoutError(
-                            `GraphQL request timed out after ${timeout}ms`,
+                            `GraphQL request timed out ` +
+                            `after ${timeout}ms`,
                             errorContext
                         );
+
                     case 'network':
                         throw new GraphQLNetworkError(
-                            `GraphQL network error: ${err.message}`,
+                            `GraphQL network error: ` +
+                            `${err.message}`,
                             errorContext
                         );
+
                     default:
                         throw err;
                 }
             }
 
-            // Calculate exponential backoff delay for retry
-            const delay = calculateRetryDelay(attempt, retryDelay);
-            await new Promise(res => setTimeout(res, delay));
+            // Calculate retry delay
+            const delay =
+                calculateRetryDelay(
+                    attempt,
+                    retryDelay
+                );
+
+            await new Promise(
+                (resolve) =>
+                    setTimeout(
+                        resolve,
+                        delay
+                    )
+            );
         }
     }
+
+    // TypeScript safety fallback
+    throw new Error(
+        'GraphQL request failed after all retry attempts'
+    );
 }
 
 export async function fetchGraphQLProducts() {

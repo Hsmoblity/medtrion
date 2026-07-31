@@ -954,7 +954,49 @@ export const GET_FEATURED_PRODUCTS = gql`
 // ============================================================================
 // API MUTATIONS
 // ============================================================================
+// Get all Blogs
+export const GET_ALL_BLOGS = `
+  query GetAllBlogs {
+    posts(first: 100) {
+      nodes {
+        id
+        title
+        excerpt
+        date
+        slug
+        featuredImage {
+          node {
+            sourceUrl
+            altText
+          }
+        }
+      }
+    }
+  }
+`;
+// Get Blog details 
+export const GET_BLOG_BY_SLUG = `
+  query GetBlogBySlug($slug: ID!) {
+    post(
+      id: $slug
+      idType: SLUG
+    ) {
+      id
+      title
+      excerpt
+      content
+      date
+      slug
 
+      featuredImage {
+        node {
+          sourceUrl
+          altText
+        }
+      }
+    }
+  }
+`;
 /**
  * Create headless Stripe session
  * Used by: src/pages/api/stripe.ts

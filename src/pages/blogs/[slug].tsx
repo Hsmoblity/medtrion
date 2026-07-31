@@ -1,311 +1,342 @@
-import Head from "next/head";
-import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
+import React from "react";
+import { GetServerSideProps } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { FaGithub, FaInstagram, FaLinkedinIn } from "react-icons/fa";
-// import client from "lib/contentful/contentful";
-import TableOfContents from "components/toc";
-import { BLOCKS, INLINES, MARKS } from "@contentful/rich-text-types";
-import FAQ from "components/faq";
-import Banner from "components/banner";
-import Form from "components/step-form";
-import { Reviews } from "components/reviews";
 
-export async function getServerSideProps(context: any) {
-    const { slug } = context.params;
+import MetaHead from "../../components/MetaHead";
+import Hero from "@/components/common/Hero";
 
-    // Temporary blog data mapping
-    const TEMPORARY_BLOG_DETAILS: Record<string, any> = {
-        'mobility-solutions-seniors': {
-            title: 'Understanding Mobility Solutions for Seniors',
-            description: 'Learn about the latest mobility solutions designed to help seniors maintain independence and improve quality of life.',
-            content: 'This comprehensive guide covers various mobility solutions available for seniors, including stairlifts, lift chairs, and home modifications.',
-            image: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=800&h=400&fit=crop',
-            date: '2024-01-15'
-        },
-        'stairlift-installation-guide': {
-            title: 'Stairlift Installation: What to Expect',
-            description: 'A comprehensive guide to stairlift installation process, timeline, and what homeowners should expect.',
-            content: 'Learn about the stairlift installation process, from initial assessment to final testing and handover.',
-            image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=400&fit=crop',
-            date: '2024-01-10'
-        },
-        'home-safety-tips': {
-            title: 'Home Safety Tips for Mobility Challenges',
-            description: 'Essential home safety modifications and tips for individuals with mobility challenges.',
-            content: 'Discover practical home safety modifications and tips to create a safer environment for individuals with mobility challenges.',
-            image: 'https://images.unsplash.com/photo-1581578731548-c6a0c3f2f6c5?w=800&h=400&fit=crop',
-            date: '2024-01-05'
-        }
+import { runClientRequest } from "../../lib/woocommerce";
+import { GET_BLOG_BY_SLUG } from "../../lib/graphql/queries";
+
+interface WordPressPost {
+  id: string;
+  title: string;
+  excerpt?: string;
+  content?: string;
+  date: string;
+  slug: string;
+
+  featuredImage?: {
+    node?: {
+      sourceUrl?: string;
+      altText?: string;
     };
+  };
+}
 
-    const blogData = TEMPORARY_BLOG_DETAILS[slug as string];
+interface BlogDetailPageProps {
+  blogDetailData: WordPressPost;
+}
 
-    if (!blogData) {
-        return {
-            notFound: true,
-        };
+const BlogDetailPage: React.FC<
+  BlogDetailPageProps
+> = ({
+  blogDetailData: blog,
+}) => {
+  const formattedDate = new Date(
+    blog.date
+  ).toLocaleDateString("en-CA", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+  const imageUrl =
+    blog.featuredImage?.node?.sourceUrl;
+
+  const imageAlt =
+    blog.featuredImage?.node?.altText ||
+    blog.title;
+
+  return (
+    <>
+      <MetaHead
+        title={`${blog.title} | Medtrion Canada`}
+        description={
+          blog.excerpt
+            ? blog.excerpt
+                .replace(/<[^>]*>/g, "")
+                .replace(/&hellip;/g, "...")
+                .replace(/&#8217;/g, "'")
+                .slice(0, 160)
+            : "Read helpful mobility and accessibility insights from Medtrion Canada."
+        }
+      />
+
+      <main className="min-h-screen bg-[#f8fbff]">
+        {/* Hero */}
+        <Hero
+          badge="Helpful Insights"
+          title={blog.title}
+          description="Expert guidance on mobility, accessibility, and independent living."
+          breadcrumbs={[
+            {
+              label: "Home",
+              href: "/",
+            },
+            {
+              label: "Our Blog & Resources",
+              href: "/blogs",
+            },
+            {
+              label: blog.title,
+            },
+          ]}
+        />
+
+        {/* Blog Content */}
+        <section className="relative py-12 sm:py-16 lg:py-20">
+          <div className="mx-auto w-full max-w-[1180px] px-4 sm:px-6 lg:px-8">
+
+            {/* Back Button */}
+            <Link
+              href="/blogs"
+              className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#3fa2a3]/20 bg-white px-5 py-3 text-sm font-semibold text-[#0b1f3a] shadow-sm transition-all duration-300 hover:border-[#3fa2a3] hover:bg-[#3fa2a3] hover:text-white"
+            >
+              <span className="text-lg">
+                ←
+              </span>
+
+              Back to All Articles
+            </Link>
+
+            <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+
+              {/* Main Article */}
+              <article className="overflow-hidden rounded-[28px] border border-[#0b1f3a]/10 bg-white shadow-[0_18px_55px_rgba(11,31,58,0.08)]">
+
+                {/* Featured Image */}
+                {imageUrl && (
+                  <div className="relative h-[260px] overflow-hidden sm:h-[380px] lg:h-[480px]">
+                    <Image
+                      src={imageUrl}
+                      alt={imageAlt}
+                      fill
+                      priority
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 850px"
+                    />
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0b1f3a]/35 via-transparent to-transparent" />
+
+                    <div className="absolute bottom-5 left-5 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-[#0b1f3a] shadow-md backdrop-blur-sm">
+                      {formattedDate}
+                    </div>
+                  </div>
+                )}
+
+                {/* Article Body */}
+                <div className="p-6 sm:p-10 lg:p-12">
+
+                  <div className="mb-7 flex flex-wrap items-center gap-3">
+                    <span className="rounded-full bg-[#3fa2a3]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-[#3fa2a3]">
+                      Medtrion Blog
+                    </span>
+
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#f7a236]" />
+
+                    <span className="text-sm font-medium text-gray-500">
+                      {formattedDate}
+                    </span>
+                  </div>
+
+                  <h1 className="mb-7 text-2xl font-bold leading-[1.15] text-[#0b1f3a] sm:text-3xl lg:text-4xl">
+                    {blog.title}
+                  </h1>
+
+                  {blog.excerpt && (
+                    <div className="mb-9 rounded-r-[20px] border-l-4 border-[#f7a236] bg-[#fff9f1] px-5 py-5 text-base leading-8 text-gray-700 sm:px-7 sm:text-lg">
+                      {blog.excerpt
+                        .replace(/<[^>]*>/g, "")
+                        .replace(/&#8217;/g, "'")
+                        .replace(/&hellip;/g, "...")
+                        .replace(/&nbsp;/g, " ")
+                        .trim()}
+                    </div>
+                  )}
+
+                  {/* WordPress Content */}
+                  <div
+                    className="
+                      blog-content
+                      text-[16px]
+                      leading-8
+                      text-[#475569]
+
+                      sm:text-[17px]
+
+                      [&_p]:mb-6
+
+                      [&_h2]:mb-5
+                      [&_h2]:mt-11
+                      [&_h2]:text-2xl
+                      [&_h2]:font-bold
+                      [&_h2]:leading-tight
+                      [&_h2]:text-[#0b1f3a]
+
+                      sm:[&_h2]:text-3xl
+
+                      [&_h3]:mb-4
+                      [&_h3]:mt-8
+                      [&_h3]:text-xl
+                      [&_h3]:font-bold
+                      [&_h3]:text-[#0b1f3a]
+
+                      sm:[&_h3]:text-2xl
+
+                      [&_ul]:mb-7
+                      [&_ul]:ml-6
+                      [&_ul]:list-disc
+                      [&_ul]:space-y-3
+
+                      [&_ol]:mb-7
+                      [&_ol]:ml-6
+                      [&_ol]:list-decimal
+                      [&_ol]:space-y-3
+
+                      [&_a]:font-semibold
+                      [&_a]:text-[#3fa2a3]
+                      [&_a]:underline
+                      [&_a]:decoration-[#3fa2a3]/40
+                      [&_a]:underline-offset-4
+                      hover:[&_a]:text-[#f7a236]
+
+                      [&_strong]:font-bold
+                      [&_strong]:text-[#0b1f3a]
+
+                      [&_blockquote]:my-8
+                      [&_blockquote]:rounded-r-2xl
+                      [&_blockquote]:border-l-4
+                      [&_blockquote]:border-[#3fa2a3]
+                      [&_blockquote]:bg-[#f1fafa]
+                      [&_blockquote]:px-6
+                      [&_blockquote]:py-5
+                      [&_blockquote]:text-lg
+                      [&_blockquote]:font-medium
+                      [&_blockquote]:italic
+                      [&_blockquote]:text-[#0b1f3a]
+
+                      [&_img]:my-8
+                      [&_img]:h-auto
+                      [&_img]:w-full
+                      [&_img]:rounded-2xl
+                    "
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        blog.content ||
+                        "<p>Article content is not available.</p>",
+                    }}
+                  />
+                </div>
+              </article>
+
+              {/* Sidebar */}
+              <aside className="space-y-6 lg:sticky lg:top-24">
+
+                {/* Article Info */}
+                <div className="rounded-[24px] border border-[#0b1f3a]/10 bg-white p-6 shadow-sm">
+                  <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[#3fa2a3]">
+                    Article Information
+                  </p>
+
+                  <h3 className="mb-5 text-xl font-bold text-[#0b1f3a]">
+                    Medtrion Resources
+                  </h3>
+
+                  <div className="border-t border-gray-100 pt-4">
+                    <p className="mb-1 text-xs text-gray-500">
+                      Published
+                    </p>
+
+                    <p className="font-semibold text-[#0b1f3a]">
+                      {formattedDate}
+                    </p>
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div className="overflow-hidden rounded-[24px] bg-[#0b1f3a] p-7 text-white shadow-lg">
+                  <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#3fa2a3] text-xl">
+                    ♿
+                  </div>
+
+                  <h3 className="mb-3 text-2xl font-bold">
+                    Need Mobility Support?
+                  </h3>
+
+                  <p className="mb-6 text-sm leading-6 text-white/75">
+                    Our team can help you find the right mobility solution for your home and lifestyle.
+                  </p>
+
+                  <Link
+                    href="/contact"
+                    className="inline-flex w-full items-center justify-center rounded-full bg-[#3fa2a3] px-5 py-3.5 text-sm font-bold text-white transition-all duration-300 hover:bg-[#f7a236]"
+                  >
+                    Contact Our Team
+                  </Link>
+                </div>
+
+                {/* Back to Blogs */}
+                <Link
+                  href="/blogs"
+                  className="flex w-full items-center justify-center rounded-full border border-[#0b1f3a]/15 bg-white px-5 py-3.5 text-sm font-bold text-[#0b1f3a] transition-all duration-300 hover:border-[#3fa2a3] hover:text-[#3fa2a3]"
+                >
+                  View All Articles
+                </Link>
+              </aside>
+            </div>
+          </div>
+        </section>
+      </main>
+    </>
+  );
+};
+
+export const getServerSideProps: GetServerSideProps<
+  BlogDetailPageProps
+> = async ({ params }) => {
+  const slug = params?.slug;
+
+  if (!slug || Array.isArray(slug)) {
+    return {
+      notFound: true,
+    };
+  }
+
+  try {
+    const response = await runClientRequest<{
+      post: WordPressPost | null;
+    }>(
+      GET_BLOG_BY_SLUG,
+      {
+        slug,
+      }
+    );
+
+    const post = response?.post;
+
+    if (!post) {
+      return {
+        notFound: true,
+      };
     }
 
     return {
-        props: {
-            blogDetailData: {
-                fields: {
-                    title: blogData.title,
-                    description: blogData.description,
-                    body: {
-                        nodeType: 'document',
-                        data: {},
-                        content: [
-                            {
-                                nodeType: 'paragraph',
-                                data: {},
-                                content: [
-                                    {
-                                        nodeType: 'text',
-                                        value: blogData.content,
-                                        marks: [],
-                                        data: {}
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    slug: slug,
-                    mainImage: {
-                        fields: {
-                            file: {
-                                url: blogData.image,
-                                details: {
-                                    image: {
-                                        width: 800,
-                                        height: 400
-                                    }
-                                }
-                            },
-                            title: blogData.title
-                        }
-                    }
-                },
-                sys: {
-                    createdAt: new Date(blogData.date).toISOString()
-                }
-            }
-        },
+      props: {
+        blogDetailData: post,
+      },
     };
-}
-
-const BlogDetailPage = ({ blogDetailData }: any) => {
-    const title = blogDetailData.fields.title || "Blog Post | Health & Supply Mobility";
-    const description = blogDetailData.fields.excerpt || "Discover our latest blog post at Health & Supply Mobility.";
-    const imageUrl = blogDetailData.fields.mainImage.fields.file.url.startsWith('http') 
-        ? blogDetailData.fields.mainImage.fields.file.url 
-        : `https:${blogDetailData.fields.mainImage.fields.file.url}`;
-    const publishedTime = new Date(blogDetailData.sys.createdAt).toISOString();
-    const renderOptions = {
-        renderNode: {
-            [BLOCKS.HEADING_1]: (node: any, children: any) => {
-                const headingText = children
-                    .toString()
-                    .replace(/\[.*?\]|\(.*?\)/g, '')
-                    .replace(/[^a-z0-9\s-]/gi, '')
-                    .replace(/[\s-]+/g, '-')
-                    .replace(/^-+|-+$/g, '')
-                    .toLowerCase();
-                return (
-                    <h1 id={headingText} className="text-4xl font-bold font-inknut p-6 text-black">
-                        {children}
-                    </h1>
-                );
-            },
-            [BLOCKS.HEADING_2]: (node: any, children: any) => {
-                const headingText = children
-                    .toString()
-                    .replace(/\[.*?\]|\(.*?\)/g, '')
-                    .replace(/[^a-z0-9\s-]/gi, '')
-                    .replace(/[\s-]+/g, '-')
-                    .replace(/^-+|-+$/g, '')
-                    .toLowerCase();
-                return (
-                    <h2 id={headingText} className="text-3xl font-semibold font-inknut p-4 text-center text-black">
-                        {children}
-                    </h2>
-                );
-            },
-            [BLOCKS.HEADING_3]: (node: any, children: any) => {
-                const headingText = children
-                    .toString()
-                    .replace(/\[.*?\]|\(.*?\)/g, '')
-                    .replace(/[^a-z0-9\s-]/gi, '')
-                    .replace(/[\s-]+/g, '-')
-                    .replace(/^-+|-+$/g, '')
-                    .toLowerCase();
-                return (
-                    <h3 id={headingText} className="text-2xl font-medium font-inknut p-2 text-black">
-                        {children}
-                    </h3>
-                );
-            },
-            [BLOCKS.PARAGRAPH]: (node: any, children: React.ReactNode) => (
-                <p className="mb-4 text-black">{children}</p>
-            ),
-            [BLOCKS.UL_LIST]: (node: any, children: React.ReactNode) => (
-                <ul className="list-disc pl-5 text-black">{children}</ul>
-            ),
-            [BLOCKS.OL_LIST]: (node: any, children: React.ReactNode) => (
-                <ol className="list-decimal pl-5 text-black">{children}</ol>
-            ),
-            [BLOCKS.LIST_ITEM]: (node: any, children: React.ReactNode) => (
-                <li className="text-black">{children}</li>
-            ),
-            [BLOCKS.QUOTE]: (node: any, children: React.ReactNode) => (
-                <blockquote className="border-l-4 pl-4 italic text-black">{children}</blockquote>
-            ),
-            [BLOCKS.EMBEDDED_ASSET]: (_node: any) => {
-                const { title, file } = _node.data.target.fields;
-                return (
-                    <div className="mb-4">
-                        <img src={`https:${file.url}`} alt={title} className="rounded-lg" />
-                        <p>{title}</p>
-                    </div>
-                );
-            },
-            [BLOCKS.HR]: () => <hr className="my-4 border-gray-300" />,
-            [BLOCKS.TABLE]: (node: any, children: React.ReactNode) => (
-                <table className="min-w-full">{children}</table>
-            ),
-            [BLOCKS.TABLE_ROW]: (node: any, children: React.ReactNode) => (
-                <tr>{children}</tr>
-            ),
-            [BLOCKS.TABLE_CELL]: (node: any, children: React.ReactNode) => (
-                <td className="border px-4 py-2">{children}</td>
-            ),
-
-            // Inline nodes
-            [INLINES.HYPERLINK]: (node: any, children: React.ReactNode) => (
-                <a href={node.data.uri} className="text-gray-500 underline" target="_blank" rel="noopener noreferrer">
-                    {children}
-                </a>
-            ),
-        },
-        renderMark: {
-            [MARKS.BOLD]: (text: React.ReactNode) => <strong className="text-black font-bold">{text}</strong>,
-            [MARKS.ITALIC]: (text: React.ReactNode) => <em className="text-black">{text}</em>,
-            [MARKS.UNDERLINE]: (text: React.ReactNode) => <u className="text-black underline">{text}</u>,
-            [MARKS.CODE]: (text: React.ReactNode) => <code className="bg-gray-700 rounded px-1">{text}</code>,
-        },
-    };
-
-    // Format the creation date
-    const createdAt = new Date(blogDetailData.sys.createdAt).toLocaleDateString("en-US", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-    });
-
-    return (
-        <>
-            <Head>
-                <title>{title}</title>
-                <meta name="description" content={description} />
-                <meta property="og:type" content="article" />
-                <meta property="og:title" content={title} />
-                <meta property="og:description" content={description} />
-                <meta property="og:image" content={imageUrl} />
-                <meta property="og:url" content={`https://medtrion.ca/blogs/${blogDetailData.fields.slug}`} />
-                <meta property="article:published_time" content={publishedTime} />
-                <meta property="twitter:card" content="summary_large_image" />
-                <meta property="twitter:title" content={title} />
-                <meta property="twitter:description" content={description} />
-                <meta property="twitter:image" content={imageUrl} />
-                <link rel="canonical" href={`https://medtrion.ca/blogs/${blogDetailData.fields.slug}`} />
-            </Head>
-
-            <section className="bg-dot-slate-50/10">
-                <div className="absolute -top-2 justify-center w-full bg-[url('/nnnoise.svg')] bg-cover bg-repeat md:h-[75vh] h-[50vh] -z-40"> </div>
-                <div className="max-w-5xl mt-20 mx-auto px-5 overflow-x-hidden scroll-smooth">
-                    <div className="flex">
-                        <Link
-                            href="/"
-                            className="flex items-center gap-2 mt-10 hover:text-[#719b8f] text-sm md:text-base text-red-800"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={1.5}
-                                stroke="currentColor"
-                                className="md:size-5 size-4"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M15.75 19.5 8.25 12l7.5-7.5"
-                                />
-                            </svg>{" "}
-                            Back to home
-                        </Link>
-                    </div>
-
-                    <div className="flex justify-between md:mt-10 mt-8">
-                        <div className="text-gray-500">{createdAt}</div>
-                        {/* <div className="flex gap-5">
-                            <a href="https://www.linkedin.com/company/harbourfrontwebdesigns/" target="_blank" rel="noopener noreferrer">
-                                <FaLinkedinIn className="h-6 w-6 text-amber-500" title="LinkedIn" />
-                            </a>
-                            <a href="https://www.instagram.com/harbourfrontwebdesigns/" target="_blank" rel="noopener noreferrer">
-                                <FaInstagram className="h-6 w-6 text-amber-500" title="Instagram" />
-                            </a>
-                        </div> */}
-                    </div>
-
-                    <div className="flex flex-col items-center">
-                        <h1 className="text-center md:text-4xl font-inknut text-xl font-bold md:mt-10 mt-8 mb-4">
-                            {blogDetailData.fields.title}
-                        </h1>
-                    </div>
-
-                    <div className="border-b-2 pb-10 border-slate-800 border-dashed">
-                        <Image
-                            src={blogDetailData.fields.mainImage.fields.file.url.startsWith('http') 
-                                ? blogDetailData.fields.mainImage.fields.file.url 
-                                : `https:${blogDetailData.fields.mainImage.fields.file.url}`}
-                            width={blogDetailData.fields.mainImage.fields.file.details.image.width}
-                            height={blogDetailData.fields.mainImage.fields.file.details.image.height}
-                            alt={blogDetailData.fields.mainImage.fields.title || "Blog Image"}
-                            title={blogDetailData.fields.mainImage.fields.title || "Blog Image"}
-                            className="h-auto w-full rounded-xl flex justify-center"
-                            loading="lazy"
-                        />
-                    </div>
-
-                    <div className="max-w-6xl flex md:flex-row flex-col mx-auto overflow-x-hidden scroll-smooth">
-                        <div className="md:w-1/4">
-                            <TableOfContents content={blogDetailData.fields.body} />
-                        </div>
-                        <div className="prose md:w-3/4 w-full text-black max-w-full mb-10 text-left lg:px-5 md:mt-10 mt-5">
-                            {documentToReactComponents(blogDetailData.fields.body, renderOptions)}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Call-to-action section */}
-                <div className="bg-gray-100 py-12">
-                    <div className="max-w-4xl mx-auto px-5 text-center">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                            Need Help Choosing the Right Solution?
-                        </h2>
-                        <p className="text-lg text-gray-600 mb-8">
-                            Our mobility experts are here to help you find the perfect solution for your needs.
-                        </p>
-                        <div className="max-w-md mx-auto">
-                            <Form />
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </>
+  } catch (error) {
+    console.error(
+      "Error fetching WordPress blog:",
+      error
     );
+
+    return {
+      notFound: true,
+    };
+  }
 };
 
 export default BlogDetailPage;

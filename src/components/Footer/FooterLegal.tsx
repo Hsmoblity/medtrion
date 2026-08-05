@@ -55,7 +55,6 @@ const FooterLegal: React.FC<FooterLegalProps> = ({
               Privacy policy
             </Link>
           </li>
-
           <li>
             <Link
               href={legal.termsOfService}
@@ -65,7 +64,16 @@ const FooterLegal: React.FC<FooterLegalProps> = ({
               Terms of service
             </Link>
           </li>
-
+          
+          <li>
+            <Link
+              href={legal.returnPolicy}
+              className={linkClass}
+              aria-label="Read our return policy"
+            >
+              Return policy
+            </Link>
+          </li>
           {legal.cookiePolicy && (
             <li>
               <Link

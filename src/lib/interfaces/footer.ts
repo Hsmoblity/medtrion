@@ -43,6 +43,7 @@ export interface FooterContent {
     privacyPolicy: string;
     termsOfService: string;
     cookiePolicy?: string;
+    returnPolicy: string;
   };
 }
 
@@ -188,9 +189,10 @@ export const defaultFooterContent: FooterContent = {
   trustIndicators: [],
   paymentMethods: ['visa', 'mastercard', 'amex', 'discover'],
   legal: {
-    copyright: '© Copyright 2025. All Rights Reserved.',
+    copyright: '© Copyright 2026. All Rights Reserved.',
     privacyPolicy: '/privacy-policy',
     termsOfService: '/terms-of-service',
-    cookiePolicy: '/cookie-policy'
+    cookiePolicy: '/cookie-policy',
+    returnPolicy: '/return-policy'
   }
 };

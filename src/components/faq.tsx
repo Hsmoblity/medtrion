@@ -82,7 +82,7 @@ function FAQ() {
                         </div>
                         <div className="flex flex-col items-center text-center md:text-left">
                             <div className="bg-gradient-to-br from-[#f0f9f8] to-[#fef3e2] p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border border-[#3fa2a3]/30 hover:border-[#3fa2a3]">
-                                <h3 className="text-xl font-primary font-semibold text-[#0d163c] mb-3">5 Year Warranty</h3>
+                                <h3 className="text-xl font-primary font-semibold text-[#0d163c] mb-3"> 5 Year Warranty</h3>
                                 <p className="text-base text-[#4b5563] leading-relaxed">
                                     Acorn stairlifts comes with Fully comprehensive 12-month warranty. If any component should fail due to faulty manufacture during the first year of ownership, Acorn will send round one of our fully trained service technicians to get your stairlift back to full working order free of charge.
                                 </p>

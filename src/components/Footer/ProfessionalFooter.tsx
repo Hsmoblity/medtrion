@@ -144,7 +144,7 @@ const ProfessionalFooter: React.FC<ProfessionalFooterProps> = ({
             <div className="rounded-[35px] border border-slate-800  p-6">
               <PaymentMethods paymentMethods={content.paymentMethods} className="mb-0" />
               <div className="mt-6 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.32em] text-white">
-                {['Los Angeles', 'Long Beach', 'San Diego', 'San Jose', 'San Francisco', 'Irvine', 'New York', 'Seattle', 'Bakersfield', 'Las Vegas'].map((city) => (
+                {['Oakville', 'Burlington', 'Mississauga', 'Milton', 'Brampton', 'Toronto', 'Hamilton'].map((city) => (
                   <span key={city} className="rounded-full bg-slate-900/80 px-3 py-2 text-white">
                     {city}
                   </span>

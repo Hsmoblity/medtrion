@@ -28,7 +28,7 @@ export const testimonials: Testimonial[] = [
   {
     id: '2',
     name: 'Robert Williams',
-    location: 'Birmingham, UK',
+    location: 'Oakville, Ontario',
     rating: 5,
     text: 'After my stroke, I thought I would have to move house. The stairlift gave me back my independence and allowed me to stay in my family home.',
     product: 'Acorn 130 Straight Stairlift',
@@ -38,7 +38,7 @@ export const testimonials: Testimonial[] = [
   {
     id: '3',
     name: 'Sarah Mitchell',
-    location: 'Leeds, UK',
+    location: 'Oakville, Ontario',
     rating: 5,
     text: 'The outdoor stairlift is fantastic. I can now enjoy my garden again without worrying about the steps. The weather protection works perfectly.',
     product: 'Acorn Outdoor Stairlift',
@@ -48,7 +48,7 @@ export const testimonials: Testimonial[] = [
   {
     id: '4',
     name: 'David Brown',
-    location: 'Liverpool, UK',
+    location: 'Oakville, Ontario',
     rating: 5,
     text: 'Excellent service from start to finish. The consultation was thorough, installation was quick, and the after-sales support has been outstanding.',
     product: 'Acorn 180 Curved Stairlift',
@@ -57,7 +57,7 @@ export const testimonials: Testimonial[] = [
   {
     id: '5',
     name: 'Linda Davis',
-    location: 'Newcastle, UK',
+    location: 'Oakville, Ontario',
     rating: 5,
     text: 'I was nervous about getting a stairlift, but the team made everything so easy. The stairlift is quiet, comfortable, and has given me peace of mind.',
     product: 'Acorn 130 Straight Stairlift',
@@ -66,7 +66,7 @@ export const testimonials: Testimonial[] = [
   {
     id: '6',
     name: 'Michael Wilson',
-    location: 'Sheffield, UK',
+    location: 'Oakville, Ontario',
     rating: 5,
     text: 'The stairlift has been a game-changer for my mobility. I can now visit friends upstairs and feel confident moving around my home.',
     product: 'Acorn 180 Curved Stairlift',

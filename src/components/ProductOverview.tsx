@@ -1,0 +1,92 @@
+/**
+ * ProductOverview Component
+ * Displays product overview/description with tabs
+ */
+
+import { useState } from 'react'
+import { ProductFeatureTab } from '@/data/productContent'
+
+interface ProductOverviewProps {
+  content: string
+  featureTabs?: ProductFeatureTab[]
+}
+
+export default function ProductOverview({ content, featureTabs = [] }: ProductOverviewProps) {
+  const [activeTab, setActiveTab] = useState<string>('overview')
+
+  // Build tabs array dynamically
+  const OVERVIEW_TABS = [
+    {
+      id: 'overview',
+      title: 'Product Overview',
+      isContent: true
+    },
+    ...featureTabs
+  ]
+
+  return (
+    <div className="mt-12 mb-16 rounded-[28px] border border-[#0b1f3a]/10 bg-gradient-to-br from-white via-[#f8fbff] to-[#f2fbfa] p-8 shadow-[0_20px_60px_rgba(11,31,58,0.08)]">
+      {/* Tabs Navigation */}
+      <div className="flex flex-col sm:flex-row gap-0 border-b border-[#0b1f3a]/10 mb-8 overflow-x-auto">
+        {OVERVIEW_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-6 py-4 font-semibold text-base whitespace-nowrap transition-all duration-200 border-b-2 ${
+              activeTab === tab.id
+                ? 'border-[#3fa2a3] text-[#3fa2a3]'
+                : 'border-transparent text-[#0b1f3a] hover:text-[#3fa2a3]'
+            }`}
+          >
+            {tab.title}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div className="animate-fadeIn">
+        {activeTab === 'overview' && (
+          <div className="space-y-4 text-gray-700 leading-relaxed">
+            {content.split('\n\n').map((paragraph, index) => (
+              <p key={index} className="text-base">
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {OVERVIEW_TABS.map((tab) => {
+          const isOverviewTab = (tab as any).isContent
+          const isFeatureTab = !isOverviewTab && 'description' in tab
+          
+          return (
+            activeTab === tab.id &&
+            isFeatureTab && (
+              <div key={tab.id}>
+                <p className="text-base text-gray-700 leading-relaxed">
+                  {(tab as ProductFeatureTab).description}
+                </p>
+              </div>
+            )
+          )
+        })}
+      </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-in-out;
+        }
+      `}</style>
+    </div>
+  )
+}

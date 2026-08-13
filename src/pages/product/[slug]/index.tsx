@@ -20,11 +20,15 @@ import SummaryPanel from "components/configurator/SummaryPanel";
 import CompatibilityAlert from "components/configurator/CompatibilityAlert";
 import { Reviews } from "components/reviews";
 import FAQ from "components/faq";
+import ProductOverview from "components/ProductOverview";
+import ProductFAQ from "components/ProductFAQ";
+import ProductSpecifications from "components/ProductSpecifications";
 import { PrimaryButton, LoadingOverlay } from "components/ui";
 import { useOptionProductsWithMetrics } from "hooks/useOptionProducts";
 import { LazyOptionProducts } from "components/lazy-loading/LazyOptionProducts";
 import { OptionProductsLoadingOverlay } from "components/loading/OptionProductsLoadingOverlay";
 import { PERFORMANCE_THRESHOLDS } from "lib/utils/performance-tracking-lazy-load";
+import { getProductContent } from "@/data/productContent";
 
 interface ProductDetailPageProps {
   product: ConfigurableProductSchema | null;
@@ -458,6 +462,14 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             </div>
           </div>
 
+          {/* Product Overview Section */}
+          {product?.slug && getProductContent(product.slug)?.overview && (
+            <ProductOverview 
+              content={getProductContent(product.slug)!.overview!}
+              featureTabs={getProductContent(product.slug)?.featureTabs}
+            />
+          )}
+
           {/* Main Configuration Area */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Sidebar Navigation */}
@@ -625,10 +637,17 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             <Reviews />
           </div>
 
-          {/* FAQ Section */}
-          <div className="mt-16">
-            <FAQ />
-          </div>
+          {/* Product FAQ Section - Dynamic based on product */}
+          {product?.slug && getProductContent(product.slug)?.faq && (
+            <ProductFAQ faqs={getProductContent(product.slug)!.faq!} />
+          )}
+
+          {/* Product Specifications Section - Dynamic based on product */}
+          {product?.slug && getProductContent(product.slug)?.specifications && (
+            <ProductSpecifications
+              specifications={getProductContent(product.slug)!.specifications!}
+            />
+          )}
 
           {/* Lazy Loaded Option Products Section */}
           {relatedOptionIds && relatedOptionIds.length > 0 && (

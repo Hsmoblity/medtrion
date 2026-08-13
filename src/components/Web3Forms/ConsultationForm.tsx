@@ -156,6 +156,7 @@ export default function ConsultationForm({
         preferred_time: data.preferredTime,
         urgency: data.urgency,
         message: data.additionalNotes || 'No additional notes provided',
+        to_email: 'info@medtrion.ca',
         // Use 'message' field instead of 'additional_notes' (Web3Forms standard)
       }
 

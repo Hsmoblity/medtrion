@@ -3,7 +3,10 @@
  * Displays product specifications in a table format
  */
 
-import { ProductSpecification } from '@/data/productContent'
+interface ProductSpecification {
+  label: string
+  value: string
+}
 
 interface ProductSpecificationsProps {
   specifications: ProductSpecification[]

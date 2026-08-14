@@ -90,6 +90,21 @@ export const GET_PRODUCT_BY_SLUG = gql`
             options 
           } 
         }
+        productExtraDetails {
+          overviewContent
+          featureTabs {
+            title
+            description
+          }
+          faqs {
+            question
+            answer
+          }
+          specifications {
+            label
+            value
+          }
+        }
         globalAttributes { 
           nodes { 
             label 

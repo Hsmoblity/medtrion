@@ -4,24 +4,32 @@
  */
 
 import { useState } from 'react'
-import { ProductFeatureTab } from '@/data/productContent'
+
+interface FeatureTab {
+  title: string
+  description: string
+  id?: string
+}
 
 interface ProductOverviewProps {
   content: string
-  featureTabs?: ProductFeatureTab[]
+  featureTabs?: FeatureTab[]
 }
 
 export default function ProductOverview({ content, featureTabs = [] }: ProductOverviewProps) {
   const [activeTab, setActiveTab] = useState<string>('overview')
 
-  // Build tabs array dynamically
+  // Build tabs array dynamically — हर feature tab को unique id दो (index के आधार पर)
   const OVERVIEW_TABS = [
     {
       id: 'overview',
       title: 'Product Overview',
       isContent: true
     },
-    ...featureTabs
+    ...featureTabs.map((tab, index) => ({
+      ...tab,
+      id: `feature-${index}`,
+    }))
   ]
 
   return (
@@ -58,13 +66,13 @@ export default function ProductOverview({ content, featureTabs = [] }: ProductOv
         {OVERVIEW_TABS.map((tab) => {
           const isOverviewTab = (tab as any).isContent
           const isFeatureTab = !isOverviewTab && 'description' in tab
-          
+
           return (
             activeTab === tab.id &&
             isFeatureTab && (
               <div key={tab.id}>
                 <p className="text-base text-gray-700 leading-relaxed">
-                  {(tab as ProductFeatureTab).description}
+                  {(tab as FeatureTab).description}
                 </p>
               </div>
             )

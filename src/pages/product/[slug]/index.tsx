@@ -28,7 +28,6 @@ import { useOptionProductsWithMetrics } from "hooks/useOptionProducts";
 import { LazyOptionProducts } from "components/lazy-loading/LazyOptionProducts";
 import { OptionProductsLoadingOverlay } from "components/loading/OptionProductsLoadingOverlay";
 import { PERFORMANCE_THRESHOLDS } from "lib/utils/performance-tracking-lazy-load";
-import { getProductContent } from "@/data/productContent";
 
 interface ProductDetailPageProps {
   product: ConfigurableProductSchema | null;
@@ -463,12 +462,12 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           </div>
 
           {/* Product Overview Section */}
-          {product?.slug && getProductContent(product.slug)?.overview && (
-            <ProductOverview 
-              content={getProductContent(product.slug)!.overview!}
-              featureTabs={getProductContent(product.slug)?.featureTabs}
-            />
-          )}
+          {product?.productExtraDetails?.overviewContent && (
+          <ProductOverview 
+            content={product.productExtraDetails.overviewContent}
+            featureTabs={product.productExtraDetails.featureTabs}
+          />
+        )}
 
           {/* Main Configuration Area */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -638,14 +637,14 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           </div>
 
           {/* Product FAQ Section - Dynamic based on product */}
-          {product?.slug && getProductContent(product.slug)?.faq && (
-            <ProductFAQ faqs={getProductContent(product.slug)!.faq!} />
+         {product?.productExtraDetails?.faqs && product.productExtraDetails.faqs.length > 0 && (
+            <ProductFAQ faqs={product.productExtraDetails.faqs} />
           )}
 
           {/* Product Specifications Section - Dynamic based on product */}
-          {product?.slug && getProductContent(product.slug)?.specifications && (
+          {product?.productExtraDetails?.specifications && product.productExtraDetails.specifications.length > 0 && (
             <ProductSpecifications
-              specifications={getProductContent(product.slug)!.specifications!}
+              specifications={product.productExtraDetails.specifications}
             />
           )}
 

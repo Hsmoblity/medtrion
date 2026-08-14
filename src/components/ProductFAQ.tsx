@@ -4,10 +4,12 @@
  */
 
 import { useState } from 'react'
-import { ProductFAQItem } from '@/data/productContent'
 
 interface ProductFAQProps {
-  faqs: ProductFAQItem[]
+  faqs: {
+    question: string
+    answer: string
+  }[]
 }
 
 export default function ProductFAQ({ faqs }: ProductFAQProps) {

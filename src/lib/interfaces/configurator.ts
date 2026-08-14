@@ -68,6 +68,21 @@ export interface ConfigurableProductSchema extends Omit<ProductSchema, 'shortDes
     variationsTotal: number;
     combinedTotal: number;
   };
+   productExtraDetails?: {
+    overviewContent?: string;
+    featureTabs?: {
+      title: string;
+      description: string;
+    }[];
+    faqs?: {
+      question: string;
+      answer: string;
+    }[];
+    specifications?: {
+      label: string;
+      value: string;
+    }[];
+  } | null;
 }
 
 export interface ConfiguratorCategory {

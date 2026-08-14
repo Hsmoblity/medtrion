@@ -320,7 +320,14 @@ export function normalizeSlugQueryResponse(wooProduct: any): any {
     affiliate: false,
     productId: wooProduct.databaseId?.toString(),
     seo: wooProduct.seo || null,
-    
+    productExtraDetails: wooProduct.productExtraDetails
+      ? {
+          overviewContent: wooProduct.productExtraDetails.overviewContent || '',
+          featureTabs: wooProduct.productExtraDetails.featureTabs || [],
+          faqs: wooProduct.productExtraDetails.faqs || [],
+          specifications: wooProduct.productExtraDetails.specifications || [],
+        }
+      : null,
     // Configurator-specific fields
     baseModel: true,
     configuratorCategories: [],

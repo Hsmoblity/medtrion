@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from 'next/router';
 import { handleAnchorNavigation } from "lib/utils/navigation";
 import { SiteLogo, getLogoUrl, getLogoAlt } from "../lib/fetchSiteLogo";
+import { removeAddressLabels } from "../lib/utils/addressFormatter";
 
 
 interface PathProps {
@@ -220,7 +221,7 @@ const Drawer = React.forwardRef<DrawerHandle, DrawerProps>(({ logo, contactInfo,
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
-                                    <span>{contactInfo?.contactAddress || '3495 Rebecca St Oakville, ON L6L 6X9'}</span>
+                                    <span>{contactInfo?.contactAddress ? removeAddressLabels(contactInfo.contactAddress) : '3495 Rebecca St Oakville, ON L6L 6X9'}</span>
                                 </div>
 
                                 {/* Phone numbers */}

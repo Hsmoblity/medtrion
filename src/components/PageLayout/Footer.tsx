@@ -1,5 +1,6 @@
 import { ProfessionalFooter } from '../Footer';
 import { SiteLogo } from '../../lib/fetchSiteLogo';
+import { removeAddressLabels } from '../../lib/utils/addressFormatter';
 
 interface ContactPhone {
   name: string;
@@ -18,13 +19,18 @@ interface FooterProps {
 }
 
 const Footer: React.FC<FooterProps> = ({ logo, contactInfo }) => {
+  // Clean address by removing labels like "Street:", "City:", "Postal:"
+  const cleanedAddress = contactInfo?.contactAddress 
+    ? removeAddressLabels(contactInfo.contactAddress) 
+    : '3495 Rebecca St Oakville, ON L6L 6X9';
+
   // Use dynamic contact info from CMS, with fallbacks
   const customContent = {
     companyInfo: {
       name: 'Medtrion',
       description: 'Medtrion is your trusted source for a wide range of health services and mobility products designed to improve your quality of life. Please note: We are not manufacturers of Acorn stairlifts but proud affiliate partners.',
       logo: '/med-logo.png',
-      address: contactInfo?.contactAddress || '3495 Rebecca St Oakville, ON L6L 6X9',
+      address: cleanedAddress,
       phone: contactInfo?.contactPhone?.[0]?.number || '+1 (905) 330-1774',
       contactPhone: contactInfo?.contactPhone && contactInfo.contactPhone.length > 0 
         ? contactInfo.contactPhone 

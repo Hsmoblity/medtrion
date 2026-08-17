@@ -266,14 +266,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </motion.div>
       </div>
       
-      {/* Product Info */}
-      <div className="p-6">
-        <h3 className="mb-2 font-primary text-xl font-semibold text-[#0b1f3a] transition-colors group-hover:text-[#3fa2a3]">
+      {/* Product Info - Fixed height for consistent cards */}
+      <div className="p-6 flex flex-col h-[280px]">
+        <h3 className="mb-3 font-primary text-xl font-semibold text-[#0b1f3a] transition-colors group-hover:text-[#3fa2a3] line-clamp-2">
           {normalizedProduct.title}
         </h3>
         
         {normalizedProduct.description && (
-          <div className="mb-4 line-clamp-2 text-gray-600">
+          <div className="mb-3 line-clamp-2 text-gray-600 flex-grow">
             <HydrationErrorBoundary>
               <RichContent content={normalizedProduct.description} />
             </HydrationErrorBoundary>
@@ -290,7 +290,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
         
         {/* Action Buttons */}
-        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+        <div className="flex gap-2 mt-auto" onClick={(e) => e.stopPropagation()}>
           <PrimaryButton 
             href={`/product/${normalizedProduct.slug}`}
             className="flex-1"

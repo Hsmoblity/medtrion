@@ -150,14 +150,14 @@ export default function ConsultationForm({
         subject: `Consultation Request from ${data.firstName} ${data.lastName}`,
         from_name: `${data.firstName} ${data.lastName}`,
         email: data.email,
+        reply_to: data.email,  // Set reply-to address to customer's email
+        to: 'info@medtrion.ca',  // Correct field name for Web3Forms recipient email
         phone: data.phone,
         address: `${data.address}, ${data.city}, ${data.province} ${data.postalCode}`,
         preferred_contact: data.preferredContact,
         preferred_time: data.preferredTime,
         urgency: data.urgency,
         message: data.additionalNotes || 'No additional notes provided',
-        to_email: 'info@medtrion.ca',
-        // Use 'message' field instead of 'additional_notes' (Web3Forms standard)
       }
 
       // Only include cart-related information if cart has items

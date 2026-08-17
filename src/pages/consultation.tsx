@@ -152,6 +152,8 @@ const ConsultationPage: React.FC = () => {
           subject: `Professional Consultation Request - ${data.firstName} ${data.lastName}`,
           from_name: `${data.firstName} ${data.lastName}`,
           email: data.email,
+          reply_to: data.email,  // Set reply-to address to customer's email
+          to: 'info@medtrion.ca',  // Send to company email
           phone: data.phone,
           address: `${data.address}, ${data.city}, ${data.province} ${data.postalCode}`,
           preferred_contact: data.preferredContact,

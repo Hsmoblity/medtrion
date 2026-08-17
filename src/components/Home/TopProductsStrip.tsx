@@ -375,7 +375,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
             transition={{ duration: 0.6, delay: 0.4 }}
             className={`bg-gray-50 rounded-2xl p-6 ${
               viewMode === 'grid' 
-                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6'
+                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 auto-rows-fr'
                 : 'space-y-4'
             }`}
           >
@@ -396,7 +396,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
           </motion.div>
         ) : (
           <div className="bg-gray-50 rounded-2xl p-6">
-            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 auto-rows-fr">
               {featuredProducts.slice(0, 3).map((product, index) => (
                 <ProductCard 
                   key={product.databaseId || product.slug || index} 

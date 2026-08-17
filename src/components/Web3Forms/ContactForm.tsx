@@ -74,6 +74,8 @@ export default function ContactForm({
           access_key: accessKey,
           subject: `Contact Form: ${data.subject}`,
           from_name: `${data.firstName} ${data.lastName}`,
+          reply_to: data.email,  // Set reply-to address to customer's email
+          to: 'info@medtrion.ca',  // Send to company email
         }),
       })
 

@@ -74,7 +74,7 @@ function parseAddress(raw: string): {
 
 // Fallback static data if CMS is unavailable
 const FALLBACK_CONTACT: ContactInfo = {
-  contactAddress: "Street:3495 Rebecca St,City:Oakville ON,Postal:L6L 6X9",
+  contactAddress: "3495 Rebecca St, Oakville ON, L6L 6X9",
   contactEmail: "Info@medtrion.ca",
   contactPhone: [{ name: "General Inquiries", number: "+1 (905) 330-1774" }],
   openHours: [
@@ -142,6 +142,8 @@ const ContactPage: React.FC<ContactPageProps> = ({ contactInfo }) => {
           ...data,
           access_key: accessKey,
           subject: `Contact Form: ${data.subject}`,
+          reply_to: data.email,  // Set reply-to address to customer's email
+          to: 'info@medtrion.ca',  // Send to company email
         }),
       });
 

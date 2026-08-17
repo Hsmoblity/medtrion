@@ -54,13 +54,16 @@ export default function ProductOverview({ content, featureTabs = [] }: ProductOv
       {/* Tab Content */}
       <div className="animate-fadeIn">
         {activeTab === 'overview' && (
-          <div className="space-y-4 text-gray-700 leading-relaxed">
-            {content.split('\n\n').map((paragraph, index) => (
-              <p key={index} className="text-base">
-                {paragraph}
-              </p>
-            ))}
-          </div>
+          <div
+            className="space-y-4 text-gray-700 leading-relaxed"
+            dangerouslySetInnerHTML={{
+              __html: content
+                .split(/\r?\n\s*\r?\n/) // blank line से पहचानो paragraph break (chahe \n\n ho ya \r\n\r\n)
+                .filter((para) => para.trim() !== '')
+                .map((para) => `<p class="text-base">${para.trim().replace(/\r?\n/g, '<br/>')}</p>`)
+                .join('')
+            }}
+          />
         )}
 
         {OVERVIEW_TABS.map((tab) => {

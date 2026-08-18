@@ -545,6 +545,9 @@ const ConfigurationSummary: React.FC<ConfigurationSummaryProps> = ({
             onClick={onAddToCart}
             className="flex-1"
           >
+            <svg className="mr-2 h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 1.9-1.4L21 8H6M10 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" />
+            </svg>
             Add to Cart
           </PrimaryButton>
           

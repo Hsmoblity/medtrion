@@ -11,9 +11,9 @@ import {
   MdCheckCircle as CheckCircleIcon,
   MdWarning as ExclamationTriangleIcon,
   MdPerson as PersonIcon,
-  MdShoppingCart as ShoppingCartIcon,
   MdAssignment as AssignmentIcon
 } from 'react-icons/md';
+import { FaShoppingCart as ShoppingCartIcon } from 'react-icons/fa';
 import PageLayout from '../components/PageLayout/PageLayout';
 import MetaHead from '../components/MetaHead';
 import { PrimaryButton } from '../components/ui';

@@ -20,7 +20,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useCartItems, useCartStore } from '../../stores/cartStore'
 import { useRouter } from 'next/router'
-import { MdShoppingCart as ShoppingCartIcon } from 'react-icons/md'
+import { FaShoppingCart as ShoppingCartIcon } from 'react-icons/fa'
 
 // Form validation schema
 const ConsultationFormSchema = z.object({

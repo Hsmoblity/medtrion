@@ -1,7 +1,7 @@
 import Cart from "./Cart/Cart";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from 'next/router';
-import { MdShoppingCart } from "react-icons/md";
+import { FaShoppingCart } from "react-icons/fa";
 import { DrawOutlineButton } from "components/btn";
 import Drawer, { DrawerHandle } from "components/drawer";
 import { RiMenu4Line } from 'react-icons/ri';
@@ -96,7 +96,7 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
           {/* Right side: ml-auto pins to far right regardless of logo size */}
           <div className="ml-auto flex flex-row items-center">
             <button onClick={() => router.push('/cart')} className="relative z-50 p-2 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors">
-              <MdShoppingCart color="black" size={30} />
+              <FaShoppingCart color="black" size={22} aria-hidden="true" />
               <ClientOnly fallback={
                 <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 right-0 top-0 bg-white opacity-0">
                   0
@@ -158,9 +158,10 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
 
 
             <button onClick={() => router.push('/cart')} className="relative z-50 outline-0 text-white flex flex-row" >
-              <MdShoppingCart
+              <FaShoppingCart
                 color="black"
-                size={40}
+                size={30}
+                aria-hidden="true"
               />
               <ClientOnly fallback={
                 <span className="absolute w-4 h-4 text-black text-xs border border-solid border-gray-500 rounded-full flex flex-row justify-center items-center p-2 -left-1 -bottom-1 bg-white opacity-0">

@@ -127,7 +127,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   // Render different variants
   const renderBasicVariant = () => (
     <article 
-      className={`cursor-pointer rounded-[24px] ${noCardSurface ? 'bg-transparent border-none shadow-none hover:shadow-none' : 'border border-[#0b1f3a]/10 bg-white shadow-[0_15px_40px_rgba(11,31,58,0.06)] hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(11,31,58,0.1)]'} p-3 transition-all duration-300 ${className}`}
+      className={`relative flex h-full cursor-pointer flex-col rounded-[24px] ${noCardSurface ? 'bg-transparent border-none shadow-none hover:shadow-none' : 'border border-[#0b1f3a]/10 bg-white shadow-[0_15px_40px_rgba(11,31,58,0.06)] hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(11,31,58,0.1)]'} p-3 transition-all duration-300 ${className}`}
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
@@ -150,7 +150,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         />
       </div>
       
-      <div className="mt-1 p-2">
+      <div className="mt-1 flex flex-1 flex-col p-2 pb-28">
         <h2 className="font-poppins font-black text-[#0b1f3a]">{normalizedProduct.title}</h2>
         <div className="mt-1 line-clamp-3 text-sm font-semibold text-slate-500">
           <HydrationErrorBoundary>
@@ -158,7 +158,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </HydrationErrorBoundary>
         </div>
         
-        <div className="mt-3 flex items-end justify-between">
+        <div className="mt-3">
           {normalizedProduct.affiliate ? (
             <>
               <button className="text-sm leading-8 font-bold text-black underline">
@@ -171,15 +171,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
           ) : (
             <>
               <p className="text-lg font-bold text-[#153a5f]">${normalizedProduct.price.toFixed(2)}</p>
-              <div className="flex flex-col space-y-2" onClick={(e) => e.stopPropagation()}>
+              <div className="absolute bottom-3 left-5 right-5 flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
                 {showConfigureButton && (
                   <PrimaryButton
                     onClick={handleConfigureClick}
                     size="sm"
                     fullWidth
+                    className="h-12 min-w-0 px-3 py-0"
                   >
-                    <span className="text-sm font-medium">Configure</span>
-                    <svg className="h-4 w-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span className="text-sm font-medium whitespace-nowrap">Configure</span>
+                    <svg className="ml-1.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -189,11 +190,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 {showAddToCartButton && (
                   <button 
                     onClick={handleAddToCartClick}
-                    className="flex items-center justify-center space-x-1.5 rounded-[35px] bg-[#3fa2a3] px-6 py-3 text-white font-primary font-semibold duration-300 hover:bg-[#f7a236] shadow-md focus:outline-none focus:ring-2 focus:ring-[#f7a236] focus:ring-offset-2"
+                    className="flex h-12 min-w-0 items-center justify-center space-x-1.5 rounded-[35px] bg-[#3fa2a3] px-3 py-0 text-white font-primary font-semibold duration-300 hover:bg-[#f7a236] shadow-md focus:outline-none focus:ring-2 focus:ring-[#f7a236] focus:ring-offset-2"
                   >
-                    <span className="text-sm">Add to cart</span>
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+                    <span className="text-sm leading-tight">Add to cart</span>
+                    <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 1.9-1.4L21 8H6M10 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" />
                     </svg>
                   </button>
                 )}

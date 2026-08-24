@@ -244,8 +244,8 @@ const Drawer = React.forwardRef<DrawerHandle, DrawerProps>(({ logo, contactInfo,
                                             ))}
                                         </div>
                                     ) : (
-                                        <Link href="tel:+19053301774" className="text-xs text-brand-primary hover:text-brand-dark transition-colors duration-200">
-                                            +1 (905) 330-1774
+                                        <Link href="tel:+18886726206" className="text-xs text-brand-primary hover:text-brand-dark transition-colors duration-200">
+                                            1(888) 672-6206
                                         </Link>
                                     )}
                                 </div>

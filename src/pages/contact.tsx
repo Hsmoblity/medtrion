@@ -16,6 +16,7 @@ import PageLayout from "../components/PageLayout/PageLayout";
 import MetaHead from "../components/MetaHead";
 import ContactForm from "../components/Web3Forms/ContactForm";
 import { GET_CONTACT_INFO } from "../lib/graphql/queries";
+import { PRIMARY_CONTACT_PHONE } from "../lib/interfaces/footer";
 
 // CMS data types
 interface ContactPhone {
@@ -76,7 +77,7 @@ function parseAddress(raw: string): {
 const FALLBACK_CONTACT: ContactInfo = {
   contactAddress: "3495 Rebecca St, Oakville ON, L6L 6X9",
   contactEmail: "Info@medtrion.ca",
-  contactPhone: [{ name: "General Inquiries", number: "+1 (905) 330-1774" }],
+  contactPhone: [{ name: "", number: "1(888) 672-6206" }],
   openHours: [
     { day: "Monday - Friday", hours: "9:00 AM - 6:00 PM" },
     { day: "Saturday", hours: "10:00 AM - 4:00 PM" },
@@ -414,7 +415,10 @@ export const getServerSideProps: GetServerSideProps<
 
     return {
       props: {
-        contactInfo: data.page.contactFields,
+        contactInfo: {
+          ...data.page.contactFields,
+          contactPhone: [{ name: "", number: PRIMARY_CONTACT_PHONE }],
+        },
       },
     };
   } catch (error) {

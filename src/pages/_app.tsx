@@ -11,6 +11,8 @@ import ClientOnly from "components/ClientOnly";
 import { SiteLogo, fetchSiteLogo } from "lib/fetchSiteLogo";
 import { GraphQLClient } from "graphql-request";
 import { GET_CONTACT_INFO } from "lib/graphql/queries";
+import { PRIMARY_CONTACT_PHONE } from "lib/interfaces/footer";
+
 interface ContactPhone {
   name: string;
   number: string;
@@ -100,7 +102,10 @@ MyApp.getInitialProps = async (appContext: AppContext) => {
       }>(GET_CONTACT_INFO);
       
       if (data?.page?.contactFields) {
-        contactInfo = data.page.contactFields;
+        contactInfo = {
+          ...data.page.contactFields,
+          contactPhone: [{ name: "", number: PRIMARY_CONTACT_PHONE }],
+        };
       }
     }
   } catch (error) {

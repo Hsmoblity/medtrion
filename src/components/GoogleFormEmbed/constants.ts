@@ -3,9 +3,9 @@
  */
 
 export const CONTACT_INFO = {
-  phone: '+1 (905) 330-1774',
+  phone: '1(888) 672-6206',
   email: 'Info@medtrion.ca',
-  phoneHref: 'tel:+19053301774',
+  phoneHref: 'tel:+18886726206',
   emailHref: 'mailto:Info@medtrion.ca'
 } as const
 

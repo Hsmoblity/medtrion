@@ -1,7 +1,7 @@
 // Auto-generated file - DO NOT EDIT MANUALLY
-// Generated at build time from last git commit: 1786994499
-// Generated on: 2026-08-18T20:14:39.453Z
+// Generated at build time from last git commit: 1787084196
+// Generated on: 2026-08-24T17:45:57.908Z
 
-export const BUILD_VERSION = '1808260051';
-export const BUILD_TIMESTAMP = 1786994499;
-export const BUILD_DATE = '2026-08-17T19:21:39.000Z';
+export const BUILD_VERSION = '1908260146';
+export const BUILD_TIMESTAMP = 1787084196;
+export const BUILD_DATE = '2026-08-18T20:16:36.000Z';

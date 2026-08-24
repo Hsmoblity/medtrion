@@ -139,6 +139,8 @@ export const footerDesignTokens = {
   }
 } as const;
 
+export const PRIMARY_CONTACT_PHONE = '(888) 672-6206';
+
 // Default footer content
 export const defaultFooterContent: FooterContent = {
   companyInfo: {
@@ -146,7 +148,7 @@ export const defaultFooterContent: FooterContent = {
     description: 'Medtrion is your trusted source for a wide range of health services and mobility products designed to improve your quality of life. Please note: We are not manufacturers of Acorn stairlifts but proud affiliate partners.',
     logo: '/med-logo.png',
     address: '3495 Rebecca St Oakville, ON L6L 6X9',
-    phone: '+1 (905) 330-1774',
+    phone: '(888) 672-6206',
     email: 'Info@medtrion.ca',
     website: 'https://medtrion.ca'
   },

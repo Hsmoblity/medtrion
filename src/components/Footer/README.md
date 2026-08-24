@@ -263,7 +263,7 @@ SEO-optimized structured data markup:
   },
   "contactPoint": {
     "@type": "ContactPoint",
-    "telephone": "+1 (905) 330-1774",
+    "telephone": "1(888) 672-6206",
     "contactType": "customer service",
     "email": "Info@medtrion.ca"
   },

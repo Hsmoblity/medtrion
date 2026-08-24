@@ -31,10 +31,10 @@ const Footer: React.FC<FooterProps> = ({ logo, contactInfo }) => {
       description: 'Medtrion is your trusted source for a wide range of health services and mobility products designed to improve your quality of life. Please note: We are not manufacturers of Acorn stairlifts but proud affiliate partners.',
       logo: '/med-logo.png',
       address: cleanedAddress,
-      phone: contactInfo?.contactPhone?.[0]?.number || '+1 (905) 330-1774',
+      phone: contactInfo?.contactPhone?.[0]?.number || '1(888) 672-6206',
       contactPhone: contactInfo?.contactPhone && contactInfo.contactPhone.length > 0 
         ? contactInfo.contactPhone 
-        : [{ name: 'General Inquiries', number: '+1 (905) 330-1774' }],
+        : [{ name: '', number: '1(888) 672-6206' }],
       email: contactInfo?.contactEmail || 'Info@medtrion.ca',
       website: 'https://medtrion.ca'
     },

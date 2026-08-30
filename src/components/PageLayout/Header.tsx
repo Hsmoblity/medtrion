@@ -81,7 +81,13 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
 
   return (
     <>
-    <div className="bg-brand-dark text-white text-[12px] md:text-sm font-medium  w-full h-10 flex justify-center items-center capitalize"> Explore our exclusive deals <Link className="inline-block rounded-full bg-gradient-to-r from-[#3fa2a3] to-[#f7a236] px-4 py-1 text-[12px] md:text-xs font-primary font-semibold text-white ml-2 shadow-md hover:text-white hover:bg-brand-accent" href="/products">Click Now</Link></div>
+    <div className="bg-brand-dark text-white text-[12px] md:text-sm font-medium w-full h-10 flex items-center justify-center gap-2 px-4 capitalize">
+      <img src="/canada-logo.webp" alt="Canadian flag" className="h-10 w-auto object-contain rounded-sm" />
+      <span className="font-semibold tracking-wide">Proudly Canadian</span>
+      <span className="hidden sm:inline">|</span>
+      <span className="hidden sm:inline">Explore our exclusive deals</span>
+      <Link className="inline-block rounded-full bg-gradient-to-r from-[#3fa2a3] to-[#f7a236] px-4 py-1 text-[12px] md:text-xs font-primary font-semibold text-white ml-1 shadow-md hover:text-white hover:bg-brand-accent" href="/products">Click Now</Link>
+    </div>
       <Cart />
       <div className="md:hidden sticky top-0 z-50 bg-white shadow-sm transition-transform duration-500">
         <div className="flex items-center justify-between px-4 py-0 md:py-4">

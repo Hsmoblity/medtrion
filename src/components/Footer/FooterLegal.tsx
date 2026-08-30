@@ -26,14 +26,13 @@ const FooterLegal: React.FC<FooterLegalProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.4 }}
       className={`
-        flex flex-col-reverse items-center gap-4
+        grid grid-cols-1 gap-4
         border-t border-slate-700 pt-6 mt-8
-        sm:flex-row sm:justify-between
+        sm:grid-cols-[1fr_auto_1fr] sm:items-center
         font-sans
         ${className}
       `}
     >
-      {/* Copyright */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -43,9 +42,16 @@ const FooterLegal: React.FC<FooterLegalProps> = ({
         {copyrightText}
       </motion.p>
 
+      <div className="flex items-center justify-center">
+        <div className="inline-flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-white">
+          <img src="/canada-logo.webp" alt="Canadian flag" className="h-10 w-auto object-contain" />
+          <span className="text-[10px]">Proudly Canadian</span>
+        </div>
+      </div>
+
       {/* Legal Links */}
-      <nav aria-label="Legal">
-        <ul className="flex flex-wrap items-center justify-center gap-2">
+      <nav aria-label="Legal" className="sm:justify-self-end">
+        <ul className="flex flex-wrap items-center justify-center gap-2 sm:justify-end">
           <li>
             <Link
               href={legal.privacyPolicy}

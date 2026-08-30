@@ -144,10 +144,22 @@ const ProfessionalFooter: React.FC<ProfessionalFooterProps> = ({
             <div className="rounded-[35px] border border-slate-800  p-6">
               <PaymentMethods paymentMethods={content.paymentMethods} className="mb-0" />
               <div className="mt-6 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.32em] text-white">
-                {['Oakville', 'Burlington', 'Mississauga', 'Milton', 'Brampton', 'Toronto', 'Hamilton'].map((city) => (
-                  <span key={city} className="rounded-full bg-slate-900/80 px-3 py-2 text-white">
-                    {city}
-                  </span>
+                {[
+                  { label: 'Oakville', href: '/stairlifts-oakville' },
+                  { label: 'Burlington', href: '/stairlifts-burlington' },
+                  { label: 'Mississauga', href: '/stairlifts-mississauga' },
+                  { label: 'Milton', href: '/stairlifts-milton' },
+                  { label: 'Brampton', href: '/stairlifts-brampton' },
+                  { label: 'Toronto', href: '/stairlifts-toronto' },
+                  { label: 'Hamilton', href: '/stairlifts-hamilton' }
+                ].map((city) => (
+                  <a
+                    key={city.label}
+                    href={city.href}
+                    className="rounded-full bg-slate-900/80 px-3 py-2 text-white transition-colors duration-200 hover:bg-slate-800 hover:text-[#f7a236]"
+                  >
+                    {city.label}
+                  </a>
                 ))}
               </div>
             </div>

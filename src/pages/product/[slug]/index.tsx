@@ -329,6 +329,11 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
     ],
   );
 
+  // Set to true whenever you want to re-enable the "Available Options & Accessories"
+  // section on product detail pages.
+  // const showAvailableOptionsSection = true;
+  const showAvailableOptionsSection = false;
+
   if (error || !product) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -649,7 +654,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           )}
 
           {/* Lazy Loaded Option Products Section */}
-          {relatedOptionIds && relatedOptionIds.length > 0 && (
+          {showAvailableOptionsSection && relatedOptionIds && relatedOptionIds.length > 0 && (
             <div className="mt-16">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-[#0b1f3a] mb-4">

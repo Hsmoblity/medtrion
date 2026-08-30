@@ -299,7 +299,14 @@ export const getStaticProps: GetStaticProps<LegalPageProps> = async () => {
       revalidate: 86400,
     };
   } catch (error) {
-    console.error('Failed to fetch return policy from CMS:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+    if (
+      process.env.NODE_ENV === 'development' &&
+      !errorMessage.includes('Page not found in CMS')
+    ) {
+      console.error('Failed to fetch return policy from CMS:', error);
+    }
 
     return {
       props: {

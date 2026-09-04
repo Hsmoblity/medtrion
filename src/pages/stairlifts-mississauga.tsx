@@ -7,7 +7,6 @@ export default function StairliftsMississaugaPage() {
       metaTitle="Stairlifts in Mississauga, ON | Medtrion"
       metaDescription="Buy or rent a stairlift in Mississauga. Free in-home assessment, expert installation & 5-year warranty. Trusted by GTA homeowners — call Medtrion today."
       pageTitle="Stairlifts & Mobility Equipment in Mississauga, Ontario"
-      description="Discover reliable stairlift support in Mississauga with Medtrion. Book your free consultation and get professional installation for safer mobility."
     />
   );
 }

@@ -7,7 +7,6 @@ export default function StairliftsHamiltonPage() {
       metaTitle="Stairlifts in Hamilton, ON | Medtrion"
       metaDescription="Buy or rent a stairlift in Hamilton. Free in-home assessment, expert installation & 5-year warranty. Trusted by GTA homeowners — call Medtrion today."
       pageTitle="Stairlifts & Mobility Equipment in Hamilton, Ontario"
-      description="Discover reliable stairlift support in Hamilton with Medtrion. Book your free consultation and get professional installation for safer mobility."
     />
   );
 }

@@ -47,8 +47,15 @@ function MyApp({ Component, pageProps }: CustomAppProps) {
             gtag('js', new Date());
 
             gtag('config', 'G-F38S3008XY');
+            gtag('config', 'AW-18426377337');
           `}
         </Script>
+
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-18426377337"
+          strategy="afterInteractive"
+        />
+
       <CartVisibilityProvider>
         <NextTopLoader
           color="#debe75"

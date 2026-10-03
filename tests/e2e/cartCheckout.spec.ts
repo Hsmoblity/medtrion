@@ -45,7 +45,7 @@ test.describe('Cart and Navigation E2E Tests', () => {
 
   test('should handle cart operations', async ({ page }) => {
     // Navigate to a product page with options
-    await page.goto('/product/acorn-stairlifts-acorn-180-curved-stairlift/options');
+    await page.goto('/product/curved-stairlift/options');
     
     // Look for add to cart button
     const addToCartButton = page.locator('text="Add Selected Options"').first();
@@ -124,7 +124,7 @@ test.describe('Cart and Navigation E2E Tests', () => {
   test('should handle product options page loading', async ({ page }) => {
     // Test that options pages load without errors
     const productSlugs = [
-      'acorn-stairlifts-acorn-180-curved-stairlift',
+      'curved-stairlift',
       // Add more product slugs as needed
     ];
     

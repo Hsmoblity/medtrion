@@ -42,7 +42,7 @@ export function Reviews() {
                                 <div className="relative flex h-full min-h-0 w-full flex-col items-center justify-center gap-3 rounded-[20px] bg-white p-4">
                                     <FaQuoteLeft color="#f7a236" size={34} className="opacity-80" />
                                     <p className="max-w-[28rem] text-center text-[#0d163c] font-primary text-sm font-semibold leading-relaxed md:text-base">
-                                        &quot;Just wanted you to know how happy and satisfied we are with our Acorn chairlift. It fits into our decor beautifully and does all it is supposed to do. The installer was excellent. Efficient and pleasant and spent the time instructing us on how to use the chair.&quot;
+                                        &quot;Just wanted you to know how happy and satisfied we are with our stairlift. It fits into our decor beautifully and does all it is supposed to do. The installer was excellent. Efficient and pleasant and spent the time instructing us on how to use the chair.&quot;
                                     </p>
                                 </div>
 

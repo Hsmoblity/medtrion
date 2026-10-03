@@ -23,9 +23,9 @@ type Story = StoryObj<typeof meta>;
 // Mock product data
 const mockProducts: ProductSchema[] = [
   {
-    title: 'Acorn 180 Curved Stairlift',
-    slug: 'acorn-180-curved-stairlift',
-    description: 'The Acorn 180 is our most advanced curved stairlift, designed to navigate the most complex staircases with smooth, quiet operation.',
+    title: 'Curved Stairlift',
+    slug: 'curved-stairlift',
+    description: 'A curved stairlift designed to navigate complex staircases with smooth, quiet operation.',
     shortDescription: 'Advanced curved stairlift with smooth, quiet operation for complex staircases.',
     featuredImage: {
       fields: {
@@ -45,9 +45,9 @@ const mockProducts: ProductSchema[] = [
     _related_options: ['seat-options', 'rail-options', 'control-options'],
   },
   {
-    title: 'Acorn 130 Straight Stairlift',
-    slug: 'acorn-130-straight-stairlift',
-    description: 'The reliable Acorn 130 straight stairlift offers dependable mobility for straight staircases with easy-to-use controls.',
+    title: 'Straight Stairlift',
+    slug: 'straight-stairlift',
+    description: 'The reliable straight stairlift offers dependable mobility for straight staircases with easy-to-use controls.',
     shortDescription: 'Reliable straight stairlift with easy-to-use controls and dependable performance.',
     featuredImage: {
       fields: {
@@ -74,13 +74,13 @@ const mockProducts: ProductSchema[] = [
     featuredImage: {
       fields: {
         file: {
-          url: '/acorn-outdoor-stair-lift-uk.jpg'
+          url: '/outdoor-stairlift.jpg'
         }
       }
     },
     productSpecifications: 'Weather protection: IP55 rated, Materials: Corrosion-resistant, Temperature range: -20°C to +50°C',
     productPictures: [
-      { fields: { file: { url: '/acorn-outdoor-stair-lift-uk.jpg' } } },
+      { fields: { file: { url: '/outdoor-stairlift.jpg' } } },
       { fields: { file: { url: '/outdoor-cover.jpg' } } }
     ],
     price: 3499,

@@ -5,6 +5,7 @@ import Item from '../../components/PageLayout/Cart/Item';
 import { SessionProvider } from '../../contexts/SessionContext';
 import { makeCartProduct, withCartEnvironment } from '../../components/storybook/storyHelpers';
 import { CartProduct } from '../../lib/interfaces';
+import { WARRANTY_TIME, warrantyTimeValue } from '../../lib/constants/warranty';
 
 // Mock Next.js router for Storybook
 const mockRouter = {
@@ -60,8 +61,8 @@ type Story = StoryObj<typeof Item>;
 
 // Base cart product with configuration options
 const baseCartProduct: CartProduct = makeCartProduct({
-  title: 'Acorn 180 Curved Stairlift',
-  slug: 'acorn-180-curved-stairlift',
+  title: 'Curved Stairlift',
+  slug: 'curved-stairlift',
   price: 3299,
   quantity: 1,
   cartItemId: 'ci_edit_demo_123',
@@ -75,7 +76,7 @@ const baseCartProduct: CartProduct = makeCartProduct({
       type: 'service'
     },
     { 
-      name: 'Extended Warranty (3 years)', 
+      name: `Extended Warranty (${warrantyTimeValue(WARRANTY_TIME)})`, 
       priceModifier: 199, 
       selected: true, 
       quantity: 1,
@@ -176,7 +177,7 @@ export const ComplexConfiguration: Story = {
       cartItemId: 'ci_complex_456',
       options: [
         { name: 'Professional Installation', priceModifier: 299, selected: true, quantity: 1, value: 'install_pro' },
-        { name: 'Extended Warranty (5 years)', priceModifier: 349, selected: true, quantity: 1, value: 'warranty_5yr' },
+        { name: `Extended Warranty (${warrantyTimeValue(WARRANTY_TIME)})`, priceModifier: 349, selected: true, quantity: 1, value: 'warranty_5yr' },
         { name: 'Premium Upholstery - Leather', priceModifier: 199, selected: true, quantity: 1, value: 'upholstery_leather' },
         { name: 'Power Swivel Seat', priceModifier: 149, selected: true, quantity: 1, value: 'swivel_power' },
         { name: 'Folding Rail Option', priceModifier: 89, selected: false, quantity: 0, value: 'rail_folding' },
@@ -208,8 +209,8 @@ export const ComplexConfiguration: Story = {
 export const EnhancedPricingDemo: Story = {
   args: {
     product: makeCartProduct({
-      title: 'Acorn 180 Curved Stairlift [ENHANCED]',
-      slug: 'acorn-180-curved-stairlift',
+      title: 'Curved Stairlift [ENHANCED]',
+      slug: 'curved-stairlift',
       price: 3846, // Base price (3299) + calculated options total (547)
       quantity: 1,
       cartItemId: 'ci_enhanced_pricing_789',
@@ -226,7 +227,7 @@ export const EnhancedPricingDemo: Story = {
           totalPrice: 3846
         },
         { 
-          name: 'Extended Warranty (3 years)', 
+          name: `Extended Warranty (${warrantyTimeValue(WARRANTY_TIME)})`, 
           price: 199,
           selected: true, 
           quantity: 1,
@@ -306,7 +307,7 @@ export const WithFinancing: Story = {
       cartItemId: 'ci_financing_789',
       options: [
         { name: 'Professional Installation', priceModifier: 299, selected: true, quantity: 1, value: 'install_pro' },
-        { name: 'Standard Warranty (2 years)', priceModifier: 99, selected: true, quantity: 1, value: 'warranty_2yr' },
+        { name: `Standard Warranty (${warrantyTimeValue(WARRANTY_TIME)})`, priceModifier: 99, selected: true, quantity: 1, value: 'warranty_2yr' },
       ],
       // Add financing information
       financing: {
@@ -390,7 +391,7 @@ export const CrossTabSync: Story = {
           session: {
             id: 'session_cross_tab_demo',
             cartItemId: 'ci_edit_demo_123',
-            productSlug: 'acorn-180-curved-stairlift',
+            productSlug: 'curved-stairlift',
             startTime: new Date(),
             expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
             tabId: 'tab_other_123'

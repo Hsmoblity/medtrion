@@ -6,6 +6,7 @@ import ProductList from '../../components/ProductList/ProductList';
 import Footer from '../../components/PageLayout/Footer';
 import Banner from '../../components/banner';
 import FAQ from '../../components/faq';
+import { WARRANTY_TIME } from '../../lib/constants/warranty';
 
 // Mock data for the homepage showcase
 const mockProducts = [
@@ -24,8 +25,8 @@ const mockProducts = [
   },
   {
     id: 'prod_002',
-    title: 'Acorn Stairlift - Basic Model',
-    slug: 'acorn-stairlift-basic',
+    title: 'Curved Stairlift',
+    slug: 'curved-stairlift',
     price: 2499.99,
     featuredImage: '/temp.webp',
     productPictures: [{ fields: { file: { url: '/temp.webp' } } }],
@@ -49,7 +50,7 @@ const mockProducts = [
 const mockFAQData = [
   {
     question: "What is the warranty on your mobility products?",
-    answer: "All our mobility products come with a comprehensive warranty. Lift chairs typically have a 2-year warranty on the mechanism and 1-year on the fabric. Stairlifts come with a 2-year warranty on all mechanical parts. Scooters have a 1-year warranty covering all components."
+    answer: `All our mobility products come with a comprehensive warranty. Lift chairs typically have a ${WARRANTY_TIME} warranty on the mechanism and a ${WARRANTY_TIME} warranty on the fabric. Stairlifts come with a ${WARRANTY_TIME} warranty on all mechanical parts. Scooters have a ${WARRANTY_TIME} warranty covering all components.`
   },
   {
     question: "Do you offer installation services?",

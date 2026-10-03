@@ -69,7 +69,7 @@ const PaymentCancel: React.FC<PaymentCancelProps> = () => {
   };
 
   return (
-    <PageLayout>
+    <PageLayout hideFooter>
       <MetaHead
         title="Payment Cancelled"
         description="Your payment was cancelled or failed. You can try again or modify your order."

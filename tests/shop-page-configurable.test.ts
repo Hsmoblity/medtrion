@@ -36,8 +36,8 @@ describe('Shop Page Configurable Products', () => {
       {
         id: '2',
         databaseId: 2,
-        slug: 'acorn-stairlifts-acorn-180-curved-stairlift',
-        title: 'Acorn Stairlifts Acorn 180 Curved Stairlift',
+        slug: 'curved-stairlift',
+        title: 'Curved Stairlift',
         description: 'Curved stairlift',
         shortDescription: 'Curved',
         price: 3000,
@@ -90,8 +90,8 @@ describe('Shop Page Configurable Products', () => {
       {
         id: '5',
         databaseId: 5,
-        slug: 'acorn-stairlifts-acorn-130-straight-stairlift',
-        title: 'Acorn Stairlifts Acorn 130 Straight Stairlift',
+        slug: 'straight-stairlift',
+        title: 'Straight Stairlift',
         description: 'Straight stairlift',
         shortDescription: 'Straight',
         price: 2200,
@@ -146,9 +146,9 @@ describe('Shop Page Configurable Products', () => {
       expect(result.props.products).toHaveLength(4); // Only configurable products
       expect(result.props.products.map((p: any) => p.slug)).toEqual([
         'vivalift-tranquil-2-plr-935s-lift-chair',
-        'acorn-stairlifts-acorn-180-curved-stairlift',
         'vivalift-ultra-plr4955s-lift-chair',
-        'acorn-stairlifts-acorn-130-straight-stairlift'
+        'curved-stairlift',
+        'straight-stairlift'
       ]);
     });
 
@@ -160,9 +160,9 @@ describe('Shop Page Configurable Products', () => {
       // Should include curated products first
       const productSlugs = result.props.products.map((p: any) => p.slug);
       expect(productSlugs).toContain('vivalift-tranquil-2-plr-935s-lift-chair');
-      expect(productSlugs).toContain('acorn-stairlifts-acorn-180-curved-stairlift');
+      expect(productSlugs).toContain('curved-stairlift');
       expect(productSlugs).toContain('vivalift-ultra-plr4955s-lift-chair');
-      expect(productSlugs).toContain('acorn-stairlifts-acorn-130-straight-stairlift');
+      expect(productSlugs).toContain('straight-stairlift');
     });
 
     it('should log warning when insufficient configurable products', async () => {

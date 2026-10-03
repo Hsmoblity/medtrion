@@ -194,7 +194,7 @@ const ConsultationPage: React.FC = () => {
   const { subtotal, tax, total } = calculateOrderTotal();
 
   return (
-    <PageLayout>
+    <PageLayout hideFooter>
       <MetaHead
         title="Professional Consultation - HSM Mobility"
         description="Schedule a professional consultation for your mobility equipment needs."

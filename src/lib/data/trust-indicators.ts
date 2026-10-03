@@ -3,6 +3,8 @@
  * This will be replaced with Contentful CMS integration
  */
 
+import { WARRANTY_TIME, warrantyTimeTitle, warrantyTimeValue } from "../constants/warranty";
+
 export interface TrustIndicator {
   icon: string; // Icon name from react-icons
   title: string;
@@ -14,10 +16,10 @@ export interface TrustIndicator {
 export const trustIndicators: TrustIndicator[] = [
   {
     icon: "FaShieldAlt",
-    title: "5-Year Warranty",
+    title: warrantyTimeTitle(WARRANTY_TIME),
     description: "Comprehensive coverage for peace of mind",
     highlight: "Included",
-    value: "5 years"
+    value: warrantyTimeValue(WARRANTY_TIME)
   },
   {
     icon: "FaUsers",

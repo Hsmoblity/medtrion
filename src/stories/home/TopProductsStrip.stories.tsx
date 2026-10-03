@@ -24,8 +24,8 @@ type Story = StoryObj<typeof meta>;
 // Mock data for featured products
 const mockFeaturedProducts: ProductCardView[] = [
   {
-    slug: 'acorn-180-stairlift',
-    title: 'Acorn 180 Stairlift',
+    slug: 'curved-stairlift',
+    title: 'Curved Stairlift',
     description: 'Premium curved stairlift with advanced safety features and smooth operation.',
     price: 2899,
     financingCopy: 'from $99/mo',
@@ -39,8 +39,8 @@ const mockFeaturedProducts: ProductCardView[] = [
     databaseId: 180,
   },
   {
-    slug: 'acorn-130-stairlift',
-    title: 'Acorn 130 Stairlift',
+    slug: 'straight-stairlift',
+    title: 'Straight Stairlift',
     description: 'Reliable straight stairlift designed for comfort and accessibility.',
     price: 2299,
     financingCopy: 'from $75/mo',
@@ -60,7 +60,7 @@ const mockFeaturedProducts: ProductCardView[] = [
     price: 3299,
     financingCopy: 'from $125/mo',
     badges: ['Weather Resistant'],
-    imageUrl: '/acorn-outdoor-stair-lift-uk.jpg',
+    imageUrl: '/outdoor-stairlift.jpg',
     rating: 4.7,
     isFeatured: true,
     optionsSummary: '6 options available',

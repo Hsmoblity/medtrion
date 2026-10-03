@@ -9,6 +9,7 @@ import { useSearchParams } from 'next/navigation';
 const OptionsClientWrapper = dynamic(() => import('components/OptionsClientWrapper'), { ssr: false });
 import { fetchProductsByDatabaseIds } from 'lib/woocommerce';
 import { normalizeImageUrl, extractImageUrl } from 'lib/utils/image';
+import { isAcornProduct } from 'lib/utils/product-sanitizer';
 
 const OptionsPage = ({ product, editingCartItem, editSessionData, seoMeta, error, baseModel, categories }: any) => {
     const router = useRouter();
@@ -170,6 +171,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const { params, query } = context || {};
     const rawSlug = params?.slug;
     const slug = Array.isArray(rawSlug) ? rawSlug[0] : (rawSlug ?? '');
+
+    if (!slug || isAcornProduct({ slug })) {
+        return { notFound: true };
+    }
     
     // Parse query parameters for edit session
     const isEditMode = query?.edit === 'true';

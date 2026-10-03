@@ -32,7 +32,7 @@
  * const products = await getProducts('stairlifts');
  * 
  * // Get single product
- * const product = await getProductBySlug('acorn-130-stairlift');
+ * const product = await getProductBySlug('curved-stairlift');
  * 
  * // Create order
  * const order = await createOrder(orderData);

@@ -6,6 +6,8 @@ HeroContentResponse,
 import {
 getProductsByCategory,
 } from '../woocommerce';
+import { WARRANTY_TIME, warrantyTimeStat } from '../constants/warranty';
+import { isAcornProduct } from '../utils/product-sanitizer';
 
 /**
 
@@ -54,7 +56,7 @@ setError(null);
       .map((product) => product.slug)
       .filter(
         (slug): slug is string =>
-          Boolean(slug)
+          Boolean(slug) && !isAcornProduct({ slug })
       );
 
     const heroContent: HeroContent = {
@@ -71,7 +73,7 @@ setError(null);
           icon: 'FaUsers',
         },
         {
-          value: '5 Years',
+          value: warrantyTimeStat(WARRANTY_TIME),
           label: 'Warranty Coverage',
           icon: 'FaShieldAlt',
         },
@@ -130,7 +132,7 @@ setError(null);
           icon: 'FaUsers',
         },
         {
-          value: '5 Years',
+          value: warrantyTimeStat(WARRANTY_TIME),
           label: 'Warranty Coverage',
           icon: 'FaShieldAlt',
         },

@@ -153,8 +153,8 @@ describe('Products Page', () => {
             imageUrl: '/test.jpg'
           },
           {
-            slug: 'acorn-stairlifts-acorn-180-curved-stairlift',
-            name: 'Acorn Stairlift 180',
+            slug: 'curved-stairlift',
+            name: 'Curved Stairlift',
             description: 'Curved stairlift',
             price: 2500,
             imageUrl: '/test2.jpg'
@@ -189,7 +189,7 @@ describe('Products Page', () => {
         props: {
           products: expect.arrayContaining([
             expect.objectContaining({ slug: 'vivalift-tranquil-2-plr-935s-lift-chair' }),
-            expect.objectContaining({ slug: 'acorn-stairlifts-acorn-180-curved-stairlift' })
+            expect.objectContaining({ slug: 'curved-stairlift' })
           ])
         }
       });

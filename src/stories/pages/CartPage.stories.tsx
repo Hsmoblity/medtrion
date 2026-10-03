@@ -6,6 +6,7 @@ import CartOptions from '../../components/Cart/CartOptions';
 import Footer from '../../components/PageLayout/Footer';
 import Banner from '../../components/banner';
 import { PrimaryButton } from 'components/ui';
+import { WARRANTY_TIME, warrantyTimeHeading } from '../../lib/constants/warranty';
 
 // Mock cart data for the cart page showcase
 const mockCartItems = [
@@ -26,8 +27,8 @@ const mockCartItems = [
   },
   {
     cartItemId: 'ci_main_002',
-    slug: 'acorn-stairlift-basic',
-    title: 'Acorn Stairlift - Basic Model',
+    slug: 'curved-stairlift',
+    title: 'Curved Stairlift',
     price: 2499.99,
     quantity: 1,
     productId: 'prod_002',
@@ -43,8 +44,8 @@ const mockCartItems = [
 const mockRelatedOptions = [
   {
     cartItemId: 'ci_option_001',
-    slug: 'extended-warranty-5-year',
-    title: 'Extended Warranty - 5 Year',
+    slug: `extended-warranty-${WARRANTY_TIME}`,
+    title: `Extended Warranty - ${warrantyTimeHeading(WARRANTY_TIME).replace(' Warranty', '')}`,
     price: 199.99,
     quantity: 1,
     productId: 'prod_201',

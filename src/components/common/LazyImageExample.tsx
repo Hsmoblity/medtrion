@@ -12,7 +12,7 @@ const LazyImageExample: React.FC = () => {
     {
       src: 'https://picsum.photos/400/300?random=2',
       alt: 'Product image 2',
-      title: 'Acorn Stairlift - Basic Model'
+      title: 'Curved Stairlift'
     },
     {
       src: 'https://picsum.photos/400/300?random=3',

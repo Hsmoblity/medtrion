@@ -2,12 +2,15 @@ import { ReactNode, useEffect, useMemo, useState } from 'react';
 import CartVisibilityContext from 'contexts/cartVisibilityContext';
 import { CartProduct, ProductSchema } from 'lib/interfaces';
 import { useCartStore } from 'stores/cartStore';
+import { WARRANTY_TIME, warrantyTimeMonths } from 'lib/constants/warranty';
+
+const warrantyPeriodMonths = Number(warrantyTimeMonths(WARRANTY_TIME).split('-')[0]);
 
 type PartialProduct = Partial<ProductSchema> & Pick<ProductSchema, 'title' | 'slug' | 'description' | 'shortDescription' | 'featuredImage' | 'productSpecifications' | 'productPictures' | 'price' | 'affiliate'>;
 
 const baseProduct: PartialProduct = {
-  title: 'Acorn 180 Stairlift',
-  slug: 'acorn-180-stairlift',
+  title: 'Curved Stairlift',
+  slug: 'curved-stairlift',
   description: 'Reliable stairlift with smooth ride and customizable options.',
   shortDescription: 'A dependable solution for curved staircases.',
   featuredImage: '/temp.webp',
@@ -75,7 +78,7 @@ export const makeConfigurableProduct = (overrides: Partial<ConfigurableProductSc
   adaCompliant: overrides.adaCompliant ?? true,
   weightCapacity: overrides.weightCapacity ?? 300,
   installationTime: overrides.installationTime ?? 2,
-  warrantyPeriod: overrides.warrantyPeriod ?? 24,
+  warrantyPeriod: overrides.warrantyPeriod ?? warrantyPeriodMonths,
   ...overrides
 });
 
@@ -98,17 +101,17 @@ export const mockPremiumSeat: ConfigurableProductSchema = makeConfigurableProduc
   optionType: 'COMFORT',
   adaCompliant: true,
   weightCapacity: 350,
-  warrantyPeriod: 36
+  warrantyPeriod: warrantyPeriodMonths
 });
 
 export const mockProfessionalInstallation: ConfigurableProductSchema = makeConfigurableProduct({
   name: 'Professional Installation Service',
-  shortDescription: 'Expert installation by certified technicians with 2-year service warranty.',
+  shortDescription: `Expert installation by certified technicians with ${WARRANTY_TIME} service warranty.`,
   price: 399,
   optionType: 'INSTALLATION',
   installationRequired: true,
   installationTime: 4,
-  warrantyPeriod: 24
+  warrantyPeriod: warrantyPeriodMonths
 });
 
 export const mockRemoteControl: ConfigurableProductSchema = makeConfigurableProduct({
@@ -239,7 +242,7 @@ export const mockConfiguratorCategories: ConfiguratorCategory[] = [
 // Mock base model for configurator
 export const mockBaseStairlift: ConfigurableProductSchema = makeConfigurableProduct({
   databaseId: 100,
-  name: 'Acorn 130 Straight Stairlift',
+  name: 'Straight Stairlift',
   shortDescription: 'Our most popular straight stairlift with proven reliability and comfort',
   regularPrice: '3495.00',
   salePrice: '2995.00',

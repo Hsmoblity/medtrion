@@ -28,22 +28,34 @@ export function parseAddress(raw: string): {
   postal: string;
   full: string;
 } {
-  const parts: Record<string, string> = {};
-  raw.split(',').forEach((segment) => {
-    const colonIdx = segment.indexOf(':');
+  const parts: Record<string, string[]> = {};
+  let currentKey = "street";
+
+  raw.split(",").forEach((segment) => {
+    const trimmed = segment.trim();
+    if (!trimmed) return;
+
+    const colonIdx = trimmed.indexOf(":");
     if (colonIdx !== -1) {
-      const key = segment.slice(0, colonIdx).trim().toLowerCase();
-      const val = segment.slice(colonIdx + 1).trim();
-      parts[key] = val;
+      currentKey = trimmed.slice(0, colonIdx).trim().toLowerCase();
+      const value = trimmed.slice(colonIdx + 1).trim();
+      if (!parts[currentKey]) parts[currentKey] = [];
+      if (value) parts[currentKey].push(value);
+      return;
     }
+
+    if (!parts[currentKey]) parts[currentKey] = [];
+    parts[currentKey].push(trimmed);
   });
-  const street = parts['street'] ?? '';
-  const city = parts['city'] ?? '';
-  const postal = parts['postal'] ?? '';
+
+  const join = (key: string) => (parts[key] ?? []).join(", ");
+  const street = join("street");
+  const city = join("city");
+  const postal = join("postal");
   return {
     street,
     city,
     postal,
-    full: [street, city, postal].filter(Boolean).join(', '),
+    full: [street, city, postal].filter(Boolean).join(", "),
   };
 }

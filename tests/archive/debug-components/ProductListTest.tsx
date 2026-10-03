@@ -15,14 +15,14 @@ const ProductListTest: React.FC = () => {
     const uuid = () => 'ci_' + Math.random().toString(36).slice(2, 9);
     
     const mockProduct = {
-      slug: 'acorn-130-straight-stairlift',
-      title: 'Acorn 130 Straight Stairlift',
+      slug: 'straight-stairlift',
+      title: 'Straight Stairlift',
       cartItemId: uuid(),
       price: 2995,
       quantity: 1,
       productPictures: [{ fields: { file: { url: '/130-stairlift-seated.jpg' } } }],
       affiliate: false,
-      productId: 'acorn-130',
+      productId: 'straight-130',
       description: 'Reliable straight stairlift',
       shortDescription: 'Perfect for straight staircases',
       featuredImage: '/130-stairlift-seated.jpg',

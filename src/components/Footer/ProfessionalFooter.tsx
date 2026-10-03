@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ProfessionalFooterProps, defaultFooterContent, footerDesignTokens } from '../../lib/interfaces/footer';
+import { FALLBACK_ADDRESS_PARTS } from '../../lib/constants/address';
 import FooterNavigation from './FooterNavigation';
 import FooterContact from './FooterContact';
 import SocialMediaLinks from './SocialMediaLinks';
@@ -35,10 +36,10 @@ const ProfessionalFooter: React.FC<ProfessionalFooterProps> = ({
     "address": {
       "@type": "PostalAddress",
       "streetAddress": content.companyInfo.address,
-      "addressLocality": "Oakville",
-      "addressRegion": "ON",
-      "postalCode": "L6L 6X9",
-      "addressCountry": "CA"
+      "addressLocality": FALLBACK_ADDRESS_PARTS.locality,
+      "addressRegion": FALLBACK_ADDRESS_PARTS.region,
+      "postalCode": FALLBACK_ADDRESS_PARTS.postalCode,
+      "addressCountry": FALLBACK_ADDRESS_PARTS.country
     },
     "contactPoint": {
       "@type": "ContactPoint",

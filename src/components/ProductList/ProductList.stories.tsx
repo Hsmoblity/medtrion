@@ -4,15 +4,15 @@ import { makeProduct, sampleRichText, withCartEnvironment } from '../storybook/s
 
 const products = [
   makeProduct({
-    title: 'Acorn 130 Straight Stairlift',
-    slug: 'acorn-130',
+    title: 'Straight Stairlift',
+    slug: 'straight-stairlift',
     price: 1999,
     shortDescription: sampleRichText,
     productId: 'prod_130'
   }),
   makeProduct({
-    title: 'Acorn 180 Curved Stairlift',
-    slug: 'acorn-180',
+    title: 'Curved Stairlift',
+    slug: 'curved-stairlift',
     price: 2899,
     shortDescription: sampleRichText,
     productId: 'prod_180',

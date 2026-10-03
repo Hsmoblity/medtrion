@@ -5,6 +5,8 @@
  * that maintains consistency with the header styling and follows the design system.
  */
 
+import { FALLBACK_ADDRESS } from "../constants/address";
+
 export interface FooterContent {
   companyInfo: {
     name: string;
@@ -145,9 +147,9 @@ export const PRIMARY_CONTACT_PHONE = '(888) 672-6206';
 export const defaultFooterContent: FooterContent = {
   companyInfo: {
     name: 'Medtrion',
-    description: 'Medtrion is your trusted source for a wide range of health services and mobility products designed to improve your quality of life. Please note: We are not manufacturers of Acorn stairlifts but proud affiliate partners.',
+    description: 'Medtrion is your trusted source for a wide range of health services and mobility products designed to improve your quality of life.',
     logo: '/med-logo.png',
-    address: '3495 Rebecca St Oakville, ON L6L 6X9',
+    address: FALLBACK_ADDRESS,
     phone: '(888) 672-6206',
     email: 'Info@medtrion.ca',
     website: 'https://medtrion.ca'
@@ -156,8 +158,6 @@ export const defaultFooterContent: FooterContent = {
     {
       title: 'Products',
       links: [
-        { label: 'Acorn 180 Curved Stairlift', href: '/product/acorn-stairlifts-acorn-180-curved-stairlift' },
-        { label: 'Acorn 130 Straight Stairlift', href: '/product/acorn-stairlifts-acorn-130-straight-stairlift' },
         { label: 'VivaLift Tranquil 2 Lift Chair', href: '/product/vivalift-tranquil-2-plr-935s-lift-chair' },
         { label: 'VivaLift Ultra Lift Chair', href: '/product/vivalift-ultra-plr4955s-lift-chair' },
         { label: 'VivaLift Classic Lift Chair', href: '/product/vivalift-classic-plr-835s-lift-chair' }

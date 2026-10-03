@@ -1,5 +1,6 @@
 import * as React from "react";
 import { FaMinusCircle, FaPlusCircle } from "react-icons/fa";
+import { WARRANTY_TIME, warrantyTimeHeading, warrantyTimeMonths } from "@/lib/constants/warranty";
 
 
 function FAQ() {
@@ -30,11 +31,11 @@ function FAQ() {
 
         {
             question: "Are stairlifts safe?",
-            answer: "Stairlifts are extremely safe, when installed by professionally competent persons. Acorn stairlifts are manufactured to the highest standard and all Acorn employed technicians are trained to the highest standards."
+            answer: "Stairlifts are extremely safe when installed by professionally competent persons. Our technicians are trained to a high standard."
         },
         {
             question: "What happens if there is a power outage?",
-            answer: "An Acorn Stairlift is battery-powered and will continue to work even if you have a power cut. Acorn pioneered the use of DC (battery) power in stairlifts."
+            answer: "Stairlifts are battery-powered and will continue to work even if you have a power cut."
         },
 
     ];
@@ -82,9 +83,9 @@ function FAQ() {
                         </div>
                         <div className="flex flex-col items-center text-center md:text-left">
                             <div className="bg-gradient-to-br from-[#f0f9f8] to-[#fef3e2] p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border border-[#3fa2a3]/30 hover:border-[#3fa2a3]">
-                                <h3 className="text-xl font-primary font-semibold text-[#0d163c] mb-3"> 5 Year Warranty</h3>
+                                <h3 className="text-xl font-primary font-semibold text-[#0d163c] mb-3"> {warrantyTimeHeading(WARRANTY_TIME)}</h3>
                                 <p className="text-base text-[#4b5563] leading-relaxed">
-                                    Acorn stairlifts comes with Fully comprehensive 60-month warranty. If any component should fail due to faulty manufacture during the first year of ownership, Acorn will send round one of our fully trained service technicians to get your stairlift back to full working order free of charge.
+                                    Stairlifts come with a fully comprehensive {warrantyTimeMonths(WARRANTY_TIME)} warranty. If any component should fail due to faulty manufacture during the first year of ownership, we will send a trained service technician to get your stairlift back to full working order free of charge.
                                 </p>
                             </div>
                         </div>

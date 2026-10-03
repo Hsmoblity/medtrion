@@ -49,11 +49,11 @@ const mockVariations: Variation[] = [
 
 const mockBaseProduct: ConfigurableProductSchema = {
   id: 'base-1',
-  name: 'Acorn Stairlift',
+  name: 'Curved Stairlift',
   price: '2000.00',
   regularPrice: '2200.00',
   salePrice: '2000.00',
-  sku: 'ACORN-180',
+  sku: 'CURVED-180',
   shortDescription: 'Curved stairlift',
   description: 'Premium curved stairlift',
   image: { sourceUrl: '/stairlift.jpg' },

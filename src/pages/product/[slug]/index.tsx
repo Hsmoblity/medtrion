@@ -7,6 +7,7 @@ import {
   ConfiguratorCategory,
 } from "lib/interfaces/configurator";
 import { stripHtml } from "lib/utils/text";
+import { isAcornProduct } from "lib/utils/product-sanitizer";
 import { normalizeImageUrl } from "lib/utils/image";
 import { useConfiguratorStore } from "stores/configuratorStore";
 import { motion } from "framer-motion";
@@ -759,7 +760,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { params } = context;
   const slug = params?.slug as string;
 
-  if (!slug) {
+  if (!slug || isAcornProduct({ slug })) {
     return {
       notFound: true,
     };

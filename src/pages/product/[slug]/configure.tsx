@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import ModelConfigurator from 'components/configurator/ModelConfigurator';
 import { ConfigurableProductSchema, ConfiguratorCategory, SavedConfigurationExtended } from 'lib/interfaces/configurator';
 import { getProductBySlug } from 'lib/contentful/contentful';
-import { sanitizeConfigurableProduct, sanitizeSSRProps } from 'lib/utils/product-sanitizer';
+import { sanitizeConfigurableProduct, sanitizeSSRProps, isAcornProduct } from 'lib/utils/product-sanitizer';
 import { extractImageUrl } from 'lib/utils/image';
 import { LoadingOverlay } from 'components/ui';
 import { useConfiguratorStore } from 'stores/configuratorStore';
@@ -506,7 +506,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const cartItemId = query?.cartItemId as string;
   const sessionId = query?.sessionId as string;
 
-  if (!slug) {
+  if (!slug || isAcornProduct({ slug })) {
     return {
       notFound: true,
     };

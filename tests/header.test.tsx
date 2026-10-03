@@ -68,7 +68,6 @@ describe('Header Component', () => {
     
     // Check desktop navigation items
     expect(screen.getByText('Shop All')).toBeInTheDocument();
-    expect(screen.getByText('Acorn Stairlifts')).toBeInTheDocument();
     expect(screen.getByText('Contact Us')).toBeInTheDocument();
     expect(screen.getByText('Reviews')).toBeInTheDocument();
     expect(screen.getByText('FAQs')).toBeInTheDocument();
@@ -164,7 +163,6 @@ describe('Header Component', () => {
     // Check that all navigation items are present
     const navigationItems = [
       'Shop All',
-      'Acorn Stairlifts', 
       'Contact Us',
       'Reviews',
       'FAQs',

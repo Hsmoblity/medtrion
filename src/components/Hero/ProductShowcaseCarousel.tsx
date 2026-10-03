@@ -5,6 +5,7 @@ import { PrimaryButton } from '../ui';
 import { ProductCardView } from '../../lib/interfaces/homepage';
 import { useHomepageStore } from '../../stores/homepageStore';
 import { sanitizeHtml } from '../../lib/utils/html-sanitizer';
+import { isAcornProduct } from '../../lib/utils/product-sanitizer';
 
 interface ProductShowcaseCarouselProps {
   products: string[]; // Product slugs
@@ -15,25 +16,28 @@ interface ProductShowcaseCarouselProps {
 // Fallback mock product data for error states with reliable image URLs
 const mockProducts = [
   {
-    slug: 'acorn-stairlifts-acorn-180-curved-stairlift',
-    title: 'Acorn Curved Stairlifts',
-    description: 'A comfortable and reliable ride designed for any curved staircases',
+    slug: '',
+    href: '/products',
+    title: 'Curved Stairlifts',
+    description: 'A comfortable and reliable ride designed for any curved staircase.',
     image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=600&fit=crop&q=80',
     price: 'From $3,495',
     badge: 'Most Popular'
   },
   {
-    slug: 'acorn-stairlifts-acorn-130-straight-stairlift',
-    title: 'Acorn Straight Stairlifts',
-    description: 'The ultimate staircase solution, giving you the full use of the home you love.',
+    slug: '',
+    href: '/products',
+    title: 'Straight Stairlifts',
+    description: 'A straightforward staircase solution that helps you use the whole home.',
     image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop&q=80',
     price: 'From $2,995',
     badge: 'Best Value'
   },
   {
-    slug: 'acorn-stairlifts-outdoor-stairlift',
-    title: 'Acorn Outdoor Stairlifts',
-    description: 'Open up and enjoy your outdoor space with Acorn Stairlifts.',
+    slug: '',
+    href: '/products',
+    title: 'Outdoor Stairlifts',
+    description: 'Open up and enjoy your outdoor space with a weather-ready stairlift.',
     image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=600&fit=crop&q=80',
     price: 'From $4,495',
     badge: 'Premium'
@@ -81,6 +85,7 @@ const transformProductForCarousel = (product: ProductCardView, index: number) =>
   
   return {
     slug: product.slug,
+    href: '',
     title: product.title,
     description: product.description || 'Premium mobility solution for your home',
     image: imageUrl,
@@ -114,8 +119,10 @@ useEffect(() => {
 ]);
 
   // Transform real products for carousel display
-  const carouselProducts = featuredProducts.length > 0 
-    ? featuredProducts.map((product, index) => { 
+  const visibleProducts = featuredProducts.filter((product) => !isAcornProduct(product));
+
+  const carouselProducts = visibleProducts.length > 0
+    ? visibleProducts.map((product, index) => { 
         console.log('Hero Slider - Product data:', {
           slug: product.slug,
           title: product.title,
@@ -236,9 +243,9 @@ useEffect(() => {
                   {currentProduct.price}
                 </span>
               </div>
-              {currentProduct.slug ? (
+              {currentProduct.href || currentProduct.slug ? (
                 <PrimaryButton
-                  href={`/product/${currentProduct.slug}`}
+                  href={currentProduct.href || `/product/${currentProduct.slug}`}
                   size="lg"
                   fullWidth
                 >

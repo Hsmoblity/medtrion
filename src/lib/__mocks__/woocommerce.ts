@@ -1,6 +1,11 @@
 // Mock version of woocommerce.ts for Storybook
 // This prevents Node.js specific imports from breaking in browser environment
 
+import { WARRANTY_TIME, warrantyTimeHeading, warrantyTimeValue } from '../constants/warranty';
+
+const extendedWarrantyTitle = `Extended Warranty - ${warrantyTimeHeading(WARRANTY_TIME).replace(' Warranty', '')}`;
+const extendedWarrantyDescription = `Extended warranty coverage for ${warrantyTimeValue(WARRANTY_TIME)}`;
+
 export const getProducts = async (params?: any) => {
   // Return mock data for Storybook
   return {
@@ -20,8 +25,8 @@ export const getProducts = async (params?: any) => {
       },
       {
         id: 'prod_002',
-        title: 'Acorn Stairlift - Basic Model',
-        slug: 'acorn-stairlift-basic',
+        title: 'Curved Stairlift',
+        slug: 'curved-stairlift',
         price: 2499.99,
         featuredImage: '/temp.webp',
         productPictures: [{ fields: { file: { url: '/temp.webp' } } }],
@@ -58,9 +63,9 @@ export const getProduct = async (slug: string) => {
     _related_options_products: [
       { 
         id: 'opt_001', 
-        title: 'Extended Warranty - 5 Year', 
+        title: extendedWarrantyTitle,
         price: 199.99,
-        description: 'Extended warranty coverage for 5 years',
+        description: extendedWarrantyDescription,
         image: '/temp.webp'
       },
       { 
@@ -103,9 +108,9 @@ export const getRelatedOptions = async (productId: string) => {
   return [
     {
       id: 'opt_001',
-      title: 'Extended Warranty - 5 Year',
+      title: extendedWarrantyTitle,
       price: 199.99,
-      description: 'Extended warranty coverage for 5 years',
+      description: extendedWarrantyDescription,
       image: '/temp.webp'
     },
     {
@@ -132,9 +137,9 @@ export const fetchRelatedProductsByIds = async (ids: string[]) => {
   return [
     {
       id: 'opt_001',
-      title: 'Extended Warranty - 5 Year',
+      title: extendedWarrantyTitle,
       price: 199.99,
-      description: 'Extended warranty coverage for 5 years',
+      description: extendedWarrantyDescription,
       image: '/temp.webp'
     },
     {

@@ -285,15 +285,10 @@ export function filterConfigurableProducts(products: ProductSchema[]): ProductSc
 export function getCuratedFallbackProducts(): string[] {
   return [
     'vivalift-tranquil-2-plr-935s-lift-chair',
-    'acorn-stairlifts-acorn-180-curved-stairlift',
     'vivalift-ultra-plr4955s-lift-chair',
-    'acorn-stairlifts-acorn-130-straight-stairlift',
     'vivalift-classic-plr-835s-lift-chair',
-    'acorn-stairlifts-acorn-200-straight-stairlift',
     'vivalift-premium-plr-945s-lift-chair',
-    'acorn-stairlifts-acorn-190-curved-stairlift',
-    'vivalift-deluxe-plr-755s-lift-chair',
-    'acorn-stairlifts-acorn-210-straight-stairlift'
+    'vivalift-deluxe-plr-755s-lift-chair'
   ];
 }
 

@@ -4,12 +4,14 @@ import { ProductSchema } from '../../lib/interfaces/schema';
 import { ProductCardView, mapToProductCardView } from '../../lib/interfaces/homepage';
 import { getProducts } from '../../lib/contentful/contentful';
 import { sanitizeForSSR, filterConfigurableProducts, handleInsufficientConfigurableProducts } from '../../lib/utils/data-validation';
+import { isAcornProduct } from '../../lib/utils/product-sanitizer';
 import ProductCard from '../../components/ui/ProductCard';
 import MetaHead from '../../components/MetaHead';
 import { PrimaryButton } from '../../components/ui';
 
 
 import Hero from "@/components/common/Hero";
+import { WARRANTY_TIME, warrantyTimeStat } from "@/lib/constants/warranty";
 
 interface ProductsPageProps {
   products: ProductCardView[];
@@ -23,20 +25,17 @@ interface ProductsPageProps {
  */
 const getCuratedProducts = (allProducts: ProductSchema[]): ProductSchema[] => {
   // First filter for configurable products only
-  const configurableProducts = filterConfigurableProducts(allProducts);
+  const configurableProducts = filterConfigurableProducts(allProducts).filter(
+    (product) => !isAcornProduct(product)
+  );
 
   // Define curated product slugs for spotlight (only configurable products)
   const curatedSlugs = [
     'vivalift-tranquil-2-plr-935s-lift-chair',
-    'acorn-stairlifts-acorn-180-curved-stairlift',
     'vivalift-ultra-plr4955s-lift-chair',
-    'acorn-stairlifts-acorn-130-straight-stairlift',
     'vivalift-classic-plr-835s-lift-chair',
-    'acorn-stairlifts-acorn-200-straight-stairlift',
     'vivalift-premium-plr-945s-lift-chair',
-    'acorn-stairlifts-acorn-190-curved-stairlift',
-    'vivalift-deluxe-plr-755s-lift-chair',
-    'acorn-stairlifts-acorn-210-straight-stairlift'
+    'vivalift-deluxe-plr-755s-lift-chair'
   ];
 
   // Filter configurable products by curated slugs
@@ -264,7 +263,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
                           Professional
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          2 Years
+                          {warrantyTimeStat(WARRANTY_TIME)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <a href={`/product/${product.slug}`} className="text-brand-primary hover:text-brand-dark">
@@ -311,7 +310,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ products, error }) => {
                   </div>
                 </div>
                 <p className="text-gray-600 mb-4">
-                  "The Acorn Stairlift has given me back my independence. I can now safely navigate my home without worrying about falls."
+                  "The stairlift has given me back my independence. I can now safely navigate my home without worrying about falls."
                 </p>
                 <div className="flex items-center">
                   <div className="flex-shrink-0">

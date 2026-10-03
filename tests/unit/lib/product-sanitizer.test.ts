@@ -173,7 +173,7 @@ describe('Product Sanitizer', () => {
     it('should handle typical product data from Contentful', () => {
       const contentfulProduct = {
         productId: '123',
-        title: 'Acorn 130 Stairlift',
+        title: 'Straight Stairlift',
         price: '2500',
         description: 'Premium stairlift solution',
         featuredImage: 'https://example.com/image.jpg',

@@ -1,6 +1,7 @@
 import { ProfessionalFooter } from '../Footer';
 import { SiteLogo } from '../../lib/fetchSiteLogo';
 import { removeAddressLabels } from '../../lib/utils/addressFormatter';
+import { FALLBACK_ADDRESS } from '../../lib/constants/address';
 
 interface ContactPhone {
   name: string;
@@ -22,13 +23,13 @@ const Footer: React.FC<FooterProps> = ({ logo, contactInfo }) => {
   // Clean address by removing labels like "Street:", "City:", "Postal:"
   const cleanedAddress = contactInfo?.contactAddress 
     ? removeAddressLabels(contactInfo.contactAddress) 
-    : '3495 Rebecca St Oakville, ON L6L 6X9';
+    : FALLBACK_ADDRESS;
 
   // Use dynamic contact info from CMS, with fallbacks
   const customContent = {
     companyInfo: {
       name: 'Medtrion',
-      description: 'Medtrion is your trusted source for a wide range of health services and mobility products designed to improve your quality of life. Please note: We are not manufacturers of Acorn stairlifts but proud affiliate partners.',
+      description: 'Medtrion is your trusted source for a wide range of health services and mobility products designed to improve your quality of life.',
       logo: '/med-logo.png',
       address: cleanedAddress,
       phone: contactInfo?.contactPhone?.[0]?.number || '1(888) 672-6206',
@@ -42,8 +43,6 @@ const Footer: React.FC<FooterProps> = ({ logo, contactInfo }) => {
       {
         title: 'Products',
         links: [
-          { label: 'Acorn 180 Curved Stairlift', href: '/product/acorn-stairlifts-acorn-180-curved-stairlift' },
-          { label: 'Acorn 130 Straight Stairlift', href: '/product/acorn-stairlifts-acorn-130-straight-stairlift' },
           { label: 'VivaLift Tranquil 2 Lift Chair', href: '/product/vivalift-tranquil-2-plr-935s-lift-chair' },
           { label: 'VivaLift Ultra Lift Chair', href: '/product/vivalift-ultra-plr4955s-lift-chair' },
           { label: 'VivaLift Classic Lift Chair', href: '/product/vivalift-classic-plr-835s-lift-chair' }

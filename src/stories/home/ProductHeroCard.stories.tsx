@@ -26,8 +26,8 @@ type Story = StoryObj<typeof meta>;
 
 // Base mock product
 const baseMockProduct: ProductCardView = {
-  slug: 'acorn-180-stairlift',
-  title: 'Acorn 180 Stairlift',
+  slug: 'curved-stairlift',
+  title: 'Curved Stairlift',
   description: 'Premium curved stairlift with advanced safety features and smooth operation for any staircase configuration.',
   price: 2899,
   financingCopy: null,
@@ -148,7 +148,7 @@ export const LongTitle: Story = {
   args: {
     product: {
       ...baseMockProduct,
-      title: 'Acorn 180 Premium Curved Stairlift with Advanced Safety Features and Custom Rail Configuration',
+      title: 'Premium Curved Stairlift with Advanced Safety Features and Custom Rail Configuration',
       badges: ['Premium'],
     },
     variant: 'hero',

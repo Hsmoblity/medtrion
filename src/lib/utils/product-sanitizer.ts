@@ -87,3 +87,12 @@ export function isSSRSerializable(value: any): boolean {
   
   return true;
 }
+
+/** True when a product slug or title refers to an Acorn product. */
+export function isAcornProduct(product: {
+  slug?: string | null;
+  title?: string | null;
+  name?: string | null;
+}): boolean {
+  return /acorn/i.test(`${product.slug ?? ""} ${product.title ?? ""} ${product.name ?? ""}`);
+}

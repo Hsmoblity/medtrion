@@ -145,10 +145,10 @@ const testUrlPatterns = () => {
     // Test edit URL pattern
     const cartItemId = 'ci_url_test_456';
     const sessionId = 'session_url_test_789';
-    const productSlug = 'acorn-180-stairlift';
+    const productSlug = 'curved-stairlift';
     
     const editUrl = `/product/${productSlug}/options?edit=true&cartItemId=${encodeURIComponent(cartItemId)}&sessionId=${encodeURIComponent(sessionId)}`;
-    const expectedPattern = '/product/acorn-180-stairlift/options?edit=true&cartItemId=ci_url_test_456&sessionId=session_url_test_789';
+    const expectedPattern = '/product/curved-stairlift/options?edit=true&cartItemId=ci_url_test_456&sessionId=session_url_test_789';
     
     console.assert(editUrl === expectedPattern, 'Edit URL should match expected pattern');
     

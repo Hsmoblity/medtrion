@@ -79,7 +79,7 @@ const SuccessPage: React.FC<SuccessPageProps> = () => {
         currency: 'CAD',
         line_items: [
           {
-            name: 'Acorn 180 Stairlift',
+            name: 'Curved Stairlift',
             quantity: 1,
             price: '2899.00',
           },

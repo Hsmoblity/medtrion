@@ -5,6 +5,7 @@ import ProductCard from '../ui/ProductCard';
 import { useProductFilters } from '../../lib/hooks/useProductFilters';
 import { getFeatureFlag } from '../../lib/featureFlags';
 import { mapToProductCardView } from '../../lib/interfaces/homepage';
+import { WARRANTY_TIME, warrantyTimeTitle } from '../../lib/constants/warranty';
 
 interface TopProductsStripProps {
   enableShowcase?: boolean; // Feature flag support
@@ -106,12 +107,12 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
             {/* Static Product Cards */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <div className="h-48 bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-500">Acorn Stairlift</span>
+                <span className="text-gray-500">Curved Stairlift</span>
               </div>
               <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2">Acorn 180 Curved Stairlift</h3>
+                <h3 className="font-semibold text-lg mb-2">Curved Stairlift</h3>
                 <p className="text-gray-600 text-sm mb-3">Premium curved stairlift solution</p>
-                <a href="/product/acorn-stairlifts-acorn-180-curved-stairlift" className="inline-flex items-center bg-[#3fa2a3] hover:bg-[#f7a236] text-white px-6 py-3 rounded-[35px] font-primary font-semibold transition-all duration-300">
+                <a href="/products" className="inline-flex items-center bg-[#3fa2a3] hover:bg-[#f7a236] text-white px-6 py-3 rounded-[35px] font-primary font-semibold transition-all duration-300">
                   Learn More →
                 </a>
               </div>
@@ -148,7 +149,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
                 <span className="text-gray-500">Warranty</span>
               </div>
               <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2">5-Year Warranty</h3>
+                <h3 className="font-semibold text-lg mb-2">{warrantyTimeTitle(WARRANTY_TIME)}</h3>
                 <p className="text-gray-600 text-sm mb-3">Comprehensive coverage included</p>
                 <a href="/#faq" className="inline-flex items-center bg-[#3fa2a3] hover:bg-[#f7a236] text-white px-6 py-3 rounded-[35px] font-primary font-semibold transition-all duration-300">
                   Learn More →
@@ -189,12 +190,12 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <div className="h-48 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                <span className="text-brand-dark font-semibold">Acorn Stairlift</span>
+                <span className="text-brand-dark font-semibold">Curved Stairlift</span>
               </div>
               <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2">Acorn 180 Curved Stairlift</h3>
+                <h3 className="font-semibold text-lg mb-2">Curved Stairlift</h3>
                 <p className="text-gray-600 text-sm mb-3">Premium curved stairlift solution for any staircase</p>
-                <a href="/product/acorn-stairlifts-acorn-180-curved-stairlift" className="inline-flex items-center bg-[#3fa2a3] hover:bg-[#f7a236] text-white px-6 py-3 rounded-[35px] font-primary font-semibold transition-all duration-300">
+                <a href="/products" className="inline-flex items-center bg-[#3fa2a3] hover:bg-[#f7a236] text-white px-6 py-3 rounded-[35px] font-primary font-semibold transition-all duration-300">
                   Learn More →
                 </a>
               </div>
@@ -228,7 +229,7 @@ const TopProductsStrip: React.FC<TopProductsStripProps> = ({ enableShowcase = tr
             
             <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <div className="h-48 bg-gradient-to-br from-yellow-100 to-yellow-200 flex items-center justify-center">
-                <span className="text-yellow-800 font-semibold">5-Year Warranty</span>
+                <span className="text-yellow-800 font-semibold">{warrantyTimeTitle(WARRANTY_TIME)}</span>
               </div>
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2">Comprehensive Warranty</h3>

@@ -17,6 +17,8 @@ import MetaHead from "../components/MetaHead";
 import ContactForm from "../components/Web3Forms/ContactForm";
 import { GET_CONTACT_INFO } from "../lib/graphql/queries";
 import { PRIMARY_CONTACT_PHONE } from "../lib/interfaces/footer";
+import { FALLBACK_CONTACT_ADDRESS } from "../lib/constants/address";
+import { parseAddress } from "../lib/utils/addressFormatter";
 
 // CMS data types
 interface ContactPhone {
@@ -46,36 +48,9 @@ interface ContactInfo {
   logo?: string | Logo; // Can be string URL or Logo object
 }
 
-// Parse "Street:3495 Rebecca St,City:Oakville ON,Postal:L6L 6X9" into parts
-function parseAddress(raw: string): {
-  street: string;
-  city: string;
-  postal: string;
-  full: string;
-} {
-  const parts: Record<string, string> = {};
-  raw.split(",").forEach((segment) => {
-    const colonIdx = segment.indexOf(":");
-    if (colonIdx !== -1) {
-      const key = segment.slice(0, colonIdx).trim().toLowerCase();
-      const val = segment.slice(colonIdx + 1).trim();
-      parts[key] = val;
-    }
-  });
-  const street = parts["street"] ?? "";
-  const city = parts["city"] ?? "";
-  const postal = parts["postal"] ?? "";
-  return {
-    street,
-    city,
-    postal,
-    full: [street, city, postal].filter(Boolean).join(", "),
-  };
-}
-
 // Fallback static data if CMS is unavailable
 const FALLBACK_CONTACT: ContactInfo = {
-  contactAddress: "3495 Rebecca St, Oakville ON, L6L 6X9",
+  contactAddress: FALLBACK_CONTACT_ADDRESS,
   contactEmail: "Info@medtrion.ca",
   contactPhone: [{ name: "", number: "1(888) 672-6206" }],
   openHours: [

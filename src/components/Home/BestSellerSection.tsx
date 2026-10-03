@@ -4,6 +4,7 @@ import { getProducts } from "../../lib/contentful/contentful";
 import { PrimaryButton, LoadingOverlay } from "components/ui";
 import ProductCard from "../ui/ProductCard";
 import { mapToProductCardView } from "../../lib/interfaces/homepage";
+import { isAcornProduct } from "../../lib/utils/product-sanitizer";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
@@ -17,7 +18,9 @@ interface BestSellerSectionProps {
 const BestSellerSection: React.FC<BestSellerSectionProps> = ({
   initialProducts = [],
 }) => {
-  const [products, setProducts] = useState<ProductSchema[]>(initialProducts);
+  const [products, setProducts] = useState<ProductSchema[]>(
+    initialProducts.filter((product) => !isAcornProduct(product))
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,7 +36,7 @@ const BestSellerSection: React.FC<BestSellerSectionProps> = ({
         } else {
           // Filter for featured/best seller products or take first 6
           const bestSellers = Array.isArray(response.items)
-            ? response.items.slice(0, 6)
+            ? response.items.filter((product) => !isAcornProduct(product)).slice(0, 6)
             : [];
           setProducts(bestSellers);
         }

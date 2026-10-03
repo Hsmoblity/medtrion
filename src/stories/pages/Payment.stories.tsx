@@ -36,9 +36,9 @@ const mockFetch = (url: string, options?: any) => {
 const mockCartWithProducts = [
   {
     cartItemId: 'ci_1',
-    slug: 'acorn-straight-stairlift',
+    slug: 'straight-stairlift',
     productId: '1413',
-    title: 'Acorn Straight Stairlift',
+    title: 'Straight Stairlift',
     price: 2999,
     quantity: 1,
     options: [
@@ -58,9 +58,9 @@ const mockCartWithProducts = [
   },
   {
     cartItemId: 'ci_2',
-    slug: 'acorn-curved-stairlift',
+    slug: 'curved-stairlift',
     productId: '1414',
-    title: 'Acorn Curved Stairlift',
+    title: 'Curved Stairlift',
     price: 3999,
     quantity: 1,
     options: [

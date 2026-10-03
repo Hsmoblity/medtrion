@@ -214,7 +214,7 @@ describe('Configurable Products Filter', () => {
       const result = getCuratedFallbackProducts();
       
       expect(result).toContain('vivalift-tranquil-2-plr-935s-lift-chair');
-      expect(result).toContain('acorn-stairlifts-acorn-180-curved-stairlift');
+      expect(result).toContain('curved-stairlift');
       expect(result).toContain('vivalift-ultra-plr4955s-lift-chair');
     });
   });
@@ -225,8 +225,8 @@ describe('Configurable Products Filter', () => {
         {
           id: 'product-1',
           databaseId: 101,
-          slug: 'acorn-stairlifts-acorn-130-straight-stairlift',
-          title: 'Acorn Stairlifts Acorn 130 Straight Stairlift',
+          slug: 'straight-stairlift',
+          title: 'Straight Stairlift',
           description: 'Professional straight stairlift',
           shortDescription: 'Straight stairlift',
           price: 2500,
@@ -268,7 +268,7 @@ describe('Configurable Products Filter', () => {
       );
 
       expect(configurableProducts).toHaveLength(1);
-      expect(configurableProducts[0].slug).toBe('acorn-stairlifts-acorn-130-straight-stairlift');
+      expect(configurableProducts[0].slug).toBe('straight-stairlift');
       expect(fallbackCheck.shouldShowFallback).toBe(true);
       expect(fallbackCheck.message).toContain('Limited selection: 1 configurable products available');
     });

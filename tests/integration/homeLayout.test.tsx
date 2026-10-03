@@ -23,8 +23,8 @@ vi.mock('next/image', () => {
 
 const mockFeaturedProducts: ProductCardView[] = [
   {
-    slug: 'acorn-180-stairlift',
-    title: 'Acorn 180 Stairlift',
+    slug: 'curved-stairlift',
+    title: 'Curved Stairlift',
     description: 'Premium curved stairlift',
     price: 2899,
     financingCopy: 'from $99/mo',
@@ -37,8 +37,8 @@ const mockFeaturedProducts: ProductCardView[] = [
     databaseId: 180,
   },
   {
-    slug: 'acorn-130-stairlift',
-    title: 'Acorn 130 Stairlift', 
+    slug: 'straight-stairlift',
+    title: 'Straight Stairlift', 
     description: 'Reliable straight stairlift',
     price: 2299,
     financingCopy: null,
@@ -75,8 +75,8 @@ describe('Home Layout Integration Tests', () => {
       render(<TopProductsStrip enableShowcase={true} />);
 
       expect(screen.getByText('Featured Products')).toBeInTheDocument();
-      expect(screen.getByText('Acorn 180 Stairlift')).toBeInTheDocument();
-      expect(screen.getByText('Acorn 130 Stairlift')).toBeInTheDocument();
+      expect(screen.getByText('Curved Stairlift')).toBeInTheDocument();
+      expect(screen.getByText('Straight Stairlift')).toBeInTheDocument();
     });
 
     it('shows loading skeleton when loading', () => {
@@ -137,13 +137,13 @@ describe('Home Layout Integration Tests', () => {
       render(<TopProductsStrip enableShowcase={true} />);
 
       // Find and click the first product link
-      const productLink = screen.getByRole('link', { name: /View details for Acorn 180 Stairlift/i });
+      const productLink = screen.getByRole('link', { name: /View details for Curved Stairlift/i });
       fireEvent.click(productLink);
 
       // Wait for analytics to be called
       await waitFor(() => {
         expect(mockAnalytics).toHaveBeenCalledWith('event', 'hero_product_click', {
-          product_slug: 'acorn-180-stairlift',
+          product_slug: 'curved-stairlift',
           badge: 'Top Seller',
           position: 0,
         });

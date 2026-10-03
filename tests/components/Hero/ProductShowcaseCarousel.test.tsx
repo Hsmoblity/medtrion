@@ -34,25 +34,25 @@ describe('ProductShowcaseCarousel', () => {
 
   const mockFeaturedProducts: ProductSchema[] = [
     {
-      slug: 'acorn-stairlifts-acorn-180-curved-stairlift',
-      name: 'Acorn Curved Stairlifts',
+      slug: 'curved-stairlift',
+      name: 'Curved Stairlifts',
       shortDescription: 'A comfortable and reliable ride designed for any curved staircases',
       description: 'Full description',
       featuredImage: {
         sourceUrl: '/180-stairlift-moving.png',
-        altText: 'Acorn Curved Stairlift'
+        altText: 'Curved Stairlift'
       },
       price: 3495,
       databaseId: 1
     },
     {
-      slug: 'acorn-stairlifts-acorn-130-straight-stairlift',
-      name: 'Acorn Straight Stairlifts',
+      slug: 'straight-stairlift',
+      name: 'Straight Stairlifts',
       shortDescription: 'The ultimate staircase solution',
       description: 'Full description',
       featuredImage: {
         sourceUrl: '/130-stairlift-hinge.jpg',
-        altText: 'Acorn Straight Stairlift'
+        altText: 'Straight Stairlift'
       },
       price: 2995,
       databaseId: 2
@@ -98,7 +98,7 @@ describe('ProductShowcaseCarousel', () => {
       />
     );
 
-    expect(screen.getByText('Acorn Curved Stairlifts')).toBeInTheDocument();
+    expect(screen.getByText('Curved Stairlifts')).toBeInTheDocument();
     expect(screen.getByText('From $3495')).toBeInTheDocument();
     expect(screen.getByText('Most Popular')).toBeInTheDocument();
   });
@@ -119,7 +119,7 @@ describe('ProductShowcaseCarousel', () => {
       />
     );
 
-    expect(screen.getByText('Acorn Curved Stairlifts')).toBeInTheDocument();
+    expect(screen.getByText('Curved Stairlifts')).toBeInTheDocument();
     expect(screen.getByText('From $3,495')).toBeInTheDocument();
   });
 
@@ -193,7 +193,7 @@ describe('ProductShowcaseCarousel', () => {
       />
     );
 
-    expect(screen.getByText('Acorn Straight Stairlifts')).toBeInTheDocument();
+    expect(screen.getByText('Straight Stairlifts')).toBeInTheDocument();
     expect(screen.getByText('From $2995')).toBeInTheDocument();
     expect(screen.getByText('Best Value')).toBeInTheDocument();
   });

@@ -36,7 +36,6 @@ const Header: React.FC<HeaderProps> = ({ logo, contactInfo }) => {
   const router = useRouter();
   const menuItems = [
     { name: "Shop All", href: "/products" },
-    // { name: "Acorn Stairlifts", href: "/product/acorn-stairlifts-acorn-180-curved-stairlift" },
     { name: "Contact Us", href: "/contact" },
     { name: "Reviews", href: "/#reviews" },
     { name: "FAQs", href: "/#faq" },

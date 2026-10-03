@@ -21,7 +21,7 @@
  * import { createDefaultClient, getConfigurationCategories } from '@/lib/graphql/configurator';
  * 
  * // Get configuration categories for a model
- * const categories = await getConfigurationCategories('acorn-130');
+ * const categories = await getConfigurationCategories('curved-stairlift');
  * 
  * // Check if selections are compatible
  * const isCompatible = await checkCompatibility(selectedOptions);

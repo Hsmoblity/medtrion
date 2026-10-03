@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
+import { FALLBACK_ADDRESS } from '@/lib/constants/address';
 
 interface MobileFooterProps {
   isMobile: boolean;
@@ -215,7 +216,7 @@ const MobileFooter: React.FC<MobileFooterProps> = ({
           }}>
             <div style={contactInfoStyles}>
               <FaMapMarkerAlt size={isMobile ? 14 : 16} />
-              <span>123 Mobility Street, Tech City, TC 12345</span>
+              <span>{FALLBACK_ADDRESS}</span>
             </div>
             <div style={contactInfoStyles}>
               <FaPhone size={isMobile ? 14 : 16} />

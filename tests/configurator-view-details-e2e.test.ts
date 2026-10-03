@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Configurator View Details E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to a product configurator page
-    await page.goto('/product/acorn-stairlifts-acorn-180-curved-stairlift/configure');
+    await page.goto('/product/curved-stairlift/configure');
   });
 
   test('should navigate to product detail page when View Details is clicked on configurator option', async ({ page }) => {

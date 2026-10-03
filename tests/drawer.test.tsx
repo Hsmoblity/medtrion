@@ -38,7 +38,6 @@ describe('Drawer Component', () => {
     
     // Check mobile navigation items
     expect(screen.getByText('Shop All')).toBeInTheDocument();
-    expect(screen.getByText('Acorn Stairlift')).toBeInTheDocument();
     expect(screen.getByText('Reviews')).toBeInTheDocument();
     expect(screen.getByText('FAQs')).toBeInTheDocument();
     expect(screen.getByText('Blogs')).toBeInTheDocument();
@@ -97,7 +96,6 @@ describe('Drawer Component', () => {
     // Test all navigation items
     const navigationItems = [
       { text: 'Shop All', href: '/#shop' },
-      { text: 'Acorn Stairlift', href: '/product/acorn-stairlifts-acorn-180-curved-stairlift' },
       { text: 'Reviews', href: '/#reviews' },
       { text: 'FAQs', href: '/#faq' },
       { text: 'Blogs', href: '/blogs' },
@@ -134,7 +132,6 @@ describe('Drawer Component', () => {
     
     // Check for proper ARIA labels
     expect(screen.getByLabelText('link to shop section')).toBeInTheDocument();
-    expect(screen.getByLabelText('check Acorn Stairlift designs')).toBeInTheDocument();
     expect(screen.getByLabelText('Check out our reviews')).toBeInTheDocument();
     expect(screen.getByLabelText('Frequently asked Questions')).toBeInTheDocument();
     expect(screen.getByLabelText('Read our blogs')).toBeInTheDocument();
@@ -168,7 +165,6 @@ describe('Drawer Component', () => {
     // Verify all navigation items from desktop are present in mobile
     const expectedItems = [
       'Shop All',
-      'Acorn Stairlift', // Note: singular in mobile
       'Reviews', 
       'FAQs',
       'Blogs',

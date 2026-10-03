@@ -5,6 +5,7 @@ import ProductOptions from '../../components/ProductOptions';
 import Reviews from '../../components/reviews';
 import Footer from '../../components/PageLayout/Footer';
 import Banner from '../../components/banner';
+import { WARRANTY_TIME, warrantyTimeHeading, warrantyTimeValue } from '../../lib/constants/warranty';
 
 // Mock product data for the product page showcase
 const mockProduct = {
@@ -27,9 +28,9 @@ const mockProduct = {
   _related_options_products: [
     { 
       id: 'opt_001', 
-      title: 'Extended Warranty - 5 Year', 
+      title: `Extended Warranty - ${warrantyTimeHeading(WARRANTY_TIME).replace(' Warranty', '')}`,
       price: 199.99,
-      description: 'Extended warranty coverage for 5 years',
+      description: `Extended warranty coverage for ${warrantyTimeValue(WARRANTY_TIME)}`,
       image: '/temp.webp'
     },
     { 

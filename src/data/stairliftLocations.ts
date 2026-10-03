@@ -1,3 +1,5 @@
+import { WARRANTY_TIME } from "../lib/constants/warranty";
+
 export type Block =
   | {
       type: "heading";
@@ -217,7 +219,7 @@ export const stairliftLocations: Record<
         type: "section",
         heading: "What's Included With Every Stairlift",
         paragraphs: [
-          "Every stairlift we install comes with a warranty. We also include a full walkthrough after installation, so you know how the controls, seatbelt, and folding seat work before we leave. If something feels off in the first year, you call us and we come back to fix it.",
+          `Every stairlift we install comes with a ${WARRANTY_TIME} warranty. We also include a full walkthrough after installation, so you know how the controls, seatbelt, and folding seat work before we leave. If something feels off in the first year, you call us and we come back to fix it.`,
         ],
       },
 
@@ -325,7 +327,7 @@ export const stairliftLocations: Record<
         type: "section",
         heading: "Peace of Mind Included",
         paragraphs: [
-          "Most stairlifts come with a warranty of three to five years covering the motor, gearbox, and rail. Once yours is installed, we walk you through the seat, controls, and seatbelt so you feel confident using it right away.",
+          `Most stairlifts come with a ${WARRANTY_TIME} warranty covering the motor, gearbox, and rail. Once yours is installed, we walk you through the seat, controls, and seatbelt so you feel confident using it right away.`,
         ],
       },
     ],
@@ -360,7 +362,7 @@ export const stairliftLocations: Record<
         type: "section",
         heading: "What You Get with Your Purchase",
         paragraphs: [
-          "Every stairlift in Hamilton we sell comes with a multi-year warranty. Once it's installed, we show you how to use the seat, controls, and seatbelt so you're comfortable right away.",
+          `Every stairlift in Hamilton we sell comes with a ${WARRANTY_TIME} warranty. Once it's installed, we show you how to use the seat, controls, and seatbelt so you're comfortable right away.`,
         ],
       },
     ],

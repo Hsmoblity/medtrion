@@ -7,6 +7,7 @@ import {
 } from '../lib/woocommerce';
 import { validateProductSchema, sanitizeForSSR, filterConfigurableProducts, handleInsufficientConfigurableProducts } from '../lib/utils/data-validation';
 import { mapWooToProductSchema } from '../lib/contentful/contentful';
+import { isAcornProduct } from '../lib/utils/product-sanitizer';
 
 
 interface HomepageState {
@@ -164,7 +165,7 @@ const mappedProducts =
     validateProductCardViews(
       mappedProducts,
       `Category-${categorySlug}`
-    );
+    ).filter((product) => !isAcornProduct(product));
 
   console.log(
     `Homepage Store - Final "${categorySlug}" products:`,

@@ -6,6 +6,7 @@ import { Reviews } from "components/reviews";
 import { getProducts } from "lib/contentful/contentful";
 import { ProductSchema } from "lib/interfaces";
 import ProductList from "components/ProductList/ProductList";
+import { isAcornProduct } from "lib/utils/product-sanitizer";
 import { Document } from "@contentful/rich-text-types";
 import Link from "next/link";
 
@@ -16,6 +17,7 @@ import ProblemSolutionSection from "components/Home/ProblemSolutionSection";
 import TestimonialCarousel from "components/Home/TestimonialCarousel";
 import FloatingActionButton from "components/ui/FloatingActionButton";
 import { getFeatureFlag } from "lib/featureFlags";
+import { WARRANTY_TIME } from "lib/constants/warranty";
 
 interface ContentfulProduct {
   fields: {
@@ -52,7 +54,7 @@ const Home = ({ products, error }: HomeProps) => {
   
   return (
     <>
-      <MetaHead title="Stairlifts & Mobility Aids in Oakville, ON | Medtrion" description="Medtrion supplies stairlifts, lift chairs & mobility equipment across the GTA. Free consultation, expert install & 5-year warranty. " />
+      <MetaHead title="Stairlifts & Mobility Aids in Oakville, ON | Medtrion" description={`Medtrion supplies stairlifts, lift chairs & mobility equipment across the GTA. Free consultation, expert install & ${WARRANTY_TIME} warranty. `} />
       <Hero />
       
       {/* Best Seller Section with Real Products - Moved right after Hero */}
@@ -155,7 +157,9 @@ export const getServerSideProps: GetServerSideProps = async () => {
       return v;
     };
 
-    const items = Array.isArray(response.items) ? response.items.map(sanitize) : [];
+    const items = Array.isArray(response.items)
+      ? response.items.map(sanitize).filter((product) => !isAcornProduct(product))
+      : [];
     console.log('Homepage: Successfully fetched', items.length, 'products');
 
     return {

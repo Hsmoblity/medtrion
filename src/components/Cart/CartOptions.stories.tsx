@@ -1,5 +1,6 @@
 import React from 'react';
 import { CartProduct } from 'lib/interfaces';
+import { WARRANTY_TIME, warrantyTimeHeading } from 'lib/constants/warranty';
 
 // Simple CartOptions component for Storybook
 const CartOptions: React.FC<{
@@ -231,8 +232,8 @@ const mockMainProduct: CartProduct = {
 const mockOptionProducts: CartProduct[] = [
   {
     cartItemId: 'ci_option_001',
-    slug: 'extended-warranty-5-year',
-    title: 'Extended Warranty - 5 Year',
+    slug: `extended-warranty-${WARRANTY_TIME}`,
+    title: `Extended Warranty - ${warrantyTimeHeading(WARRANTY_TIME).replace(' Warranty', '')}`,
     price: 199.99,
     quantity: 1,
     productId: 'prod_201',
@@ -261,8 +262,8 @@ const mockOptionProducts: CartProduct[] = [
 
 const mockSimpleProduct: CartProduct = {
   cartItemId: 'ci_simple_001',
-  slug: 'acorn-stairlift-basic',
-  title: 'Acorn Stairlift - Basic Model',
+  slug: 'curved-stairlift',
+  title: 'Curved Stairlift',
   price: 2499.99,
   quantity: 1,
   productId: 'prod_003',

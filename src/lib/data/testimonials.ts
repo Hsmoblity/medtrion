@@ -20,8 +20,8 @@ export const testimonials: Testimonial[] = [
     name: 'Margaret Thompson',
     location: 'Manchester, UK',
     rating: 5,
-    text: 'The Acorn stairlift has transformed my life. I can now access my entire home safely and independently. The installation team was professional and the service has been excellent.',
-    product: 'Acorn 180 Curved Stairlift',
+    text: 'The stairlift has transformed my life. I can now access my entire home safely and independently. The installation team was professional and the service has been excellent.',
+    product: 'Curved Stairlift',
     image: '/face1.jpg',
     verified: true
   },
@@ -31,7 +31,7 @@ export const testimonials: Testimonial[] = [
     location: 'Oakville, Ontario',
     rating: 5,
     text: 'After my stroke, I thought I would have to move house. The stairlift gave me back my independence and allowed me to stay in my family home.',
-    product: 'Acorn 130 Straight Stairlift',
+    product: 'Straight Stairlift',
     image: '/face2.jpg',
     verified: true
   },
@@ -41,7 +41,7 @@ export const testimonials: Testimonial[] = [
     location: 'Oakville, Ontario',
     rating: 5,
     text: 'The outdoor stairlift is fantastic. I can now enjoy my garden again without worrying about the steps. The weather protection works perfectly.',
-    product: 'Acorn Outdoor Stairlift',
+    product: 'Outdoor Stairlift',
     image: '/face3.jpg',
     verified: true
   },
@@ -51,7 +51,7 @@ export const testimonials: Testimonial[] = [
     location: 'Oakville, Ontario',
     rating: 5,
     text: 'Excellent service from start to finish. The consultation was thorough, installation was quick, and the after-sales support has been outstanding.',
-    product: 'Acorn 180 Curved Stairlift',
+    product: 'Curved Stairlift',
     verified: true
   },
   {
@@ -60,7 +60,7 @@ export const testimonials: Testimonial[] = [
     location: 'Oakville, Ontario',
     rating: 5,
     text: 'I was nervous about getting a stairlift, but the team made everything so easy. The stairlift is quiet, comfortable, and has given me peace of mind.',
-    product: 'Acorn 130 Straight Stairlift',
+    product: 'Straight Stairlift',
     verified: true
   },
   {
@@ -69,7 +69,7 @@ export const testimonials: Testimonial[] = [
     location: 'Oakville, Ontario',
     rating: 5,
     text: 'The stairlift has been a game-changer for my mobility. I can now visit friends upstairs and feel confident moving around my home.',
-    product: 'Acorn 180 Curved Stairlift',
+    product: 'Curved Stairlift',
     verified: true
   }
 ];

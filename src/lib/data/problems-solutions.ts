@@ -15,7 +15,7 @@ export const problemsSolutions: ProblemSolution[] = [
   {
     problem: "Difficulty climbing stairs",
     solution: "Stairlifts for safe, comfortable access",
-    products: ["Acorn 180", "Acorn 130", "Acorn Outdoor"],
+    products: ["Curved Stairlift", "Straight Stairlift", "Outdoor Stairlift"],
     icon: "FaStairs",
     description: "Regain independence with our range of stairlifts designed for any staircase configuration."
   },

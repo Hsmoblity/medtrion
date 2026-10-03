@@ -155,14 +155,14 @@ describe('Cart View More Functionality', () => {
     it('should handle products with valid slug data', () => {
       const validProduct: CartProduct = {
         cartItemId: 'ci_valid123',
-        slug: 'acorn-stairlifts-acorn-180-curved-stairlift',
-        title: 'Acorn 180 Curved Stairlift',
+        slug: 'curved-stairlift',
+        title: 'Curved Stairlift',
         description: 'Premium curved stairlift',
         shortDescription: 'Curved stairlift',
         price: 15000,
         quantity: 1,
         productPictures: [],
-        featuredImage: '/acorn-stairlift.jpg',
+        featuredImage: '/stairlift.jpg',
         productSpecifications: '',
         affiliate: false,
       };
@@ -170,7 +170,7 @@ describe('Cart View More Functionality', () => {
       render(<Item product={validProduct} />);
 
       const viewMoreLink = screen.getByText('View More →');
-      expect(viewMoreLink).toHaveAttribute('href', '/product/acorn-stairlifts-acorn-180-curved-stairlift');
+      expect(viewMoreLink).toHaveAttribute('href', '/product/curved-stairlift');
     });
 
     it('should handle products with complex slug data', () => {

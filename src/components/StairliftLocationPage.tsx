@@ -54,7 +54,7 @@ export default function StairliftLocationPage({
         description={metaDesc}
       />
      <div className="min-h-screen bg-gray-50">
-      <PageLayout>
+      <PageLayout hideFooter>
         <Hero
           badge={city}
           title={heroTitle}

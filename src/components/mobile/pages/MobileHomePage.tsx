@@ -3,6 +3,7 @@ import MobileLayout from '../layout/MobileLayout';
 import MobileButton from '../ui/MobileButton';
 import MobileImage from '../ui/MobileImage';
 import { useMobileOptimization } from '../hooks/useMobileOptimization';
+import { WARRANTY_TIME } from '@/lib/constants/warranty';
 
 interface MobileHomePageProps {
   featuredProducts?: any[];
@@ -287,7 +288,7 @@ const MobileHomePage: React.FC<MobileHomePageProps> = ({
       {
         icon: '🛡️',
         title: 'Warranty Protection',
-        description: 'Comprehensive warranty coverage for peace of mind',
+        description: `Comprehensive ${WARRANTY_TIME} warranty coverage for peace of mind`,
       },
       {
         icon: '🔧',
